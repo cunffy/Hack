@@ -1,0 +1,13 @@
+#!/bin/bash
+# Install Node.js 20 LTS via NodeSource
+set -e
+
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt-get install -y nodejs
+
+# Verify
+node --version
+npm --version
+
+# Install global dev tools
+npm install -g pnpm yarn typescript ts-node

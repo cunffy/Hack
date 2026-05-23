@@ -1,0 +1,31 @@
+#!/bin/bash
+# Install Calamares graphical installer
+set -e
+
+# Add Calamares repo (not in Debian main)
+apt-get install -y calamares calamares-settings-debian 2>/dev/null || {
+  # Fallback: build from Calamares backports
+  echo "deb http://deb.debian.org/debian bookworm-backports main" >> /etc/apt/sources.list
+  apt-get update -qq
+  apt-get install -y -t bookworm-backports calamares 2>/dev/null || {
+    # Last resort: download AppImage
+    CALAMARES_URL="https://github.com/calamares/calamares/releases/download/v3.3.8/calamares-3.3.8-x86_64.AppImage"
+    curl -fsSL "$CALAMARES_URL" -o /usr/local/bin/calamares-installer
+    chmod +x /usr/local/bin/calamares-installer
+    ln -sf /usr/local/bin/calamares-installer /usr/bin/calamares
+  }
+}
+
+# Install desktop shortcut for the installer
+cat > /usr/share/applications/install-cryogram.desktop << 'DESKTOP'
+[Desktop Entry]
+Name=Install Cryogram OS
+Comment=Install Cryogram OS to this computer
+Exec=pkexec calamares
+Icon=system-software-install
+Terminal=false
+Type=Application
+Categories=System;
+DESKTOP
+
+echo "Calamares installer installed"

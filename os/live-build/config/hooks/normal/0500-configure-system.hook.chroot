@@ -1,0 +1,222 @@
+#!/bin/bash
+# Final system configuration for Cryogram OS
+set -e
+
+# --- Locale & timezone ---
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
+locale-gen
+update-locale LANG=en_US.UTF-8
+
+# --- Default user: cryogram ---
+useradd -m -s /bin/bash -G sudo,audio,video,plugdev,netdev,bluetooth,docker cryogram 2>/dev/null || true
+echo "cryogram:cryogram" | chpasswd
+# Require password change on first login
+chage -d 0 cryogram
+
+# --- sudoers ---
+echo "cryogram ALL=(ALL) NOPASSWD: /usr/bin/calamares" > /etc/sudoers.d/calamares
+echo "cryogram ALL=(ALL) NOPASSWD: /usr/bin/apt-get, /usr/bin/apt" > /etc/sudoers.d/apt
+
+# --- LightDM autologin for live session ---
+mkdir -p /etc/lightdm/lightdm.conf.d
+cat > /etc/lightdm/lightdm.conf.d/10-autologin.conf << 'EOF'
+[Seat:*]
+autologin-user=cryogram
+autologin-user-timeout=0
+user-session=openbox
+EOF
+
+# --- Default session ---
+mkdir -p /usr/share/xsessions
+cat > /usr/share/xsessions/cryogram.desktop << 'EOF'
+[Desktop Entry]
+Name=Cryogram
+Comment=Cryogram Security OS Desktop
+Exec=/usr/local/bin/cryogram-session
+TryExec=/usr/local/bin/cryogram-session
+Icon=
+Type=Application
+DesktopNames=Cryogram
+EOF
+
+# --- Cryogram session script ---
+cat > /usr/local/bin/cryogram-session << 'EOF'
+#!/bin/bash
+# Cryogram OS session — starts Openbox + CyberDen
+export DISPLAY=:0
+export XDG_SESSION_TYPE=x11
+
+# Apply wallpaper
+feh --bg-fill /usr/share/backgrounds/cryogram/wallpaper.png 2>/dev/null &
+
+# Start system tray components
+nm-applet &
+pasystray &
+cbatticon &
+dunst &
+
+# Compositor
+picom --daemon --config /etc/cryogram/picom.conf &
+
+# Notification daemon warmup
+sleep 0.5
+
+# Launch CyberDen as primary interface
+cyberden --start-maximized &
+
+# Start Openbox (window manager, handles right-click menu etc.)
+exec openbox --startup "echo Openbox started"
+EOF
+chmod +x /usr/local/bin/cryogram-session
+
+# --- Picom config ---
+mkdir -p /etc/cryogram
+cat > /etc/cryogram/picom.conf << 'EOF'
+backend = "glx";
+vsync = true;
+shadow = true;
+shadow-radius = 12;
+shadow-offset-x = -5;
+shadow-offset-y = -5;
+shadow-opacity = 0.6;
+shadow-color = "#000000";
+fading = true;
+fade-in-step = 0.05;
+fade-out-step = 0.05;
+fade-delta = 5;
+opacity-rule = [
+  "95:class_g = 'Alacritty'",
+  "98:class_g = 'cyberden'"
+];
+EOF
+
+# --- Openbox menu ---
+mkdir -p /etc/skel/.config/openbox
+cat > /etc/skel/.config/openbox/menu.xml << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu xmlns="http://openbox.org/3.4/menu">
+  <menu id="root-menu" label="Cryogram">
+    <item label="CyberDen"><action name="Execute"><execute>cyberden</execute></action></item>
+    <separator/>
+    <menu id="apps" label="Applications">
+      <item label="Terminal"><action name="Execute"><execute>xfce4-terminal</execute></action></item>
+      <item label="Files"><action name="Execute"><execute>thunar</execute></action></item>
+      <item label="Opera GX"><action name="Execute"><execute>opera</execute></action></item>
+      <item label="Text Editor"><action name="Execute"><execute>mousepad</execute></action></item>
+      <item label="Calculator"><action name="Execute"><execute>galculator</execute></action></item>
+    </menu>
+    <menu id="security" label="Security Tools">
+      <item label="Wireshark"><action name="Execute"><execute>wireshark</execute></action></item>
+      <item label="Metasploit"><action name="Execute"><execute>xfce4-terminal -e msfconsole</execute></action></item>
+      <item label="Nmap"><action name="Execute"><execute>xfce4-terminal -e nmap</execute></action></item>
+      <item label="Bettercap"><action name="Execute"><execute>xfce4-terminal -e bettercap</execute></action></item>
+    </menu>
+    <separator/>
+    <item label="Install Cryogram OS"><action name="Execute"><execute>pkexec calamares</execute></action></item>
+    <separator/>
+    <item label="Log Out"><action name="Exit"/></item>
+    <item label="Reboot"><action name="Execute"><execute>systemctl reboot</execute></action></item>
+    <item label="Power Off"><action name="Execute"><execute>systemctl poweroff</execute></action></item>
+  </menu>
+</openbox_menu>
+EOF
+
+# --- GTK dark theme ---
+mkdir -p /etc/skel/.config/gtk-3.0
+cat > /etc/skel/.config/gtk-3.0/settings.ini << 'EOF'
+[Settings]
+gtk-theme-name=Arc-Dark
+gtk-icon-theme-name=Papirus-Dark
+gtk-font-name=JetBrains Mono 10
+gtk-cursor-theme-name=Adwaita
+gtk-cursor-theme-size=24
+gtk-toolbar-style=GTK_TOOLBAR_ICONS
+gtk-toolbar-icon-size=GTK_ICON_SIZE_SMALL_TOOLBAR
+gtk-button-images=0
+gtk-menu-images=1
+gtk-enable-event-sounds=1
+gtk-enable-input-feedback-sounds=0
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintslight
+gtk-xft-rgba=rgb
+gtk-application-prefer-dark-theme=1
+EOF
+
+cat > /etc/skel/.config/gtk-2.0/gtkrc 2>/dev/null || true
+mkdir -p /etc/skel/.config/gtk-2.0
+cat > /etc/skel/.config/gtk-2.0/gtkrc << 'EOF'
+gtk-theme-name="Arc-Dark"
+gtk-icon-theme-name="Papirus-Dark"
+gtk-font-name="JetBrains Mono 10"
+gtk-cursor-theme-name="Adwaita"
+EOF
+
+# --- Shell setup (.bashrc) ---
+cat >> /etc/skel/.bashrc << 'EOF'
+
+# Cryogram OS
+export HISTSIZE=50000
+export HISTFILESIZE=100000
+export HISTCONTROL=ignoredups:erasedups
+shopt -s histappend
+
+export PATH="$HOME/.cargo/bin:/usr/local/go/bin:$PATH"
+
+# Aliases
+alias ll='ls -lahF --color=auto'
+alias la='ls -A --color=auto'
+alias grep='grep --color=auto'
+alias ip='ip --color=auto'
+alias diff='diff --color=auto'
+alias nmap='nmap --reason'
+alias python='python3'
+
+# Cryogram prompt
+CYAN='\[\033[0;36m\]'
+GREEN='\[\033[0;32m\]'
+RED='\[\033[0;31m\]'
+BOLD='\[\033[1m\]'
+RESET='\[\033[0m\]'
+PS1="${CYAN}┌──${GREEN}(${BOLD}\u${RESET}${GREEN}㉿cryogram${GREEN})${CYAN}─[${RESET}\w${CYAN}]
+${CYAN}└─${RED}\$${RESET} "
+EOF
+
+# --- Profile.d PATH additions ---
+cat > /etc/profile.d/cryogram-paths.sh << 'EOF'
+export PATH="/usr/local/go/bin:$HOME/.cargo/bin:$PATH"
+export GOPATH="$HOME/go"
+EOF
+
+# --- GRUB configuration ---
+cat > /etc/default/grub << 'EOF'
+GRUB_DEFAULT=0
+GRUB_TIMEOUT=5
+GRUB_DISTRIBUTOR="Cryogram OS"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+GRUB_CMDLINE_LINUX=""
+GRUB_THEME="/usr/share/grub/themes/cryogram/theme.txt"
+GRUB_GFXMODE="1920x1080,auto"
+GRUB_GFXPAYLOAD_LINUX=keep
+EOF
+
+# --- Hostname ---
+echo "cryogram" > /etc/hostname
+cat > /etc/hosts << 'EOF'
+127.0.0.1   localhost
+127.0.1.1   cryogram
+::1         localhost ip6-localhost ip6-loopback
+ff02::1     ip6-allnodes
+ff02::2     ip6-allrouters
+EOF
+
+# --- Enable services ---
+systemctl enable lightdm 2>/dev/null || true
+systemctl enable NetworkManager 2>/dev/null || true
+systemctl enable bluetooth 2>/dev/null || true
+
+# --- Disable services that waste memory ---
+systemctl disable apt-daily.timer 2>/dev/null || true
+systemctl disable apt-daily-upgrade.timer 2>/dev/null || true
+
+echo "System configuration complete."

@@ -1,0 +1,74 @@
+# Desktop environment — Openbox + full app suite (Windows-feature-parity)
+xorg
+xserver-xorg
+xserver-xorg-input-all
+xserver-xorg-video-all
+xinit
+x11-utils
+x11-xserver-utils
+openbox
+obconf
+picom
+lxappearance
+lightdm
+lightdm-gtk-greeter
+lightdm-gtk-greeter-settings
+network-manager
+network-manager-gnome
+pulseaudio
+pavucontrol
+blueman
+xfce4-power-manager
+xfce4-notifyd
+thunar
+thunar-archive-plugin
+thunar-volman
+gvfs
+gvfs-backends
+evince
+eog
+vlc
+# Opera GX installed via hook (0350-opera-gx.hook.chroot)
+mousepad
+geany
+file-roller
+flameshot
+redshift
+redshift-gtk
+xclip
+xdotool
+wmctrl
+rofi
+dunst
+feh
+xarchiver
+galculator
+gnome-font-viewer
+font-manager
+xfce4-terminal
+xterm
+alacritty
+nitrogen
+lxrandr
+arandr
+numlockx
+xautomation
+libnotify-bin
+notify-send
+zenity
+yad
+# GTK theme / icon theme
+arc-theme
+papirus-icon-theme
+# System tray essentials
+pasystray
+nm-tray
+cbatticon
+# Printing
+cups
+system-config-printer
+# Fonts
+fonts-liberation
+fonts-freefont-ttf
+fonts-dejavu
+ttf-bitstream-vera

@@ -1,0 +1,28 @@
+#!/bin/bash
+# Install Opera GX as the default browser
+# Opera GX for Linux is Opera's standard Linux build with GX branding
+set -e
+
+# Add Opera's official apt repository
+curl -fsSL https://deb.opera.com/archive.key | gpg --dearmor -o /usr/share/keyrings/opera-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/opera-archive-keyring.gpg arch=amd64] https://deb.opera.com/opera-stable/ stable non-free" \
+  > /etc/apt/sources.list.d/opera-stable.list
+
+DEBIAN_FRONTEND=noninteractive apt-get update -qq
+DEBIAN_FRONTEND=noninteractive apt-get install -y opera-stable
+
+# Remove Firefox (Opera is our browser)
+apt-get remove -y firefox-esr --purge 2>/dev/null || true
+
+# Set Opera as default browser and x-www-browser
+update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/bin/opera 200
+update-alternatives --set x-www-browser /usr/bin/opera
+update-alternatives --install /usr/bin/gnome-www-browser gnome-www-browser /usr/bin/opera 200
+xdg-mime default opera.desktop text/html 2>/dev/null || true
+xdg-mime default opera.desktop x-scheme-handler/http 2>/dev/null || true
+xdg-mime default opera.desktop x-scheme-handler/https 2>/dev/null || true
+
+# Add Opera to the Openbox menu (update menu.xml placeholder entry for browser)
+# The menu is configured in 0500-configure-system; Opera binary is /usr/bin/opera
+
+echo "Opera GX installed and set as default browser."

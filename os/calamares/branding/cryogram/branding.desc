@@ -1,0 +1,31 @@
+# Cryogram OS Calamares branding
+---
+componentName: cryogram
+
+welcomeStyleCalamares: false
+welcomeExpandingLogo: true
+
+strings:
+  productName:       "Cryogram OS"
+  shortProductName:  "Cryogram"
+  version:           "1.0"
+  shortVersion:      "1.0"
+  versionedName:     "Cryogram OS 1.0"
+  shortVersionedName: "Cryogram 1.0"
+  bootloaderEntryName: "Cryogram OS"
+  productUrl:        "https://github.com/cunffy/hack"
+  supportUrl:        "https://github.com/cunffy/hack/issues"
+  knownIssuesUrl:    "https://github.com/cunffy/hack/issues"
+  releaseNotesUrl:   "https://github.com/cunffy/hack"
+
+images:
+  productLogo:    "logo.svg"
+  productIcon:    "logo.svg"
+  productWelcome: "welcome.svg"
+
+slideshow: "show.qml"
+
+style:
+  sidebarBackground:  "#0a0e14"
+  sidebarText:        "#c9d1d9"
+  sidebarTextSelect:  "#00d4ff"

@@ -1,0 +1,76 @@
+# Cryogram OS GRUB Theme
+# Colors: deep navy + cyan accent (matches CyberDen UI)
+
+title-text: ""
+desktop-color: "#0a0e14"
+desktop-image: "background.png"
+
+# Boot menu
++ boot_menu {
+  left = 15%
+  top = 25%
+  width = 70%
+  height = 50%
+  item_font = "JetBrains Mono Regular 14"
+  item_color = "#c9d1d9"
+  selected_item_font = "JetBrains Mono Bold 14"
+  selected_item_color = "#00d4ff"
+  selected_item_pixmap_style = "select_*.png"
+  item_height = 36
+  item_padding = 10
+  item_spacing = 4
+  scrollbar = true
+  scrollbar_width = 4
+  scrollbar_frame = "scrollbar_frame_*.png"
+  scrollbar_thumb = "scrollbar_thumb_*.png"
+}
+
+# Title
++ label {
+  left = 0
+  top = 8%
+  width = 100%
+  height = 60
+  text = "CRYOGRAM OS"
+  font = "JetBrains Mono Bold 36"
+  color = "#00d4ff"
+  align = "center"
+}
+
++ label {
+  left = 0
+  top = 16%
+  width = 100%
+  height = 30
+  text = "Security Operations Platform"
+  font = "JetBrains Mono Regular 14"
+  color = "#6e7681"
+  align = "center"
+}
+
+# Progress bar
++ progress_bar {
+  id = "__timeout__"
+  left = 15%
+  top = 80%
+  width = 70%
+  height = 6
+  font = "JetBrains Mono Regular 12"
+  text_color = "#6e7681"
+  fg_color = "#00d4ff"
+  bg_color = "#1e2d40"
+  border_color = "#1e2d40"
+  text = ""
+}
+
+# Hint text
++ label {
+  left = 0
+  top = 88%
+  width = 100%
+  height = 24
+  text = "↑↓ Select   Enter Boot   e Edit   c Console"
+  font = "JetBrains Mono Regular 11"
+  color = "#3d5166"
+  align = "center"
+}

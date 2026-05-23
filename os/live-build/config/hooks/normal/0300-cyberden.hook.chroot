@@ -1,0 +1,77 @@
+#!/bin/bash
+# Build CyberDen from source and install as system application
+set -e
+
+REPO_DIR="/opt/cyberden-src"
+INSTALL_DIR="/opt/cyberden"
+APP_USER="cryogram"
+
+# Clone or copy the CyberDen source
+# During ISO build, the repo is available at /build/cyberden-src (bind-mounted by build.sh)
+if [ -d "/build/cyberden-src" ]; then
+  cp -r /build/cyberden-src "$REPO_DIR"
+else
+  echo "ERROR: CyberDen source not found at /build/cyberden-src"
+  echo "Make sure the build script mounts the repo correctly."
+  exit 1
+fi
+
+cd "$REPO_DIR"
+
+# Install Node.js dependencies
+npm ci --prefer-offline 2>/dev/null || npm install
+
+# Install Python deps for security scripts
+pip3 install -r scripts/requirements.txt --break-system-packages || true
+
+# Build the Electron app
+npm run build
+
+# Package as AppImage (no sandbox — OS-level install)
+npx electron-builder --linux AppImage --config.linux.executableName=cyberden 2>/dev/null || true
+
+# Install built files
+mkdir -p "$INSTALL_DIR"
+cp -r out/ "$INSTALL_DIR/"
+cp -r scripts/ "$INSTALL_DIR/"
+cp -r resources/ "$INSTALL_DIR/"
+cp package.json "$INSTALL_DIR/"
+
+# Install node_modules (needed at runtime for native deps like node-pty)
+cp -r node_modules/ "$INSTALL_DIR/"
+
+# Create launcher script
+cat > /usr/local/bin/cyberden << 'LAUNCHER'
+#!/bin/bash
+export ELECTRON_DISABLE_SANDBOX=1
+export DISPLAY="${DISPLAY:-:0}"
+exec electron /opt/cyberden/out/main/index.js "$@"
+LAUNCHER
+chmod +x /usr/local/bin/cyberden
+
+# Create kiosk launcher (fullscreen, no OS chrome)
+cat > /usr/local/bin/cyberden-kiosk << 'LAUNCHER'
+#!/bin/bash
+export ELECTRON_DISABLE_SANDBOX=1
+export DISPLAY="${DISPLAY:-:0}"
+exec electron /opt/cyberden/out/main/index.js --kiosk --start-maximized "$@"
+LAUNCHER
+chmod +x /usr/local/bin/cyberden-kiosk
+
+# .desktop file for application launcher
+cat > /usr/share/applications/cyberden.desktop << 'DESKTOP'
+[Desktop Entry]
+Name=CyberDen
+Comment=Security Operations Platform
+Exec=/usr/local/bin/cyberden
+Icon=/opt/cyberden/resources/icon.png
+Terminal=false
+Type=Application
+Categories=Security;Network;System;
+StartupWMClass=cyberden
+DESKTOP
+
+# Clean up source to save space
+rm -rf "$REPO_DIR"
+
+echo "CyberDen installed successfully at $INSTALL_DIR"

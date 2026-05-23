@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="80%">
+      <stop offset="0%" stop-color="#0d1623"/>
+      <stop offset="100%" stop-color="#0a0e14"/>
+    </radialGradient>
+    <radialGradient id="centralGlow" cx="50%" cy="50%" r="45%">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softBlur">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+    <filter id="glowFilter">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Base background -->
+  <rect width="1920" height="1080" fill="url(#bgGrad)"/>
+  <rect width="1920" height="1080" fill="url(#centralGlow)"/>
+
+  <!-- Subtle dot grid -->
+  <pattern id="dots" width="48" height="48" patternUnits="userSpaceOnUse">
+    <circle cx="24" cy="24" r="1" fill="#1e2d40" opacity="0.7"/>
+  </pattern>
+  <rect width="1920" height="1080" fill="url(#dots)"/>
+
+  <!-- Horizontal scan lines (very subtle) -->
+  <pattern id="scanlines" width="1" height="4" patternUnits="userSpaceOnUse">
+    <rect width="1" height="1" fill="#000000" opacity="0.08"/>
+  </pattern>
+  <rect width="1920" height="1080" fill="url(#scanlines)"/>
+
+  <!-- Left vertical accent line -->
+  <rect x="64" y="0" width="2" height="1080" fill="#00d4ff" opacity="0.12"/>
+
+  <!-- Right vertical accent line -->
+  <rect x="1854" y="0" width="2" height="1080" fill="#00d4ff" opacity="0.12"/>
+
+  <!-- Top horizontal accent -->
+  <rect x="0" y="64" width="1920" height="1" fill="#00d4ff" opacity="0.08"/>
+
+  <!-- Bottom accent -->
+  <rect x="0" y="1015" width="1920" height="1" fill="#00d4ff" opacity="0.08"/>
+
+  <!-- Corner brackets -->
+  <g fill="#00d4ff" opacity="0.5">
+    <!-- Top left -->
+    <rect x="64" y="64" width="60" height="3"/>
+    <rect x="64" y="64" width="3" height="60"/>
+    <!-- Top right -->
+    <rect x="1796" y="64" width="60" height="3"/>
+    <rect x="1853" y="64" width="3" height="60"/>
+    <!-- Bottom left -->
+    <rect x="64" y="1013" width="60" height="3"/>
+    <rect x="64" y="956" width="3" height="60"/>
+    <!-- Bottom right -->
+    <rect x="1796" y="1013" width="60" height="3"/>
+    <rect x="1853" y="956" width="3" height="60"/>
+  </g>
+
+  <!-- Central wordmark -->
+  <g transform="translate(960,480)" filter="url(#glowFilter)">
+    <!-- Large C glyph (geometric) -->
+    <path d="M -90,-70 A 100,100 0 1 0 -90,70 L -60,70 A 70,70 0 1 1 -60,-70 Z"
+          fill="#00d4ff" opacity="0.08"/>
+
+    <!-- Outer ring -->
+    <circle cx="0" cy="0" r="130" fill="none" stroke="#00d4ff" stroke-width="1" opacity="0.12" stroke-dasharray="8,6"/>
+
+    <!-- Inner ring -->
+    <circle cx="0" cy="0" r="90" fill="none" stroke="#00d4ff" stroke-width="0.5" opacity="0.1"/>
+  </g>
+
+  <!-- CRYOGRAM text -->
+  <text x="960" y="520"
+    font-family="'JetBrains Mono', 'Courier New', monospace"
+    font-size="72"
+    font-weight="bold"
+    fill="#00d4ff"
+    opacity="0.15"
+    text-anchor="middle"
+    letter-spacing="20"
+    filter="url(#glowFilter)">CRYOGRAM</text>
+
+  <!-- Tagline -->
+  <text x="960" y="556"
+    font-family="'JetBrains Mono', 'Courier New', monospace"
+    font-size="14"
+    fill="#6e7681"
+    opacity="0.6"
+    text-anchor="middle"
+    letter-spacing="6">SECURITY OPERATIONS PLATFORM</text>
+
+  <!-- Scan line element bottom right -->
+  <text x="1856" y="1028"
+    font-family="'JetBrains Mono', 'Courier New', monospace"
+    font-size="10"
+    fill="#1e2d40"
+    text-anchor="end"
+    opacity="0.8">CRYOGRAM OS 1.0</text>
+</svg>
