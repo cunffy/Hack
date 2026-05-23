@@ -31,13 +31,6 @@ const APPS: AppIcon[] = [
     color: '#ffcc00',
   },
   {
-    id: 'shodan',
-    label: 'Shodan',
-    description: 'Internet intelligence',
-    icon: '👁',
-    color: '#bb88ff',
-  },
-  {
     id: 'leaker',
     label: 'Leaker',
     description: 'Breach & credential monitor',

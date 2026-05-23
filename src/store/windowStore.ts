@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type AppId = 'terminal' | 'editor' | 'password-tester' | 'shodan' | 'leaker' | 'settings'
+export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings'
 
 export interface AppWindow {
   id: string
@@ -31,7 +31,6 @@ const APP_META: Record<AppId, { title: string; width: number; height: number }> 
   terminal: { title: 'Terminal', width: 800, height: 500 },
   editor: { title: 'Code Editor', width: 900, height: 600 },
   'password-tester': { title: 'Password Tester', width: 820, height: 620 },
-  shodan: { title: 'Shodan', width: 900, height: 580 },
   leaker: { title: 'Leaker — Breach Monitor', width: 860, height: 560 },
   settings: { title: 'Settings', width: 600, height: 480 },
 }

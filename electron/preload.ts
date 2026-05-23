@@ -47,15 +47,6 @@ contextBridge.exposeInMainWorld('cyberden', {
     },
   },
 
-  // Shodan
-  shodan: {
-    search: (query: string, page?: number) =>
-      ipcRenderer.invoke('shodan:search', query, page),
-    host: (ip: string) => ipcRenderer.invoke('shodan:host', ip),
-    count: (query: string) => ipcRenderer.invoke('shodan:count', query),
-    myIp: () => ipcRenderer.invoke('shodan:myIp'),
-  },
-
   // Leaker (breach monitoring)
   leaker: {
     addTarget: (target: unknown) => ipcRenderer.invoke('leaker:addTarget', target),

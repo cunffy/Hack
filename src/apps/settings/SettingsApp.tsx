@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 
 interface SettingsValues {
-  shodanApiKey: string
   hibpApiKey: string
   dehashedEmail: string
   dehashedApiKey: string
@@ -10,7 +9,6 @@ interface SettingsValues {
 
 export default function SettingsApp() {
   const [vals, setVals] = useState<SettingsValues>({
-    shodanApiKey: '',
     hibpApiKey: '',
     dehashedEmail: '',
     dehashedApiKey: '',
@@ -21,7 +19,6 @@ export default function SettingsApp() {
   useEffect(() => {
     window.cyberden.settings.getAll().then((all) => {
       setVals({
-        shodanApiKey: (all.shodanApiKey as string) || '',
         hibpApiKey: (all.hibpApiKey as string) || '',
         dehashedEmail: (all.dehashedEmail as string) || '',
         dehashedApiKey: (all.dehashedApiKey as string) || '',
@@ -49,20 +46,6 @@ export default function SettingsApp() {
         <h2 className="text-sm font-bold text-den-text mb-1">Settings</h2>
         <p className="text-xs text-den-muted">API keys are stored encrypted on your local machine.</p>
       </div>
-
-      <section className="panel p-4 space-y-3">
-        <div className="text-xs text-den-muted uppercase tracking-wider font-bold">Shodan</div>
-        <div>
-          <label className="block text-xs text-den-muted mb-1">API Key</label>
-          <input
-            type="password"
-            className="w-full"
-            placeholder="your-shodan-api-key"
-            value={vals.shodanApiKey}
-            onChange={(e) => setVals((v) => ({ ...v, shodanApiKey: e.target.value }))}
-          />
-        </div>
-      </section>
 
       <section className="panel p-4 space-y-3">
         <div className="text-xs text-den-muted uppercase tracking-wider font-bold">Have I Been Pwned (Leaker)</div>

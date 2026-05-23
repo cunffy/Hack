@@ -4,7 +4,6 @@ import { AppWindow as AppWindowType, useWindowStore } from '../store/windowStore
 const TerminalApp = lazy(() => import('../apps/terminal/Terminal'))
 const EditorApp = lazy(() => import('../apps/editor/Editor'))
 const PasswordTesterApp = lazy(() => import('../apps/password-tester/PasswordTester'))
-const ShodanApp = lazy(() => import('../apps/shodan/ShodanApp'))
 const LeakerApp = lazy(() => import('../apps/leaker/LeakerApp'))
 const SettingsApp = lazy(() => import('../apps/settings/SettingsApp'))
 
@@ -14,7 +13,6 @@ function AppContent({ appId }: { appId: string }) {
       {appId === 'terminal' && <TerminalApp />}
       {appId === 'editor' && <EditorApp />}
       {appId === 'password-tester' && <PasswordTesterApp />}
-      {appId === 'shodan' && <ShodanApp />}
       {appId === 'leaker' && <LeakerApp />}
       {appId === 'settings' && <SettingsApp />}
     </Suspense>

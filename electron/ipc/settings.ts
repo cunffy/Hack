@@ -4,7 +4,6 @@ import Store from 'electron-store'
 const store = new Store({
   encryptionKey: 'cyberden-v1-key',
   defaults: {
-    shodanApiKey: '',
     hibpApiKey: '',
     dehashedEmail: '',
     dehashedApiKey: '',

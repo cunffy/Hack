@@ -3,7 +3,6 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerTerminalHandlers } from './ipc/terminal'
 import { registerPasswordTesterHandlers } from './ipc/password-tester'
-import { registerShodanHandlers } from './ipc/shodan'
 import { registerLeakerHandlers } from './ipc/leaker'
 import { registerEditorHandlers } from './ipc/editor'
 import { registerSettingsHandlers } from './ipc/settings'
@@ -62,7 +61,6 @@ app.whenReady().then(() => {
   // Register all feature IPC handlers
   registerTerminalHandlers()
   registerPasswordTesterHandlers()
-  registerShodanHandlers()
   registerLeakerHandlers()
   registerEditorHandlers()
   registerSettingsHandlers()

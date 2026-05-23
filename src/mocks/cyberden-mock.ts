@@ -28,81 +28,6 @@ const mockFs: Record<string, string> = {
   '/workspace/crack.sh': '#!/bin/bash\n# Example hash crack script\nhashcat -m 0 hash.txt wordlist.txt\n',
 }
 
-// Mock Shodan data
-const MOCK_SHODAN_RESULTS: ShodanSearchResult = {
-  total: 12482,
-  page: 1,
-  matches: [
-    {
-      ip_str: '93.184.216.34',
-      port: 80,
-      org: 'Edgecast Networks',
-      hostnames: ['example.com'],
-      location: { country_name: 'United States', city: 'Los Angeles' },
-      data: 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nServer: EOS (lax004/54E9)\r\n',
-      timestamp: '2024-03-15T08:23:11.000Z',
-    },
-    {
-      ip_str: '8.8.8.8',
-      port: 53,
-      org: 'Google LLC',
-      hostnames: ['dns.google'],
-      location: { country_name: 'United States', city: 'Mountain View' },
-      data: 'DNS/53 Google Public DNS',
-      timestamp: '2024-03-14T11:45:00.000Z',
-    },
-    {
-      ip_str: '104.21.30.22',
-      port: 443,
-      org: 'Cloudflare, Inc.',
-      hostnames: ['cloudflare.com'],
-      location: { country_name: 'United States', city: 'San Francisco' },
-      data: 'TLS 1.3 Cloudflare CDN edge',
-      timestamp: '2024-03-13T16:12:55.000Z',
-      vulns: { 'CVE-2021-44228': { cvss: 10.0, summary: 'Log4Shell RCE vulnerability (mock data)' } },
-    },
-    {
-      ip_str: '185.220.101.55',
-      port: 9001,
-      org: 'Tor Project',
-      hostnames: [],
-      location: { country_name: 'Germany', city: 'Frankfurt' },
-      data: 'Tor relay node',
-      timestamp: '2024-03-12T09:30:00.000Z',
-    },
-    {
-      ip_str: '45.33.32.156',
-      port: 22,
-      org: 'Akamai Technologies',
-      hostnames: ['scanme.nmap.org'],
-      location: { country_name: 'United States', city: 'Atlanta' },
-      data: 'SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13\r\n',
-      timestamp: '2024-03-11T14:20:00.000Z',
-    },
-  ],
-}
-
-const MOCK_HOST: ShodanHost = {
-  ip_str: '45.33.32.156',
-  hostnames: ['scanme.nmap.org'],
-  org: 'Akamai Technologies',
-  isp: 'Akamai Technologies',
-  os: 'Linux 3.x',
-  ports: [22, 80, 9929, 31337],
-  country_name: 'United States',
-  last_update: '2024-03-11T14:20:00.000Z',
-  data: [
-    { ip_str: '45.33.32.156', port: 22, data: 'SSH-2.0-OpenSSH_6.6.1p1 Ubuntu\r\nKey type: ssh-rsa' },
-    { ip_str: '45.33.32.156', port: 80, data: 'HTTP/1.1 200 OK\r\nServer: Apache/2.4.7 (Ubuntu)\r\nContent-Type: text/html' },
-    { ip_str: '45.33.32.156', port: 9929, data: 'Ncat: Version 6.40 (http://nmap.org/ncat)' },
-    { ip_str: '45.33.32.156', port: 31337, data: 'EvilFTP service mock banner' },
-  ],
-  vulns: {
-    'CVE-2021-41773': { cvss: 7.5, summary: 'Apache HTTP Server path traversal (mock)' },
-    'CVE-2021-42013': { cvss: 9.8, summary: 'Apache HTTP Server RCE via path traversal (mock)' },
-  },
-}
-
 // Mock breach data
 const mockTargets: LeakerTarget[] = [
   { id: 1, type: 'email', value: 'alice@example.com', label: 'alice@example.com', added_at: '2024-01-10T10:00:00', last_checked: '2024-03-14T08:00:00' },
@@ -232,26 +157,6 @@ export function installMockCyberDen(): void {
         const handler = (e: Event) => cb((e as CustomEvent).detail)
         window.addEventListener('cyberden:pt-progress', handler)
         return () => window.removeEventListener('cyberden:pt-progress', handler)
-      },
-    },
-
-    shodan: {
-      search: async (query, _page = 1) => {
-        await sleep(600)
-        if (!(settingsStore.shodanApiKey as string)) throw new Error('NO_API_KEY')
-        return { ...MOCK_SHODAN_RESULTS, query }
-      },
-      host: async (_ip) => {
-        await sleep(500)
-        return MOCK_HOST
-      },
-      count: async (_query) => {
-        await sleep(300)
-        return { count: 12482 }
-      },
-      myIp: async () => {
-        await sleep(200)
-        return '1.2.3.4'
       },
     },
 

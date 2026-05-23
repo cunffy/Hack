@@ -24,12 +24,6 @@ interface CyberDenAPI {
     cancel(jobId: string): void
     onProgress(cb: (data: ProgressData) => void): () => void
   }
-  shodan: {
-    search(query: string, page?: number): Promise<ShodanSearchResult>
-    host(ip: string): Promise<ShodanHost>
-    count(query: string): Promise<{ count: number }>
-    myIp(): Promise<string>
-  }
   leaker: {
     addTarget(target: { type: string; value: string; label?: string }): Promise<LeakerTarget>
     removeTarget(id: number): Promise<boolean>
@@ -97,36 +91,6 @@ interface ProgressData {
   rate: number
   elapsed: number
   currentWord?: string
-}
-
-interface ShodanSearchResult {
-  matches: ShodanMatch[]
-  total: number
-  page: number
-}
-
-interface ShodanMatch {
-  ip_str: string
-  port: number
-  org?: string
-  hostnames?: string[]
-  location?: { country_name?: string; city?: string }
-  data?: string
-  timestamp?: string
-  vulns?: Record<string, unknown>
-}
-
-interface ShodanHost {
-  ip_str: string
-  hostnames: string[]
-  org?: string
-  isp?: string
-  os?: string
-  ports: number[]
-  data: ShodanMatch[]
-  vulns?: Record<string, { cvss: number; summary: string }>
-  last_update?: string
-  country_name?: string
 }
 
 interface LeakerTarget {
