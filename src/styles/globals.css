@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #0a0e14;
+  color: #c9d1d9;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0f1520; }
+::-webkit-scrollbar-thumb { background: #1e2d40; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2a3f58; }
+
+/* Selection */
+::selection { background: rgba(0, 212, 255, 0.25); }
+
+/* Inputs */
+input, textarea, select {
+  background: #0a0e14;
+  border: 1px solid #1e2d40;
+  color: #c9d1d9;
+  font-family: inherit;
+  font-size: inherit;
+  border-radius: 4px;
+  padding: 6px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: #00d4ff;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 4px;
+  border: 1px solid #1e2d40;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  transition: all 0.15s;
+  background: #0f1520;
+  color: #c9d1d9;
+}
+.btn:hover { border-color: #00d4ff; color: #00d4ff; }
+.btn-primary { background: #00d4ff; color: #0a0e14; border-color: #00d4ff; font-weight: 600; }
+.btn-primary:hover { background: #00aacc; border-color: #00aacc; color: #0a0e14; }
+.btn-danger { border-color: #ff4466; color: #ff4466; }
+.btn-danger:hover { background: #ff4466; color: #0a0e14; }
+.btn-success { border-color: #00ff88; color: #00ff88; }
+.btn-success:hover { background: #00ff88; color: #0a0e14; }
+
+/* Tag/badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Code text */
+.code { font-family: 'JetBrains Mono', monospace; }
+
+/* Glow effects */
+.glow-cyan { text-shadow: 0 0 8px rgba(0, 212, 255, 0.6); }
+.glow-green { text-shadow: 0 0 8px rgba(0, 255, 136, 0.6); }
+.glow-red { text-shadow: 0 0 8px rgba(255, 68, 102, 0.6); }
+
+/* Panel */
+.panel {
+  background: #0f1520;
+  border: 1px solid #1e2d40;
+  border-radius: 6px;
+}
