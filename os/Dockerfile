@@ -4,7 +4,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LC_ALL=C
 
 # Install live-build and all build deps
-RUN apt-get update && apt-get install -y \
+# -o Acquire::Check-Valid-Until=false handles clock-skew in constrained environments
+RUN apt-get update -o Acquire::Check-Valid-Until=false && \
+    apt-get install -y -o Acquire::Check-Valid-Until=false \
     live-build \
     live-config \
     live-boot \
