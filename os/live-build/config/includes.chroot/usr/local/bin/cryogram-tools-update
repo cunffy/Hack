@@ -1,0 +1,105 @@
+#!/bin/bash
+# Cryogram OS — Security Tools Updater
+# Run this after installing to disk, or anytime you want the latest versions
+# of tools that are not in the standard Debian repositories.
+set +e
+
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
+ok()   { echo -e "${GREEN}[OK]${NC} $1"; }
+fail() { echo -e "${RED}[FAIL]${NC} $1"; }
+info() { echo -e "${CYAN}[INFO]${NC} $1"; }
+
+if [[ $EUID -ne 0 ]]; then
+  echo -e "${RED}Run as root:${NC} sudo cryogram-tools-update"
+  exit 1
+fi
+
+echo -e "${CYAN}╔══════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║  Cryogram OS — Security Tools Updater   ║${NC}"
+echo -e "${CYAN}╚══════════════════════════════════════════╝${NC}"
+echo ""
+
+# ── Metasploit Framework ────────────────────────────────────────────────────
+info "Metasploit Framework..."
+if command -v msfconsole &>/dev/null; then
+  apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --only-upgrade metasploit-framework && ok "Metasploit updated." || fail "Metasploit update failed."
+else
+  curl -fsSL https://apt.metasploit.com/metasploit-framework.gpg \
+    | gpg --dearmor -o /etc/apt/trusted.gpg.d/metasploit.gpg && \
+  echo "deb [signed-by=/etc/apt/trusted.gpg.d/metasploit.gpg] https://apt.metasploit.com/ focal main" \
+    > /etc/apt/sources.list.d/metasploit.list && \
+  apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y metasploit-framework && \
+  ok "Metasploit installed." || fail "Metasploit install failed."
+fi
+
+# ── Volatility3 ─────────────────────────────────────────────────────────────
+info "Volatility3..."
+pip3 install --break-system-packages --upgrade volatility3 && \
+  ok "Volatility3 installed/updated." || fail "Volatility3 failed."
+
+# ── ExploitDB / searchsploit ────────────────────────────────────────────────
+info "ExploitDB / searchsploit..."
+if [ -d /opt/exploitdb ]; then
+  git -C /opt/exploitdb pull --ff-only && ok "ExploitDB updated." || fail "ExploitDB update failed."
+else
+  git clone --depth=1 https://gitlab.com/exploit-database/exploitdb.git /opt/exploitdb && \
+  cp /opt/exploitdb/.searchsploit_rc /etc/skel/.searchsploit_rc 2>/dev/null ; \
+  ln -sf /opt/exploitdb/searchsploit /usr/local/bin/searchsploit && \
+  ok "searchsploit installed." || fail "ExploitDB clone failed."
+fi
+
+# ── TheHarvester ────────────────────────────────────────────────────────────
+info "theHarvester..."
+pip3 install --break-system-packages --upgrade theHarvester && \
+  ok "theHarvester installed/updated." || \
+{
+  if [ -d /opt/theharvester ]; then
+    git -C /opt/theharvester pull --ff-only && ok "theHarvester (git) updated." || fail "theHarvester update failed."
+  else
+    git clone --depth=1 https://github.com/laramies/theHarvester.git /opt/theharvester && \
+    pip3 install --break-system-packages -r /opt/theharvester/requirements/base.txt 2>/dev/null && \
+    cat > /usr/local/bin/theharvester << 'WRAPPER'
+#!/bin/bash
+exec python3 /opt/theharvester/theHarvester.py "$@"
+WRAPPER
+    chmod +x /usr/local/bin/theharvester && \
+    ok "theHarvester installed from git." || fail "theHarvester install failed."
+  fi
+}
+
+# ── Amass ────────────────────────────────────────────────────────────────────
+info "Amass..."
+AMASS_VER=$(curl -fsSL "https://api.github.com/repos/owasp-amass/amass/releases/latest" | python3 -c "import sys,json; print(json.load(sys.stdin)['tag_name'])" 2>/dev/null || echo "v4.2.0")
+curl -fsSL "https://github.com/owasp-amass/amass/releases/download/${AMASS_VER}/amass_linux_amd64.zip" \
+  -o /tmp/amass.zip && \
+unzip -q -o /tmp/amass.zip -d /tmp/amass_dl && \
+find /tmp/amass_dl -name "amass" -type f -exec mv {} /usr/local/bin/amass \; && \
+chmod +x /usr/local/bin/amass && \
+rm -rf /tmp/amass_dl /tmp/amass.zip && \
+ok "Amass ${AMASS_VER} installed." || fail "Amass install failed."
+
+# ── Bettercap ────────────────────────────────────────────────────────────────
+info "Bettercap..."
+BETTERCAP_VER=$(curl -fsSL "https://api.github.com/repos/bettercap/bettercap/releases/latest" | python3 -c "import sys,json; print(json.load(sys.stdin)['tag_name'])" 2>/dev/null || echo "v2.32.0")
+curl -fsSL "https://github.com/bettercap/bettercap/releases/download/${BETTERCAP_VER}/bettercap_linux_amd64_${BETTERCAP_VER}.zip" \
+  -o /tmp/bettercap.zip && \
+unzip -q -o /tmp/bettercap.zip -d /tmp/bettercap_dl && \
+mv /tmp/bettercap_dl/bettercap /usr/local/bin/bettercap && \
+chmod +x /usr/local/bin/bettercap && \
+rm -rf /tmp/bettercap_dl /tmp/bettercap.zip && \
+ok "Bettercap ${BETTERCAP_VER} installed." || fail "Bettercap install failed."
+
+# ── Radare2 ──────────────────────────────────────────────────────────────────
+info "Radare2..."
+if command -v r2 &>/dev/null; then
+  r2 -v | head -1
+  ok "Radare2 already installed. To update: r2pm update"
+else
+  git clone --depth=1 https://github.com/radareorg/radare2.git /tmp/radare2 && \
+  /tmp/radare2/sys/install.sh && \
+  rm -rf /tmp/radare2 && \
+  ok "Radare2 installed." || fail "Radare2 build failed."
+fi
+
+echo ""
+echo -e "${CYAN}Done. Failed tools can be retried by running: sudo cryogram-tools-update${NC}"

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Update Security Tools
+Comment=Install or update security tools not in standard Debian repos (Metasploit, Volatility3, Amass, etc.)
+Exec=pkexec bash -c 'cryogram-tools-update 2>&1 | tee /tmp/tools-update.log; echo; echo "Press Enter to close."; read'
+Icon=system-software-update
+Terminal=true
+Type=Application
+Categories=System;Security;
