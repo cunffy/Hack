@@ -6,12 +6,14 @@ A custom Debian-based Linux operating system built for security operations. Repl
 
 | Category | Contents |
 |---|---|
-| Desktop | CyberDen (Terminal, Editor, Password Tester, Shodan, Leaker), Openbox WM, Picom compositor |
+| Desktop | CyberDen (Terminal, Editor, Password Tester, Leaker), Openbox WM, Picom compositor |
 | Browser | Opera GX (default) |
 | Security tools | Nmap, Wireshark, Metasploit, Hashcat, John, Aircrack-ng, Bettercap, SQLmap, Nikto, Gobuster, Volatility, Autopsy, MITMProxy, Recon-ng, + 50 more |
 | Languages | Python 3, Node.js 20 LTS, Go 1.22, Rust (stable), C/C++ (GCC/Clang) |
 | Dev tools | Git, Docker, SQLite, Monaco editor (via CyberDen), Geany |
-| System | systemd, NetworkManager, PulseAudio, Bluetooth, LightDM login screen |
+| Gaming | Steam + Proton, Proton-GE, Heroic (Epic/GOG), Lutris, Wine, MangoHud, GameMode, ProtonUp-Qt |
+| GPU drivers | AMD (amdgpu), Intel (i915), NVIDIA (proprietary — auto-activated on first boot) |
+| System | systemd, NetworkManager, PipeWire audio, Bluetooth, LightDM login screen |
 | Installer | Calamares graphical installer (full disk, dual boot, or custom partitioning) |
 
 ## Build Requirements
@@ -85,9 +87,44 @@ The system boots directly into CyberDen. Default live credentials: `cryogram` / 
 
 ### Set up your tools
 
-1. Open **Settings** in CyberDen → add your Shodan, HIBP, and Dehashed API keys
+1. Open **Settings** in CyberDen → add your HIBP and Dehashed API keys
 2. Open **Password Tester** → accept the authorization disclaimer
 3. Drop wordlists (e.g. `rockyou.txt`) to `/home/yourusername/wordlists/`
+
+### Gaming
+
+Steam, Lutris, Heroic, and Wine are pre-installed. Right-click the desktop → **Gaming** to launch any of them.
+
+**First launch — Steam:**
+- Steam will update itself on first run, then log in with your Steam account
+- Enable Proton for Windows games: Steam → Settings → Compatibility → "Enable Steam Play for all titles"
+- **Proton-GE** is pre-installed at `~/.steam/root/compatibilitytools.d/` — select it per-game in Properties → Compatibility
+
+**NVIDIA GPU:**
+On first boot a script auto-detects your GPU and activates the NVIDIA driver if present. If you have an NVIDIA card and games perform poorly, run:
+```bash
+nvidia-smi        # confirms driver is active
+prime-select nvidia   # if on a laptop with hybrid GPU
+```
+
+**AMD / Intel GPU:**
+Drivers are loaded automatically — no setup needed.
+
+**MangoHud overlay** (shows FPS, GPU/CPU temp, frametime):
+```bash
+# Launch any game with overlay:
+mangohud steam
+mangohud lutris
+# Or toggle in-game with Shift+F12
+```
+
+**GameMode** (boosts CPU governor while gaming):
+```bash
+gamemoderun steam
+# Or prefix any game launch command with gamemoderun
+```
+
+**Check game compatibility** before buying: [protondb.com](https://protondb.com)
 
 ### Security tools from Terminal
 

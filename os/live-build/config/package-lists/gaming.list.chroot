@@ -1,0 +1,57 @@
+# Gaming — Steam, Proton, Lutris, GPU drivers
+# Note: Steam requires i386 arch, enabled in 0600-gaming.hook.chroot
+
+# Vulkan (64-bit)
+vulkan-tools
+mesa-vulkan-drivers
+libvulkan1
+libvulkan-dev
+
+# OpenGL / Mesa
+mesa-utils
+libgl1-mesa-dri
+libgles2-mesa
+
+# AMD GPU (open source — works for RX 400 series and newer)
+firmware-amd-graphics
+xserver-xorg-video-amdgpu
+mesa-va-drivers
+
+# Intel GPU
+xserver-xorg-video-intel
+intel-media-va-driver
+i965-va-driver
+
+# NVIDIA (open-source nouveau fallback — proprietary installed via hook)
+xserver-xorg-video-nouveau
+
+# Wine (runs Windows games/apps without Steam)
+wine
+wine64
+winetricks
+
+# Lutris — universal game launcher (Steam, GOG, Epic via Heroic, emulators)
+lutris
+
+# GameMode — CPU/GPU performance governor for gaming
+gamemode
+libgamemode0
+libgamemodeauto0
+
+# MangoHud — in-game FPS/GPU/CPU overlay
+mangohud
+
+# Audio (required for most games)
+pipewire
+pipewire-pulse
+wireplumber
+pavucontrol
+
+# Controller support
+joystick
+jstest-gtk
+gamepad-tool
+
+# Misc gaming utils
+ffmpeg
+mesa-utils-extra
