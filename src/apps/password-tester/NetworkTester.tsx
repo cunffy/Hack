@@ -159,7 +159,7 @@ export function NetworkTester() {
             <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Usernames (one per line)</label>
             <textarea
               className="w-full h-24 resize-none"
-              placeholder="user1&#10;user2&#10;admin"
+              placeholder={"user1\nuser2\nadmin"}
               value={usernames}
               onChange={(e) => setUsernames(e.target.value)}
             />

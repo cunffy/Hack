@@ -46,7 +46,7 @@ export function registerPasswordTesterHandlers(): void {
             const lastLine = stdout.trim().split('\n').filter(l => !l.startsWith('PROGRESS:')).pop() || '{}'
             resolve({ jobId, ...JSON.parse(lastLine) })
           } catch {
-            resolve({ jobId, raw: stdout })
+            resolve({ jobId, found: false, attempts: 0, elapsed: 0, error: 'Failed to parse result' })
           }
         } else {
           reject(new Error(stderr || `Process exited with code ${code}`))
@@ -100,7 +100,7 @@ export function registerPasswordTesterHandlers(): void {
             const lastLine = stdout.trim().split('\n').filter(l => !l.startsWith('PROGRESS:')).pop() || '{}'
             resolve({ jobId, ...JSON.parse(lastLine) })
           } catch {
-            resolve({ jobId, raw: stdout })
+            resolve({ jobId, found: false, attempts: 0, elapsed: 0, error: 'Failed to parse result' })
           }
         } else {
           reject(new Error(stderr || `Process exited with code ${code}`))

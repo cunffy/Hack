@@ -63,6 +63,7 @@ interface CrackResult {
   password?: string
   attempts: number
   elapsed: number
+  error?: string
 }
 
 interface NetworkTestOptions {

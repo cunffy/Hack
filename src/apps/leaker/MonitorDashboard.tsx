@@ -119,12 +119,12 @@ export function MonitorDashboard({ targets, breaches, onAdd, onRemove }: Props) 
       {targets.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Monitored', value: targets.length, color: 'den-accent' },
-            { label: 'Total Breaches', value: breaches.length, color: 'den-red' },
-            { label: 'Clean Targets', value: targets.filter((t) => breachCountFor(t.id) === 0).length, color: 'den-green' },
+            { label: 'Monitored', value: targets.length, color: '#00d4ff' },
+            { label: 'Total Breaches', value: breaches.length, color: '#ff4466' },
+            { label: 'Clean Targets', value: targets.filter((t) => breachCountFor(t.id) === 0).length, color: '#00ff88' },
           ].map(({ label, value, color }) => (
             <div key={label} className="panel p-3 text-center">
-              <div className={`text-2xl font-bold text-${color} font-mono`}>{value}</div>
+              <div className="text-2xl font-bold font-mono" style={{ color }}>{value}</div>
               <div className="text-xs text-den-muted mt-1">{label}</div>
             </div>
           ))}

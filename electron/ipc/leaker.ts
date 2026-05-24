@@ -127,7 +127,14 @@ export function registerLeakerHandlers(): void {
       'INSERT OR IGNORE INTO targets (type, value, label) VALUES (?, ?, ?)'
     )
     const result = stmt.run(target.type, target.value, target.label || target.value)
-    return { id: result.lastInsertRowid, ...target }
+    return {
+      id: Number(result.lastInsertRowid),
+      type: target.type as 'email' | 'domain' | 'username',
+      value: target.value,
+      label: target.label || target.value,
+      added_at: new Date().toISOString(),
+      last_checked: null,
+    }
   })
 
   ipcMain.handle('leaker:removeTarget', (_, id: number) => {

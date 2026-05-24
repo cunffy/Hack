@@ -1,8 +1,15 @@
-import { ipcMain } from 'electron'
+import { ipcMain, app } from 'electron'
 import Store from 'electron-store'
+import { createHash } from 'crypto'
+
+// Derive a machine-specific key from the app's userData path so the store
+// is tied to this installation and not trivially readable if the file is copied.
+const encryptionKey = createHash('sha256')
+  .update(`cyberden-v1:${app.getPath('userData')}`)
+  .digest('hex')
 
 const store = new Store({
-  encryptionKey: 'cyberden-v1-key',
+  encryptionKey,
   defaults: {
     hibpApiKey: '',
     dehashedEmail: '',

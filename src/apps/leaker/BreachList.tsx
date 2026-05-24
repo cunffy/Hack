@@ -37,7 +37,8 @@ export function BreachList({ breaches, targets }: Props) {
         ) : (
           filtered.map((b) => {
             const target = targetMap[b.target_id]
-            const dataClasses: string[] = b.data_classes ? JSON.parse(b.data_classes) : []
+            let dataClasses: string[] = []
+            try { dataClasses = b.data_classes ? JSON.parse(b.data_classes) : [] } catch {}
             const hoursAgo = (Date.now() - new Date(b.discovered_at).getTime()) / 3600000
             const isNew = hoursAgo < 24
 
@@ -73,10 +74,9 @@ export function BreachList({ breaches, targets }: Props) {
                 )}
 
                 {b.description && (
-                  <div
-                    className="text-xs text-den-muted line-clamp-2"
-                    dangerouslySetInnerHTML={{ __html: b.description.replace(/<[^>]+>/g, '') }}
-                  />
+                  <div className="text-xs text-den-muted line-clamp-2">
+                    {b.description.replace(/<[^>]+>/g, '')}
+                  </div>
                 )}
 
                 <div className="text-xs text-den-muted mt-1.5">

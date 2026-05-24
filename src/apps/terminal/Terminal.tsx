@@ -12,6 +12,7 @@ export default function Terminal() {
   const fitAddonRef = useRef<FitAddon | null>(null)
   const sessionIdRef = useRef<string>(SESSION_ID())
   const cleanupRef = useRef<(() => void) | null>(null)
+  const resizeCleanupRef = useRef<(() => void) | null>(null)
 
   const init = useCallback(async () => {
     if (!containerRef.current || termRef.current) return
@@ -71,14 +72,14 @@ export default function Terminal() {
       window.cyberden.terminal.resize(id, cols, rows)
     })
     resizeObserver.observe(containerRef.current)
-
-    return () => resizeObserver.disconnect()
+    resizeCleanupRef.current = () => resizeObserver.disconnect()
   }, [])
 
   useEffect(() => {
     init()
     return () => {
       cleanupRef.current?.()
+      resizeCleanupRef.current?.()
       const id = sessionIdRef.current
       window.cyberden.terminal.destroy(id)
       termRef.current?.dispose()

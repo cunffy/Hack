@@ -47,12 +47,15 @@ export default function Editor() {
       const content = await window.cyberden.fs.readFile(filePath)
       const ext = fileName.split('.').pop() || ''
       const lang = LANG_MAP[ext] || 'plaintext'
-      setFiles((prev) => [...prev, { path: filePath, name: fileName, content, lang, dirty: false }])
-      setActiveIdx(files.length)
+      setFiles((prev) => {
+        const next = [...prev, { path: filePath, name: fileName, content, lang, dirty: false }]
+        setActiveIdx(next.length - 1)
+        return next
+      })
     } catch (err) {
       console.error('Failed to open file', err)
     }
-  }, [files])
+  }, [])
 
   const saveFile = useCallback(async () => {
     const file = files[activeIdx]
