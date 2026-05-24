@@ -6,6 +6,8 @@ import { registerPasswordTesterHandlers } from './ipc/password-tester'
 import { registerLeakerHandlers } from './ipc/leaker'
 import { registerEditorHandlers } from './ipc/editor'
 import { registerSettingsHandlers } from './ipc/settings'
+import { registerSystemHandlers } from './ipc/system'
+import { registerLauncherHandlers } from './ipc/launcher'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -17,7 +19,7 @@ function createWindow(): void {
     minHeight: 700,
     frame: false,
     titleBarStyle: 'hidden',
-    backgroundColor: '#0a0e14',
+    backgroundColor: '#080c12',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -64,6 +66,8 @@ app.whenReady().then(() => {
   registerLeakerHandlers()
   registerEditorHandlers()
   registerSettingsHandlers()
+  registerSystemHandlers()
+  registerLauncherHandlers()
 
   createWindow()
 
@@ -75,4 +79,3 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
-

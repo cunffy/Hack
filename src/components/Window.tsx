@@ -7,6 +7,9 @@ const EditorApp = lazy(() => import('../apps/editor/Editor'))
 const PasswordTesterApp = lazy(() => import('../apps/password-tester/PasswordTester'))
 const LeakerApp = lazy(() => import('../apps/leaker/LeakerApp'))
 const SettingsApp = lazy(() => import('../apps/settings/SettingsApp'))
+const FilesApp = lazy(() => import('../apps/files/FilesApp'))
+const LauncherApp = lazy(() => import('../apps/launcher/LauncherApp'))
+const SystemApp = lazy(() => import('../apps/system/SystemApp'))
 
 const APP_COLORS: Record<string, string> = {
   terminal: '#00ff88',
@@ -14,6 +17,9 @@ const APP_COLORS: Record<string, string> = {
   'password-tester': '#ffcc00',
   leaker: '#ff4466',
   settings: '#bb88ff',
+  files: '#f59e0b',
+  launcher: '#34d399',
+  system: '#818cf8',
 }
 
 function AppContent({ appId }: { appId: string }) {
@@ -39,6 +45,9 @@ function AppContent({ appId }: { appId: string }) {
       {appId === 'password-tester' && <PasswordTesterApp />}
       {appId === 'leaker' && <LeakerApp />}
       {appId === 'settings' && <SettingsApp />}
+      {appId === 'files' && <FilesApp />}
+      {appId === 'launcher' && <LauncherApp />}
+      {appId === 'system' && <SystemApp />}
     </Suspense>
   )
 }

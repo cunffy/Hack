@@ -195,6 +195,102 @@ export function installMockCyberDen(): void {
       getAll: async () => ({ ...settingsStore }),
     },
 
+    files: {
+      getHome: async () => '/home/user',
+      getDrives: async () => [
+        { path: '/', name: 'Root (/)', mounted: true },
+        { path: '/media/usb0', name: 'USB Drive', mounted: true },
+      ],
+      readDir: async (path) => {
+        const mockDirs: Record<string, FileItem[]> = {
+          '/home/user': [
+            { name: 'Desktop',   path: '/home/user/Desktop',   isDir: true,  ext: '', size: 0,     modified: new Date().toISOString() },
+            { name: 'Documents', path: '/home/user/Documents', isDir: true,  ext: '', size: 0,     modified: new Date().toISOString() },
+            { name: 'Downloads', path: '/home/user/Downloads', isDir: true,  ext: '', size: 0,     modified: new Date().toISOString() },
+            { name: 'Pictures',  path: '/home/user/Pictures',  isDir: true,  ext: '', size: 0,     modified: new Date().toISOString() },
+            { name: 'notes.md',  path: '/home/user/notes.md',  isDir: false, ext: 'md', size: 1420, modified: new Date().toISOString() },
+            { name: 'scan.py',   path: '/home/user/scan.py',   isDir: false, ext: 'py', size: 890,  modified: new Date().toISOString() },
+          ],
+          '/home/user/Documents': [
+            { name: 'pentest-report.pdf', path: '/home/user/Documents/pentest-report.pdf', isDir: false, ext: 'pdf', size: 245000, modified: new Date().toISOString() },
+            { name: 'notes.txt',          path: '/home/user/Documents/notes.txt',          isDir: false, ext: 'txt', size: 1200,   modified: new Date().toISOString() },
+          ],
+          '/home/user/Downloads': [
+            { name: 'rockyou.txt', path: '/home/user/Downloads/rockyou.txt', isDir: false, ext: 'txt', size: 134000000, modified: new Date().toISOString() },
+            { name: 'nmap.tar.gz', path: '/home/user/Downloads/nmap.tar.gz', isDir: false, ext: 'gz',  size: 5800000,  modified: new Date().toISOString() },
+          ],
+        }
+        await sleep(80)
+        return mockDirs[path] ?? []
+      },
+      stat: async (path) => ({ size: 0, modified: new Date().toISOString(), isDir: false }),
+      readFile: async (path) => `# Mock file: ${path}\n`,
+      writeFile: async () => true,
+      copy: async () => true,
+      move: async () => true,
+      delete: async () => true,
+      mkdir: async () => true,
+      rename: async (path, newName) => path.split('/').slice(0, -1).join('/') + '/' + newName,
+      openExternal: async () => true,
+      openDialog: async () => null,
+    },
+
+    system: {
+      getNetworks: async () => [
+        { ssid: 'CyberNet-5G',  signal: 90, security: 'WPA2', active: true },
+        { ssid: 'Home-WiFi',    signal: 68, security: 'WPA2', active: false },
+        { ssid: 'Guest',        signal: 42, security: '',     active: false },
+        { ssid: 'Neighbor_2.4', signal: 22, security: 'WPA',  active: false },
+      ],
+      getWifiStatus: async () => ({ connected: true, ssid: 'CyberNet-5G', signal: 90 }),
+      connectNetwork: async () => true,
+      disconnectNetwork: async () => true,
+      rescanNetworks: async () => true,
+      getBattery: async () => ({ level: 72, charging: false, full: false, status: 'Discharging' }),
+      getVolume: async () => ({ level: 65, muted: false }),
+      setVolume: async () => true,
+      toggleMute: async () => true,
+      getBrightness: async () => 80,
+      setBrightness: async () => true,
+      getBluetoothDevices: async () => [
+        { address: 'AA:BB:CC:DD:EE:FF', name: 'Sony WH-1000XM5', connected: true },
+        { address: '11:22:33:44:55:66', name: 'Logitech MX Keys', connected: false },
+      ],
+      bluetoothConnect: async () => true,
+      bluetoothDisconnect: async () => true,
+      bluetoothScan: async () => { await sleep(1000); return true },
+      getInfo: async () => ({
+        hostname: 'cryogram',
+        os: 'Cryogram Linux 1.0 (Debian-based)',
+        kernel: '6.1.0-cryogram-amd64',
+        cpu: 'Intel Core i7-12700H @ 2.30GHz',
+        ramTotal: 16 * 1024 * 1024 * 1024,
+        ramUsed: 4.2 * 1024 * 1024 * 1024,
+        uptime: '3h 42m',
+      }),
+      shutdown: async () => { alert('[mock] Shutdown called') },
+      reboot: async () => { alert('[mock] Reboot called') },
+      lock: async () => { alert('[mock] Lock screen called') },
+    },
+
+    launcher: {
+      getApps: async () => [
+        { name: 'Firefox',     exec: 'firefox',    icon: '', comment: 'Web Browser',          categories: ['Internet'],  category: 'Internet',     desktopFile: 'firefox.desktop',     terminal: false },
+        { name: 'VS Code',     exec: 'code',       icon: '', comment: 'Code Editor',           categories: ['Development'], category: 'Development', desktopFile: 'code.desktop',        terminal: false },
+        { name: 'Nmap',        exec: 'nmap',       icon: '', comment: 'Network Scanner',       categories: ['Security'],  category: 'Security',     desktopFile: 'nmap.desktop',        terminal: true  },
+        { name: 'Wireshark',   exec: 'wireshark',  icon: '', comment: 'Packet Analyzer',       categories: ['Security'],  category: 'Security',     desktopFile: 'wireshark.desktop',   terminal: false },
+        { name: 'Metasploit',  exec: 'msfconsole', icon: '', comment: 'Penetration Testing',   categories: ['Security'],  category: 'Security',     desktopFile: 'msf.desktop',         terminal: true  },
+        { name: 'Steam',       exec: 'steam',      icon: '', comment: 'Gaming Platform',       categories: ['Gaming'],    category: 'Gaming',       desktopFile: 'steam.desktop',       terminal: false },
+        { name: 'Opera GX',    exec: 'opera',      icon: '', comment: 'Gaming Browser',        categories: ['Internet'],  category: 'Internet',     desktopFile: 'opera.desktop',       terminal: false },
+        { name: 'Files',       exec: 'thunar',     icon: '', comment: 'File Manager',          categories: ['System'],    category: 'System',       desktopFile: 'thunar.desktop',      terminal: false },
+        { name: 'VLC',         exec: 'vlc',        icon: '', comment: 'Media Player',          categories: ['Multimedia'], category: 'Multimedia',  desktopFile: 'vlc.desktop',         terminal: false },
+        { name: 'GIMP',        exec: 'gimp',       icon: '', comment: 'Image Editor',          categories: ['Graphics'],  category: 'Graphics',     desktopFile: 'gimp.desktop',        terminal: false },
+        { name: 'Burp Suite',  exec: 'burpsuite',  icon: '', comment: 'Web Security Testing',  categories: ['Security'],  category: 'Security',     desktopFile: 'burpsuite.desktop',   terminal: false },
+        { name: 'Hashcat',     exec: 'hashcat',    icon: '', comment: 'Password Recovery',     categories: ['Security'],  category: 'Security',     desktopFile: 'hashcat.desktop',     terminal: true  },
+      ],
+      launch: async (app) => { alert(`[mock] Launching: ${app.name}`); return true },
+    },
+
     onNotification: (cb) => {
       notifListeners.push(cb)
       return () => {

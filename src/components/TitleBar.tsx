@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import SystemTray from './SystemTray'
 
 export function TitleBar() {
   const isMock = !window.cyberden?.window?.close
@@ -37,6 +38,14 @@ export function TitleBar() {
         <span className="text-den-muted text-xs tracking-wide hidden sm:block">
           Security Operations Platform
         </span>
+      </div>
+
+      {/* Center: system tray */}
+      <div
+        className="flex items-center relative"
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+      >
+        <SystemTray />
       </div>
 
       {/* Right: window controls */}

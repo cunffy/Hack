@@ -194,7 +194,7 @@ export function NetworkTester() {
           {result.found && result.credentials ? (
             <>
               <div className="text-den-green font-bold mb-3">Credentials Found!</div>
-              {result.credentials.map((c, i) => (
+              {result.credentials.map((c: { username: string; password: string }, i: number) => (
                 <div key={i} className="font-mono text-sm mb-1">
                   <span className="text-den-muted">user: </span><span className="text-den-accent">{c.username}</span>
                   <span className="text-den-muted">  pass: </span><span className="text-den-green">{c.password}</span>

@@ -52,25 +52,17 @@ mkdir -p /etc/skel/.config/openbox
 cat > /etc/skel/.config/openbox/autostart << 'EOF'
 #!/bin/bash
 
-# Wallpaper
+# Wallpaper (shown briefly during compositor startup; CyberDen covers it)
 feh --bg-fill /usr/share/backgrounds/cryogram/wallpaper.png &
 
-# Compositor
+# Compositor (glassmorphism + shadows)
 picom --daemon --config /etc/cryogram/picom.conf &
 
-# Panel + system tray
-tint2 &
-
-# System tray applets
-nm-applet --no-agent &
-pasystray &
-cbatticon -u 30 &
-blueman-applet &
-
-# Notifications daemon
+# Notifications daemon (CyberDen forwards via Electron Notification API, but
+# system-level notifications (e.g. from terminal tools) still use dunst)
 dunst &
 
-# Clipboard manager
+# Clipboard manager (system-wide, not Electron-specific)
 copyq &
 
 # Screen lock on idle (10 min) and on lid close
@@ -79,11 +71,12 @@ xss-lock --transfer-sleep-lock -- i3lock -c 080c12 -e --nofork &
 # Touchpad gestures
 libinput-gestures-setup start &
 
-# Redshift (eye comfort, adjusts colour temp at night)
+# Redshift (adjusts colour temp at night)
 redshift-gtk &
 
-# Launch CyberDen as the primary interface
-cyberden --start-maximized &
+# Launch CyberDen as the full desktop shell
+# --kiosk disables the Electron menu bar; DISPLAY and home are set by LightDM
+sleep 1 && cyberden --start-maximized --no-sandbox &
 EOF
 chmod +x /etc/skel/.config/openbox/autostart
 
@@ -103,18 +96,19 @@ cat > /etc/skel/.config/openbox/rc.xml << 'RCEOF'
   <resize><drawContents>yes</drawContents><popupShow>Nonpixel</popupShow><popupPosition>Center</popupPosition><popupFixedPosition><x>30</x><y>30</y></popupFixedPosition></resize>
 
   <applications>
-    <!-- CyberDen: no decorations, maximized -->
+    <!-- CyberDen: full-screen desktop shell, no WM decorations -->
     <application name="cyberden">
       <decor>no</decor>
       <maximized>yes</maximized>
+      <fullscreen>no</fullscreen>
       <layer>normal</layer>
-    </application>
-    <!-- Tint2: always on top, no decorations -->
-    <application name="tint2">
-      <decor>no</decor>
-      <layer>above</layer>
       <skip_pager>yes</skip_pager>
       <skip_taskbar>yes</skip_taskbar>
+    </application>
+    <!-- i3lock overlay -->
+    <application name="i3lock">
+      <decor>no</decor>
+      <layer>above</layer>
     </application>
   </applications>
 
