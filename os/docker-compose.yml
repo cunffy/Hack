@@ -9,7 +9,9 @@ services:
     container_name: cryogram-build
     privileged: true        # Required for loopback mounts during ISO creation
     volumes:
-      # live-build config — mounted directly so package list / hook changes
+      # build.sh mounted directly — git pull is all that's needed to update it
+      - ./build.sh:/build/build.sh
+      # live-build config — mounted directly so hook/package list changes
       # are picked up without rebuilding the Docker image
       - ./live-build:/build/live-build
       # Mount Cryogram source into the build
