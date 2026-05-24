@@ -27,17 +27,258 @@ mkdir -p "$OUTPUT_DIR"
 find "$LB_DIR/config/hooks" -name "*.chroot" -exec chmod +x {} \; 2>/dev/null || true
 find "$LB_DIR/auto" -type f -exec chmod +x {} \; 2>/dev/null || true
 
-# Strip packages that don't exist in Debian Bookworm standard repos.
-# These cause lb build to abort with "Unable to locate package".
-# This guard means the build works even if the local package lists are stale.
+# Clear any stale chroot/binary state left over from a previous failed build.
+# The live-build directory is volume-mounted so state persists between runs.
+echo "[build] Cleaning stale live-build state..."
+cd "$LB_DIR"
+lb clean --chroot --binary 2>/dev/null || true
+cd - >/dev/null
+
+# Write authoritative package lists directly — overrides whatever is on disk.
+# This guarantees the build works even if local files were never git-pulled.
+echo "[build] Writing package lists..."
 PKG_LISTS="$LB_DIR/config/package-lists"
-REMOVE_PKGS="radare2 mysql-client notify-send gamepad-tool wordlists \
-  metasploit-framework exploitdb airbase-ng volatility3 ddrescue \
-  theharvester maltego amass openvas bettercap"
-for pkg in $REMOVE_PKGS; do
-  sed -i "/^${pkg}$/d" "$PKG_LISTS"/*.chroot 2>/dev/null || true
-done
-echo "[build] Package list sanity check done."
+mkdir -p "$PKG_LISTS"
+
+cat > "$PKG_LISTS/security.list.chroot" << 'PKGEOF'
+# Security tools — verified available in Debian Bookworm
+nmap
+masscan
+netcat-openbsd
+ncat
+tcpdump
+wireshark
+tshark
+ettercap-text-only
+arpwatch
+hashcat
+john
+crunch
+nikto
+gobuster
+sqlmap
+wfuzz
+dirb
+aircrack-ng
+reaver
+binwalk
+foremost
+scalpel
+sleuthkit
+autopsy
+gdb
+ltrace
+strace
+dc3dd
+gddrescue
+whois
+dnsrecon
+dnsenum
+mitmproxy
+sslsplit
+proxychains4
+lynis
+chkrootkit
+rkhunter
+gpg
+keepassxc
+kleopatra
+openssl
+sshpass
+autossh
+proxytunnel
+stunnel4
+tor
+torsocks
+macchanger
+python3-scapy
+python3-impacket
+python3-ldap3
+python3-requests
+python3-paramiko
+python3-cryptography
+python3-pycryptodome
+PKGEOF
+
+cat > "$PKG_LISTS/dev.list.chroot" << 'PKGEOF'
+# Development tools
+gcc
+g++
+make
+cmake
+ninja-build
+clang
+clang-format
+lldb
+valgrind
+gdb
+python3
+python3-pip
+python3-venv
+python3-dev
+python3-setuptools
+python3-wheel
+ipython3
+build-essential
+pkg-config
+libssl-dev
+libffi-dev
+libbz2-dev
+libreadline-dev
+libsqlite3-dev
+zlib1g-dev
+git
+git-lfs
+tig
+gitk
+geany
+geany-plugins
+docker.io
+docker-compose
+sqlite3
+postgresql-client
+default-mysql-client
+jq
+yq
+httpie
+meld
+xz-utils
+tar
+PKGEOF
+
+cat > "$PKG_LISTS/desktop.list.chroot" << 'PKGEOF'
+# Desktop environment — Openbox + full app suite
+xorg
+xserver-xorg
+xserver-xorg-input-all
+xserver-xorg-input-libinput
+xserver-xorg-video-all
+xinit
+x11-utils
+x11-xserver-utils
+openbox
+obconf
+picom
+lxappearance
+lightdm
+lightdm-gtk-greeter
+lightdm-gtk-greeter-settings
+network-manager
+network-manager-gnome
+pipewire
+pipewire-pulse
+pipewire-alsa
+wireplumber
+pavucontrol
+blueman
+xfce4-power-manager
+xfce4-notifyd
+thunar
+thunar-archive-plugin
+thunar-volman
+gvfs
+gvfs-backends
+evince
+eog
+vlc
+mousepad
+geany
+file-roller
+flameshot
+redshift
+redshift-gtk
+xclip
+xdotool
+wmctrl
+rofi
+dunst
+feh
+xarchiver
+galculator
+gnome-font-viewer
+font-manager
+xfce4-terminal
+xterm
+alacritty
+nitrogen
+lxrandr
+arandr
+numlockx
+xautomation
+libnotify-bin
+zenity
+yad
+arc-theme
+papirus-icon-theme
+tint2
+pasystray
+cbatticon
+qt5ct
+qt5-style-plugins
+adwaita-qt
+cups
+system-config-printer
+hplip
+printer-driver-gutenprint
+fonts-liberation
+fonts-freefont-ttf
+fonts-dejavu
+ttf-bitstream-vera
+fonts-inter
+fonts-noto-color-emoji
+tlp
+tlp-rdw
+powertop
+acpi
+laptop-detect
+ufw
+gufw
+gparted
+copyq
+i3lock
+xss-lock
+brightnessctl
+plymouth
+plymouth-themes
+libinput-tools
+python3-evdev
+PKGEOF
+
+cat > "$PKG_LISTS/gaming.list.chroot" << 'PKGEOF'
+# Gaming — GPU drivers, Wine, Lutris
+vulkan-tools
+mesa-vulkan-drivers
+libvulkan1
+libvulkan-dev
+mesa-utils
+libgl1-mesa-dri
+libgles2-mesa
+firmware-amd-graphics
+xserver-xorg-video-amdgpu
+mesa-va-drivers
+xserver-xorg-video-intel
+intel-media-va-driver
+i965-va-driver
+xserver-xorg-video-nouveau
+wine
+wine64
+winetricks
+lutris
+gamemode
+libgamemode0
+libgamemodeauto0
+mangohud
+pipewire
+pipewire-pulse
+wireplumber
+pavucontrol
+joystick
+jstest-gtk
+ffmpeg
+mesa-utils-extra
+PKGEOF
+
+echo "[build] Package lists written."
 
 # ---- 1. Generate graphic assets ----
 echo "[1/6] Generating GRUB theme and wallpaper assets..."
