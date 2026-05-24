@@ -280,6 +280,18 @@ PKGEOF
 
 echo "[build] Package lists written."
 
+# Tell dpkg to keep our staged config files without prompting.
+# Without this, installing calamares-settings-debian (which ships
+# its own settings.conf) hangs on a conffile prompt in non-interactive mode.
+mkdir -p "$LB_DIR/config/apt"
+cat > "$LB_DIR/config/apt/apt.conf" << 'APTEOF'
+DPkg::Options {
+   "--force-confdef";
+   "--force-confold";
+};
+APTEOF
+echo "[build] apt.conf written (--force-confold)."
+
 # ---- 1. Generate graphic assets ----
 echo "[1/6] Generating GRUB theme and wallpaper assets..."
 THEME_DIR="$LB_DIR/config/includes.chroot/usr/share/grub/themes/cryogram"
