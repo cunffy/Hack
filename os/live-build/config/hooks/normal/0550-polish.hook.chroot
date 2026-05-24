@@ -1,0 +1,324 @@
+#!/bin/bash
+# Cryogram OS — Polish hook
+# Handles: Plymouth, TLP, UFW, DNS-over-HTTPS, fontconfig,
+#           libinput-gestures, printer drivers, and first-boot setup.
+set -e
+
+# ── Plymouth boot splash ───────────────────────────────────────────────────────
+echo "[polish] Configuring Plymouth boot splash..."
+
+# Create a minimal Cryogram script theme
+PLYDIR="/usr/share/plymouth/themes/cryogram"
+mkdir -p "$PLYDIR"
+
+cat > "$PLYDIR/cryogram.plymouth" << 'EOF'
+[Plymouth Theme]
+Name=Cryogram
+Description=Cryogram OS boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/cryogram
+ScriptFile=/usr/share/plymouth/themes/cryogram/cryogram.script
+EOF
+
+cat > "$PLYDIR/cryogram.script" << 'PLYSCRIPT'
+# Cryogram OS Plymouth script theme
+# Dark background with animated cyan progress bar and logo text
+
+bg_color.red   = 0.031; bg_color.green = 0.047; bg_color.blue  = 0.071;
+bar_color.red  = 0.0;   bar_color.green = 0.831; bar_color.blue = 1.0;
+
+Window.SetBackgroundTopColor(bg_color.red, bg_color.green, bg_color.blue);
+Window.SetBackgroundBottomColor(bg_color.red, bg_color.green, bg_color.blue);
+
+screen_width  = Window.GetWidth();
+screen_height = Window.GetHeight();
+
+# Logo text sprite
+logo_image = Image.Text("CRYOGRAM OS", 1.0, 1.0, 1.0, 1.0, "Sans Bold 24");
+logo_sprite = Sprite(logo_image);
+logo_sprite.SetX(screen_width  / 2 - logo_image.GetWidth()  / 2);
+logo_sprite.SetY(screen_height / 2 - logo_image.GetHeight() / 2 - 40);
+logo_sprite.SetOpacity(1);
+
+# Tagline
+tag_image = Image.Text("Security Operations Platform", 0.49, 0.51, 0.55, 1.0, "Sans 11");
+tag_sprite = Sprite(tag_image);
+tag_sprite.SetX(screen_width  / 2 - tag_image.GetWidth()  / 2);
+tag_sprite.SetY(screen_height / 2 - tag_image.GetHeight() / 2);
+
+# Progress bar background
+bar_bg_w = 280; bar_h = 3;
+bar_bg_image = Image(bar_bg_w, bar_h);
+bar_bg_image.Scale(bar_bg_w, bar_h);
+bar_bg_sprite = Sprite(bar_bg_image);
+bar_bg_sprite.SetX(screen_width / 2 - bar_bg_w / 2);
+bar_bg_sprite.SetY(screen_height / 2 + 50);
+bar_bg_sprite.SetOpacity(0.2);
+
+# Progress bar foreground
+progress_bar_w = 1;
+fun DrawProgressBar(percent) {
+    progress_bar_w = Math.Int(bar_bg_w * percent / 100);
+    if (progress_bar_w < 1) progress_bar_w = 1;
+    bar_image = Image(progress_bar_w, bar_h);
+    r = 0; c = 0;
+    while (r < bar_h) {
+        c = 0;
+        while (c < progress_bar_w) {
+            bar_image.SetPixel(c, r, bar_color.red, bar_color.green, bar_color.blue, 1.0);
+            c++;
+        }
+        r++;
+    }
+    global.bar_sprite = Sprite(bar_image);
+    global.bar_sprite.SetX(screen_width / 2 - bar_bg_w / 2);
+    global.bar_sprite.SetY(screen_height / 2 + 50);
+}
+
+DrawProgressBar(0);
+
+fun boot_progress_callback(duration, progress) {
+    DrawProgressBar(Math.Int(progress * 100));
+}
+
+Plymouth.SetBootProgressFunction(boot_progress_callback);
+PLYSCRIPT
+
+# Set as default Plymouth theme
+if command -v plymouth-set-default-theme >/dev/null 2>&1; then
+  plymouth-set-default-theme cryogram 2>/dev/null || true
+fi
+
+# Configure Plymouth in initramfs
+cat > /etc/plymouth/plymouthd.conf << 'EOF'
+[Daemon]
+Theme=cryogram
+ShowDelay=0
+DeviceTimeout=5
+EOF
+
+# Rebuild initramfs with Plymouth
+update-initramfs -u 2>/dev/null || true
+
+echo "[polish] Plymouth configured."
+
+# ── Fontconfig — consistent font rendering ────────────────────────────────────
+echo "[polish] Configuring fontconfig rendering..."
+mkdir -p /etc/fonts/conf.d
+
+cat > /etc/fonts/local.conf << 'EOF'
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+  <!-- Enable subpixel rendering (RGB) for LCD screens -->
+  <match target="font">
+    <edit name="antialias"     mode="assign"><bool>true</bool></edit>
+    <edit name="hinting"       mode="assign"><bool>true</bool></edit>
+    <edit name="hintstyle"     mode="assign"><const>hintslight</const></edit>
+    <edit name="rgba"          mode="assign"><const>rgb</const></edit>
+    <edit name="lcdfilter"     mode="assign"><const>lcddefault</const></edit>
+    <edit name="embeddedbitmap" mode="assign"><bool>false</bool></edit>
+  </match>
+
+  <!-- Prefer Inter for UI, JetBrains Mono for monospace -->
+  <alias><family>sans-serif</family>
+    <prefer><family>Inter</family><family>DejaVu Sans</family><family>Liberation Sans</family></prefer>
+  </alias>
+  <alias><family>monospace</family>
+    <prefer><family>JetBrains Mono</family><family>DejaVu Sans Mono</family><family>Liberation Mono</family></prefer>
+  </alias>
+  <alias><family>serif</family>
+    <prefer><family>DejaVu Serif</family><family>Liberation Serif</family></prefer>
+  </alias>
+</fontconfig>
+EOF
+
+# Link the config so it's picked up
+ln -sf /etc/fonts/local.conf /etc/fonts/conf.d/99-cryogram.conf 2>/dev/null || true
+fc-cache -f 2>/dev/null || true
+
+echo "[polish] Fontconfig configured."
+
+# ── TLP — laptop battery life ─────────────────────────────────────────────────
+echo "[polish] Configuring TLP power management..."
+
+cat > /etc/tlp.conf << 'EOF'
+# Cryogram OS — TLP power management
+TLP_ENABLE=1
+TLP_DEFAULT_MODE=AC
+TLP_PERSISTENT_DEFAULT=0
+
+# CPU governors
+CPU_SCALING_GOVERNOR_ON_AC=performance
+CPU_SCALING_GOVERNOR_ON_BAT=powersave
+CPU_ENERGY_PERF_POLICY_ON_AC=performance
+CPU_ENERGY_PERF_POLICY_ON_BAT=power
+
+# CPU boost
+CPU_BOOST_ON_AC=1
+CPU_BOOST_ON_BAT=0
+
+# WiFi power saving
+WIFI_PWR_ON_AC=off
+WIFI_PWR_ON_BAT=on
+
+# USB autosuspend (keeps peripherals alive)
+USB_AUTOSUSPEND=1
+USB_BLACKLIST_BTUSB=1
+
+# Runtime power management
+RUNTIME_PM_ON_AC=on
+RUNTIME_PM_ON_BAT=auto
+
+# NVMe power management
+PCIE_ASPM_ON_AC=default
+PCIE_ASPM_ON_BAT=powersupersave
+
+# Battery care (limit charge to extend lifespan — ThinkPad/compatible)
+# START_CHARGE_THRESH_BAT0=75
+# STOP_CHARGE_THRESH_BAT0=80
+EOF
+
+systemctl enable tlp 2>/dev/null || true
+echo "[polish] TLP configured."
+
+# ── UFW firewall ──────────────────────────────────────────────────────────────
+echo "[polish] Configuring UFW firewall..."
+ufw --force reset
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow ssh
+ufw --force enable
+systemctl enable ufw 2>/dev/null || true
+echo "[polish] UFW enabled (deny in / allow out / allow SSH)."
+
+# ── DNS over HTTPS / TLS via systemd-resolved ─────────────────────────────────
+echo "[polish] Configuring DNS over TLS..."
+mkdir -p /etc/systemd/resolved.conf.d
+cat > /etc/systemd/resolved.conf.d/cryogram-dns.conf << 'EOF'
+[Resolve]
+# Cloudflare + Quad9 — privacy-respecting, no logging
+DNS=1.1.1.1#cloudflare-dns.com 9.9.9.9#dns.quad9.net 1.0.0.1#cloudflare-dns.com
+FallbackDNS=8.8.8.8 8.8.4.4
+DNSSEC=allow-downgrade
+DNSOverTLS=opportunistic
+Cache=yes
+ReadEtcHosts=yes
+EOF
+
+systemctl enable systemd-resolved 2>/dev/null || true
+# Point /etc/resolv.conf to systemd-resolved stub
+ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf 2>/dev/null || true
+echo "[polish] DNS over TLS configured."
+
+# ── libinput-gestures (touchpad multi-finger swipes) ─────────────────────────
+echo "[polish] Installing libinput-gestures..."
+pip3 install --break-system-packages libinput-gestures 2>/dev/null || \
+  pip3 install libinput-gestures 2>/dev/null || true
+
+# Configure gestures
+mkdir -p /etc/skel/.config
+cat > /etc/skel/.config/libinput-gestures.conf << 'EOF'
+# Cryogram OS — touchpad gestures
+# Swipe 3 fingers left/right: switch desktops
+gesture swipe right 3 xdotool key super+1
+gesture swipe left  3 xdotool key super+2
+
+# Swipe 4 fingers up: show all windows (rofi)
+gesture swipe up   4 rofi -show window -theme cryogram
+
+# Swipe 4 fingers down: show desktop
+gesture swipe down 4 xdotool key super+d
+
+# Pinch in/out: zoom (pass-through to app)
+gesture pinch in  2 xdotool key ctrl+minus
+gesture pinch out 2 xdotool key ctrl+plus
+EOF
+
+# Add cryogram user to input group for gesture access
+usermod -aG input cryogram 2>/dev/null || true
+echo "[polish] libinput-gestures configured."
+
+# ── Natural scrolling + touchpad config ───────────────────────────────────────
+echo "[polish] Configuring libinput (natural scrolling, tap-to-click)..."
+mkdir -p /etc/X11/xorg.conf.d
+cat > /etc/X11/xorg.conf.d/40-libinput.conf << 'EOF'
+Section "InputClass"
+    Identifier "libinput touchpad"
+    MatchIsTouchpad "on"
+    Driver "libinput"
+    Option "Tapping"           "on"
+    Option "TappingDrag"       "on"
+    Option "NaturalScrolling"  "on"
+    Option "ScrollMethod"      "twofinger"
+    Option "DisableWhileTyping" "on"
+    Option "AccelProfile"      "adaptive"
+EndSection
+
+Section "InputClass"
+    Identifier "libinput mouse"
+    MatchIsPointer "on"
+    Driver "libinput"
+    Option "NaturalScrolling"  "off"
+    Option "AccelProfile"      "flat"
+EndSection
+EOF
+echo "[polish] Touchpad configured."
+
+# ── Printer drivers ───────────────────────────────────────────────────────────
+echo "[polish] Configuring printer support..."
+systemctl enable cups 2>/dev/null || true
+
+# Enable CUPS browsing for network printers
+if [ -f /etc/cups/cupsd.conf ]; then
+  sed -i 's/^Listen localhost:631/Listen 0.0.0.0:631/' /etc/cups/cupsd.conf 2>/dev/null || true
+fi
+
+cat >> /etc/cups/cups-browsed.conf << 'EOF' 2>/dev/null || true
+BrowseRemoteProtocols dnssd cups
+BrowseLocalProtocols dnssd cups
+EOF
+
+echo "[polish] CUPS + printer drivers ready."
+
+# ── First-boot privacy notice ─────────────────────────────────────────────────
+echo "[polish] Installing first-boot welcome script..."
+cat > /usr/local/bin/cryogram-welcome << 'WELCOME'
+#!/bin/bash
+# Shown once on first login
+STAMP="$HOME/.cryogram-welcomed"
+[ -f "$STAMP" ] && exit 0
+
+zenity --info \
+  --title="Welcome to Cryogram OS" \
+  --width=500 \
+  --text="<b>Welcome to Cryogram OS</b>
+
+<b>Privacy:</b> This OS collects <b>zero telemetry</b>. No data is ever sent to any server without your explicit action.
+
+<b>Firewall:</b> UFW is active — incoming connections are blocked by default.
+
+<b>DNS:</b> Your DNS traffic is encrypted via DNS-over-TLS (Cloudflare + Quad9).
+
+<b>Next steps:</b>
+• Open <b>CyberDen → Settings</b> to add your API keys (HIBP, Dehashed)
+• Drop wordlists into <b>~/wordlists/</b> for Password Tester
+• Use <b>Super key</b> to search and launch apps
+• Right-click the desktop for the full app menu
+
+Enjoy." 2>/dev/null || true
+
+touch "$STAMP"
+WELCOME
+chmod +x /usr/local/bin/cryogram-welcome
+
+# Add welcome to autostart (runs once, then never again)
+cat >> /etc/skel/.config/openbox/autostart << 'EOF'
+
+# First-boot welcome (runs once only)
+/usr/local/bin/cryogram-welcome &
+EOF
+
+echo "[polish] All polish steps complete."

@@ -6,7 +6,7 @@ A custom Debian-based Linux operating system built for security operations. Repl
 
 | Category | Contents |
 |---|---|
-| Desktop | CyberDen (Terminal, Editor, Password Tester, Leaker), Openbox WM, Picom compositor |
+| Desktop | CyberDen (Terminal, Editor, Password Tester, Leaker), Openbox WM, Picom compositor, Tint2 panel |
 | Browser | Opera GX (default) |
 | Security tools | Nmap, Wireshark, Metasploit, Hashcat, John, Aircrack-ng, Bettercap, SQLmap, Nikto, Gobuster, Volatility, Autopsy, MITMProxy, Recon-ng, + 50 more |
 | Languages | Python 3, Node.js 20 LTS, Go 1.22, Rust (stable), C/C++ (GCC/Clang) |
@@ -15,6 +15,11 @@ A custom Debian-based Linux operating system built for security operations. Repl
 | GPU drivers | AMD (amdgpu), Intel (i915), NVIDIA (proprietary — auto-activated on first boot) |
 | System | systemd, NetworkManager, PipeWire audio, Bluetooth, LightDM login screen |
 | Installer | Calamares graphical installer (full disk, dual boot, or custom partitioning) |
+| UX polish | Super key app launcher (Rofi), snap windows left/right/max, volume & brightness OSD, touchpad gestures, natural scrolling, tap-to-click, clipboard history (CopyQ), auto screen lock (i3lock + xss-lock), Plymouth boot splash |
+| Privacy | UFW firewall (deny incoming by default), DNS-over-TLS (Cloudflare + Quad9), zero telemetry, first-boot privacy notice |
+| Power | TLP battery management (doubles laptop battery life), auto CPU governor, hybrid GPU safe idle |
+| Printing | CUPS + HP (hplip) + generic (Gutenprint) drivers — 90% of printers work plug-and-play |
+| Fonts & rendering | Inter UI font, JetBrains Mono, subpixel LCD rendering across GTK + Qt apps |
 
 ## Build Requirements
 

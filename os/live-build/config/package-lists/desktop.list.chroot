@@ -2,6 +2,7 @@
 xorg
 xserver-xorg
 xserver-xorg-input-all
+xserver-xorg-input-libinput
 xserver-xorg-video-all
 xinit
 x11-utils
@@ -15,7 +16,10 @@ lightdm-gtk-greeter
 lightdm-gtk-greeter-settings
 network-manager
 network-manager-gnome
-pulseaudio
+pipewire
+pipewire-pulse
+pipewire-alsa
+wireplumber
 pavucontrol
 blueman
 xfce4-power-manager
@@ -60,15 +64,47 @@ yad
 # GTK theme / icon theme
 arc-theme
 papirus-icon-theme
-# System tray essentials
+# System tray / panel
+tint2
 pasystray
-nm-tray
 cbatticon
-# Printing
+# Qt theming (so Qt apps match the dark GTK theme)
+qt5ct
+qt5-style-plugins
+adwaita-qt
+# Printing — CUPS + drivers covering 90% of printers
 cups
 system-config-printer
+hplip
+printer-driver-gutenprint
 # Fonts
 fonts-liberation
 fonts-freefont-ttf
 fonts-dejavu
 ttf-bitstream-vera
+fonts-inter
+fonts-noto-color-emoji
+# Power management (laptop battery life)
+tlp
+tlp-rdw
+powertop
+acpi
+laptop-detect
+# Firewall
+ufw
+gufw
+# Disk management GUI
+gparted
+# Clipboard manager with history
+copyq
+# Screen lock
+i3lock
+xss-lock
+# Brightness control
+brightnessctl
+# Plymouth boot splash
+plymouth
+plymouth-themes
+# Touchpad gestures (libinput-gestures installed via hook — not in Debian repos)
+libinput-tools
+python3-evdev

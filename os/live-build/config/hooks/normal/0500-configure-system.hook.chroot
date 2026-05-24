@@ -8,9 +8,8 @@ locale-gen
 update-locale LANG=en_US.UTF-8
 
 # --- Default user: cryogram ---
-useradd -m -s /bin/bash -G sudo,audio,video,plugdev,netdev,bluetooth,docker cryogram 2>/dev/null || true
+useradd -m -s /bin/bash -G sudo,audio,video,plugdev,netdev,bluetooth,docker,lp,input cryogram 2>/dev/null || true
 echo "cryogram:cryogram" | chpasswd
-# Require password change on first login
 chage -d 0 cryogram
 
 # --- sudoers ---
@@ -23,10 +22,10 @@ cat > /etc/lightdm/lightdm.conf.d/10-autologin.conf << 'EOF'
 [Seat:*]
 autologin-user=cryogram
 autologin-user-timeout=0
-user-session=openbox
+user-session=cryogram
 EOF
 
-# --- Default session ---
+# --- Default session (openbox-session reads autostart automatically) ---
 mkdir -p /usr/share/xsessions
 cat > /usr/share/xsessions/cryogram.desktop << 'EOF'
 [Desktop Entry]
@@ -34,40 +33,303 @@ Name=Cryogram
 Comment=Cryogram Security OS Desktop
 Exec=/usr/local/bin/cryogram-session
 TryExec=/usr/local/bin/cryogram-session
-Icon=
 Type=Application
 DesktopNames=Cryogram
 EOF
 
-# --- Cryogram session script ---
 cat > /usr/local/bin/cryogram-session << 'EOF'
 #!/bin/bash
-# Cryogram OS session — starts Openbox + CyberDen
 export DISPLAY=:0
 export XDG_SESSION_TYPE=x11
+export QT_QPA_PLATFORMTHEME=qt5ct
+export QT_AUTO_SCREEN_SCALE_FACTOR=1
+exec openbox-session
+EOF
+chmod +x /usr/local/bin/cryogram-session
 
-# Apply wallpaper
-feh --bg-fill /usr/share/backgrounds/cryogram/wallpaper.png 2>/dev/null &
+# --- Openbox autostart (everything that launches at login) ---
+mkdir -p /etc/skel/.config/openbox
+cat > /etc/skel/.config/openbox/autostart << 'EOF'
+#!/bin/bash
 
-# Start system tray components
-nm-applet &
-pasystray &
-cbatticon &
-dunst &
+# Wallpaper
+feh --bg-fill /usr/share/backgrounds/cryogram/wallpaper.png &
 
 # Compositor
 picom --daemon --config /etc/cryogram/picom.conf &
 
-# Notification daemon warmup
-sleep 0.5
+# Panel + system tray
+tint2 &
 
-# Launch CyberDen as primary interface
+# System tray applets
+nm-applet --no-agent &
+pasystray &
+cbatticon -u 30 &
+blueman-applet &
+
+# Notifications daemon
+dunst &
+
+# Clipboard manager
+copyq &
+
+# Screen lock on idle (10 min) and on lid close
+xss-lock --transfer-sleep-lock -- i3lock -c 080c12 -e --nofork &
+
+# Touchpad gestures
+libinput-gestures-setup start &
+
+# Redshift (eye comfort, adjusts colour temp at night)
+redshift-gtk &
+
+# Launch CyberDen as the primary interface
 cyberden --start-maximized &
-
-# Start Openbox (window manager, handles right-click menu etc.)
-exec openbox --startup "echo Openbox started"
 EOF
-chmod +x /usr/local/bin/cryogram-session
+chmod +x /etc/skel/.config/openbox/autostart
+
+# --- Openbox rc.xml (keyboard shortcuts + window behaviour) ---
+cat > /etc/skel/.config/openbox/rc.xml << 'RCEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_config xmlns="http://openbox.org/3.4/rc"
+                xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <resistance><strength>10</strength><screen_edge_strength>20</screen_edge_strength></resistance>
+  <focus><focusNew>yes</focusNew><followMouse>no</followMouse><focusLast>yes</focusLast><underMouse>no</underMouse><focusDelay>200</focusDelay><raiseOnFocus>no</raiseOnFocus></focus>
+  <placement><policy>Smart</policy><center>yes</center><monitor>Primary</monitor></placement>
+  <theme><name>Clearlooks</name><titleLayout>NLIMC</titleLayout><keepBorder>yes</keepBorder><animateIconify>yes</animateIconify><font place="ActiveWindow"><name>JetBrains Mono</name><size>9</size><weight>Bold</weight><slant>Normal</slant></font><font place="InactiveWindow"><name>JetBrains Mono</name><size>9</size><weight>Normal</weight><slant>Normal</slant></font><font place="MenuHeader"><name>JetBrains Mono</name><size>9</size><weight>Normal</weight><slant>Normal</slant></font><font place="MenuItem"><name>JetBrains Mono</name><size>9</size><weight>Normal</weight><slant>Normal</slant></font><font place="OSD"><name>JetBrains Mono</name><size>10</size><weight>Bold</weight><slant>Normal</slant></font></theme>
+
+  <desktops><number>4</number><firstdesk>1</firstdesk><names><name>Main</name><name>Work</name><name>Gaming</name><name>Monitor</name></names><popupTime>875</popupTime></desktops>
+
+  <resize><drawContents>yes</drawContents><popupShow>Nonpixel</popupShow><popupPosition>Center</popupPosition><popupFixedPosition><x>30</x><y>30</y></popupFixedPosition></resize>
+
+  <applications>
+    <!-- CyberDen: no decorations, maximized -->
+    <application name="cyberden">
+      <decor>no</decor>
+      <maximized>yes</maximized>
+      <layer>normal</layer>
+    </application>
+    <!-- Tint2: always on top, no decorations -->
+    <application name="tint2">
+      <decor>no</decor>
+      <layer>above</layer>
+      <skip_pager>yes</skip_pager>
+      <skip_taskbar>yes</skip_taskbar>
+    </application>
+  </applications>
+
+  <keyboard>
+    <!-- App launcher (Super key) -->
+    <keybind key="Super_L">
+      <action name="Execute"><command>rofi -show drun -theme cryogram</command></action>
+    </keybind>
+    <keybind key="Super-space">
+      <action name="Execute"><command>rofi -show drun -theme cryogram</command></action>
+    </keybind>
+
+    <!-- Common app shortcuts -->
+    <keybind key="Super-e">
+      <action name="Execute"><command>thunar</command></action>
+    </keybind>
+    <keybind key="Super-b">
+      <action name="Execute"><command>opera</command></action>
+    </keybind>
+    <keybind key="Super-t">
+      <action name="Execute"><command>xfce4-terminal</command></action>
+    </keybind>
+    <keybind key="Super-l">
+      <action name="Execute"><command>i3lock -c 080c12 -e</command></action>
+    </keybind>
+
+    <!-- Screenshots -->
+    <keybind key="Print">
+      <action name="Execute"><command>flameshot gui</command></action>
+    </keybind>
+    <keybind key="Super-Print">
+      <action name="Execute"><command>flameshot screen</command></action>
+    </keybind>
+    <keybind key="A-Print">
+      <action name="Execute"><command>flameshot gui</command></action>
+    </keybind>
+
+    <!-- Volume keys -->
+    <keybind key="XF86AudioRaiseVolume">
+      <action name="Execute"><command>/usr/local/bin/cryogram-volume up</command></action>
+    </keybind>
+    <keybind key="XF86AudioLowerVolume">
+      <action name="Execute"><command>/usr/local/bin/cryogram-volume down</command></action>
+    </keybind>
+    <keybind key="XF86AudioMute">
+      <action name="Execute"><command>/usr/local/bin/cryogram-volume mute</command></action>
+    </keybind>
+    <keybind key="XF86AudioMicMute">
+      <action name="Execute"><command>pactl set-source-mute @DEFAULT_SOURCE@ toggle</command></action>
+    </keybind>
+
+    <!-- Brightness keys -->
+    <keybind key="XF86MonBrightnessUp">
+      <action name="Execute"><command>/usr/local/bin/cryogram-brightness up</command></action>
+    </keybind>
+    <keybind key="XF86MonBrightnessDown">
+      <action name="Execute"><command>/usr/local/bin/cryogram-brightness down</command></action>
+    </keybind>
+
+    <!-- Window management -->
+    <keybind key="A-F4">
+      <action name="Close"/>
+    </keybind>
+    <keybind key="A-Tab">
+      <action name="NextWindow"><dialog>icons</dialog><bar>yes</bar><raise>yes</raise></action>
+    </keybind>
+    <keybind key="A-S-Tab">
+      <action name="PreviousWindow"><dialog>icons</dialog><bar>yes</bar><raise>yes</raise></action>
+    </keybind>
+    <keybind key="Super-d">
+      <action name="ToggleShowDesktop"/>
+    </keybind>
+    <keybind key="Super-h">
+      <action name="Iconify"/>
+    </keybind>
+    <keybind key="Super-m">
+      <action name="ToggleMaximize"/>
+    </keybind>
+
+    <!-- Snap windows -->
+    <keybind key="Super-Left">
+      <action name="UnmaximizeFull"/>
+      <action name="MoveResizeTo"><x>0</x><y>0</y><width>50%</width><height>100%</height></action>
+    </keybind>
+    <keybind key="Super-Right">
+      <action name="UnmaximizeFull"/>
+      <action name="MoveResizeTo"><x>50%</x><y>0</y><width>50%</width><height>100%</height></action>
+    </keybind>
+    <keybind key="Super-Up">
+      <action name="ToggleMaximize"/>
+    </keybind>
+    <keybind key="Super-Down">
+      <action name="UnmaximizeFull"/>
+    </keybind>
+
+    <!-- Desktop switching -->
+    <keybind key="Super-1"><action name="GoToDesktop"><to>1</to></action></keybind>
+    <keybind key="Super-2"><action name="GoToDesktop"><to>2</to></action></keybind>
+    <keybind key="Super-3"><action name="GoToDesktop"><to>3</to></action></keybind>
+    <keybind key="Super-4"><action name="GoToDesktop"><to>4</to></action></keybind>
+
+    <!-- Session -->
+    <keybind key="C-A-Delete">
+      <action name="Execute"><command>xfce4-terminal -e htop</command></action>
+    </keybind>
+    <keybind key="C-A-t">
+      <action name="Execute"><command>xfce4-terminal</command></action>
+    </keybind>
+  </keyboard>
+
+  <mouse>
+    <dragThreshold>1</dragThreshold>
+    <doubleClickTime>500</doubleClickTime>
+    <screenEdgeWarpTime>400</screenEdgeWarpTime>
+    <screenEdgeWarpMouse>false</screenEdgeWarpMouse>
+    <context name="Frame">
+      <mousebind button="A-Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+      <mousebind button="A-Left" action="Click"><action name="Focus"/></mousebind>
+      <mousebind button="A-Left" action="Drag"><action name="Move"/></mousebind>
+      <mousebind button="A-Right" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+      <mousebind button="A-Right" action="Drag"><action name="Resize"/></mousebind>
+    </context>
+    <context name="Desktop">
+      <mousebind button="Right" action="Press">
+        <action name="ShowMenu"><menu>root-menu</menu></action>
+      </mousebind>
+    </context>
+    <context name="Root">
+      <mousebind button="Right" action="Press">
+        <action name="ShowMenu"><menu>root-menu</menu></action>
+      </mousebind>
+    </context>
+    <context name="Titlebar">
+      <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+      <mousebind button="Left" action="Drag"><action name="Move"/></mousebind>
+      <mousebind button="Left" action="DoubleClick"><action name="ToggleMaximize"/></mousebind>
+      <mousebind button="Right" action="Press"><action name="Focus"/><action name="Raise"/><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
+    </context>
+    <context name="Close">
+      <mousebind button="Left" action="Click"><action name="Close"/></mousebind>
+    </context>
+    <context name="Maximize">
+      <mousebind button="Left" action="Click"><action name="ToggleMaximize"/></mousebind>
+    </context>
+    <context name="Iconify">
+      <mousebind button="Left" action="Click"><action name="Iconify"/></mousebind>
+    </context>
+  </mouse>
+
+  <menu>
+    <file>menu.xml</file>
+    <hideDelay>200</hideDelay>
+    <middle>no</middle>
+    <submenuShowDelay>100</submenuShowDelay>
+    <submenuHideDelay>400</submenuHideDelay>
+    <applicationIcons>yes</applicationIcons>
+    <manageDesktops>yes</manageDesktops>
+  </menu>
+
+</openbox_config>
+RCEOF
+
+# --- Openbox right-click menu ---
+cat > /etc/skel/.config/openbox/menu.xml << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu xmlns="http://openbox.org/3.4/menu">
+  <menu id="root-menu" label="Cryogram OS">
+    <item label="CyberDen">
+      <action name="Execute"><command>cyberden</command></action>
+    </item>
+    <separator/>
+    <menu id="apps-menu" label="Applications">
+      <item label="Terminal"><action name="Execute"><command>xfce4-terminal</command></action></item>
+      <item label="Files (Thunar)"><action name="Execute"><command>thunar</command></action></item>
+      <item label="Opera GX"><action name="Execute"><command>opera</command></action></item>
+      <item label="Text Editor"><action name="Execute"><command>mousepad</command></action></item>
+      <item label="Calculator"><action name="Execute"><command>galculator</command></action></item>
+      <item label="Image Viewer"><action name="Execute"><command>eog</command></action></item>
+      <item label="Media Player (VLC)"><action name="Execute"><command>vlc</command></action></item>
+      <item label="Screenshot (Flameshot)"><action name="Execute"><command>flameshot gui</command></action></item>
+      <item label="App Launcher (Rofi)"><action name="Execute"><command>rofi -show drun -theme cryogram</command></action></item>
+    </menu>
+    <menu id="security-menu" label="Security Tools">
+      <item label="Wireshark"><action name="Execute"><command>wireshark</command></action></item>
+      <item label="Metasploit"><action name="Execute"><command>xfce4-terminal -e msfconsole</command></action></item>
+      <item label="Nmap"><action name="Execute"><command>xfce4-terminal -e 'nmap --help'</command></action></item>
+      <item label="Hashcat"><action name="Execute"><command>xfce4-terminal -e 'hashcat --help'</command></action></item>
+      <item label="SQLmap"><action name="Execute"><command>xfce4-terminal -e 'sqlmap --help'</command></action></item>
+      <item label="Bettercap"><action name="Execute"><command>xfce4-terminal -e bettercap</command></action></item>
+    </menu>
+    <menu id="gaming-menu" label="Gaming">
+      <item label="Steam"><action name="Execute"><command>steam</command></action></item>
+      <item label="Heroic (Epic/GOG)"><action name="Execute"><command>heroic</command></action></item>
+      <item label="Lutris"><action name="Execute"><command>lutris</command></action></item>
+    </menu>
+    <menu id="system-menu" label="System">
+      <item label="System Monitor"><action name="Execute"><command>xfce4-terminal -e btop</command></action></item>
+      <item label="Disk Manager (GParted)"><action name="Execute"><command>pkexec gparted</command></action></item>
+      <item label="Printers"><action name="Execute"><command>system-config-printer</command></action></item>
+      <item label="Firewall (Gufw)"><action name="Execute"><command>pkexec gufw</command></action></item>
+      <item label="Display Settings"><action name="Execute"><command>arandr</command></action></item>
+      <item label="Bluetooth"><action name="Execute"><command>blueman-manager</command></action></item>
+    </menu>
+    <separator/>
+    <item label="Install Cryogram OS">
+      <action name="Execute"><command>pkexec calamares</command></action>
+    </item>
+    <separator/>
+    <item label="Lock Screen"><action name="Execute"><command>i3lock -c 080c12 -e</command></action></item>
+    <item label="Log Out"><action name="Exit"/></item>
+    <item label="Reboot"><action name="Execute"><command>systemctl reboot</command></action></item>
+    <item label="Power Off"><action name="Execute"><command>systemctl poweroff</command></action></item>
+  </menu>
+</openbox_menu>
+EOF
 
 # --- Picom config ---
 mkdir -p /etc/cryogram
@@ -75,51 +337,187 @@ cat > /etc/cryogram/picom.conf << 'EOF'
 backend = "glx";
 vsync = true;
 shadow = true;
-shadow-radius = 12;
-shadow-offset-x = -5;
-shadow-offset-y = -5;
-shadow-opacity = 0.6;
+shadow-radius = 14;
+shadow-offset-x = -7;
+shadow-offset-y = -7;
+shadow-opacity = 0.55;
 shadow-color = "#000000";
+shadow-exclude = [
+  "class_g = 'tint2'",
+  "class_g = 'dunst'"
+];
 fading = true;
-fade-in-step = 0.05;
-fade-out-step = 0.05;
-fade-delta = 5;
+fade-in-step = 0.06;
+fade-out-step = 0.06;
+fade-delta = 4;
 opacity-rule = [
-  "95:class_g = 'Alacritty'",
+  "94:class_g = 'Alacritty'",
+  "94:class_g = 'xfce4-terminal'",
   "98:class_g = 'cyberden'"
 ];
+blur-method = "dual_kawase";
+blur-strength = 4;
+blur-background = false;
 EOF
 
-# --- Openbox menu ---
-mkdir -p /etc/skel/.config/openbox
-cat > /etc/skel/.config/openbox/menu.xml << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<openbox_menu xmlns="http://openbox.org/3.4/menu">
-  <menu id="root-menu" label="Cryogram">
-    <item label="CyberDen"><action name="Execute"><execute>cyberden</execute></action></item>
-    <separator/>
-    <menu id="apps" label="Applications">
-      <item label="Terminal"><action name="Execute"><execute>xfce4-terminal</execute></action></item>
-      <item label="Files"><action name="Execute"><execute>thunar</execute></action></item>
-      <item label="Opera GX"><action name="Execute"><execute>opera</execute></action></item>
-      <item label="Text Editor"><action name="Execute"><execute>mousepad</execute></action></item>
-      <item label="Calculator"><action name="Execute"><execute>galculator</execute></action></item>
-    </menu>
-    <menu id="security" label="Security Tools">
-      <item label="Wireshark"><action name="Execute"><execute>wireshark</execute></action></item>
-      <item label="Metasploit"><action name="Execute"><execute>xfce4-terminal -e msfconsole</execute></action></item>
-      <item label="Nmap"><action name="Execute"><execute>xfce4-terminal -e nmap</execute></action></item>
-      <item label="Bettercap"><action name="Execute"><execute>xfce4-terminal -e bettercap</execute></action></item>
-    </menu>
-    <separator/>
-    <item label="Install Cryogram OS"><action name="Execute"><execute>pkexec calamares</execute></action></item>
-    <separator/>
-    <item label="Log Out"><action name="Exit"/></item>
-    <item label="Reboot"><action name="Execute"><execute>systemctl reboot</execute></action></item>
-    <item label="Power Off"><action name="Execute"><execute>systemctl poweroff</execute></action></item>
-  </menu>
-</openbox_menu>
+# --- Tint2 panel config (thin top bar: system tray + clock) ---
+mkdir -p /etc/skel/.config/tint2
+cat > /etc/skel/.config/tint2/tint2rc << 'EOF'
+# Cryogram OS — Tint2 panel configuration
+
+#---- Background definitions ----
+rounded = 0
+border_width = 0
+background_color = #080c12 100
+border_color = #00d4ff 0
+
+rounded = 4
+border_width = 1
+background_color = #0d1421 90
+border_color = #1a2840 80
+
+#---- Panel ----
+panel_items = S:C
+panel_size = 100% 28
+panel_margin = 0 0
+panel_padding = 6 0 6
+panel_background_id = 1
+panel_position = top center horizontal
+panel_layer = top
+panel_monitor = all
+autohide = 0
+strut_policy = follow_size
+panel_window_name = tint2
+disable_transparency = 0
+mouse_effects = 1
+font_shadow = 0
+
+#---- Clock ----
+time1_format = %H:%M
+time2_format = %a %d %b
+time1_font = JetBrains Mono Bold 10
+time2_font = JetBrains Mono 8
+clock_font_color = #c9d1d9 90
+clock_padding = 6 0
+clock_background_id = 2
+clock_tooltip = %A %d %B %Y
+
+#---- System tray ----
+systray_padding = 0 3 6
+systray_background_id = 0
+systray_sort = ascending
+systray_icon_size = 18
+systray_icon_asb = 100 0 0
+systray_monitor = primary
+systray_name_filter =
 EOF
+
+# --- Rofi theme (Cryogram dark) ---
+mkdir -p /etc/skel/.config/rofi
+cat > /etc/skel/.config/rofi/cryogram.rasi << 'EOF'
+* {
+    bg:       #080c12;
+    bg-alt:   #0d1421;
+    fg:       #c9d1d9;
+    accent:   #00d4ff;
+    muted:    #4e5d6e;
+    border:   #1a2840;
+    red:      #ff4466;
+
+    background-color: transparent;
+    text-color:       @fg;
+    font:             "JetBrains Mono 11";
+}
+
+window {
+    background-color: @bg;
+    border:           1px solid @border;
+    border-radius:    10px;
+    width:            480px;
+    padding:          8px;
+}
+
+mainbox {
+    background-color: transparent;
+    spacing:          8px;
+}
+
+inputbar {
+    background-color: @bg-alt;
+    border:           1px solid @border;
+    border-radius:    7px;
+    padding:          8px 12px;
+    spacing:          8px;
+    children:         [prompt, entry];
+}
+
+prompt {
+    text-color: @accent;
+    font:       "JetBrains Mono Bold 11";
+}
+
+entry {
+    text-color:        @fg;
+    placeholder:       "Type to search…";
+    placeholder-color: @muted;
+}
+
+listview {
+    background-color: transparent;
+    lines:            8;
+    spacing:          2px;
+}
+
+element {
+    background-color: transparent;
+    border-radius:    6px;
+    padding:          8px 12px;
+    spacing:          10px;
+    orientation:      horizontal;
+}
+
+element normal.normal  { background-color: transparent; text-color: @fg; }
+element selected.normal { background-color: @bg-alt; border: 1px solid @accent; text-color: @accent; }
+element normal.urgent  { text-color: @red; }
+
+element-icon { size: 20px; }
+element-text { vertical-align: 0.5; }
+EOF
+
+# --- Volume OSD script ---
+cat > /usr/local/bin/cryogram-volume << 'EOF'
+#!/bin/bash
+case "$1" in
+  up)   pactl set-sink-volume @DEFAULT_SINK@ +5% ;;
+  down) pactl set-sink-volume @DEFAULT_SINK@ -5% ;;
+  mute) pactl set-sink-mute @DEFAULT_SINK@ toggle ;;
+esac
+VOL=$(pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null | grep -oP '\d+(?=%)' | head -1)
+MUTED=$(pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null | grep -c 'yes' || true)
+if [ "${MUTED}" = "1" ]; then
+  dunstify -a "Volume" -i audio-volume-muted "Muted" "" -r 9993 -u low -t 1500
+else
+  VOL=${VOL:-0}
+  dunstify -a "Volume" -i audio-volume-high "Volume" "${VOL}%" \
+    -h "int:value:${VOL}" -r 9993 -u low -t 1500
+fi
+EOF
+chmod +x /usr/local/bin/cryogram-volume
+
+# --- Brightness OSD script ---
+cat > /usr/local/bin/cryogram-brightness << 'EOF'
+#!/bin/bash
+case "$1" in
+  up)   brightnessctl set 5%+ ;;
+  down) brightnessctl set 5%- ;;
+esac
+BRIGHT=$(brightnessctl get 2>/dev/null || echo 100)
+MAX=$(brightnessctl max 2>/dev/null || echo 100)
+PCT=$(( BRIGHT * 100 / MAX ))
+dunstify -a "Brightness" -i display-brightness "Brightness" "${PCT}%" \
+  -h "int:value:${PCT}" -r 9994 -u low -t 1500
+EOF
+chmod +x /usr/local/bin/cryogram-brightness
 
 # --- GTK dark theme ---
 mkdir -p /etc/skel/.config/gtk-3.0
@@ -127,11 +525,10 @@ cat > /etc/skel/.config/gtk-3.0/settings.ini << 'EOF'
 [Settings]
 gtk-theme-name=Arc-Dark
 gtk-icon-theme-name=Papirus-Dark
-gtk-font-name=JetBrains Mono 10
+gtk-font-name=Inter 10
 gtk-cursor-theme-name=Adwaita
 gtk-cursor-theme-size=24
 gtk-toolbar-style=GTK_TOOLBAR_ICONS
-gtk-toolbar-icon-size=GTK_ICON_SIZE_SMALL_TOOLBAR
 gtk-button-images=0
 gtk-menu-images=1
 gtk-enable-event-sounds=1
@@ -143,25 +540,47 @@ gtk-xft-rgba=rgb
 gtk-application-prefer-dark-theme=1
 EOF
 
-cat > /etc/skel/.config/gtk-2.0/gtkrc 2>/dev/null || true
 mkdir -p /etc/skel/.config/gtk-2.0
 cat > /etc/skel/.config/gtk-2.0/gtkrc << 'EOF'
 gtk-theme-name="Arc-Dark"
 gtk-icon-theme-name="Papirus-Dark"
-gtk-font-name="JetBrains Mono 10"
+gtk-font-name="Inter 10"
 gtk-cursor-theme-name="Adwaita"
+EOF
+
+# --- Qt theming ---
+mkdir -p /etc/skel/.config/qt5ct
+cat > /etc/skel/.config/qt5ct/qt5ct.conf << 'EOF'
+[Appearance]
+color_scheme_path=/usr/share/qt5ct/colors/darker.conf
+custom_palette=false
+icon_theme=Papirus-Dark
+standard_dialogs=default
+style=Adwaita-Dark
+
+[Fonts]
+fixed=@Variant(\0\0\0@\0\0\0\x12\0J\0e\0t\0B\0r\0a\0i\0n\0s\0 \0M\0o\0n\0o@$\0\0\0\0\0\0\xff\xff\xff\xff\x5\x1\0\x32\x10)
+general=@Variant(\0\0\0@\0\0\0\n\0I\0n\0t\0e\0r@$\0\0\0\0\0\0\xff\xff\xff\xff\x5\x1\0\x32\x10)
+EOF
+
+# --- QT platform theme env (system-wide) ---
+cat > /etc/profile.d/cryogram-qt.sh << 'EOF'
+export QT_QPA_PLATFORMTHEME=qt5ct
+export QT_AUTO_SCREEN_SCALE_FACTOR=1
 EOF
 
 # --- Shell setup (.bashrc) ---
 cat >> /etc/skel/.bashrc << 'EOF'
 
-# Cryogram OS
+# ── Cryogram OS ──────────────────────────────────────────────────────────────
 export HISTSIZE=50000
 export HISTFILESIZE=100000
 export HISTCONTROL=ignoredups:erasedups
 shopt -s histappend
 
-export PATH="$HOME/.cargo/bin:/usr/local/go/bin:$PATH"
+export PATH="$HOME/.cargo/bin:/usr/local/go/bin:$HOME/.local/bin:$PATH"
+export GOPATH="$HOME/go"
+export QT_QPA_PLATFORMTHEME=qt5ct
 
 # Aliases
 alias ll='ls -lahF --color=auto'
@@ -171,8 +590,11 @@ alias ip='ip --color=auto'
 alias diff='diff --color=auto'
 alias nmap='nmap --reason'
 alias python='python3'
+alias update='sudo apt update && sudo apt upgrade -y'
+alias ports='ss -tulpn'
+alias myip='curl -s ifconfig.me'
 
-# Cryogram prompt
+# Cryogram prompt (Kali-style)
 CYAN='\[\033[0;36m\]'
 GREEN='\[\033[0;32m\]'
 RED='\[\033[0;31m\]'
@@ -182,9 +604,9 @@ PS1="${CYAN}┌──${GREEN}(${BOLD}\u${RESET}${GREEN}㉿cryogram${GREEN})${CYA
 ${CYAN}└─${RED}\$${RESET} "
 EOF
 
-# --- Profile.d PATH additions ---
+# --- Profile PATH ---
 cat > /etc/profile.d/cryogram-paths.sh << 'EOF'
-export PATH="/usr/local/go/bin:$HOME/.cargo/bin:$PATH"
+export PATH="/usr/local/go/bin:$HOME/.cargo/bin:$HOME/.local/bin:$PATH"
 export GOPATH="$HOME/go"
 EOF
 
@@ -211,12 +633,15 @@ ff02::2     ip6-allrouters
 EOF
 
 # --- Enable services ---
-systemctl enable lightdm 2>/dev/null || true
+systemctl enable lightdm       2>/dev/null || true
 systemctl enable NetworkManager 2>/dev/null || true
-systemctl enable bluetooth 2>/dev/null || true
+systemctl enable bluetooth     2>/dev/null || true
+systemctl enable cups          2>/dev/null || true
+systemctl enable tlp           2>/dev/null || true
 
-# --- Disable services that waste memory ---
-systemctl disable apt-daily.timer 2>/dev/null || true
+# --- Disable services that waste resources ---
+systemctl disable apt-daily.timer         2>/dev/null || true
 systemctl disable apt-daily-upgrade.timer 2>/dev/null || true
+systemctl disable ModemManager            2>/dev/null || true
 
 echo "System configuration complete."
