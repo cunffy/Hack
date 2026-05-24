@@ -11,8 +11,10 @@ export interface AppWindow {
   width: number
   height: number
   minimized: boolean
+  maximized: boolean
   focused: boolean
   zIndex: number
+  prevBounds?: { x: number; y: number; width: number; height: number }
 }
 
 interface WindowStore {
@@ -25,6 +27,7 @@ interface WindowStore {
   resizeWindow(id: string, width: number, height: number): void
   minimizeWindow(id: string): void
   restoreWindow(id: string): void
+  toggleMaximize(id: string): void
 }
 
 const APP_META: Record<AppId, { title: string; width: number; height: number }> = {
@@ -69,6 +72,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
           width: meta.width,
           height: meta.height,
           minimized: false,
+          maximized: false,
           focused: true,
           zIndex: z,
         },
@@ -112,6 +116,32 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     set((s) => ({
       nextZ: s.nextZ + 1,
       windows: s.windows.map((w) => w.id === id ? { ...w, minimized: false, focused: true, zIndex: z } : w),
+    }))
+  },
+
+  toggleMaximize(id) {
+    const z = get().nextZ
+    // Content area: full width, full height minus menubar (28px) and dock clearance (88px)
+    const W = typeof window !== 'undefined' ? window.innerWidth : 1440
+    const H = typeof window !== 'undefined' ? window.innerHeight - 28 : 872
+    set((s) => ({
+      nextZ: s.nextZ + 1,
+      windows: s.windows.map((w) => {
+        if (w.id !== id) return w
+        if (w.maximized) {
+          return { ...w, maximized: false, zIndex: z, ...(w.prevBounds ?? {}) }
+        }
+        return {
+          ...w,
+          maximized: true,
+          zIndex: z,
+          prevBounds: { x: w.x, y: w.y, width: w.width, height: w.height },
+          x: 0,
+          y: 0,
+          width: W,
+          height: H,
+        }
+      }),
     }))
   },
 }))

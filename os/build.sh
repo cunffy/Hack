@@ -18,7 +18,7 @@ echo ""
 echo "╔══════════════════════════════════════════╗"
 echo "║        CRYOGRAM OS  BUILD  SYSTEM        ║"
 echo "║           Version ${VERSION} (${CODENAME})          ║"
-echo "║         build.sh rev 2026-05-24-v6       ║"
+echo "║         build.sh rev 2026-05-24-v7       ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
 
@@ -565,17 +565,31 @@ cat > "$HOOKS_DIR/0520-opera-gx.hook.chroot" << 'HOOKEOF'
 set +e
 echo "[opera-gx] Installing Opera GX browser..."
 
-# Add Opera GX signing key and repo
+# Add Opera signing key (shared by Opera and Opera GX)
 curl -fsSL https://deb.opera.com/archive.key \
   | gpg --dearmor -o /usr/share/keyrings/opera-archive-keyring.gpg 2>/dev/null
+
+# Try Opera GX repo first, fall back to Opera stable repo
 echo "deb [signed-by=/usr/share/keyrings/opera-archive-keyring.gpg arch=amd64] \
   https://deb.opera.com/opera-gx-stable/ stable non-free" \
   > /etc/apt/sources.list.d/opera-gx.list
+echo "deb [signed-by=/usr/share/keyrings/opera-archive-keyring.gpg arch=amd64] \
+  https://deb.opera.com/opera-stable/ stable non-free" \
+  >> /etc/apt/sources.list.d/opera-gx.list
 
-apt-get update -qq 2>/dev/null && \
-  DEBIAN_FRONTEND=noninteractive apt-get install -y opera-gx 2>/dev/null && \
-  echo "[opera-gx] Installed successfully." || \
-  echo "[opera-gx] Install failed — will need manual install after boot."
+apt-get update -qq 2>/dev/null
+
+# Try opera-gx first, fall back to opera
+if DEBIAN_FRONTEND=noninteractive apt-get install -y opera-gx 2>/dev/null; then
+  echo "[opera-gx] opera-gx installed."
+elif DEBIAN_FRONTEND=noninteractive apt-get install -y opera 2>/dev/null; then
+  echo "[opera-gx] Fell back to opera (opera-gx pkg unavailable in this region)."
+  # Write a post-install reminder to cryogram-tools-update
+  echo "# Run: sudo apt install opera-gx  (after enabling Opera GX repo)" \
+    >> /usr/local/bin/cryogram-tools-update
+else
+  echo "[opera-gx] Install failed — run 'sudo apt install opera-gx' after boot."
+fi
 
 exit 0
 HOOKEOF
