@@ -24,13 +24,6 @@ RUN apt-get update && apt-get install -y \
     debootstrap \
     cpio \
     dpkg-dev \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Node.js 20 LTS — needed to pre-build the Cryogram Electron app
-# inside the Docker container (avoids fragile npm/node-gyp inside the chroot)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build

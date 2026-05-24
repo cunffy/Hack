@@ -11,6 +11,9 @@ OUTPUT_DIR="/build/output"
 LB_DIR="/build/live-build"
 ASSETS_DIR="/build/assets"
 
+# Print which command failed, for diagnosis
+trap 'echo ""; echo "BUILD FAILED at line $LINENO (exit code $?)"; echo ""; exit 1' ERR
+
 echo ""
 echo "╔══════════════════════════════════════════╗"
 echo "║        CRYOGRAM OS  BUILD  SYSTEM        ║"
@@ -45,77 +48,56 @@ fi
 
 bash "$THEME_DIR/generate-assets.sh"
 
-# ---- 2. Pre-build Cryogram app in Docker container ----
-# Building inside the live-build chroot requires downloading Electron + compiling
-# C++ native addons in a restricted environment. We build here in Docker (full
-# tools, reliable network) and stage the output into includes.chroot.
-echo "[2/6] Building Cryogram app..."
+# ---- 2. Stage pre-built Cryogram app into chroot ----
+# The app is already built on the host (out/ exists in the source tree).
+# The bind-mount is :ro which blocks writes — we read from it and write
+# into the container's own filesystem (includes.chroot).
+echo "[2/6] Staging Cryogram app into chroot..."
 
-# Guard: npm must be present (Dockerfile recently added Node.js 20).
-# If this errors, the image must be rebuilt: docker compose build --no-cache
-if ! command -v npm &>/dev/null; then
-  echo ""
-  echo "ERROR: npm not found. The Dockerfile was updated to add Node.js 20."
-  echo "Rebuild the image from scratch:"
-  echo "  docker compose down"
-  echo "  docker compose build --no-cache"
-  echo "  docker compose up"
+SRC="/build/cryogram-src"
+
+if [ ! -d "$SRC" ]; then
+  echo "ERROR: $SRC not found — docker-compose bind-mount missing."
   exit 1
 fi
 
-if [ ! -d "/build/cryogram-src" ]; then
-  echo "ERROR: /build/cryogram-src not found (docker-compose bind-mount missing)."
+if [ ! -d "$SRC/out" ]; then
+  echo "ERROR: $SRC/out not found."
+  echo "The app must be built before building the ISO."
+  echo "Run on the host machine first:"
+  echo "  cd ~/cryogram && npm install && npm run build"
   exit 1
 fi
 
-# The bind-mount is :ro (read-only), so npm cannot write node_modules into it.
-# Copy source to a writable temp workspace first.
-BUILD_WS="/tmp/cryogram-build"
-echo "  Copying source to writable workspace..."
-rm -rf "$BUILD_WS"
-mkdir -p "$BUILD_WS"
-cp -r /build/cryogram-src/. "$BUILD_WS/"
-# Remove any stale build artifacts that may have come from the host
-rm -rf "$BUILD_WS/node_modules" "$BUILD_WS/out" "$BUILD_WS/dist"
-cd "$BUILD_WS"
-
-echo "  Installing npm dependencies (includes ~80 MB Electron binary)..."
-npm install
-echo "  npm install done."
-
-echo "  Rebuilding native modules for Electron's ABI..."
-# node-pty and better-sqlite3 are C++ addons; they must be compiled against
-# Electron's embedded Node.js headers, not the system Node.js ABI.
-npx @electron/rebuild -f -w node-pty -w better-sqlite3 2>/dev/null || \
-  npx electron-rebuild   -f -w node-pty -w better-sqlite3 2>/dev/null || \
-  echo "  WARNING: electron-rebuild unavailable; native modules may crash at runtime."
-
-echo "  Building renderer / main / preload via electron-vite..."
-npm run build
-echo "  Build done: $(du -sh out/ | cut -f1)"
-
-# Stage built files — live-build copies includes.chroot verbatim into the image,
-# so these land at /opt/cryogram on the installed system.
 CRYOGRAM_DEST="$LB_DIR/config/includes.chroot/opt/cryogram"
-mkdir -p "$CRYOGRAM_DEST"
-
-cp -r out/ "$CRYOGRAM_DEST/"
-cp package.json "$CRYOGRAM_DEST/"
-[ -d scripts ]   && cp -r scripts/   "$CRYOGRAM_DEST/"
-[ -d resources ] && cp -r resources/ "$CRYOGRAM_DEST/"
-
-# Only stage the Electron binary + native deps.
-# Pure-JS deps (axios, zustand, framer-motion …) are rolled into out/ by
-# electron-vite's rollup bundler and don't need to be in node_modules.
 mkdir -p "$CRYOGRAM_DEST/node_modules"
-for dep in electron node-pty better-sqlite3; do
-  [ -d "node_modules/$dep" ] && cp -r "node_modules/$dep" "$CRYOGRAM_DEST/node_modules/"
-done
-mkdir -p "$CRYOGRAM_DEST/node_modules/.bin"
-[ -e "node_modules/.bin/electron" ] && \
-  cp -P "node_modules/.bin/electron" "$CRYOGRAM_DEST/node_modules/.bin/" 2>/dev/null || true
 
-echo "  Staged: $(du -sh "$CRYOGRAM_DEST" | cut -f1) into chroot."
+# Copy pre-built electron-vite output (main, preload, renderer)
+cp -r "$SRC/out/"        "$CRYOGRAM_DEST/"
+cp    "$SRC/package.json" "$CRYOGRAM_DEST/"
+
+# Copy security scripts (Python)
+[ -d "$SRC/scripts" ]   && cp -r "$SRC/scripts/"   "$CRYOGRAM_DEST/"
+[ -d "$SRC/resources" ] && cp -r "$SRC/resources/"  "$CRYOGRAM_DEST/"
+
+# Copy Electron binary and the two native C++ addons.
+# Pure-JS deps (axios, zustand, framer-motion, etc.) are already bundled into
+# out/ by electron-vite's rollup step and don't need to be in node_modules.
+for dep in electron node-pty better-sqlite3; do
+  if [ -d "$SRC/node_modules/$dep" ]; then
+    cp -r "$SRC/node_modules/$dep" "$CRYOGRAM_DEST/node_modules/"
+    echo "  Copied $dep"
+  else
+    echo "  WARNING: $SRC/node_modules/$dep not found — run npm install first"
+  fi
+done
+
+# .bin/electron wrapper symlink
+mkdir -p "$CRYOGRAM_DEST/node_modules/.bin"
+[ -e "$SRC/node_modules/.bin/electron" ] && \
+  cp -P "$SRC/node_modules/.bin/electron" "$CRYOGRAM_DEST/node_modules/.bin/" 2>/dev/null || true
+
+echo "  Staged: $(du -sh "$CRYOGRAM_DEST" | cut -f1)"
 
 # ---- 3. Configure live-build ----
 echo "[3/6] Configuring live-build..."
@@ -138,7 +120,7 @@ fi
 echo "[5/6] Building Cryogram OS ISO (this takes 30-90 minutes)..."
 bash auto/build
 
-# Always copy build.log to the host-mounted output dir for post-mortem reading
+# Copy build.log to host-mounted output dir so it's readable after the run
 cp "$LB_DIR/build.log" "$OUTPUT_DIR/build.log" 2>/dev/null || true
 
 # ---- 6. Rename and copy output ----
@@ -148,13 +130,11 @@ if [ -z "$ISO_SRC" ]; then
   echo ""
   echo "ERROR: No ISO file found after build."
   echo ""
-  echo "=== Files in $LB_DIR (top level): ==="
+  echo "=== Top-level files in $LB_DIR: ==="
   ls -lah "$LB_DIR/" 2>/dev/null || true
   echo ""
   echo "=== Last 80 lines of build.log: ==="
   tail -80 "$LB_DIR/build.log" 2>/dev/null || echo "(no build.log)"
-  echo ""
-  echo "Full build.log has been copied to output/build.log for review."
   exit 1
 fi
 
