@@ -28,20 +28,16 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /build
 
-# Copy live-build configuration
-COPY live-build/ /build/live-build/
-
 # Copy OS assets (wallpaper, icon, GRUB background)
 COPY assets/ /build/assets/
 
 # Copy Calamares config
 COPY calamares/ /build/calamares/
 
-# Make hook scripts executable
-RUN find /build/live-build/config/hooks -name "*.chroot" -exec chmod +x {} \;
-RUN find /build/live-build/auto -type f -exec chmod +x {} \;
-
 # Entry point: run the build
+# live-build/ is mounted as a volume at runtime (see docker-compose.yml)
+# so it is NOT copied here — changes to hooks/package-lists/config take
+# effect immediately without rebuilding the Docker image.
 COPY build.sh /build/build.sh
 RUN chmod +x /build/build.sh
 CMD ["/build/build.sh"]

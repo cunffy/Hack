@@ -9,6 +9,9 @@ services:
     container_name: cryogram-build
     privileged: true        # Required for loopback mounts during ISO creation
     volumes:
+      # live-build config — mounted directly so package list / hook changes
+      # are picked up without rebuilding the Docker image
+      - ./live-build:/build/live-build
       # Mount Cryogram source into the build
       - ../:/build/cryogram-src:ro
       # Output directory — ISO ends up here on your host

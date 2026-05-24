@@ -23,6 +23,10 @@ echo ""
 
 mkdir -p "$OUTPUT_DIR"
 
+# Ensure hook scripts are executable (volume mounts may drop exec bit)
+find "$LB_DIR/config/hooks" -name "*.chroot" -exec chmod +x {} \; 2>/dev/null || true
+find "$LB_DIR/auto" -type f -exec chmod +x {} \; 2>/dev/null || true
+
 # ---- 1. Generate graphic assets ----
 echo "[1/6] Generating GRUB theme and wallpaper assets..."
 THEME_DIR="$LB_DIR/config/includes.chroot/usr/share/grub/themes/cryogram"
