@@ -280,6 +280,59 @@ ffmpeg
 mesa-utils-extra
 PKGEOF
 
+cat > "$PKG_LISTS/base.list.chroot" << 'PKGEOF'
+# Base system — core utilities
+apt-transport-https
+ca-certificates
+curl
+wget
+gnupg
+lsb-release
+sudo
+bash-completion
+man-db
+less
+vim
+nano
+htop
+btop
+lsof
+strace
+file
+tree
+unzip
+zip
+p7zip-full
+rsync
+openssh-client
+openssh-server
+net-tools
+iproute2
+iputils-ping
+dnsutils
+traceroute
+whois
+socat
+git
+locales
+tzdata
+keyboard-configuration
+console-setup
+fonts-jetbrains-mono
+fonts-noto
+# Firmware — broad hardware coverage
+firmware-linux
+firmware-linux-free
+firmware-linux-nonfree
+# WiFi firmware — covers Intel, Realtek, Atheros, Broadcom adapters
+firmware-iwlwifi
+firmware-realtek
+firmware-atheros
+firmware-brcm80211
+amd64-microcode
+intel-microcode
+PKGEOF
+
 echo "[build] Package lists written."
 
 # Write hook scripts from here so stale volume-mounted copies can't break the build.
@@ -478,6 +531,39 @@ exit 0
 HOOKEOF
 chmod +x "$HOOKS_DIR/0510-apply-skel.hook.chroot"
 echo "[build] Skel apply hook written."
+
+cat > "$HOOKS_DIR/0512-hardware-support.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set +e
+
+# Enable pipewire/wireplumber globally so it starts for every user on login
+echo "[hw] Enabling pipewire user services globally..."
+systemctl --global enable pipewire.socket        2>/dev/null || true
+systemctl --global enable pipewire-pulse.socket  2>/dev/null || true
+systemctl --global enable wireplumber.service    2>/dev/null || true
+
+# Backlight udev rule — allows cryogram user to control brightness
+# without sudo (brightnessctl needs write access to the sysfs node)
+echo "[hw] Writing backlight udev rule..."
+cat > /etc/udev/rules.d/90-backlight.rules << 'EOF'
+ACTION=="add", SUBSYSTEM=="backlight", \
+  RUN+="/bin/chmod 0666 /sys/class/backlight/%k/brightness", \
+  RUN+="/bin/chmod 0666 /sys/class/backlight/%k/actual_brightness"
+EOF
+
+# Also grant via group membership (belt and suspenders)
+groupadd -f video 2>/dev/null || true
+usermod -aG video cryogram 2>/dev/null || true
+
+# Input group for libinput-gestures
+groupadd -f input 2>/dev/null || true
+usermod -aG input cryogram 2>/dev/null || true
+
+echo "[hw] Hardware support configured."
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0512-hardware-support.hook.chroot"
+echo "[build] Hardware support hook written."
 
 # ---- 1. Generate graphic assets ----
 echo "[1/6] Generating GRUB theme and wallpaper assets..."
