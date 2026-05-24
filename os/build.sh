@@ -463,6 +463,22 @@ HOOKEOF
 chmod +x "$HOOKS_DIR/0401-calamares-config.hook.chroot"
 echo "[build] Calamares config hook written."
 
+# Fix skel timing: write a hook that copies /etc/skel to /home/cryogram
+# AFTER all other hooks have populated skel. The configure-system hook
+# creates the user early (before skel is filled), so the home dir misses
+# the openbox autostart, GTK theme, and other per-user configs.
+cat > "$HOOKS_DIR/0510-apply-skel.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set +e
+echo "[skel] Applying /etc/skel to /home/cryogram..."
+rsync -a --ignore-existing /etc/skel/. /home/cryogram/
+chown -R cryogram:cryogram /home/cryogram/
+echo "[skel] Done."
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0510-apply-skel.hook.chroot"
+echo "[build] Skel apply hook written."
+
 # ---- 1. Generate graphic assets ----
 echo "[1/6] Generating GRUB theme and wallpaper assets..."
 THEME_DIR="$LB_DIR/config/includes.chroot/usr/share/grub/themes/cryogram"
