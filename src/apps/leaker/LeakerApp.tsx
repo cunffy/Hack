@@ -1,8 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { MonitorDashboard } from './MonitorDashboard'
 import { BreachList } from './BreachList'
 
 type Tab = 'dashboard' | 'breaches'
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'dashboard', label: 'Monitor' },
+  { id: 'breaches', label: 'Breach Feed' },
+]
 
 export default function LeakerApp() {
   const [tab, setTab] = useState<Tab>('dashboard')
@@ -20,9 +26,7 @@ export default function LeakerApp() {
     setBreaches(b)
   }, [])
 
-  useEffect(() => {
-    loadData()
-  }, [loadData])
+  useEffect(() => { loadData() }, [loadData])
 
   const refresh = async () => {
     setRefreshing(true)
@@ -53,14 +57,28 @@ export default function LeakerApp() {
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-den-border shrink-0">
+      <div
+        className="flex items-center justify-between px-4 py-2.5 shrink-0"
+        style={{ borderBottom: '1px solid rgba(26,40,64,0.7)' }}
+      >
         <div className="flex items-center gap-3">
-          <div className="flex gap-0.5">
-            <div className="w-2 h-2 rounded-full bg-den-red animate-pulse" />
-          </div>
+          <motion.div
+            className="w-2 h-2 rounded-full bg-den-red"
+            animate={{ opacity: [1, 0.3, 1], scale: [1, 1.3, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            style={{ boxShadow: '0 0 6px rgba(255,68,102,0.7)' }}
+          />
           <span className="text-xs text-den-muted">
             {targets.length} monitored · {breaches.length} total breaches
-            {newBreaches > 0 && <span className="text-den-red ml-2 font-bold">{newBreaches} new</span>}
+            {newBreaches > 0 && (
+              <motion.span
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                className="text-den-red ml-2 font-bold"
+              >
+                {newBreaches} new
+              </motion.span>
+            )}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -70,42 +88,79 @@ export default function LeakerApp() {
             </span>
           )}
           <button className="btn text-xs py-1" onClick={refresh} disabled={refreshing}>
-            {refreshing ? 'Checking...' : 'Refresh Now'}
+            {refreshing ? (
+              <span className="flex items-center gap-1.5">
+                <motion.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
+                  className="inline-block"
+                >
+                  ⟳
+                </motion.span>
+                Checking…
+              </span>
+            ) : 'Refresh Now'}
           </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-den-border shrink-0">
-        {([['dashboard', 'Monitor'], ['breaches', 'Breach Feed']] as [Tab, string][]).map(([id, label]) => (
+      <div
+        className="flex shrink-0 relative"
+        style={{ borderBottom: '1px solid rgba(26,40,64,0.7)' }}
+      >
+        {TABS.map(({ id, label }) => (
           <button
             key={id}
             onClick={() => setTab(id)}
-            className={`px-5 py-2 text-xs font-medium transition-colors border-b-2 -mb-px ${
-              tab === id
-                ? 'border-den-red text-den-red'
-                : 'border-transparent text-den-muted hover:text-den-text'
-            }`}
+            className="relative px-5 py-2.5 text-xs font-medium transition-colors"
+            style={{ color: tab === id ? '#ff4466' : '#4e5d6e' }}
           >
             {label}
             {id === 'breaches' && newBreaches > 0 && (
-              <span className="ml-1.5 badge bg-den-red/20 text-den-red">{newBreaches}</span>
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="ml-1.5 badge bg-den-red/20 text-den-red"
+              >
+                {newBreaches}
+              </motion.span>
+            )}
+            {tab === id && (
+              <motion.div
+                layoutId="leaker-tab-indicator"
+                className="absolute bottom-0 left-0 right-0 h-px"
+                style={{ background: '#ff4466', boxShadow: '0 0 6px rgba(255,68,102,0.6)' }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              />
             )}
           </button>
         ))}
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        {tab === 'dashboard' ? (
-          <MonitorDashboard
-            targets={targets}
-            breaches={breaches}
-            onAdd={addTarget}
-            onRemove={removeTarget}
-          />
-        ) : (
-          <BreachList breaches={breaches} targets={targets} />
-        )}
+      {/* Content */}
+      <div className="flex-1 overflow-hidden relative">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={tab}
+            className="absolute inset-0"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+          >
+            {tab === 'dashboard' ? (
+              <MonitorDashboard
+                targets={targets}
+                breaches={breaches}
+                onAdd={addTarget}
+                onRemove={removeTarget}
+              />
+            ) : (
+              <BreachList breaches={breaches} targets={targets} />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   )

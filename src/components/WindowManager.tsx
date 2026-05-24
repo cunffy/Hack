@@ -1,3 +1,4 @@
+import { AnimatePresence } from 'framer-motion'
 import { useWindowStore } from '../store/windowStore'
 import { AppWindow } from './Window'
 
@@ -6,9 +7,11 @@ export function WindowManager() {
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {windows.map((win) => (
-        <AppWindow key={win.id} window={win} />
-      ))}
+      <AnimatePresence>
+        {windows.map((win) => (
+          <AppWindow key={win.id} window={win} />
+        ))}
+      </AnimatePresence>
     </div>
   )
 }
