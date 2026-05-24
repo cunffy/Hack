@@ -24,6 +24,13 @@ RUN apt-get update && apt-get install -y \
     debootstrap \
     cpio \
     dpkg-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 20 LTS — needed to pre-build the Cryogram Electron app
+# inside the Docker container (avoids fragile npm/node-gyp inside the chroot)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
@@ -36,9 +43,6 @@ COPY assets/ /build/assets/
 
 # Copy Calamares config
 COPY calamares/ /build/calamares/
-
-# Copy Cryogram source (bind-mounted from host — see docker-compose.yml)
-# /build/cryogram-src is mounted at runtime
 
 # Make hook scripts executable
 RUN find /build/live-build/config/hooks -name "*.chroot" -exec chmod +x {} \;
