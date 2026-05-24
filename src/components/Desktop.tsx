@@ -90,76 +90,116 @@ export function Desktop() {
   const openApp = useWindowStore((s) => s.openApp)
 
   return (
-    <div className="absolute inset-0 p-10 flex flex-col">
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="flex flex-wrap gap-5"
+    <div className="absolute inset-0 flex flex-col">
+      {/* Watermark */}
+      <div
+        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
+        style={{ opacity: 0.018 }}
       >
-        {APPS.map((app) => (
-          <motion.button
-            key={app.id}
-            variants={item}
-            onClick={() => openApp(app.id)}
-            whileHover={{ y: -4, scale: 1.04 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-            className="group flex flex-col items-center gap-2.5 p-4 w-[88px] rounded-2xl cursor-default relative outline-none"
-            style={{
-              background: 'rgba(13,20,33,0.55)',
-              border: '1px solid rgba(26,40,64,0.7)',
-              backdropFilter: 'blur(10px)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.border = `1px solid ${app.color}55`
-              e.currentTarget.style.boxShadow = `0 8px 32px ${app.glow}, 0 0 0 1px ${app.color}22`
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.border = '1px solid rgba(26,40,64,0.7)'
-              e.currentTarget.style.boxShadow = ''
-            }}
-          >
-            {/* Icon container */}
-            <div
-              className="w-14 h-14 rounded-xl flex items-center justify-center transition-all"
+        <div
+          className="text-[22vw] font-black tracking-[0.15em]"
+          style={{ fontFamily: '"JetBrains Mono", monospace', color: '#00d4ff' }}
+        >
+          CG
+        </div>
+      </div>
+
+      {/* App grid */}
+      <div className="p-8 pt-10">
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="flex flex-wrap gap-4"
+        >
+          {APPS.map((app) => (
+            <motion.button
+              key={app.id}
+              variants={item}
+              onClick={() => openApp(app.id)}
+              whileHover={{ y: -5, scale: 1.06 }}
+              whileTap={{ scale: 0.94 }}
+              className="group flex flex-col items-center gap-2 p-3.5 w-24 rounded-2xl cursor-default relative outline-none transition-all"
               style={{
-                background: `radial-gradient(ellipse at 40% 35%, ${app.color}18, rgba(13,20,33,0.9))`,
-                border: `1px solid ${app.color}30`,
+                background: 'rgba(13,20,33,0.5)',
+                border: '1px solid rgba(26,40,64,0.65)',
+                backdropFilter: 'blur(12px)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.border = `1px solid ${app.color}50`
+                e.currentTarget.style.background = `rgba(13,20,33,0.75)`
+                e.currentTarget.style.boxShadow = `0 12px 40px ${app.glow}, 0 0 0 1px ${app.color}18`
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.border = '1px solid rgba(26,40,64,0.65)'
+                e.currentTarget.style.background = 'rgba(13,20,33,0.5)'
+                e.currentTarget.style.boxShadow = ''
               }}
             >
-              <div style={{ color: app.color }}>{app.icon}</div>
-            </div>
+              {/* Icon */}
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all relative"
+                style={{
+                  background: `radial-gradient(ellipse at 35% 30%, ${app.color}22, rgba(8,12,18,0.95))`,
+                  border: `1px solid ${app.color}28`,
+                  boxShadow: `0 4px 20px ${app.color}10`,
+                }}
+              >
+                <div style={{ color: app.color }}>{app.icon}</div>
+                {/* Inner glow on hover */}
+                <div
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ background: `radial-gradient(ellipse at 50% 30%, ${app.color}15, transparent 70%)` }}
+                />
+              </div>
 
-            {/* Label */}
-            <span
-              className="text-[11px] font-semibold text-center leading-tight text-cryo-text"
-              style={{ whiteSpace: 'pre-line' }}
-            >
-              {app.label}
-            </span>
-          </motion.button>
-        ))}
-      </motion.div>
+              {/* Label */}
+              <span
+                className="text-[11px] font-medium text-center leading-tight"
+                style={{ color: '#c9d1d9', whiteSpace: 'pre-line' }}
+              >
+                {app.label}
+              </span>
 
-      {/* Bottom status */}
+              {/* Description tooltip on hover */}
+              <motion.div
+                className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded text-xs whitespace-nowrap pointer-events-none z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{
+                  background: 'rgba(13,20,33,0.95)',
+                  border: '1px solid rgba(26,40,64,0.8)',
+                  color: '#4e5d6e',
+                }}
+              >
+                {app.description}
+              </motion.div>
+            </motion.button>
+          ))}
+        </motion.div>
+      </div>
+
+      {/* Bottom status bar */}
       <motion.div
-        className="absolute bottom-3 left-10 flex items-center gap-4 text-cryo-muted text-xs"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
+        className="absolute bottom-4 left-8 right-8 flex items-center justify-between"
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.9, duration: 0.5 }}
       >
-        <span className="flex items-center gap-1.5">
-          <motion.span
-            className="w-1.5 h-1.5 rounded-full bg-cryo-green inline-block"
-            animate={{ opacity: [1, 0.3, 1] }}
-            transition={{ duration: 2.2, repeat: Infinity }}
-            style={{ boxShadow: '0 0 5px rgba(0,255,136,0.7)' }}
-          />
-          Systems online
-        </span>
-        <span className="text-cryo-faint">|</span>
-        <span>{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+        <div className="flex items-center gap-4 text-xs" style={{ color: '#4e5d6e' }}>
+          <span className="flex items-center gap-1.5">
+            <motion.span
+              className="w-1.5 h-1.5 rounded-full inline-block"
+              style={{ background: '#00ff88', boxShadow: '0 0 5px rgba(0,255,136,0.7)' }}
+              animate={{ opacity: [1, 0.35, 1] }}
+              transition={{ duration: 2.4, repeat: Infinity }}
+            />
+            All systems operational
+          </span>
+          <span style={{ color: 'rgba(30,45,64,1)' }}>|</span>
+          <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'rgba(26,40,64,0.9)' }}>
+          <span style={{ fontFamily: '"JetBrains Mono", monospace', letterSpacing: '0.15em' }}>CRYOGRAM OS</span>
+        </div>
       </motion.div>
     </div>
   )

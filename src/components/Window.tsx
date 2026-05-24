@@ -67,7 +67,10 @@ export function AppWindow({ window: win }: { window: AppWindowType }) {
         if (!dragRef.current) return
         const dx = ev.clientX - dragRef.current.startX
         const dy = ev.clientY - dragRef.current.startY
-        moveWindow(win.id, dragRef.current.winX + dx, dragRef.current.winY + dy)
+        const TITLE_H = 36
+        const newX = Math.max(-win.width + 80, Math.min(window.innerWidth - 80, dragRef.current.winX + dx))
+        const newY = Math.max(0, Math.min(window.innerHeight - TITLE_H, dragRef.current.winY + dy))
+        moveWindow(win.id, newX, newY)
       }
       const onUp = () => {
         dragRef.current = null

@@ -55,6 +55,37 @@ html, body, #root {
 }
 ::-webkit-scrollbar-thumb:hover { background: rgba(0, 212, 255, 0.3); }
 
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* Range input styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(26,40,64,0.8);
+  height: 4px;
+  border-radius: 2px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #00d4ff;
+  box-shadow: 0 0 8px rgba(0,212,255,0.5);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 14px rgba(0,212,255,0.7);
+}
+input[type="range"]:focus { box-shadow: none; border: none; }
+
 /* ─── Selection ─────────────────────────────────────────────────── */
 ::selection { background: rgba(0, 212, 255, 0.18); }
 

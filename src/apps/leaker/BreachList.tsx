@@ -43,7 +43,8 @@ export function BreachList({ breaches, targets }: Props) {
             const isNew = hoursAgo < 24
 
             return (
-              <div key={b.id} className={`p-3 border-b border-cryo-border hover:bg-cryo-surface/50 transition-colors ${isNew ? 'border-l-2 border-l-den-red' : ''}`}>
+              <div key={b.id} className="p-3 border-b border-cryo-border hover:bg-cryo-surface/50 transition-colors"
+                style={isNew ? { borderLeft: '2px solid #ff4466' } : {}}>
                 <div className="flex items-start justify-between gap-2 mb-1.5">
                   <div className="flex items-center gap-2">
                     {isNew && <span className="badge bg-cryo-red/20 text-cryo-red text-xs">NEW</span>}

@@ -86,7 +86,7 @@ export function HashCracker() {
                   value={m.id}
                   checked={mode === m.id}
                   onChange={() => setMode(m.id)}
-                  className="mt-0.5 accent-den-accent"
+                  className="mt-0.5 accent-cryo-accent"
                 />
                 <div>
                   <div className="text-xs text-cryo-text">{m.label}</div>
@@ -158,7 +158,7 @@ export function HashCracker() {
                     type="checkbox"
                     checked={charsets.includes(c)}
                     onChange={() => toggleCharset(c)}
-                    className="accent-den-accent"
+                    className="accent-cryo-accent"
                   />
                   {c}
                 </label>

@@ -1,63 +1,56 @@
-import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWindowStore } from '../store/windowStore'
 
 const APP_COLORS: Record<string, string> = {
-  terminal: '#00ff88',
-  editor: '#00d4ff',
+  terminal:          '#00ff88',
+  editor:            '#00d4ff',
   'password-tester': '#ffcc00',
-  leaker: '#ff4466',
-  settings: '#bb88ff',
+  leaker:            '#ff4466',
+  settings:          '#bb88ff',
+  files:             '#f59e0b',
+  launcher:          '#34d399',
+  system:            '#818cf8',
 }
 
 export function Taskbar() {
   const { windows, focusWindow, restoreWindow, minimizeWindow } = useWindowStore()
-  const [time, setTime] = useState(new Date())
-
-  useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 1000)
-    return () => clearInterval(t)
-  }, [])
 
   return (
     <div
-      className="flex items-center h-11 px-3 gap-3 shrink-0 relative"
+      className="flex items-center h-10 px-3 gap-2 shrink-0 relative select-none"
       style={{
-        background: 'rgba(8,12,18,0.92)',
+        background: 'rgba(8,12,18,0.93)',
         borderTop: '1px solid rgba(26,40,64,0.7)',
         backdropFilter: 'blur(20px)',
       }}
     >
-      {/* Top gradient line */}
+      {/* Top gradient edge */}
       <div
-        className="absolute inset-x-0 top-0 h-px"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.2) 50%, transparent)' }}
+        className="absolute inset-x-0 top-0 h-px pointer-events-none"
+        style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.18) 50%, transparent)' }}
       />
 
-      {/* Branding pill */}
+      {/* Logo mark */}
       <div
-        className="flex items-center gap-1.5 px-3 h-7 rounded-lg shrink-0 select-none"
-        style={{
-          background: 'rgba(0,212,255,0.06)',
-          border: '1px solid rgba(0,212,255,0.2)',
-        }}
+        className="flex items-center justify-center w-7 h-7 rounded-lg shrink-0"
+        style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.18)' }}
+        title="Cryogram"
       >
         <motion.div
-          className="w-1.5 h-1.5 rounded-full bg-cryo-accent"
-          animate={{ opacity: [1, 0.3, 1] }}
-          transition={{ duration: 2.5, repeat: Infinity }}
-          style={{ boxShadow: '0 0 5px rgba(0,212,255,0.8)' }}
-        />
-        <span
-          className="text-cryo-accent text-xs font-black tracking-widest"
-          style={{ fontFamily: '"JetBrains Mono", monospace' }}
+          animate={{ opacity: [1, 0.4, 1] }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+          className="text-cryo-accent text-sm"
+          style={{ filter: 'drop-shadow(0 0 4px rgba(0,212,255,0.9))' }}
         >
-          CD
-        </span>
+          ⬡
+        </motion.div>
       </div>
 
-      {/* Window buttons */}
-      <div className="flex items-center gap-1.5 flex-1 overflow-hidden">
+      {/* Divider */}
+      <div className="w-px h-5 shrink-0" style={{ background: 'rgba(26,40,64,0.8)' }} />
+
+      {/* Window buttons — scrollable row */}
+      <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto scrollbar-none">
         <AnimatePresence initial={false}>
           {windows.map((win) => {
             const accent = APP_COLORS[win.appId] ?? '#00d4ff'
@@ -65,51 +58,49 @@ export function Taskbar() {
             return (
               <motion.button
                 key={win.id}
-                initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                initial={{ opacity: 0, scale: 0.75, x: -12 }}
                 animate={{ opacity: 1, scale: 1, x: 0 }}
-                exit={{ opacity: 0, scale: 0.8, x: -10 }}
-                transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                exit={{ opacity: 0, scale: 0.75, x: -12 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 28 }}
                 onClick={() => {
                   if (win.minimized) restoreWindow(win.id)
                   else if (win.focused) minimizeWindow(win.id)
                   else focusWindow(win.id)
                 }}
-                className="relative flex items-center gap-1.5 px-2.5 h-7 rounded-lg text-xs shrink-0 transition-colors"
+                className="relative flex items-center gap-1.5 px-2.5 h-7 rounded-lg text-xs shrink-0 transition-all"
                 style={{
                   background: isActive ? `${accent}14` : 'rgba(13,20,33,0.5)',
-                  border: isActive ? `1px solid ${accent}44` : '1px solid rgba(26,40,64,0.6)',
-                  color: isActive ? accent : win.minimized ? 'rgba(78,93,110,0.6)' : '#c9d1d9',
+                  border: isActive ? `1px solid ${accent}40` : '1px solid rgba(26,40,64,0.55)',
+                  color: isActive ? accent : win.minimized ? 'rgba(78,93,110,0.55)' : '#c9d1d9',
+                  maxWidth: 160,
+                  boxShadow: isActive ? `0 0 12px ${accent}18` : 'none',
                 }}
               >
-                {/* Active dot */}
                 <span
-                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  className="w-1.5 h-1.5 rounded-full shrink-0 transition-all"
                   style={{
-                    background: isActive ? accent : 'rgba(78,93,110,0.4)',
-                    boxShadow: isActive ? `0 0 5px ${accent}` : 'none',
-                    transition: 'background 0.2s, box-shadow 0.2s',
+                    background: isActive ? accent : win.minimized ? 'rgba(78,93,110,0.3)' : 'rgba(78,93,110,0.5)',
+                    boxShadow: isActive ? `0 0 6px ${accent}` : 'none',
                   }}
                 />
-                <span className="max-w-28 truncate">{win.title}</span>
+                <span className="truncate">{win.title}</span>
 
-                {/* Active underline */}
                 {isActive && (
                   <motion.div
-                    layoutId="taskbar-underline"
+                    layoutId="taskbar-active"
                     className="absolute bottom-0 left-2 right-2 h-px rounded-full"
-                    style={{ background: accent }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                   />
                 )}
               </motion.button>
             )
           })}
         </AnimatePresence>
-      </div>
 
-      {/* Clock */}
-      <div className="text-cryo-muted text-xs font-mono shrink-0 tabular-nums">
-        {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        {windows.length === 0 && (
+          <span className="text-xs text-cryo-muted/40 pl-1 italic">No open apps</span>
+        )}
       </div>
     </div>
   )
