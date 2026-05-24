@@ -1,18 +1,20 @@
 #!/bin/bash
-# Install Rust and Go language runtimes
-set -e
+# Install Go and Rust — optional dev tools, non-fatal if downloads fail
+set +e
 
 # --- Go 1.22 ---
 GO_VERSION="1.22.3"
-curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go.tar.gz
-tar -C /usr/local -xzf /tmp/go.tar.gz
-rm /tmp/go.tar.gz
-ln -sf /usr/local/go/bin/go /usr/local/bin/go
-ln -sf /usr/local/go/bin/gofmt /usr/local/bin/gofmt
-go version
+echo "[runtimes] Installing Go ${GO_VERSION}..."
+curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go.tar.gz && \
+  tar -C /usr/local -xzf /tmp/go.tar.gz && \
+  rm -f /tmp/go.tar.gz && \
+  ln -sf /usr/local/go/bin/go /usr/local/bin/go && \
+  ln -sf /usr/local/go/bin/gofmt /usr/local/bin/gofmt && \
+  go version && echo "[runtimes] Go installed." || \
+  echo "[runtimes] Go download failed — install manually after boot."
 
-# --- Rust (stable, system-wide via rustup) ---
-# Install rustup for the default user skeleton — each user gets their own toolchain
+# --- Rust ---
+echo "[runtimes] Installing Rust..."
 mkdir -p /etc/skel/.cargo /etc/skel/.rustup
 cat > /etc/profile.d/rust.sh << 'EOF'
 export RUSTUP_HOME="$HOME/.rustup"
@@ -21,14 +23,14 @@ export PATH="$HOME/.cargo/bin:$PATH"
 EOF
 chmod +x /etc/profile.d/rust.sh
 
-# Pre-install for root during build so Cryogram can compile
 export RUSTUP_HOME="/root/.rustup"
 export CARGO_HOME="/root/.cargo"
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
-source /root/.cargo/env
-rustup toolchain install stable
-rustc --version
-cargo --version
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path && \
+  source /root/.cargo/env && \
+  rustup toolchain install stable && \
+  cp /root/.cargo/bin/* /usr/local/bin/ 2>/dev/null && \
+  rustc --version && echo "[runtimes] Rust installed." || \
+  echo "[runtimes] Rust download failed — install manually after boot."
 
-# Copy stable toolchain to /opt so all users can use rustc without downloading
-cp /root/.cargo/bin/* /usr/local/bin/ 2>/dev/null || true
+echo "[runtimes] Language runtimes hook done (failures are non-fatal)."
+exit 0

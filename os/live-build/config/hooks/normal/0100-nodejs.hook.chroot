@@ -1,13 +1,12 @@
 #!/bin/bash
-# Install Node.js 20 LTS via NodeSource
-set -e
+# Install Node.js 20 LTS — optional dev tool, non-fatal if network fails
+set +e
 
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 apt-get install -y nodejs
 
-# Verify
-node --version
-npm --version
+node --version && npm --version && \
+  npm install -g pnpm yarn typescript ts-node || true
 
-# Install global dev tools
-npm install -g pnpm yarn typescript ts-node
+echo "Node.js hook done (failures are non-fatal)."
+exit 0

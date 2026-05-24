@@ -1,88 +1,60 @@
 #!/bin/bash
-# Gaming support hook — Steam, Proton, NVIDIA drivers, GameMode, Lutris
-set -e
+# Gaming support — Steam, Proton, NVIDIA drivers, GameMode, Lutris
+# All steps are non-fatal: a failed download won't break the ISO.
+set +e
 
 echo "[gaming] Enabling 32-bit architecture for Steam..."
 dpkg --add-architecture i386
 apt-get update -qq
 
-# ── 32-bit libs Steam requires ────────────────────────────────────────────────
 echo "[gaming] Installing 32-bit Mesa and Steam dependencies..."
 DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  libgl1-mesa-dri:i386 \
-  libgl1:i386 \
-  libc6:i386 \
-  libstdc++6:i386 \
-  libgcc-s1:i386 \
-  mesa-vulkan-drivers:i386 \
-  libvulkan1:i386 \
-  libglib2.0-0:i386 \
-  libpulse0:i386 \
-  libdbus-1-3:i386 \
-  libgdk-pixbuf-2.0-0:i386
+  libgl1-mesa-dri:i386 libgl1:i386 libc6:i386 libstdc++6:i386 \
+  libgcc-s1:i386 mesa-vulkan-drivers:i386 libvulkan1:i386 \
+  libglib2.0-0:i386 libpulse0:i386 libdbus-1-3:i386 \
+  libgdk-pixbuf-2.0-0:i386 || true
 
-# ── Steam ─────────────────────────────────────────────────────────────────────
 echo "[gaming] Installing Steam..."
 DEBIAN_FRONTEND=noninteractive apt-get install -y steam-installer || {
-  # Fallback: download Steam .deb directly
   curl -fsSL "https://repo.steampowered.com/steam/archive/precise/steam_latest.deb" \
-    -o /tmp/steam.deb
-  DEBIAN_FRONTEND=noninteractive apt-get install -y /tmp/steam.deb || true
-  rm -f /tmp/steam.deb
-}
+    -o /tmp/steam.deb && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y /tmp/steam.deb && \
+    rm -f /tmp/steam.deb
+} || echo "[gaming] Steam unavailable — install manually after boot."
 
-# ── NVIDIA proprietary drivers ─────────────────────────────────────────────────
-# Installed but not activated — activation depends on hardware detected at runtime.
-# The NVIDIA setup script runs on first boot if an NVIDIA GPU is detected.
-echo "[gaming] Installing NVIDIA drivers (activate on NVIDIA hardware)..."
+echo "[gaming] Installing NVIDIA drivers..."
 DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  nvidia-driver \
-  nvidia-dkms \
-  nvidia-settings \
-  nvidia-smi \
-  libcuda1 \
-  libcuda1:i386 \
-  2>/dev/null || echo "[gaming] NVIDIA packages unavailable — skipping (AMD/Intel users unaffected)"
+  nvidia-driver nvidia-dkms nvidia-settings nvidia-smi \
+  libcuda1 libcuda1:i386 || \
+  echo "[gaming] NVIDIA packages unavailable — AMD/Intel users unaffected."
 
-# ── Heroic Games Launcher (Epic Games Store + GOG on Linux) ───────────────────
 echo "[gaming] Installing Heroic Games Launcher..."
 HEROIC_VER="2.14.0"
-HEROIC_URL="https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/releases/download/v${HEROIC_VER}/heroic_${HEROIC_VER}_amd64.deb"
-curl -fsSL "$HEROIC_URL" -o /tmp/heroic.deb 2>/dev/null && \
+curl -fsSL "https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/releases/download/v${HEROIC_VER}/heroic_${HEROIC_VER}_amd64.deb" \
+  -o /tmp/heroic.deb && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y /tmp/heroic.deb && \
   rm -f /tmp/heroic.deb || \
-  echo "[gaming] Heroic download failed — install manually from heroicgameslauncher.com"
+  echo "[gaming] Heroic unavailable — install from heroicgameslauncher.com after boot."
 
-# ── Proton-GE (community Proton build with extra game fixes) ──────────────────
 echo "[gaming] Installing Proton-GE..."
 PROTGE_VER="GE-Proton9-20"
-PROTGE_URL="https://github.com/GloriousEggroll/proton-ge-custom/releases/download/${PROTGE_VER}/${PROTGE_VER}.tar.gz"
 mkdir -p /etc/skel/.steam/root/compatibilitytools.d
-curl -fsSL "$PROTGE_URL" -o /tmp/proton-ge.tar.gz 2>/dev/null && \
+curl -fsSL "https://github.com/GloriousEggroll/proton-ge-custom/releases/download/${PROTGE_VER}/${PROTGE_VER}.tar.gz" \
+  -o /tmp/proton-ge.tar.gz && \
   tar -xzf /tmp/proton-ge.tar.gz -C /etc/skel/.steam/root/compatibilitytools.d/ && \
   rm -f /tmp/proton-ge.tar.gz || \
-  echo "[gaming] Proton-GE download failed — install via ProtonUp-Qt after boot"
+  echo "[gaming] Proton-GE unavailable — install via ProtonUp-Qt after boot."
 
-# ── ProtonUp-Qt (GUI to manage Proton/Wine versions) ─────────────────────────
-echo "[gaming] Installing ProtonUp-Qt..."
-pip3 install protonup-qt --break-system-packages 2>/dev/null || \
-  flatpak install --noninteractive flathub net.davidotek.pupgui2 2>/dev/null || \
-  echo "[gaming] ProtonUp-Qt: install manually from github.com/DavidoTek/ProtonUp-Qt"
+pip3 install protonup-qt --break-system-packages 2>/dev/null || true
 
-# ── GameMode systemd service ──────────────────────────────────────────────────
-echo "[gaming] Configuring GameMode..."
-# Allow users in 'games' group to use GameMode without sudo
 cat > /etc/security/limits.d/gamemode.conf << 'EOF'
 @games  -  nice  -10
 EOF
 groupadd -f games
-# Add default user to games group
 usermod -aG games cryogram 2>/dev/null || true
 
-# ── MangoHud global config ────────────────────────────────────────────────────
 mkdir -p /etc/skel/.config/MangoHud
 cat > /etc/skel/.config/MangoHud/MangoHud.conf << 'EOF'
-# MangoHud — gaming overlay (toggle with Shift+F12)
 fps
 frametime
 gpu_stats
@@ -100,47 +72,25 @@ position=top-left
 toggle_hud=Shift_R+F12
 EOF
 
-# ── Steam Openbox autostart ───────────────────────────────────────────────────
-# Patch the openbox autostart skel to NOT auto-launch Steam (let user choose)
-# but ensure Steam .desktop is in the menu
-
-# ── Add gaming apps to Openbox right-click menu ───────────────────────────────
-# This patches the menu.xml that was created by 0500-configure-system.hook.chroot
 MENU_FILE="/etc/skel/.config/openbox/menu.xml"
 if [ -f "$MENU_FILE" ]; then
-  # Insert a Gaming submenu before the closing </menu> of root-menu
-  sed -i 's|<item label="Install Cryogram OS">|<menu id="gaming" label="Gaming">\n      <item label="Steam"><action name="Execute"><execute>steam</execute></action></item>\n      <item label="Lutris"><action name="Execute"><execute>lutris</execute></action></item>\n      <item label="Heroic (Epic/GOG)"><action name="Execute"><execute>heroic</execute></action></item>\n      <item label="ProtonUp-Qt"><action name="Execute"><execute>protonup-qt</execute></action></item>\n      <item label="Wine Config"><action name="Execute"><execute>winecfg</execute></action></item>\n    </menu>\n    <separator/>\n    <item label="Install Cryogram OS">|' "$MENU_FILE"
+  sed -i 's|<item label="Install Cryogram OS">|<menu id="gaming" label="Gaming">\n      <item label="Steam"><action name="Execute"><execute>steam</execute></action></item>\n      <item label="Lutris"><action name="Execute"><execute>lutris</execute></action></item>\n      <item label="Heroic (Epic/GOG)"><action name="Execute"><execute>heroic</execute></action></item>\n    </menu>\n    <separator/>\n    <item label="Install Cryogram OS">|' "$MENU_FILE" || true
 fi
 
-# ── First-boot NVIDIA detection script ───────────────────────────────────────
 cat > /usr/local/bin/cryogram-gpu-setup << 'GPUSCRIPT'
 #!/bin/bash
-# Detect GPU on first boot and activate the right driver.
-# Runs once via systemd.
-
 STAMP="/var/lib/cryogram/gpu-setup-done"
 [ -f "$STAMP" ] && exit 0
 mkdir -p /var/lib/cryogram
-
 GPU_INFO=$(lspci | grep -i 'vga\|3d\|display' 2>/dev/null || echo "")
-
 if echo "$GPU_INFO" | grep -qi "nvidia"; then
-  echo "[gpu] NVIDIA GPU detected — activating nvidia driver"
-  # Switch from nouveau to nvidia
-  update-alternatives --set glx /usr/lib/x86_64-linux-gnu/libGL.so.1.mesa 2>/dev/null || true
   modprobe nvidia 2>/dev/null || true
-  notify-send "Cryogram GPU Setup" "NVIDIA GPU detected. Driver activated. Reboot recommended." 2>/dev/null || true
-elif echo "$GPU_INFO" | grep -qi "amd\|radeon\|advanced micro"; then
-  echo "[gpu] AMD GPU detected — amdgpu driver active (no action needed)"
-elif echo "$GPU_INFO" | grep -qi "intel"; then
-  echo "[gpu] Intel GPU detected — i915 driver active (no action needed)"
+  notify-send "Cryogram GPU Setup" "NVIDIA GPU detected. Reboot recommended." 2>/dev/null || true
 fi
-
 touch "$STAMP"
 GPUSCRIPT
 chmod +x /usr/local/bin/cryogram-gpu-setup
 
-# Register first-boot GPU setup as a systemd service
 cat > /etc/systemd/system/cryogram-gpu-setup.service << 'UNIT'
 [Unit]
 Description=Cryogram GPU Driver Setup (first boot)
@@ -157,6 +107,5 @@ WantedBy=multi-user.target
 UNIT
 systemctl enable cryogram-gpu-setup 2>/dev/null || true
 
-echo "[gaming] Gaming stack installed successfully."
-echo "[gaming]   Steam, Lutris, Heroic, Proton-GE, ProtonUp-Qt, MangoHud, GameMode"
-echo "[gaming]   GPU drivers: AMD (amdgpu), Intel (i915), NVIDIA (nvidia — activate on NVIDIA hardware)"
+echo "[gaming] Gaming hook done (failures are non-fatal)."
+exit 0
