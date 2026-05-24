@@ -27,7 +27,6 @@ BG_DIR="$LB_DIR/config/includes.chroot/usr/share/backgrounds/cryogram"
 mkdir -p "$BG_DIR"
 mkdir -p "$LB_DIR/config/includes.chroot/usr/share/pixmaps"
 
-# Convert SVG wallpaper → PNG
 if command -v inkscape &>/dev/null; then
   inkscape --export-type=png --export-width=1920 --export-height=1080 \
     "$ASSETS_DIR/wallpaper.svg" -o "$BG_DIR/wallpaper.png" 2>/dev/null || \
@@ -44,52 +43,70 @@ else
   convert -size 256x256 xc:"#0a0e14" "$LB_DIR/config/includes.chroot/usr/share/pixmaps/cryogram.png"
 fi
 
-# Generate GRUB bitmap assets (scrollbar slices, etc.)
 bash "$THEME_DIR/generate-assets.sh"
 
 # ---- 2. Pre-build Cryogram app in Docker container ----
-# Building inside the live-build chroot is fragile (100MB Electron download,
-# node-gyp in a restricted environment). We build here where we have full tools,
-# then stage the built output into includes.chroot so lb just copies it into
-# the OS image unchanged.
+# Building inside the live-build chroot requires downloading Electron + compiling
+# C++ native addons in a restricted environment. We build here in Docker (full
+# tools, reliable network) and stage the output into includes.chroot.
 echo "[2/6] Building Cryogram app..."
 
-if [ ! -d "/build/cryogram-src" ]; then
-  echo "ERROR: /build/cryogram-src not found."
-  echo "docker-compose.yml should bind-mount the repo at runtime:"
-  echo "  volumes:"
-  echo "    - ../:/build/cryogram-src:ro"
+# Guard: npm must be present (Dockerfile recently added Node.js 20).
+# If this errors, the image must be rebuilt: docker compose build --no-cache
+if ! command -v npm &>/dev/null; then
+  echo ""
+  echo "ERROR: npm not found. The Dockerfile was updated to add Node.js 20."
+  echo "Rebuild the image from scratch:"
+  echo "  docker compose down"
+  echo "  docker compose build --no-cache"
+  echo "  docker compose up"
   exit 1
 fi
 
-cd /build/cryogram-src
+if [ ! -d "/build/cryogram-src" ]; then
+  echo "ERROR: /build/cryogram-src not found (docker-compose bind-mount missing)."
+  exit 1
+fi
 
-echo "  Installing npm dependencies..."
-npm ci --prefer-offline 2>/dev/null || npm install
+# The bind-mount is :ro (read-only), so npm cannot write node_modules into it.
+# Copy source to a writable temp workspace first.
+BUILD_WS="/tmp/cryogram-build"
+echo "  Copying source to writable workspace..."
+rm -rf "$BUILD_WS"
+mkdir -p "$BUILD_WS"
+cp -r /build/cryogram-src/. "$BUILD_WS/"
+# Remove any stale build artifacts that may have come from the host
+rm -rf "$BUILD_WS/node_modules" "$BUILD_WS/out" "$BUILD_WS/dist"
+cd "$BUILD_WS"
+
+echo "  Installing npm dependencies (includes ~80 MB Electron binary)..."
+npm install
 echo "  npm install done."
 
 echo "  Rebuilding native modules for Electron's ABI..."
-# node-pty and better-sqlite3 are C++ addons — they must be compiled
-# against Electron's embedded Node.js headers (not the system Node.js ABI).
+# node-pty and better-sqlite3 are C++ addons; they must be compiled against
+# Electron's embedded Node.js headers, not the system Node.js ABI.
 npx @electron/rebuild -f -w node-pty -w better-sqlite3 2>/dev/null || \
-  npx electron-rebuild -f -w node-pty -w better-sqlite3 2>/dev/null || \
-  echo "  (Warning: electron-rebuild not available — native modules may have ABI mismatch)"
+  npx electron-rebuild   -f -w node-pty -w better-sqlite3 2>/dev/null || \
+  echo "  WARNING: electron-rebuild unavailable; native modules may crash at runtime."
 
-echo "  Building renderer/main/preload via electron-vite..."
+echo "  Building renderer / main / preload via electron-vite..."
 npm run build
-echo "  Build complete. Output: $(du -sh out/ | cut -f1)"
+echo "  Build done: $(du -sh out/ | cut -f1)"
 
-# Stage built files into the chroot (they'll land at /opt/cryogram in the OS)
+# Stage built files — live-build copies includes.chroot verbatim into the image,
+# so these land at /opt/cryogram on the installed system.
 CRYOGRAM_DEST="$LB_DIR/config/includes.chroot/opt/cryogram"
 mkdir -p "$CRYOGRAM_DEST"
 
 cp -r out/ "$CRYOGRAM_DEST/"
 cp package.json "$CRYOGRAM_DEST/"
-[ -d scripts ]    && cp -r scripts/    "$CRYOGRAM_DEST/"
-[ -d resources ]  && cp -r resources/  "$CRYOGRAM_DEST/"
+[ -d scripts ]   && cp -r scripts/   "$CRYOGRAM_DEST/"
+[ -d resources ] && cp -r resources/ "$CRYOGRAM_DEST/"
 
-# Stage Electron binary + only native deps (not all node_modules —
-# pure-JS deps are bundled into out/ by electron-vite's rollup step)
+# Only stage the Electron binary + native deps.
+# Pure-JS deps (axios, zustand, framer-motion …) are rolled into out/ by
+# electron-vite's rollup bundler and don't need to be in node_modules.
 mkdir -p "$CRYOGRAM_DEST/node_modules"
 for dep in electron node-pty better-sqlite3; do
   [ -d "node_modules/$dep" ] && cp -r "node_modules/$dep" "$CRYOGRAM_DEST/node_modules/"
@@ -118,10 +135,10 @@ if [ -d /build/calamares/modules ]; then
 fi
 
 # ---- 5. Build the ISO ----
-echo "[5/6] Building Cryogram OS ISO (this takes 30–90 minutes)..."
+echo "[5/6] Building Cryogram OS ISO (this takes 30-90 minutes)..."
 bash auto/build
 
-# Always copy build.log to output so you can read it from the host
+# Always copy build.log to the host-mounted output dir for post-mortem reading
 cp "$LB_DIR/build.log" "$OUTPUT_DIR/build.log" 2>/dev/null || true
 
 # ---- 6. Rename and copy output ----
