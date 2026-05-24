@@ -50,7 +50,6 @@ pavucontrol
 # Controller support
 joystick
 jstest-gtk
-gamepad-tool
 
 # Misc gaming utils
 ffmpeg

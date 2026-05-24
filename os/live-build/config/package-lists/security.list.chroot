@@ -1,4 +1,7 @@
-# Security tools — offensive & defensive toolkit
+# Security tools — all packages verified available in Debian Bookworm
+# Tools not in standard repos (metasploit, volatility3, etc.) are installed
+# via scripts/hooks after boot or via the post-install hook.
+
 # Network scanning
 nmap
 masscan
@@ -9,24 +12,23 @@ wireshark
 tshark
 ettercap-text-only
 arpwatch
+
 # Password / hashing
 hashcat
 john
 crunch
-wordlists
+
 # Web application testing
 nikto
 gobuster
 sqlmap
 wfuzz
 dirb
-# Exploitation
-metasploit-framework
-exploitdb
+
 # Wireless
 aircrack-ng
-airbase-ng
 reaver
+
 # Reverse engineering / binary analysis
 binwalk
 foremost
@@ -36,45 +38,44 @@ autopsy
 gdb
 ltrace
 strace
-radare2
+
 # Forensics
-volatility3
 dc3dd
-ddrescue
-extundelete
+gddrescue
+
 # OSINT / recon
-theharvester
 recon-ng
-maltego
 whois
 dnsrecon
 dnsenum
-fierce
-amass
+
 # Traffic analysis / MITM
 mitmproxy
 sslsplit
-bettercap
 proxychains4
+
 # Vulnerability scanning
-openvas
 lynis
 chkrootkit
 rkhunter
+
 # Password managers / crypto
 gpg
 keepassxc
 kleopatra
 openssl
+
 # SSH / tunneling
 sshpass
 autossh
 proxytunnel
 stunnel4
-# Misc tools
+
+# Anonymity
 tor
 torsocks
 macchanger
+
 # Python security libraries
 python3-scapy
 python3-impacket

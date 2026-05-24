@@ -58,7 +58,6 @@ arandr
 numlockx
 xautomation
 libnotify-bin
-notify-send
 zenity
 yad
 # GTK theme / icon theme
