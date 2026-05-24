@@ -47,17 +47,34 @@ bash "$THEME_DIR/generate-assets.sh"
 # Copy wallpaper to LightDM uses
 cp "$BG_DIR/wallpaper.png" "$LB_DIR/config/includes.chroot/usr/share/backgrounds/cryogram/wallpaper.png" 2>/dev/null || true
 
-# ---- 2. Prepare Opera GX hook ----
-echo "[1.5/6] Ensuring Opera GX hook is present..."
+# ---- 2. Stage Cryogram source into the chroot ----
+# The Docker bind-mount at /build/cryogram-src is NOT visible inside the
+# live-build chroot. We copy the source into includes.chroot so lb places it
+# at /build/cryogram-src when building the chroot filesystem.
+echo "[2/6] Staging Cryogram source for in-chroot build..."
+CHROOT_SRC="$LB_DIR/config/includes.chroot/build/cryogram-src"
+mkdir -p "$CHROOT_SRC"
+tar -C /build/cryogram-src \
+  --exclude='.git' \
+  --exclude='node_modules' \
+  --exclude='dist' \
+  --exclude='out' \
+  --exclude='os' \
+  --exclude='.next' \
+  -cf - . | tar -xf - -C "$CHROOT_SRC/"
+echo "  Staged $(du -sh "$CHROOT_SRC" | cut -f1) of source files"
+
+# ---- 3. Prepare Opera GX hook ----
+echo "[2.5/6] Ensuring Opera GX hook is present..."
 # Opera GX hook is already in hooks/normal/0350-opera-gx.hook.chroot
 
-# ---- 3. Configure live-build ----
-echo "[2/6] Configuring live-build..."
+# ---- 4. Configure live-build ----
+echo "[3/6] Configuring live-build..."
 cd "$LB_DIR"
 bash auto/config
 
-# ---- 4. Copy Calamares config into chroot ----
-echo "[3/6] Staging Calamares installer configuration..."
+# ---- 5. Copy Calamares config into chroot ----
+echo "[4/6] Staging Calamares installer configuration..."
 CALA_DEST="$LB_DIR/config/includes.chroot/etc/calamares"
 mkdir -p "$CALA_DEST/branding"
 cp /build/calamares/settings.conf "$CALA_DEST/"
@@ -69,12 +86,12 @@ if [ -d /build/calamares/modules ]; then
   cp -r /build/calamares/modules/. "$CALA_DEST/modules/"
 fi
 
-# ---- 5. Build the ISO ----
-echo "[4/6] Building Cryogram OS ISO (this takes 30–90 minutes)..."
+# ---- 6. Build the ISO ----
+echo "[5/6] Building Cryogram OS ISO (this takes 30–90 minutes)..."
 bash auto/build
 
-# ---- 6. Rename and copy output ----
-echo "[5/6] Packaging output..."
+# ---- 7. Rename and copy output ----
+echo "[6/6] Packaging output..."
 ISO_SRC=$(find "$LB_DIR" -name "*.iso" | head -1)
 if [ -z "$ISO_SRC" ]; then
   echo "ERROR: No ISO file found after build. Check build.log for details."

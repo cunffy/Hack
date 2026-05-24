@@ -4,61 +4,81 @@ set -e
 
 REPO_DIR="/opt/cryogram-src"
 INSTALL_DIR="/opt/cryogram"
-APP_USER="cryogram"
 
-# Clone or copy the Cryogram source
-# During ISO build, the repo is available at /build/cryogram-src (bind-mounted by build.sh)
+# The source was staged into the chroot by build.sh (includes.chroot/build/cryogram-src)
 if [ -d "/build/cryogram-src" ]; then
   cp -r /build/cryogram-src "$REPO_DIR"
 else
-  echo "ERROR: Cryogram source not found at /build/cryogram-src"
-  echo "Make sure the build script mounts the repo correctly."
+  echo "ERROR: Cryogram source not found at /build/cryogram-src inside chroot."
+  echo "build.sh should have staged it there via includes.chroot."
   exit 1
 fi
 
 cd "$REPO_DIR"
 
-# Install Node.js dependencies
-npm ci --prefer-offline 2>/dev/null || npm install
+# Install Node.js dependencies (npm ci falls back to npm install if no lock file)
+npm ci 2>/dev/null || npm install
+
+# Rebuild native modules for Electron's ABI (node-pty, better-sqlite3, etc.)
+# Without this they'd be compiled for Node.js ABI which mismatches Electron's.
+npx electron-rebuild -f -w node-pty -w better-sqlite3 2>/dev/null || true
 
 # Install Python deps for security scripts
-pip3 install -r scripts/requirements.txt --break-system-packages || true
+pip3 install -r scripts/requirements.txt --break-system-packages 2>/dev/null || true
 
-# Build the Electron app
+# Build the Electron app (produces out/main, out/preload, out/renderer)
 npm run build
-
-# Package as AppImage (no sandbox — OS-level install)
-npx electron-builder --linux AppImage --config.linux.executableName=cryogram 2>/dev/null || true
 
 # Install built files
 mkdir -p "$INSTALL_DIR"
 cp -r out/ "$INSTALL_DIR/"
 cp -r scripts/ "$INSTALL_DIR/"
-cp -r resources/ "$INSTALL_DIR/"
 cp package.json "$INSTALL_DIR/"
+[ -d resources ] && cp -r resources/ "$INSTALL_DIR/"
 
-# Install node_modules (needed at runtime for native deps like node-pty)
-cp -r node_modules/ "$INSTALL_DIR/"
+# Copy only the native deps needed at Electron runtime:
+#   electron  — the binary itself
+#   node-pty  — PTY bindings for Terminal
+#   better-sqlite3 — SQLite bindings for Leaker/settings
+mkdir -p "$INSTALL_DIR/node_modules"
+for dep in electron node-pty better-sqlite3; do
+  [ -d "node_modules/$dep" ] && cp -r "node_modules/$dep" "$INSTALL_DIR/node_modules/"
+done
+# Also copy .bin so the electron wrapper script is present
+mkdir -p "$INSTALL_DIR/node_modules/.bin"
+[ -f "node_modules/.bin/electron" ] && \
+  cp -P "node_modules/.bin/electron" "$INSTALL_DIR/node_modules/.bin/"
 
-# Create launcher script
+# Make the Electron binary executable
+ELECTRON_BIN="$INSTALL_DIR/node_modules/electron/dist/electron"
+[ -f "$ELECTRON_BIN" ] && chmod +x "$ELECTRON_BIN"
+
+# Expose electron system-wide via symlink
+if [ -f "$ELECTRON_BIN" ]; then
+  ln -sf "$ELECTRON_BIN" /usr/local/bin/electron
+fi
+
+# Create launcher script (uses full path — no PATH dependency)
 cat > /usr/local/bin/cryogram << 'LAUNCHER'
 #!/bin/bash
 export ELECTRON_DISABLE_SANDBOX=1
 export DISPLAY="${DISPLAY:-:0}"
-exec electron /opt/cryogram/out/main/index.js "$@"
+ELECTRON="/opt/cryogram/node_modules/electron/dist/electron"
+exec "$ELECTRON" /opt/cryogram/out/main/index.js "$@"
 LAUNCHER
 chmod +x /usr/local/bin/cryogram
 
-# Create kiosk launcher (fullscreen, no OS chrome)
+# Kiosk launcher (fullscreen, no OS chrome)
 cat > /usr/local/bin/cryogram-kiosk << 'LAUNCHER'
 #!/bin/bash
 export ELECTRON_DISABLE_SANDBOX=1
 export DISPLAY="${DISPLAY:-:0}"
-exec electron /opt/cryogram/out/main/index.js --kiosk --start-maximized "$@"
+ELECTRON="/opt/cryogram/node_modules/electron/dist/electron"
+exec "$ELECTRON" /opt/cryogram/out/main/index.js --kiosk --start-maximized "$@"
 LAUNCHER
 chmod +x /usr/local/bin/cryogram-kiosk
 
-# .desktop file for application launcher
+# .desktop file
 cat > /usr/share/applications/cryogram.desktop << 'DESKTOP'
 [Desktop Entry]
 Name=Cryogram
@@ -71,7 +91,7 @@ Categories=Security;Network;System;
 StartupWMClass=cryogram
 DESKTOP
 
-# Clean up source to save space
+# Clean up source to save ISO space
 rm -rf "$REPO_DIR"
 
-echo "Cryogram installed successfully at $INSTALL_DIR"
+echo "Cryogram installed at $INSTALL_DIR"
