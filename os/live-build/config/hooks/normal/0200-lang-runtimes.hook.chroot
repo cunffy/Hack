@@ -21,7 +21,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 EOF
 chmod +x /etc/profile.d/rust.sh
 
-# Pre-install for root during build so CyberDen can compile
+# Pre-install for root during build so Cryogram can compile
 export RUSTUP_HOME="/root/.rustup"
 export CARGO_HOME="/root/.cargo"
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path

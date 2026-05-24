@@ -45,7 +45,7 @@ async function checkHIBP(email: string, targetId: number): Promise<number> {
     const res = await axios.get(
       `https://haveibeenpwned.com/api/v3/breachedaccount/${encodeURIComponent(email)}`,
       {
-        headers: { 'hibp-api-key': key, 'User-Agent': 'CyberDen-Security-Tool' },
+        headers: { 'hibp-api-key': key, 'User-Agent': 'Cryogram-Security-Tool' },
         params: { truncateResponse: false },
         timeout: 10000,
       }

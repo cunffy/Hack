@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
-contextBridge.exposeInMainWorld('cyberden', {
+contextBridge.exposeInMainWorld('cryogram', {
   // Window controls
   window: {
     minimize: () => ipcRenderer.send('window:minimize'),
@@ -113,4 +113,4 @@ contextBridge.exposeInMainWorld('cyberden', {
   },
 })
 
-export type CyberDenAPI = typeof import('./preload')
+export type CryogramAPI = typeof import('./preload')

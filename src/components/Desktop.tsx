@@ -133,7 +133,7 @@ export function Desktop() {
 
             {/* Label */}
             <span
-              className="text-[11px] font-semibold text-center leading-tight text-den-text"
+              className="text-[11px] font-semibold text-center leading-tight text-cryo-text"
               style={{ whiteSpace: 'pre-line' }}
             >
               {app.label}
@@ -144,21 +144,21 @@ export function Desktop() {
 
       {/* Bottom status */}
       <motion.div
-        className="absolute bottom-3 left-10 flex items-center gap-4 text-den-muted text-xs"
+        className="absolute bottom-3 left-10 flex items-center gap-4 text-cryo-muted text-xs"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.5 }}
       >
         <span className="flex items-center gap-1.5">
           <motion.span
-            className="w-1.5 h-1.5 rounded-full bg-den-green inline-block"
+            className="w-1.5 h-1.5 rounded-full bg-cryo-green inline-block"
             animate={{ opacity: [1, 0.3, 1] }}
             transition={{ duration: 2.2, repeat: Infinity }}
             style={{ boxShadow: '0 0 5px rgba(0,255,136,0.7)' }}
           />
           Systems online
         </span>
-        <span className="text-den-faint">|</span>
+        <span className="text-cryo-faint">|</span>
         <span>{new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
       </motion.div>
     </div>

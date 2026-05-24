@@ -303,7 +303,7 @@ zenity --info \
 <b>DNS:</b> Your DNS traffic is encrypted via DNS-over-TLS (Cloudflare + Quad9).
 
 <b>Next steps:</b>
-• Open <b>CyberDen → Settings</b> to add your API keys (HIBP, Dehashed)
+• Open <b>Cryogram → Settings</b> to add your API keys (HIBP, Dehashed)
 • Drop wordlists into <b>~/wordlists/</b> for Password Tester
 • Use <b>Super key</b> to search and launch apps
 • Right-click the desktop for the full app menu

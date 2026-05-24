@@ -5,7 +5,7 @@ import { createHash } from 'crypto'
 // Derive a machine-specific key from the app's userData path so the store
 // is tied to this installation and not trivially readable if the file is copied.
 const encryptionKey = createHash('sha256')
-  .update(`cyberden-v1:${app.getPath('userData')}`)
+  .update(`cryogram-v1:${app.getPath('userData')}`)
   .digest('hex')
 
 const store = new Store({

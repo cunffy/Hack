@@ -16,7 +16,7 @@ export default function PasswordTester() {
   const [tab, setTab] = useState<Tab>('hash')
 
   useEffect(() => {
-    window.cyberden.settings.get('ptDisclaimerAccepted').then((val) => {
+    window.cryogram.settings.get('ptDisclaimerAccepted').then((val) => {
       if (!val) { setAccepted(false); return }
       const acceptedDate = new Date(val as string)
       const daysSince = (Date.now() - acceptedDate.getTime()) / (1000 * 60 * 60 * 24)
@@ -25,13 +25,13 @@ export default function PasswordTester() {
   }, [])
 
   const onAccept = async () => {
-    await window.cyberden.settings.set('ptDisclaimerAccepted', new Date().toISOString())
+    await window.cryogram.settings.set('ptDisclaimerAccepted', new Date().toISOString())
     setAccepted(true)
   }
 
   if (accepted === null) {
     return (
-      <div className="flex-1 flex items-center justify-center text-den-muted text-xs">
+      <div className="flex-1 flex items-center justify-center text-cryo-muted text-xs">
         <motion.span animate={{ opacity: [0.4, 1, 0.4] }} transition={{ duration: 1.5, repeat: Infinity }}>
           Loading…
         </motion.span>

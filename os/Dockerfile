@@ -37,8 +37,8 @@ COPY assets/ /build/assets/
 # Copy Calamares config
 COPY calamares/ /build/calamares/
 
-# Copy CyberDen source (bind-mounted from host — see docker-compose.yml)
-# /build/cyberden-src is mounted at runtime
+# Copy Cryogram source (bind-mounted from host — see docker-compose.yml)
+# /build/cryogram-src is mounted at runtime
 
 # Make hook scripts executable
 RUN find /build/live-build/config/hooks -name "*.chroot" -exec chmod +x {} \;

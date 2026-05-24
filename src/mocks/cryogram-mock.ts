@@ -1,5 +1,5 @@
 /**
- * Mock implementation of window.cyberden for browser-only development.
+ * Mock implementation of window.cryogram for browser-only development.
  * Installed automatically when the app runs outside of Electron.
  * Simulates all IPC calls with realistic fake data and delays.
  */
@@ -11,19 +11,19 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 // In-memory settings store (backed by localStorage)
 const settingsStore: Record<string, unknown> = (() => {
   try {
-    return JSON.parse(localStorage.getItem('cyberden-mock-settings') || '{}')
+    return JSON.parse(localStorage.getItem('cryogram-mock-settings') || '{}')
   } catch {
     return {}
   }
 })()
 
 function saveMockSettings() {
-  localStorage.setItem('cyberden-mock-settings', JSON.stringify(settingsStore))
+  localStorage.setItem('cryogram-mock-settings', JSON.stringify(settingsStore))
 }
 
 // In-memory fs (workspace lives in memory during the session)
 const mockFs: Record<string, string> = {
-  '/workspace/hello.py': 'print("Hello from CyberDen!")\n',
+  '/workspace/hello.py': 'print("Hello from Cryogram!")\n',
   '/workspace/scan.js': 'const target = "192.168.1.1";\nconsole.log(`Scanning ${target}...`);\n',
   '/workspace/crack.sh': '#!/bin/bash\n# Example hash crack script\nhashcat -m 0 hash.txt wordlist.txt\n',
 }
@@ -63,7 +63,7 @@ const termCallbacks: Record<string, (data: string) => void> = {}
 
 function mockTerminalInit(id: string, cb: (data: string) => void) {
   termCallbacks[id] = cb
-  setTimeout(() => cb('\x1b[32mCyberDen Mock Terminal\x1b[0m — running in browser mode\r\n'), 100)
+  setTimeout(() => cb('\x1b[32mCryogram Mock Terminal\x1b[0m — running in browser mode\r\n'), 100)
   setTimeout(() => cb('\x1b[33mNote:\x1b[0m Real PTY not available in browser. Run \x1b[36mnpm run dev\x1b[0m for a live shell.\r\n\r\n'), 300)
   setTimeout(() => cb('\x1b[34m$\x1b[0m '), 500)
 }
@@ -83,12 +83,12 @@ function mockTerminalInput(id: string, data: string) {
 // Notification listeners
 const notifListeners: Array<(n: { title: string; body: string }) => void> = []
 
-export function installMockCyberDen(): void {
-  if (window.cyberden) return // Already installed (Electron)
+export function installMockCryogram(): void {
+  if (window.cryogram) return // Already installed (Electron)
 
-  console.info('[CyberDen] Running in browser mock mode')
+  console.info('[Cryogram] Running in browser mock mode')
 
-  window.cyberden = {
+  window.cryogram = {
     window: {
       minimize: () => {},
       maximize: () => {},
@@ -138,7 +138,7 @@ export function installMockCyberDen(): void {
         for (let i = 0; i < 5; i++) {
           await sleep(400)
           attempts += 1200
-          const event = new CustomEvent('cyberden:pt-progress', {
+          const event = new CustomEvent('cryogram:pt-progress', {
             detail: { jobId, attempts, rate: 3000, elapsed: (Date.now() - start) / 1000, currentWord: 'password' + i }
           })
           window.dispatchEvent(event)
@@ -155,8 +155,8 @@ export function installMockCyberDen(): void {
       cancel: (_jobId) => {},
       onProgress: (cb) => {
         const handler = (e: Event) => cb((e as CustomEvent).detail)
-        window.addEventListener('cyberden:pt-progress', handler)
-        return () => window.removeEventListener('cyberden:pt-progress', handler)
+        window.addEventListener('cryogram:pt-progress', handler)
+        return () => window.removeEventListener('cryogram:pt-progress', handler)
       },
     },
 

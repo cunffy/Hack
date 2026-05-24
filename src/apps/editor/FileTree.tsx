@@ -42,7 +42,7 @@ function TreeNode({
   const toggle = async () => {
     if (!entry.isDir) { onOpenFile(entry.path, entry.name); return }
     if (!open) {
-      const entries = await window.cyberden.fs.readDir(entry.path)
+      const entries = await window.cryogram.fs.readDir(entry.path)
       setChildren(entries)
     }
     setOpen(!open)
@@ -59,7 +59,7 @@ function TreeNode({
   return (
     <div>
       <div
-        className="flex items-center gap-1.5 px-2 py-0.5 cursor-pointer hover:bg-den-border/40 text-den-text text-xs rounded transition-colors"
+        className="flex items-center gap-1.5 px-2 py-0.5 cursor-pointer hover:bg-cryo-border/40 text-cryo-text text-xs rounded transition-colors"
         style={{ paddingLeft: `${8 + depth * 12}px` }}
         onClick={toggle}
       >
@@ -77,16 +77,16 @@ export function FileTree({ workspace, onOpenFile }: FileTreeProps) {
   const [entries, setEntries] = useState<Entry[]>([])
 
   useEffect(() => {
-    window.cyberden.fs.readDir('__workspace__').then(setEntries).catch(() => setEntries([]))
+    window.cryogram.fs.readDir('__workspace__').then(setEntries).catch(() => setEntries([]))
   }, [workspace])
 
   return (
     <div className="py-2">
-      <div className="px-2 pb-1 text-xs text-den-muted font-bold uppercase tracking-wider">
+      <div className="px-2 pb-1 text-xs text-cryo-muted font-bold uppercase tracking-wider">
         Explorer
       </div>
       {entries.length === 0 ? (
-        <div className="px-3 py-2 text-xs text-den-muted">Empty workspace</div>
+        <div className="px-3 py-2 text-xs text-cryo-muted">Empty workspace</div>
       ) : (
         entries.map((e) => (
           <TreeNode key={e.path} entry={e} depth={0} onOpenFile={onOpenFile} />

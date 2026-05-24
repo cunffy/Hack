@@ -6,7 +6,7 @@ import { store } from './settings'
 
 function getWorkspacePath(): string {
   const saved = store.get('workspace') as string
-  return saved || join(app.getPath('documents'), 'CyberDen', 'workspace')
+  return saved || join(app.getPath('documents'), 'Cryogram', 'workspace')
 }
 
 async function safeResolve(requestedPath: string): Promise<string> {

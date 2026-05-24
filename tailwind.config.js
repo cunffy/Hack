@@ -4,7 +4,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        den: {
+        cryo: {
           bg:        '#080c12',
           surface:   '#0d1421',
           surfaceHi: '#111b2e',

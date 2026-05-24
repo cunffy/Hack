@@ -23,9 +23,9 @@ export default function SystemTray() {
 
   useEffect(() => {
     const load = async () => {
-      try { setBattery(await window.cyberden.system.getBattery()) } catch {}
-      try { setWifi(await window.cyberden.system.getWifiStatus()) } catch {}
-      try { setVol(await window.cyberden.system.getVolume()) } catch {}
+      try { setBattery(await window.cryogram.system.getBattery()) } catch {}
+      try { setWifi(await window.cryogram.system.getWifiStatus()) } catch {}
+      try { setVol(await window.cryogram.system.getVolume()) } catch {}
     }
     load()
     const t = setInterval(load, 15000)
@@ -96,10 +96,10 @@ export default function SystemTray() {
             {popup === 'wifi' && <WifiPopup wifi={wifi} />}
             {popup === 'vol' && <VolumePopup vol={vol} onChange={async v => {
               setVol((prev: VolumeInfo | null) => prev ? { ...prev, level: v } : prev)
-              await window.cyberden.system.setVolume(v)
+              await window.cryogram.system.setVolume(v)
             }} onToggleMute={async () => {
-              await window.cyberden.system.toggleMute()
-              const updated = await window.cyberden.system.getVolume()
+              await window.cryogram.system.toggleMute()
+              const updated = await window.cryogram.system.getVolume()
               setVol(updated)
             }} />}
             {popup === 'bat' && <BatteryPopup battery={battery} />}
@@ -129,12 +129,12 @@ function WifiPopup({ wifi }: { wifi: WifiStatus | null }) {
       <div className="text-xs font-semibold mb-2" style={{ color: '#00d4ff' }}>Wi-Fi</div>
       {wifi?.connected ? (
         <>
-          <div className="text-xs text-den-muted mb-1">Connected to</div>
+          <div className="text-xs text-cryo-muted mb-1">Connected to</div>
           <div className="text-sm" style={{ color: '#c9d1d9' }}>{wifi.ssid}</div>
-          <div className="text-xs text-den-muted mt-1">Signal: {wifi.signal}%</div>
+          <div className="text-xs text-cryo-muted mt-1">Signal: {wifi.signal}%</div>
         </>
       ) : (
-        <div className="text-xs text-den-muted">Not connected</div>
+        <div className="text-xs text-cryo-muted">Not connected</div>
       )}
     </div>
   )
@@ -153,7 +153,7 @@ function VolumePopup({
       {vol && (
         <>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-den-muted">{vol.muted ? 'Muted' : `${vol.level}%`}</span>
+            <span className="text-xs text-cryo-muted">{vol.muted ? 'Muted' : `${vol.level}%`}</span>
           </div>
           <input
             type="range" min={0} max={100} value={vol.level}
@@ -191,7 +191,7 @@ function BatteryPopup({ battery }: { battery: BatteryInfo | null }) {
           }}
         />
       </div>
-      <div className="text-xs text-den-muted">{battery.charging ? '⚡ Charging' : battery.status}</div>
+      <div className="text-xs text-cryo-muted">{battery.charging ? '⚡ Charging' : battery.status}</div>
     </div>
   )
 }

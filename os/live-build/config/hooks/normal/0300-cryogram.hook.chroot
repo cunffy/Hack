@@ -1,17 +1,17 @@
 #!/bin/bash
-# Build CyberDen from source and install as system application
+# Build Cryogram from source and install as system application
 set -e
 
-REPO_DIR="/opt/cyberden-src"
-INSTALL_DIR="/opt/cyberden"
+REPO_DIR="/opt/cryogram-src"
+INSTALL_DIR="/opt/cryogram"
 APP_USER="cryogram"
 
-# Clone or copy the CyberDen source
-# During ISO build, the repo is available at /build/cyberden-src (bind-mounted by build.sh)
-if [ -d "/build/cyberden-src" ]; then
-  cp -r /build/cyberden-src "$REPO_DIR"
+# Clone or copy the Cryogram source
+# During ISO build, the repo is available at /build/cryogram-src (bind-mounted by build.sh)
+if [ -d "/build/cryogram-src" ]; then
+  cp -r /build/cryogram-src "$REPO_DIR"
 else
-  echo "ERROR: CyberDen source not found at /build/cyberden-src"
+  echo "ERROR: Cryogram source not found at /build/cryogram-src"
   echo "Make sure the build script mounts the repo correctly."
   exit 1
 fi
@@ -28,7 +28,7 @@ pip3 install -r scripts/requirements.txt --break-system-packages || true
 npm run build
 
 # Package as AppImage (no sandbox — OS-level install)
-npx electron-builder --linux AppImage --config.linux.executableName=cyberden 2>/dev/null || true
+npx electron-builder --linux AppImage --config.linux.executableName=cryogram 2>/dev/null || true
 
 # Install built files
 mkdir -p "$INSTALL_DIR"
@@ -41,37 +41,37 @@ cp package.json "$INSTALL_DIR/"
 cp -r node_modules/ "$INSTALL_DIR/"
 
 # Create launcher script
-cat > /usr/local/bin/cyberden << 'LAUNCHER'
+cat > /usr/local/bin/cryogram << 'LAUNCHER'
 #!/bin/bash
 export ELECTRON_DISABLE_SANDBOX=1
 export DISPLAY="${DISPLAY:-:0}"
-exec electron /opt/cyberden/out/main/index.js "$@"
+exec electron /opt/cryogram/out/main/index.js "$@"
 LAUNCHER
-chmod +x /usr/local/bin/cyberden
+chmod +x /usr/local/bin/cryogram
 
 # Create kiosk launcher (fullscreen, no OS chrome)
-cat > /usr/local/bin/cyberden-kiosk << 'LAUNCHER'
+cat > /usr/local/bin/cryogram-kiosk << 'LAUNCHER'
 #!/bin/bash
 export ELECTRON_DISABLE_SANDBOX=1
 export DISPLAY="${DISPLAY:-:0}"
-exec electron /opt/cyberden/out/main/index.js --kiosk --start-maximized "$@"
+exec electron /opt/cryogram/out/main/index.js --kiosk --start-maximized "$@"
 LAUNCHER
-chmod +x /usr/local/bin/cyberden-kiosk
+chmod +x /usr/local/bin/cryogram-kiosk
 
 # .desktop file for application launcher
-cat > /usr/share/applications/cyberden.desktop << 'DESKTOP'
+cat > /usr/share/applications/cryogram.desktop << 'DESKTOP'
 [Desktop Entry]
-Name=CyberDen
+Name=Cryogram
 Comment=Security Operations Platform
-Exec=/usr/local/bin/cyberden
-Icon=/opt/cyberden/resources/icon.png
+Exec=/usr/local/bin/cryogram
+Icon=/opt/cryogram/resources/icon.png
 Terminal=false
 Type=Application
 Categories=Security;Network;System;
-StartupWMClass=cyberden
+StartupWMClass=cryogram
 DESKTOP
 
 # Clean up source to save space
 rm -rf "$REPO_DIR"
 
-echo "CyberDen installed successfully at $INSTALL_DIR"
+echo "Cryogram installed successfully at $INSTALL_DIR"

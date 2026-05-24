@@ -1,16 +1,16 @@
 # Cryogram OS
 
-A custom Debian-based Linux operating system built for security operations. Replaces Windows entirely. Ships with CyberDen as the desktop interface and a full offensive/defensive security toolkit pre-installed.
+A custom Debian-based Linux operating system built for security operations. Replaces Windows entirely. Ships with Cryogram as the desktop interface and a full offensive/defensive security toolkit pre-installed.
 
 ## What's included
 
 | Category | Contents |
 |---|---|
-| Desktop | CyberDen (Terminal, Editor, Password Tester, Leaker), Openbox WM, Picom compositor, Tint2 panel |
+| Desktop | Cryogram (Terminal, Editor, Password Tester, Leaker), Openbox WM, Picom compositor, Tint2 panel |
 | Browser | Opera GX (default) |
 | Security tools | Nmap, Wireshark, Metasploit, Hashcat, John, Aircrack-ng, Bettercap, SQLmap, Nikto, Gobuster, Volatility, Autopsy, MITMProxy, Recon-ng, + 50 more |
 | Languages | Python 3, Node.js 20 LTS, Go 1.22, Rust (stable), C/C++ (GCC/Clang) |
-| Dev tools | Git, Docker, SQLite, Monaco editor (via CyberDen), Geany |
+| Dev tools | Git, Docker, SQLite, Monaco editor (via Cryogram), Geany |
 | Gaming | Steam + Proton, Proton-GE, Heroic (Epic/GOG), Lutris, Wine, MangoHud, GameMode, ProtonUp-Qt |
 | GPU drivers | AMD (amdgpu), Intel (i915), NVIDIA (proprietary — auto-activated on first boot) |
 | System | systemd, NetworkManager, PipeWire audio, Bluetooth, LightDM login screen |
@@ -88,11 +88,11 @@ In the Calamares partitioner, choose **"Alongside"** or **"Manual partitioning"*
 
 ## First Boot
 
-The system boots directly into CyberDen. Default live credentials: `cryogram` / `cryogram` (you set your own password during install).
+The system boots directly into Cryogram. Default live credentials: `cryogram` / `cryogram` (you set your own password during install).
 
 ### Set up your tools
 
-1. Open **Settings** in CyberDen → add your HIBP and Dehashed API keys
+1. Open **Settings** in Cryogram → add your HIBP and Dehashed API keys
 2. Open **Password Tester** → accept the authorization disclaimer
 3. Drop wordlists (e.g. `rockyou.txt`) to `/home/yourusername/wordlists/`
 
@@ -150,7 +150,7 @@ wireshark           # GUI
 sudo apt update && sudo apt upgrade
 ```
 
-CyberDen updates: pull the repo and rebuild (`npm run build`), the installed version is at `/opt/cyberden`.
+Cryogram updates: pull the repo and rebuild (`npm run build`), the installed version is at `/opt/cryogram`.
 
 ## Directory structure
 
@@ -167,7 +167,7 @@ os/
 │   ├── auto/              live-build automation scripts
 │   └── config/
 │       ├── package-lists/ APT package lists (base, security, dev, desktop)
-│       ├── hooks/         Chroot hooks (Node.js, Rust, Go, CyberDen, Opera GX)
+│       ├── hooks/         Chroot hooks (Node.js, Rust, Go, Cryogram, Opera GX)
 │       └── includes.chroot/ Files copied verbatim into the OS image
 │           ├── etc/       System config (LightDM, Openbox, GTK theme)
 │           └── usr/share/ GRUB theme, wallpapers, .desktop files

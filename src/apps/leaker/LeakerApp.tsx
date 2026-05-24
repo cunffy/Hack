@@ -19,8 +19,8 @@ export default function LeakerApp() {
 
   const loadData = useCallback(async () => {
     const [t, b] = await Promise.all([
-      window.cyberden.leaker.getTargets(),
-      window.cyberden.leaker.getBreaches(),
+      window.cryogram.leaker.getTargets(),
+      window.cryogram.leaker.getBreaches(),
     ])
     setTargets(t)
     setBreaches(b)
@@ -31,7 +31,7 @@ export default function LeakerApp() {
   const refresh = async () => {
     setRefreshing(true)
     try {
-      await window.cyberden.leaker.forceRefresh()
+      await window.cryogram.leaker.forceRefresh()
       await loadData()
       setLastRefresh(new Date())
     } finally {
@@ -40,12 +40,12 @@ export default function LeakerApp() {
   }
 
   const addTarget = async (type: string, value: string, label?: string) => {
-    await window.cyberden.leaker.addTarget({ type, value, label })
+    await window.cryogram.leaker.addTarget({ type, value, label })
     await loadData()
   }
 
   const removeTarget = async (id: number) => {
-    await window.cyberden.leaker.removeTarget(id)
+    await window.cryogram.leaker.removeTarget(id)
     await loadData()
   }
 
@@ -63,18 +63,18 @@ export default function LeakerApp() {
       >
         <div className="flex items-center gap-3">
           <motion.div
-            className="w-2 h-2 rounded-full bg-den-red"
+            className="w-2 h-2 rounded-full bg-cryo-red"
             animate={{ opacity: [1, 0.3, 1], scale: [1, 1.3, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
             style={{ boxShadow: '0 0 6px rgba(255,68,102,0.7)' }}
           />
-          <span className="text-xs text-den-muted">
+          <span className="text-xs text-cryo-muted">
             {targets.length} monitored · {breaches.length} total breaches
             {newBreaches > 0 && (
               <motion.span
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
-                className="text-den-red ml-2 font-bold"
+                className="text-cryo-red ml-2 font-bold"
               >
                 {newBreaches} new
               </motion.span>
@@ -83,7 +83,7 @@ export default function LeakerApp() {
         </div>
         <div className="flex items-center gap-2">
           {lastRefresh && (
-            <span className="text-xs text-den-muted">
+            <span className="text-xs text-cryo-muted">
               Last: {lastRefresh.toLocaleTimeString()}
             </span>
           )}
@@ -121,7 +121,7 @@ export default function LeakerApp() {
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="ml-1.5 badge bg-den-red/20 text-den-red"
+                className="ml-1.5 badge bg-cryo-red/20 text-cryo-red"
               >
                 {newBreaches}
               </motion.span>

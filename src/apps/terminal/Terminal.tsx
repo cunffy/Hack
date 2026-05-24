@@ -59,17 +59,17 @@ export default function Terminal() {
 
     const id = sessionIdRef.current
     const { cols, rows } = term
-    await window.cyberden.terminal.create(id, cols, rows)
+    await window.cryogram.terminal.create(id, cols, rows)
 
-    term.onData((data) => window.cyberden.terminal.write(id, data))
+    term.onData((data) => window.cryogram.terminal.write(id, data))
 
-    const removeListener = window.cyberden.terminal.onData(id, (data) => term.write(data))
+    const removeListener = window.cryogram.terminal.onData(id, (data) => term.write(data))
     cleanupRef.current = removeListener
 
     const resizeObserver = new ResizeObserver(() => {
       fitAddon.fit()
       const { cols, rows } = term
-      window.cyberden.terminal.resize(id, cols, rows)
+      window.cryogram.terminal.resize(id, cols, rows)
     })
     resizeObserver.observe(containerRef.current)
     resizeCleanupRef.current = () => resizeObserver.disconnect()
@@ -81,7 +81,7 @@ export default function Terminal() {
       cleanupRef.current?.()
       resizeCleanupRef.current?.()
       const id = sessionIdRef.current
-      window.cyberden.terminal.destroy(id)
+      window.cryogram.terminal.destroy(id)
       termRef.current?.dispose()
     }
   }, [init])

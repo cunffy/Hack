@@ -43,7 +43,7 @@ Presentation {
         anchors.centerIn: parent
         spacing: 20
         Text {
-          text: "CyberDen — Your Security Hub"
+          text: "Cryogram — Your Security Hub"
           font.pixelSize: 28
           font.bold: true
           color: "#00d4ff"

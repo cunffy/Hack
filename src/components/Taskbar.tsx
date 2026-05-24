@@ -43,13 +43,13 @@ export function Taskbar() {
         }}
       >
         <motion.div
-          className="w-1.5 h-1.5 rounded-full bg-den-accent"
+          className="w-1.5 h-1.5 rounded-full bg-cryo-accent"
           animate={{ opacity: [1, 0.3, 1] }}
           transition={{ duration: 2.5, repeat: Infinity }}
           style={{ boxShadow: '0 0 5px rgba(0,212,255,0.8)' }}
         />
         <span
-          className="text-den-accent text-xs font-black tracking-widest"
+          className="text-cryo-accent text-xs font-black tracking-widest"
           style={{ fontFamily: '"JetBrains Mono", monospace' }}
         >
           CD
@@ -108,7 +108,7 @@ export function Taskbar() {
       </div>
 
       {/* Clock */}
-      <div className="text-den-muted text-xs font-mono shrink-0 tabular-nums">
+      <div className="text-cryo-muted text-xs font-mono shrink-0 tabular-nums">
         {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
       </div>
     </div>

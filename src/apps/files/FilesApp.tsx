@@ -47,11 +47,11 @@ export default function FilesApp() {
   const [ctx, setCtx] = useState<{ x: number; y: number; item: FileItem | null } | null>(null)
 
   useEffect(() => {
-    window.cyberden.files.getHome().then(h => {
+    window.cryogram.files.getHome().then(h => {
       setHome(h)
       navigate(h)
     })
-    window.cyberden.files.getDrives().then(setDrives)
+    window.cryogram.files.getDrives().then(setDrives)
   }, [])
 
   const navigate = useCallback(async (path: string, addHistory = true) => {
@@ -59,7 +59,7 @@ export default function FilesApp() {
     setSelected(new Set())
     setSearch('')
     try {
-      const entries = await window.cyberden.files.readDir(path)
+      const entries = await window.cryogram.files.readDir(path)
       setCwd(path)
       setItems(entries)
       if (addHistory) {
@@ -94,13 +94,13 @@ export default function FilesApp() {
     if (item.isDir) {
       navigate(item.path)
     } else {
-      await window.cyberden.files.openExternal(item.path)
+      await window.cryogram.files.openExternal(item.path)
     }
   }
 
   const deleteSelected = async () => {
     for (const path of selected) {
-      await window.cyberden.files.delete(path)
+      await window.cryogram.files.delete(path)
     }
     navigate(cwd, false)
     setCtx(null)
@@ -114,7 +114,7 @@ export default function FilesApp() {
 
   const commitRename = async () => {
     if (renaming && renameVal.trim()) {
-      await window.cyberden.files.rename(renaming, renameVal.trim())
+      await window.cryogram.files.rename(renaming, renameVal.trim())
       navigate(cwd, false)
     }
     setRenaming(null)
@@ -124,7 +124,7 @@ export default function FilesApp() {
     let name = 'New Folder'; let i = 1
     const names = items.map(x => x.name)
     while (names.includes(name)) name = `New Folder ${++i}`
-    await window.cyberden.files.mkdir(`${cwd}/${name}`)
+    await window.cryogram.files.mkdir(`${cwd}/${name}`)
     navigate(cwd, false)
   }
 
@@ -139,7 +139,7 @@ export default function FilesApp() {
 
   return (
     <div
-      className="flex flex-1 overflow-hidden text-den-text"
+      className="flex flex-1 overflow-hidden text-cryo-text"
       onContextMenu={e => { e.preventDefault(); setCtx({ x: e.clientX, y: e.clientY, item: null }) }}
       onClick={() => { setCtx(null); setSelected(new Set()) }}
     >
@@ -148,7 +148,7 @@ export default function FilesApp() {
         className="w-44 shrink-0 flex flex-col py-3 overflow-auto"
         style={{ borderRight: '1px solid rgba(26,40,64,0.6)', background: 'rgba(8,12,18,0.5)' }}
       >
-        <div className="px-3 mb-1 text-den-muted text-xs uppercase tracking-widest">Locations</div>
+        <div className="px-3 mb-1 text-cryo-muted text-xs uppercase tracking-widest">Locations</div>
         {SIDEBAR_LOCS.map(loc => (
           <button
             key={loc.key}
@@ -163,7 +163,7 @@ export default function FilesApp() {
 
         {drives.length > 0 && (
           <>
-            <div className="px-3 mt-3 mb-1 text-den-muted text-xs uppercase tracking-widest">Drives</div>
+            <div className="px-3 mt-3 mb-1 text-cryo-muted text-xs uppercase tracking-widest">Drives</div>
             {drives.map(d => (
               <button
                 key={d.path}
@@ -192,7 +192,7 @@ export default function FilesApp() {
 
           {/* Path bar */}
           <div
-            className="flex-1 mx-2 px-2.5 py-1 rounded-md text-xs truncate text-den-muted"
+            className="flex-1 mx-2 px-2.5 py-1 rounded-md text-xs truncate text-cryo-muted"
             style={{ background: 'rgba(8,12,18,0.6)', border: '1px solid rgba(26,40,64,0.6)' }}
             title={cwd}
           >
@@ -212,9 +212,9 @@ export default function FilesApp() {
         {/* File grid */}
         <div className="flex-1 overflow-auto p-4">
           {loading ? (
-            <div className="flex items-center justify-center h-full text-den-muted text-xs">Loading…</div>
+            <div className="flex items-center justify-center h-full text-cryo-muted text-xs">Loading…</div>
           ) : filtered.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-den-muted text-xs">
+            <div className="flex items-center justify-center h-full text-cryo-muted text-xs">
               {search ? 'No results' : 'Empty folder'}
             </div>
           ) : (
@@ -266,7 +266,7 @@ export default function FilesApp() {
                   )}
 
                   {!item.isDir && (
-                    <span className="text-xs text-den-muted">{formatSize(item.size)}</span>
+                    <span className="text-xs text-cryo-muted">{formatSize(item.size)}</span>
                   )}
                 </div>
               ))}
@@ -276,7 +276,7 @@ export default function FilesApp() {
 
         {/* Status bar */}
         <div
-          className="px-4 py-1 text-xs text-den-muted shrink-0"
+          className="px-4 py-1 text-xs text-cryo-muted shrink-0"
           style={{ borderTop: '1px solid rgba(26,40,64,0.4)' }}
         >
           {filtered.length} item{filtered.length !== 1 ? 's' : ''}
@@ -329,7 +329,7 @@ function NavBtn({ onClick, disabled, children, title }: { onClick: () => void; d
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className="w-7 h-7 flex items-center justify-center rounded text-den-muted hover:text-den-text hover:bg-white/5 transition-colors text-sm disabled:opacity-30"
+      className="w-7 h-7 flex items-center justify-center rounded text-cryo-muted hover:text-cryo-text hover:bg-white/5 transition-colors text-sm disabled:opacity-30"
     >
       {children}
     </button>

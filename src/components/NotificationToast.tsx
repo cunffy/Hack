@@ -21,8 +21,8 @@ export function NotificationToast() {
       setToasts((prev) => [...prev, { id, title, body }])
       setTimeout(() => dismiss(id), 5500)
     }
-    window.addEventListener('cyberden:notification', handler)
-    return () => window.removeEventListener('cyberden:notification', handler)
+    window.addEventListener('cryogram:notification', handler)
+    return () => window.removeEventListener('cryogram:notification', handler)
   }, [])
 
   return (
@@ -44,7 +44,7 @@ export function NotificationToast() {
             }}
           >
             {/* Accent bar */}
-            <div className="h-0.5 w-full bg-gradient-to-r from-den-accent via-den-purple to-transparent" />
+            <div className="h-0.5 w-full bg-gradient-to-r from-cryo-accent via-cryo-purple to-transparent" />
 
             <div className="p-3 flex items-start gap-2.5">
               <div
@@ -56,12 +56,12 @@ export function NotificationToast() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-den-accent text-xs font-bold truncate">{t.title}</div>
-                <div className="text-den-text text-xs mt-0.5 leading-relaxed opacity-80">{t.body}</div>
+                <div className="text-cryo-accent text-xs font-bold truncate">{t.title}</div>
+                <div className="text-cryo-text text-xs mt-0.5 leading-relaxed opacity-80">{t.body}</div>
               </div>
               <button
                 onClick={() => dismiss(t.id)}
-                className="text-den-muted hover:text-den-text transition-colors text-base leading-none shrink-0 mt-0.5"
+                className="text-cryo-muted hover:text-cryo-text transition-colors text-base leading-none shrink-0 mt-0.5"
               >
                 ×
               </button>
@@ -69,7 +69,7 @@ export function NotificationToast() {
 
             {/* Auto-dismiss progress */}
             <motion.div
-              className="h-px mx-3 mb-2 rounded-full bg-den-accent/40"
+              className="h-px mx-3 mb-2 rounded-full bg-cryo-accent/40"
               initial={{ scaleX: 1, originX: 0 }}
               animate={{ scaleX: 0 }}
               transition={{ duration: 5.5, ease: 'linear' }}

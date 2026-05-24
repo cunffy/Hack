@@ -1,5 +1,5 @@
 # Cryogram OS GRUB Theme
-# Colors: deep navy + cyan accent (matches CyberDen UI)
+# Colors: deep navy + cyan accent (matches Cryogram UI)
 
 title-text: ""
 desktop-color: "#0a0e14"

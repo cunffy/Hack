@@ -20,7 +20,7 @@ export function NetworkTester() {
   const jobIdRef = useRef<string | null>(null)
 
   useEffect(() => {
-    const cleanup = window.cyberden.passwordTester.onProgress((data) => {
+    const cleanup = window.cryogram.passwordTester.onProgress((data) => {
       if (data.jobId === jobIdRef.current) setProgress(data)
     })
     return cleanup
@@ -46,7 +46,7 @@ export function NetworkTester() {
     }
 
     try {
-      const res = await window.cyberden.passwordTester.runNetwork(opts)
+      const res = await window.cryogram.passwordTester.runNetwork(opts)
       jobIdRef.current = res.jobId
       setResult(res)
     } catch (err) {
@@ -57,20 +57,20 @@ export function NetworkTester() {
   }
 
   const cancel = () => {
-    if (jobIdRef.current) window.cyberden.passwordTester.cancel(jobIdRef.current)
+    if (jobIdRef.current) window.cryogram.passwordTester.cancel(jobIdRef.current)
     setRunning(false)
   }
 
   return (
     <div className="flex flex-col gap-4 p-4 overflow-auto flex-1">
-      <div className="panel p-3 text-xs text-den-yellow border-den-yellow/30 flex items-start gap-2">
+      <div className="panel p-3 text-xs text-cryo-yellow border-cryo-yellow/30 flex items-start gap-2">
         <span>⚠</span>
         <span>Only test systems you own or have explicit written authorization to test. Unauthorized access testing is illegal.</span>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Mode</label>
+          <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Mode</label>
           <select value={mode} onChange={(e) => setMode(e.target.value as Mode)} className="w-full">
             <option value="dictionary">Dictionary</option>
             <option value="bruteforce">Brute Force</option>
@@ -78,7 +78,7 @@ export function NetworkTester() {
           </select>
         </div>
         <div>
-          <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Protocol</label>
+          <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Protocol</label>
           <select value={protocol} onChange={(e) => setProtocol(e.target.value as Protocol)} className="w-full">
             <option value="ssh">SSH</option>
             <option value="http">HTTP Basic</option>
@@ -87,7 +87,7 @@ export function NetworkTester() {
           </select>
         </div>
         <div>
-          <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Rate Limit (req/s)</label>
+          <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Rate Limit (req/s)</label>
           <input
             type="number"
             min={1}
@@ -101,7 +101,7 @@ export function NetworkTester() {
 
       <div className="flex gap-3">
         <div className="flex-1">
-          <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Target Host</label>
+          <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Target Host</label>
           <input
             className="w-full"
             placeholder="192.168.1.1"
@@ -110,7 +110,7 @@ export function NetworkTester() {
           />
         </div>
         <div className="w-24">
-          <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Port</label>
+          <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Port</label>
           <input
             className="w-full"
             placeholder="auto"
@@ -122,7 +122,7 @@ export function NetworkTester() {
 
       {mode !== 'spraying' && (
         <div>
-          <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Username</label>
+          <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Username</label>
           <input
             className="w-full"
             placeholder="admin"
@@ -134,7 +134,7 @@ export function NetworkTester() {
 
       {mode !== 'spraying' && (
         <div>
-          <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Password Wordlist</label>
+          <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Password Wordlist</label>
           <input
             className="w-full"
             placeholder="/path/to/wordlist.txt"
@@ -147,7 +147,7 @@ export function NetworkTester() {
       {mode === 'spraying' && (
         <>
           <div>
-            <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Password to Spray</label>
+            <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Password to Spray</label>
             <input
               className="w-full"
               placeholder="Password123!"
@@ -156,7 +156,7 @@ export function NetworkTester() {
             />
           </div>
           <div>
-            <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Usernames (one per line)</label>
+            <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Usernames (one per line)</label>
             <textarea
               className="w-full h-24 resize-none"
               placeholder={"user1\nuser2\nadmin"}
@@ -178,13 +178,13 @@ export function NetworkTester() {
 
       {running && progress && (
         <div className="panel p-3 text-xs space-y-1">
-          <div className="flex justify-between text-den-muted">
-            <span>Attempts: <span className="text-den-text">{progress.attempts.toLocaleString()}</span></span>
-            <span>Rate: <span className="text-den-text">{progress.rate.toFixed(1)}/s</span></span>
-            <span>Elapsed: <span className="text-den-text">{progress.elapsed.toFixed(1)}s</span></span>
+          <div className="flex justify-between text-cryo-muted">
+            <span>Attempts: <span className="text-cryo-text">{progress.attempts.toLocaleString()}</span></span>
+            <span>Rate: <span className="text-cryo-text">{progress.rate.toFixed(1)}/s</span></span>
+            <span>Elapsed: <span className="text-cryo-text">{progress.elapsed.toFixed(1)}s</span></span>
           </div>
           {progress.currentWord && (
-            <div className="text-den-muted">Trying: <span className="text-den-accent font-mono">{progress.currentWord}</span></div>
+            <div className="text-cryo-muted">Trying: <span className="text-cryo-accent font-mono">{progress.currentWord}</span></div>
           )}
         </div>
       )}
@@ -193,21 +193,21 @@ export function NetworkTester() {
         <div className={`panel p-4`} style={{ borderColor: result.found ? 'rgba(0,255,136,0.5)' : 'rgba(255,68,102,0.5)' }}>
           {result.found && result.credentials ? (
             <>
-              <div className="text-den-green font-bold mb-3">Credentials Found!</div>
+              <div className="text-cryo-green font-bold mb-3">Credentials Found!</div>
               {result.credentials.map((c: { username: string; password: string }, i: number) => (
                 <div key={i} className="font-mono text-sm mb-1">
-                  <span className="text-den-muted">user: </span><span className="text-den-accent">{c.username}</span>
-                  <span className="text-den-muted">  pass: </span><span className="text-den-green">{c.password}</span>
+                  <span className="text-cryo-muted">user: </span><span className="text-cryo-accent">{c.username}</span>
+                  <span className="text-cryo-muted">  pass: </span><span className="text-cryo-green">{c.password}</span>
                 </div>
               ))}
-              <div className="text-xs text-den-muted mt-2">
+              <div className="text-xs text-cryo-muted mt-2">
                 {result.attempts.toLocaleString()} attempts · {result.elapsed.toFixed(2)}s
               </div>
             </>
           ) : (
             <>
-              <div className="text-den-red font-bold">No valid credentials found</div>
-              <div className="text-xs text-den-muted mt-1">
+              <div className="text-cryo-red font-bold">No valid credentials found</div>
+              <div className="text-xs text-cryo-muted mt-1">
                 {result.attempts.toLocaleString()} attempts · {result.elapsed.toFixed(2)}s
               </div>
             </>
@@ -215,7 +215,7 @@ export function NetworkTester() {
         </div>
       )}
 
-      {error && <div className="panel p-3 text-xs text-den-red">{error}</div>}
+      {error && <div className="panel p-3 text-xs text-cryo-red">{error}</div>}
     </div>
   )
 }

@@ -52,13 +52,13 @@ mkdir -p /etc/skel/.config/openbox
 cat > /etc/skel/.config/openbox/autostart << 'EOF'
 #!/bin/bash
 
-# Wallpaper (shown briefly during compositor startup; CyberDen covers it)
+# Wallpaper (shown briefly during compositor startup; Cryogram covers it)
 feh --bg-fill /usr/share/backgrounds/cryogram/wallpaper.png &
 
 # Compositor (glassmorphism + shadows)
 picom --daemon --config /etc/cryogram/picom.conf &
 
-# Notifications daemon (CyberDen forwards via Electron Notification API, but
+# Notifications daemon (Cryogram forwards via Electron Notification API, but
 # system-level notifications (e.g. from terminal tools) still use dunst)
 dunst &
 
@@ -74,9 +74,9 @@ libinput-gestures-setup start &
 # Redshift (adjusts colour temp at night)
 redshift-gtk &
 
-# Launch CyberDen as the full desktop shell
+# Launch Cryogram as the full desktop shell
 # --kiosk disables the Electron menu bar; DISPLAY and home are set by LightDM
-sleep 1 && cyberden --start-maximized --no-sandbox &
+sleep 1 && cryogram --start-maximized --no-sandbox &
 EOF
 chmod +x /etc/skel/.config/openbox/autostart
 
@@ -96,8 +96,8 @@ cat > /etc/skel/.config/openbox/rc.xml << 'RCEOF'
   <resize><drawContents>yes</drawContents><popupShow>Nonpixel</popupShow><popupPosition>Center</popupPosition><popupFixedPosition><x>30</x><y>30</y></popupFixedPosition></resize>
 
   <applications>
-    <!-- CyberDen: full-screen desktop shell, no WM decorations -->
-    <application name="cyberden">
+    <!-- Cryogram: full-screen desktop shell, no WM decorations -->
+    <application name="cryogram">
       <decor>no</decor>
       <maximized>yes</maximized>
       <fullscreen>no</fullscreen>
@@ -276,8 +276,8 @@ cat > /etc/skel/.config/openbox/menu.xml << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <openbox_menu xmlns="http://openbox.org/3.4/menu">
   <menu id="root-menu" label="Cryogram OS">
-    <item label="CyberDen">
-      <action name="Execute"><command>cyberden</command></action>
+    <item label="Cryogram">
+      <action name="Execute"><command>cryogram</command></action>
     </item>
     <separator/>
     <menu id="apps-menu" label="Applications">
@@ -347,7 +347,7 @@ fade-delta = 4;
 opacity-rule = [
   "94:class_g = 'Alacritty'",
   "94:class_g = 'xfce4-terminal'",
-  "98:class_g = 'cyberden'"
+  "98:class_g = 'cryogram'"
 ];
 blur-method = "dual_kawase";
 blur-strength = 4;

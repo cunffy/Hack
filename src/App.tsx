@@ -12,8 +12,8 @@ export default function App() {
   const [booted, setBooted] = useState(false)
 
   useEffect(() => {
-    const cleanup = window.cyberden.onNotification((n) => {
-      const event = new CustomEvent('cyberden:notification', { detail: n })
+    const cleanup = window.cryogram.onNotification((n) => {
+      const event = new CustomEvent('cryogram:notification', { detail: n })
       window.dispatchEvent(event)
     })
     return cleanup
@@ -28,7 +28,7 @@ export default function App() {
       <AnimatePresence>
         {booted && (
           <motion.div
-            className="flex flex-col h-screen w-screen overflow-hidden bg-den-bg"
+            className="flex flex-col h-screen w-screen overflow-hidden bg-cryo-bg"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}

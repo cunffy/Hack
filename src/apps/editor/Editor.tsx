@@ -14,9 +14,9 @@ const RUN_COMMANDS: Record<string, string> = {
   python: 'python3 "{file}"',
   javascript: 'node "{file}"',
   typescript: 'npx ts-node "{file}"',
-  c: 'gcc "{file}" -o /tmp/cyberden_c_out && /tmp/cyberden_c_out',
-  cpp: 'g++ "{file}" -o /tmp/cyberden_cpp_out && /tmp/cyberden_cpp_out',
-  rust: 'rustc "{file}" -o /tmp/cyberden_rs_out && /tmp/cyberden_rs_out',
+  c: 'gcc "{file}" -o /tmp/cryogram_c_out && /tmp/cryogram_c_out',
+  cpp: 'g++ "{file}" -o /tmp/cryogram_cpp_out && /tmp/cryogram_cpp_out',
+  rust: 'rustc "{file}" -o /tmp/cryogram_rs_out && /tmp/cryogram_rs_out',
   go: 'go run "{file}"',
   shell: 'bash "{file}"',
 }
@@ -37,14 +37,14 @@ export default function Editor() {
   const [running, setRunning] = useState(false)
 
   useEffect(() => {
-    window.cyberden.fs.getWorkspace().then(setWorkspace)
+    window.cryogram.fs.getWorkspace().then(setWorkspace)
   }, [])
 
   const openFile = useCallback(async (filePath: string, fileName: string) => {
     const existing = files.findIndex((f) => f.path === filePath)
     if (existing >= 0) { setActiveIdx(existing); return }
     try {
-      const content = await window.cyberden.fs.readFile(filePath)
+      const content = await window.cryogram.fs.readFile(filePath)
       const ext = fileName.split('.').pop() || ''
       const lang = LANG_MAP[ext] || 'plaintext'
       setFiles((prev) => {
@@ -60,7 +60,7 @@ export default function Editor() {
   const saveFile = useCallback(async () => {
     const file = files[activeIdx]
     if (!file) return
-    await window.cyberden.fs.writeFile(file.path, file.content)
+    await window.cryogram.fs.writeFile(file.path, file.content)
     setFiles((prev) => prev.map((f, i) => i === activeIdx ? { ...f, dirty: false } : f))
   }, [files, activeIdx])
 
@@ -75,7 +75,7 @@ export default function Editor() {
     setRunning(true)
     setOutput('Running...\n')
     // Save first
-    await window.cyberden.fs.writeFile(file.path, file.content)
+    await window.cryogram.fs.writeFile(file.path, file.content)
     const cmd = RUN_COMMANDS[file.lang]
     if (!cmd) { setOutput(`No runner configured for ${file.lang}`); setRunning(false); return }
     // Fire via terminal IPC would require a new terminal session;
@@ -89,11 +89,11 @@ export default function Editor() {
   if (!workspace) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8">
-        <div className="text-den-muted text-sm">No workspace selected</div>
+        <div className="text-cryo-muted text-sm">No workspace selected</div>
         <button
           className="btn btn-primary"
           onClick={async () => {
-            const path = await window.cyberden.fs.openDialog()
+            const path = await window.cryogram.fs.openDialog()
             if (path) setWorkspace(path)
           }}
         >
@@ -106,26 +106,26 @@ export default function Editor() {
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* File tree sidebar */}
-      <div className="w-48 shrink-0 border-r border-den-border overflow-auto">
+      <div className="w-48 shrink-0 border-r border-cryo-border overflow-auto">
         <FileTree workspace={workspace} onOpenFile={openFile} />
       </div>
 
       {/* Editor area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Tabs */}
-        <div className="flex items-center border-b border-den-border bg-den-surface overflow-x-auto shrink-0">
+        <div className="flex items-center border-b border-cryo-border bg-cryo-surface overflow-x-auto shrink-0">
           {files.map((f, idx) => (
             <div
               key={f.path}
               onClick={() => setActiveIdx(idx)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 border-r border-den-border cursor-pointer shrink-0 text-xs transition-colors ${
-                idx === activeIdx ? 'bg-den-bg text-den-text' : 'text-den-muted hover:text-den-text'
+              className={`flex items-center gap-1.5 px-3 py-1.5 border-r border-cryo-border cursor-pointer shrink-0 text-xs transition-colors ${
+                idx === activeIdx ? 'bg-cryo-bg text-cryo-text' : 'text-cryo-muted hover:text-cryo-text'
               }`}
             >
               <span className="max-w-28 truncate">{f.name}{f.dirty ? ' •' : ''}</span>
               <button
                 onClick={(e) => { e.stopPropagation(); closeTab(idx) }}
-                className="text-den-muted hover:text-den-red w-3.5 h-3.5 flex items-center justify-center rounded"
+                className="text-cryo-muted hover:text-cryo-red w-3.5 h-3.5 flex items-center justify-center rounded"
               >
                 ×
               </button>
@@ -136,9 +136,9 @@ export default function Editor() {
         {activeFile ? (
           <>
             {/* Toolbar */}
-            <div className="flex items-center gap-2 px-3 py-1.5 border-b border-den-border bg-den-surface shrink-0">
-              <span className="text-xs text-den-muted flex-1 truncate">{activeFile.path}</span>
-              <span className="badge text-den-muted" style={{ background: '#1e2d40' }}>{activeFile.lang}</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 border-b border-cryo-border bg-cryo-surface shrink-0">
+              <span className="text-xs text-cryo-muted flex-1 truncate">{activeFile.path}</span>
+              <span className="badge text-cryo-muted" style={{ background: '#1e2d40' }}>{activeFile.lang}</span>
               <button className="btn text-xs py-1 px-2" onClick={saveFile}>Save</button>
               <button
                 className="btn btn-success text-xs py-1 px-2"
@@ -172,14 +172,14 @@ export default function Editor() {
             />
 
             {output && (
-              <div className="border-t border-den-border bg-den-bg p-3 overflow-auto font-mono text-xs text-den-green whitespace-pre" style={{ height: '35%' }}>
+              <div className="border-t border-cryo-border bg-cryo-bg p-3 overflow-auto font-mono text-xs text-cryo-green whitespace-pre" style={{ height: '35%' }}>
                 {output}
                 <button className="btn text-xs mt-2" onClick={() => setOutput(null)}>Clear</button>
               </div>
             )}
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-den-muted text-sm">
+          <div className="flex-1 flex items-center justify-center text-cryo-muted text-sm">
             Double-click a file to open it
           </div>
         )}

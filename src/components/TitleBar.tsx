@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import SystemTray from './SystemTray'
 
 export function TitleBar() {
-  const isMock = !window.cyberden?.window?.close
+  const isMock = !window.cryogram?.window?.close
 
   return (
     <div
@@ -24,18 +24,18 @@ export function TitleBar() {
       <div className="flex items-center gap-3">
         {/* Status dot */}
         <motion.div
-          className="w-2 h-2 rounded-full bg-den-green"
+          className="w-2 h-2 rounded-full bg-cryo-green"
           animate={{ opacity: [1, 0.4, 1] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
           style={{ boxShadow: '0 0 6px rgba(0,255,136,0.8)' }}
         />
         <span
-          className="text-den-accent font-black text-sm tracking-[0.2em] glow-cyan"
+          className="text-cryo-accent font-black text-sm tracking-[0.2em] glow-cyan"
           style={{ fontFamily: '"JetBrains Mono", monospace' }}
         >
-          CYBERDEN
+          CRYOGRAM
         </span>
-        <span className="text-den-muted text-xs tracking-wide hidden sm:block">
+        <span className="text-cryo-muted text-xs tracking-wide hidden sm:block">
           Security Operations Platform
         </span>
       </div>
@@ -56,7 +56,7 @@ export function TitleBar() {
         <WinBtn
           title="Minimize"
           hoverColor="#ffcc00"
-          onClick={() => !isMock && window.cyberden.window.minimize()}
+          onClick={() => !isMock && window.cryogram.window.minimize()}
         >
           <svg width="10" height="2" viewBox="0 0 10 2" fill="currentColor">
             <rect width="10" height="2" rx="1" />
@@ -65,7 +65,7 @@ export function TitleBar() {
         <WinBtn
           title="Maximize"
           hoverColor="#00d4ff"
-          onClick={() => !isMock && window.cyberden.window.maximize()}
+          onClick={() => !isMock && window.cryogram.window.maximize()}
         >
           <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" strokeWidth="1.5">
             <rect x="0.75" y="0.75" width="7.5" height="7.5" rx="1.5" />
@@ -75,7 +75,7 @@ export function TitleBar() {
           title="Close"
           hoverColor="#ff4466"
           hoverBg="rgba(255,68,102,0.15)"
-          onClick={() => !isMock && window.cyberden.window.close()}
+          onClick={() => !isMock && window.cryogram.window.close()}
         >
           <svg width="9" height="9" viewBox="0 0 9 9" stroke="currentColor" strokeWidth="1.5">
             <line x1="1" y1="1" x2="8" y2="8" />
@@ -104,7 +104,7 @@ function WinBtn({
     <motion.button
       onClick={onClick}
       title={title}
-      className="w-7 h-7 flex items-center justify-center rounded text-den-muted transition-colors"
+      className="w-7 h-7 flex items-center justify-center rounded text-cryo-muted transition-colors"
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       style={{ '--hc': hoverColor, '--hbg': hoverBg ?? 'rgba(255,255,255,0.06)' } as React.CSSProperties}

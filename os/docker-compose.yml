@@ -9,8 +9,8 @@ services:
     container_name: cryogram-build
     privileged: true        # Required for loopback mounts during ISO creation
     volumes:
-      # Mount CyberDen source into the build
-      - ../:/build/cyberden-src:ro
+      # Mount Cryogram source into the build
+      - ../:/build/cryogram-src:ro
       # Output directory — ISO ends up here on your host
       - ./output:/build/output
     environment:

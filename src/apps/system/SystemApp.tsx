@@ -15,13 +15,13 @@ export default function SystemApp() {
   const [tab, setTab] = useState<Tab>('network')
 
   return (
-    <div className="flex flex-1 overflow-hidden text-den-text">
+    <div className="flex flex-1 overflow-hidden text-cryo-text">
       {/* Sidebar */}
       <div
         className="w-44 shrink-0 flex flex-col py-3"
         style={{ borderRight: '1px solid rgba(26,40,64,0.6)', background: 'rgba(8,12,18,0.5)' }}
       >
-        <div className="px-3 mb-2 text-den-muted text-xs uppercase tracking-widest">Settings</div>
+        <div className="px-3 mb-2 text-cryo-muted text-xs uppercase tracking-widest">Settings</div>
         {TABS.map(t => (
           <button
             key={t.id}
@@ -70,8 +70,8 @@ function NetworkPanel() {
 
   const load = useCallback(async () => {
     const [nets, s] = await Promise.all([
-      window.cyberden.system.getNetworks(),
-      window.cyberden.system.getWifiStatus(),
+      window.cryogram.system.getNetworks(),
+      window.cryogram.system.getWifiStatus(),
     ])
     setNetworks(nets)
     setStatus(s)
@@ -82,19 +82,19 @@ function NetworkPanel() {
   const connect = async (ssid: string, password?: string) => {
     setConnecting(ssid)
     setPwdFor(null)
-    await window.cyberden.system.connectNetwork(ssid, password)
+    await window.cryogram.system.connectNetwork(ssid, password)
     await load()
     setConnecting(null)
   }
 
   const disconnect = async () => {
-    await window.cyberden.system.disconnectNetwork()
+    await window.cryogram.system.disconnectNetwork()
     await load()
   }
 
   const rescan = async () => {
     setScanning(true)
-    await window.cyberden.system.rescanNetworks()
+    await window.cryogram.system.rescanNetworks()
     await load()
     setScanning(false)
   }
@@ -113,7 +113,7 @@ function NetworkPanel() {
         <div>
           <h2 className="text-sm font-semibold">Wi-Fi</h2>
           {status?.connected && (
-            <p className="text-xs text-den-muted mt-0.5">Connected to <span style={{ color: '#00d4ff' }}>{status.ssid}</span></p>
+            <p className="text-xs text-cryo-muted mt-0.5">Connected to <span style={{ color: '#00d4ff' }}>{status.ssid}</span></p>
           )}
         </div>
         <div className="flex gap-2">
@@ -139,7 +139,7 @@ function NetworkPanel() {
               </span>
               <div>
                 <div className="text-xs" style={{ color: net.active ? '#00d4ff' : '#c9d1d9' }}>{net.ssid}</div>
-                <div className="text-xs text-den-muted">{net.security || 'Open'}</div>
+                <div className="text-xs text-cryo-muted">{net.security || 'Open'}</div>
               </div>
             </div>
             {!net.active && (
@@ -153,7 +153,7 @@ function NetworkPanel() {
           </div>
         ))}
         {networks.length === 0 && (
-          <p className="text-xs text-den-muted text-center py-8">No networks found — click Scan</p>
+          <p className="text-xs text-cryo-muted text-center py-8">No networks found — click Scan</p>
         )}
       </div>
 
@@ -171,7 +171,7 @@ function NetworkPanel() {
               style={{ background: 'rgba(13,20,33,0.98)', border: '1px solid rgba(26,40,64,0.9)' }}
             >
               <p className="text-sm mb-1">Connect to <span style={{ color: '#00d4ff' }}>{pwdFor}</span></p>
-              <p className="text-xs text-den-muted mb-3">Enter Wi-Fi password</p>
+              <p className="text-xs text-cryo-muted mb-3">Enter Wi-Fi password</p>
               <input
                 autoFocus
                 type="password"
@@ -202,7 +202,7 @@ function BluetoothPanel() {
   const [busy, setBusy] = useState<string | null>(null)
 
   const load = async () => {
-    const devs = await window.cyberden.system.getBluetoothDevices()
+    const devs = await window.cryogram.system.getBluetoothDevices()
     setDevices(devs)
   }
 
@@ -210,15 +210,15 @@ function BluetoothPanel() {
 
   const scan = async () => {
     setScanning(true)
-    await window.cyberden.system.bluetoothScan()
+    await window.cryogram.system.bluetoothScan()
     await load()
     setScanning(false)
   }
 
   const toggle = async (dev: BtDevice) => {
     setBusy(dev.address)
-    if (dev.connected) await window.cyberden.system.bluetoothDisconnect(dev.address)
-    else await window.cyberden.system.bluetoothConnect(dev.address)
+    if (dev.connected) await window.cryogram.system.bluetoothDisconnect(dev.address)
+    else await window.cryogram.system.bluetoothConnect(dev.address)
     await load()
     setBusy(null)
   }
@@ -240,7 +240,7 @@ function BluetoothPanel() {
           >
             <div>
               <div className="text-xs" style={{ color: dev.connected ? '#00d4ff' : '#c9d1d9' }}>{dev.name || dev.address}</div>
-              <div className="text-xs text-den-muted">{dev.address}</div>
+              <div className="text-xs text-cryo-muted">{dev.address}</div>
             </div>
             <SettingBtn onClick={() => toggle(dev)} disabled={busy === dev.address} primary={dev.connected}>
               {busy === dev.address ? '…' : dev.connected ? 'Disconnect' : 'Connect'}
@@ -248,7 +248,7 @@ function BluetoothPanel() {
           </div>
         ))}
         {devices.length === 0 && (
-          <p className="text-xs text-den-muted text-center py-8">No paired devices — click Scan</p>
+          <p className="text-xs text-cryo-muted text-center py-8">No paired devices — click Scan</p>
         )}
       </div>
     </div>
@@ -261,7 +261,7 @@ function SoundPanel() {
   const [vol, setVol] = useState<VolumeInfo | null>(null)
 
   const load = async () => {
-    const v = await window.cyberden.system.getVolume()
+    const v = await window.cryogram.system.getVolume()
     setVol(v)
   }
 
@@ -269,11 +269,11 @@ function SoundPanel() {
 
   const setVolume = async (level: number) => {
     setVol((v: VolumeInfo | null) => v ? { ...v, level } : v)
-    await window.cyberden.system.setVolume(level)
+    await window.cryogram.system.setVolume(level)
   }
 
   const toggleMute = async () => {
-    await window.cyberden.system.toggleMute()
+    await window.cryogram.system.toggleMute()
     load()
   }
 
@@ -286,7 +286,7 @@ function SoundPanel() {
           style={{ background: 'rgba(13,20,33,0.5)', border: '1px solid rgba(26,40,64,0.5)' }}
         >
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs text-den-muted">Output Volume</span>
+            <span className="text-xs text-cryo-muted">Output Volume</span>
             <span className="text-xs font-mono" style={{ color: vol.muted ? '#6b7280' : '#00d4ff' }}>
               {vol.muted ? 'Muted' : `${vol.level}%`}
             </span>
@@ -312,7 +312,7 @@ function DisplayPanel() {
   const [brightness, setBrightnessState] = useState<number | null>(null)
 
   const load = async () => {
-    const b = await window.cyberden.system.getBrightness()
+    const b = await window.cryogram.system.getBrightness()
     setBrightnessState(b)
   }
 
@@ -320,7 +320,7 @@ function DisplayPanel() {
 
   const setBrightness = async (pct: number) => {
     setBrightnessState(pct)
-    await window.cyberden.system.setBrightness(pct)
+    await window.cryogram.system.setBrightness(pct)
   }
 
   return (
@@ -331,7 +331,7 @@ function DisplayPanel() {
         style={{ background: 'rgba(13,20,33,0.5)', border: '1px solid rgba(26,40,64,0.5)' }}
       >
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-den-muted">Brightness</span>
+          <span className="text-xs text-cryo-muted">Brightness</span>
           <span className="text-xs font-mono" style={{ color: '#00d4ff' }}>
             {brightness !== null ? `${brightness}%` : '—'}
           </span>
@@ -354,12 +354,12 @@ function AboutPanel() {
   const [info, setInfo] = useState<SystemInfo | null>(null)
 
   useEffect(() => {
-    window.cyberden.system.getInfo().then(setInfo).catch(() => {})
+    window.cryogram.system.getInfo().then(setInfo).catch(() => {})
   }, [])
 
   const Row = ({ label, value }: { label: string; value: string }) => (
     <div className="flex items-start justify-between py-2.5" style={{ borderBottom: '1px solid rgba(26,40,64,0.4)' }}>
-      <span className="text-xs text-den-muted">{label}</span>
+      <span className="text-xs text-cryo-muted">{label}</span>
       <span className="text-xs text-right ml-4" style={{ color: '#c9d1d9', maxWidth: '60%' }}>{value}</span>
     </div>
   )
@@ -374,8 +374,8 @@ function AboutPanel() {
           🛡
         </div>
         <div>
-          <div className="text-lg font-bold" style={{ color: '#00d4ff' }}>CyberDen</div>
-          <div className="text-xs text-den-muted">Security Operations Platform</div>
+          <div className="text-lg font-bold" style={{ color: '#00d4ff' }}>Cryogram</div>
+          <div className="text-xs text-cryo-muted">Security Operations Platform</div>
         </div>
       </div>
       {info && (
@@ -394,9 +394,9 @@ function AboutPanel() {
         </div>
       )}
       <div className="mt-4 flex gap-2">
-        <SettingBtn onClick={() => window.cyberden.system.lock()}>Lock Screen</SettingBtn>
-        <SettingBtn onClick={() => window.cyberden.system.reboot()}>Reboot</SettingBtn>
-        <SettingBtn onClick={() => window.cyberden.system.shutdown()} primary>Shut Down</SettingBtn>
+        <SettingBtn onClick={() => window.cryogram.system.lock()}>Lock Screen</SettingBtn>
+        <SettingBtn onClick={() => window.cryogram.system.reboot()}>Reboot</SettingBtn>
+        <SettingBtn onClick={() => window.cryogram.system.shutdown()} primary>Shut Down</SettingBtn>
       </div>
     </div>
   )

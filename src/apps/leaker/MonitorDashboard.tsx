@@ -34,7 +34,7 @@ export function MonitorDashboard({ targets, breaches, onAdd, onRemove }: Props) 
     <div className="flex flex-col gap-4 p-4 overflow-auto flex-1">
       {/* Add target */}
       <div className="panel p-4">
-        <div className="text-xs text-den-muted uppercase tracking-wider mb-3">Add Target to Monitor</div>
+        <div className="text-xs text-cryo-muted uppercase tracking-wider mb-3">Add Target to Monitor</div>
         <div className="flex gap-2 flex-wrap">
           <select
             value={type}
@@ -66,11 +66,11 @@ export function MonitorDashboard({ targets, breaches, onAdd, onRemove }: Props) 
 
       {/* Target list */}
       <div>
-        <div className="text-xs text-den-muted uppercase tracking-wider mb-2">
+        <div className="text-xs text-cryo-muted uppercase tracking-wider mb-2">
           Monitored Targets ({targets.length})
         </div>
         {targets.length === 0 ? (
-          <div className="panel p-4 text-center text-xs text-den-muted">
+          <div className="panel p-4 text-center text-xs text-cryo-muted">
             No targets yet. Add emails, domains, or usernames to monitor for breaches.
           </div>
         ) : (
@@ -80,31 +80,31 @@ export function MonitorDashboard({ targets, breaches, onAdd, onRemove }: Props) 
               return (
                 <div key={t.id} className="panel p-3 flex items-center gap-3">
                   <span className={`badge text-xs ${
-                    t.type === 'email' ? 'bg-den-accent/10 text-den-accent' :
-                    t.type === 'domain' ? 'bg-den-purple/10 text-den-purple' :
-                    'bg-den-green/10 text-den-green'
+                    t.type === 'email' ? 'bg-cryo-accent/10 text-cryo-accent' :
+                    t.type === 'domain' ? 'bg-cryo-purple/10 text-cryo-purple' :
+                    'bg-cryo-green/10 text-cryo-green'
                   }`}>
                     {t.type}
                   </span>
                   <div className="flex-1">
-                    <div className="text-sm text-den-text">{t.label}</div>
-                    <div className="text-xs text-den-muted font-mono">{t.value}</div>
+                    <div className="text-sm text-cryo-text">{t.label}</div>
+                    <div className="text-xs text-cryo-muted font-mono">{t.value}</div>
                   </div>
                   <div className="text-right">
                     {count > 0 ? (
-                      <span className="badge bg-den-red/20 text-den-red">{count} breaches</span>
+                      <span className="badge bg-cryo-red/20 text-cryo-red">{count} breaches</span>
                     ) : (
-                      <span className="badge bg-den-green/10 text-den-green">Clean</span>
+                      <span className="badge bg-cryo-green/10 text-cryo-green">Clean</span>
                     )}
                     {t.last_checked && (
-                      <div className="text-xs text-den-muted mt-0.5">
+                      <div className="text-xs text-cryo-muted mt-0.5">
                         Checked: {new Date(t.last_checked).toLocaleDateString()}
                       </div>
                     )}
                   </div>
                   <button
                     onClick={() => onRemove(t.id)}
-                    className="text-den-muted hover:text-den-red transition-colors text-xs ml-1"
+                    className="text-cryo-muted hover:text-cryo-red transition-colors text-xs ml-1"
                   >
                     Remove
                   </button>
@@ -125,7 +125,7 @@ export function MonitorDashboard({ targets, breaches, onAdd, onRemove }: Props) 
           ].map(({ label, value, color }) => (
             <div key={label} className="panel p-3 text-center">
               <div className="text-2xl font-bold font-mono" style={{ color }}>{value}</div>
-              <div className="text-xs text-den-muted mt-1">{label}</div>
+              <div className="text-xs text-cryo-muted mt-1">{label}</div>
             </div>
           ))}
         </div>

@@ -26,7 +26,7 @@ export default function LauncherApp() {
   const [launching, setLaunching] = useState<string | null>(null)
 
   useEffect(() => {
-    window.cyberden.launcher.getApps().then(setApps).catch(() => setApps([]))
+    window.cryogram.launcher.getApps().then(setApps).catch(() => setApps([]))
   }, [])
 
   const categories = useMemo(() => {
@@ -46,19 +46,19 @@ export default function LauncherApp() {
   const launch = async (app: AppEntry) => {
     setLaunching(app.desktopFile)
     try {
-      await window.cyberden.launcher.launch(app)
+      await window.cryogram.launcher.launch(app)
     } catch {}
     setTimeout(() => setLaunching(null), 1500)
   }
 
   return (
-    <div className="flex flex-1 overflow-hidden text-den-text">
+    <div className="flex flex-1 overflow-hidden text-cryo-text">
       {/* Sidebar */}
       <div
         className="w-44 shrink-0 flex flex-col py-3 overflow-auto"
         style={{ borderRight: '1px solid rgba(26,40,64,0.6)', background: 'rgba(8,12,18,0.5)' }}
       >
-        <div className="px-3 mb-2 text-den-muted text-xs uppercase tracking-widest">Categories</div>
+        <div className="px-3 mb-2 text-cryo-muted text-xs uppercase tracking-widest">Categories</div>
         {categories.map(cat => (
           <button
             key={cat}
@@ -92,7 +92,7 @@ export default function LauncherApp() {
         {/* App grid */}
         <div className="flex-1 overflow-auto p-4">
           {filtered.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-den-muted text-xs">
+            <div className="flex items-center justify-center h-full text-cryo-muted text-xs">
               No applications found
             </div>
           ) : (
@@ -136,7 +136,7 @@ export default function LauncherApp() {
                     </div>
                     <span className="text-xs text-center leading-tight line-clamp-2 max-w-full">{app.name}</span>
                     {launching === app.desktopFile && (
-                      <span className="text-xs text-den-accent">Launching…</span>
+                      <span className="text-xs text-cryo-accent">Launching…</span>
                     )}
                   </motion.div>
                 ))}
@@ -146,7 +146,7 @@ export default function LauncherApp() {
         </div>
 
         <div
-          className="px-4 py-1 text-xs text-den-muted shrink-0"
+          className="px-4 py-1 text-xs text-cryo-muted shrink-0"
           style={{ borderTop: '1px solid rgba(26,40,64,0.4)' }}
         >
           {filtered.length} app{filtered.length !== 1 ? 's' : ''} · Double-click to launch

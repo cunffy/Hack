@@ -27,7 +27,7 @@ export function HashCracker() {
   const cleanupRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
-    const cleanup = window.cyberden.passwordTester.onProgress((data) => {
+    const cleanup = window.cryogram.passwordTester.onProgress((data) => {
       if (data.jobId === jobIdRef.current) setProgress(data)
     })
     cleanupRef.current = cleanup
@@ -52,7 +52,7 @@ export function HashCracker() {
     }
 
     try {
-      const res = await window.cyberden.passwordTester.runCrack(opts)
+      const res = await window.cryogram.passwordTester.runCrack(opts)
       jobIdRef.current = res.jobId
       setResult(res)
     } catch (err) {
@@ -63,7 +63,7 @@ export function HashCracker() {
   }
 
   const cancel = () => {
-    if (jobIdRef.current) window.cyberden.passwordTester.cancel(jobIdRef.current)
+    if (jobIdRef.current) window.cryogram.passwordTester.cancel(jobIdRef.current)
     setRunning(false)
   }
 
@@ -76,7 +76,7 @@ export function HashCracker() {
       <div className="grid grid-cols-2 gap-4">
         {/* Mode */}
         <div>
-          <label className="block text-xs text-den-muted mb-2 uppercase tracking-wider">Mode</label>
+          <label className="block text-xs text-cryo-muted mb-2 uppercase tracking-wider">Mode</label>
           <div className="space-y-1">
             {MODES.map((m) => (
               <label key={m.id} className="flex items-start gap-2 cursor-pointer group">
@@ -89,8 +89,8 @@ export function HashCracker() {
                   className="mt-0.5 accent-den-accent"
                 />
                 <div>
-                  <div className="text-xs text-den-text">{m.label}</div>
-                  <div className="text-xs text-den-muted">{m.desc}</div>
+                  <div className="text-xs text-cryo-text">{m.label}</div>
+                  <div className="text-xs text-cryo-muted">{m.desc}</div>
                 </div>
               </label>
             ))}
@@ -99,7 +99,7 @@ export function HashCracker() {
 
         {/* Algorithm */}
         <div>
-          <label className="block text-xs text-den-muted mb-2 uppercase tracking-wider">Algorithm</label>
+          <label className="block text-xs text-cryo-muted mb-2 uppercase tracking-wider">Algorithm</label>
           <select
             value={algorithm}
             onChange={(e) => setAlgorithm(e.target.value as Algorithm)}
@@ -114,7 +114,7 @@ export function HashCracker() {
 
       {/* Hash input */}
       <div>
-        <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Hash</label>
+        <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Hash</label>
         <input
           className="w-full font-mono"
           placeholder="Paste hash here..."
@@ -126,7 +126,7 @@ export function HashCracker() {
       {/* Mode-specific options */}
       {(mode === 'dictionary' || mode === 'hybrid') && (
         <div>
-          <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Wordlist Path</label>
+          <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Wordlist Path</label>
           <input
             className="w-full"
             placeholder="/path/to/rockyou.txt"
@@ -139,7 +139,7 @@ export function HashCracker() {
       {mode === 'bruteforce' && (
         <div className="flex gap-4">
           <div className="flex-1">
-            <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Max Length</label>
+            <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Max Length</label>
             <input
               type="number"
               min={1}
@@ -150,7 +150,7 @@ export function HashCracker() {
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Charsets</label>
+            <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Charsets</label>
             <div className="flex flex-wrap gap-2">
               {['lowercase', 'uppercase', 'digits', 'symbols'].map((c) => (
                 <label key={c} className="flex items-center gap-1.5 cursor-pointer text-xs">
@@ -170,7 +170,7 @@ export function HashCracker() {
 
       {mode === 'rainbow' && (
         <div>
-          <label className="block text-xs text-den-muted mb-1.5 uppercase tracking-wider">Rainbow Table Path</label>
+          <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Rainbow Table Path</label>
           <input
             className="w-full"
             placeholder="/path/to/table.rt"
@@ -197,32 +197,32 @@ export function HashCracker() {
       {/* Progress */}
       {running && progress && (
         <div className="panel p-3 text-xs space-y-1">
-          <div className="flex justify-between text-den-muted">
-            <span>Attempts: <span className="text-den-text">{progress.attempts.toLocaleString()}</span></span>
-            <span>Rate: <span className="text-den-text">{progress.rate.toLocaleString()}/s</span></span>
-            <span>Elapsed: <span className="text-den-text">{progress.elapsed.toFixed(1)}s</span></span>
+          <div className="flex justify-between text-cryo-muted">
+            <span>Attempts: <span className="text-cryo-text">{progress.attempts.toLocaleString()}</span></span>
+            <span>Rate: <span className="text-cryo-text">{progress.rate.toLocaleString()}/s</span></span>
+            <span>Elapsed: <span className="text-cryo-text">{progress.elapsed.toFixed(1)}s</span></span>
           </div>
           {progress.currentWord && (
-            <div className="text-den-muted">Current: <span className="text-den-accent font-mono">{progress.currentWord}</span></div>
+            <div className="text-cryo-muted">Current: <span className="text-cryo-accent font-mono">{progress.currentWord}</span></div>
           )}
         </div>
       )}
 
       {/* Result */}
       {result && (
-        <div className={`panel p-4 ${result.found ? 'border-den-green/50' : 'border-den-red/50'}`} style={{ borderColor: result.found ? 'rgba(0,255,136,0.5)' : 'rgba(255,68,102,0.5)' }}>
+        <div className={`panel p-4 ${result.found ? 'border-cryo-green/50' : 'border-cryo-red/50'}`} style={{ borderColor: result.found ? 'rgba(0,255,136,0.5)' : 'rgba(255,68,102,0.5)' }}>
           {result.found ? (
             <>
-              <div className="text-den-green font-bold mb-2">Password Found!</div>
-              <div className="font-mono text-den-accent text-lg">{result.password}</div>
-              <div className="text-xs text-den-muted mt-2">
+              <div className="text-cryo-green font-bold mb-2">Password Found!</div>
+              <div className="font-mono text-cryo-accent text-lg">{result.password}</div>
+              <div className="text-xs text-cryo-muted mt-2">
                 {result.attempts.toLocaleString()} attempts · {result.elapsed.toFixed(2)}s
               </div>
             </>
           ) : (
             <>
-              <div className="text-den-red font-bold">Not Found</div>
-              <div className="text-xs text-den-muted mt-1">
+              <div className="text-cryo-red font-bold">Not Found</div>
+              <div className="text-xs text-cryo-muted mt-1">
                 Exhausted {result.attempts.toLocaleString()} attempts in {result.elapsed.toFixed(2)}s
               </div>
             </>
@@ -231,7 +231,7 @@ export function HashCracker() {
       )}
 
       {error && (
-        <div className="panel p-3 text-xs text-den-red border-den-red/30">
+        <div className="panel p-3 text-xs text-cryo-red border-cryo-red/30">
           Error: {error}
         </div>
       )}

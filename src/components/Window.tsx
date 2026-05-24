@@ -27,7 +27,7 @@ function AppContent({ appId }: { appId: string }) {
     <Suspense
       fallback={
         <div className="flex-1 flex items-center justify-center">
-          <div className="flex items-center gap-2 text-den-muted text-xs">
+          <div className="flex items-center gap-2 text-cryo-muted text-xs">
             <motion.span
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -152,7 +152,7 @@ export function AppWindow({ window: win }: { window: AppWindowType }) {
         </div>
 
         {/* Title */}
-        <span className="text-den-muted text-xs tracking-wide absolute left-1/2 -translate-x-1/2">
+        <span className="text-cryo-muted text-xs tracking-wide absolute left-1/2 -translate-x-1/2">
           {win.title}
         </span>
 

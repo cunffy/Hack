@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const BOOT_LINES = [
-  '[ OK ] Loaded CyberDen kernel modules',
+  '[ OK ] Loaded Cryogram kernel modules',
   '[ OK ] Started security daemon',
   '[ OK ] Mounted encrypted workspace',
   '[ OK ] Initialized PTY subsystem',
@@ -55,19 +55,19 @@ export function BootSplash({ onDone }: Props) {
             className="mb-10 text-center"
           >
             <div
-              className="text-5xl font-black tracking-[0.25em] text-den-accent glow-cyan mb-2"
+              className="text-5xl font-black tracking-[0.25em] text-cryo-accent glow-cyan mb-2"
               style={{ fontFamily: '"JetBrains Mono", monospace' }}
             >
-              CYBERDEN
+              CRYOGRAM
             </div>
-            <div className="text-den-muted text-xs tracking-[0.3em] uppercase">
+            <div className="text-cryo-muted text-xs tracking-[0.3em] uppercase">
               Security Operations Platform
             </div>
           </motion.div>
 
           {/* Progress bar */}
           <div className="w-72 mb-6">
-            <div className="h-px bg-den-border rounded-full overflow-hidden">
+            <div className="h-px bg-cryo-border rounded-full overflow-hidden">
               <motion.div
                 className="h-full rounded-full"
                 style={{ background: 'linear-gradient(90deg, #00d4ff, #bb88ff)' }}
@@ -86,11 +86,11 @@ export function BootSplash({ onDone }: Props) {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.2 }}
-                className="text-den-muted"
+                className="text-cryo-muted"
               >
-                <span className="text-den-green mr-1">[</span>
-                <span className="text-den-green"> OK </span>
-                <span className="text-den-green mr-2">]</span>
+                <span className="text-cryo-green mr-1">[</span>
+                <span className="text-cryo-green"> OK </span>
+                <span className="text-cryo-green mr-2">]</span>
                 <span>{line.replace(/^\[ OK \] /, '')}</span>
               </motion.div>
             ))}

@@ -2,10 +2,10 @@ declare global {
   // ── Window API (set by Electron context bridge) ───────────────────────────
 
   interface Window {
-    cyberden: CyberDenAPI
+    cryogram: CryogramAPI
   }
 
-  interface CyberDenAPI {
+  interface CryogramAPI {
     window: {
       minimize(): void
       maximize(): void
