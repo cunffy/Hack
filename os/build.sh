@@ -280,17 +280,42 @@ PKGEOF
 
 echo "[build] Package lists written."
 
-# Tell dpkg to keep our staged config files without prompting.
-# Without this, installing calamares-settings-debian (which ships
-# its own settings.conf) hangs on a conffile prompt in non-interactive mode.
-mkdir -p "$LB_DIR/config/apt"
-cat > "$LB_DIR/config/apt/apt.conf" << 'APTEOF'
-DPkg::Options {
-   "--force-confdef";
-   "--force-confold";
-};
-APTEOF
-echo "[build] apt.conf written (--force-confold)."
+# Write hook scripts from here so stale volume-mounted copies can't break the build.
+HOOKS_DIR="$LB_DIR/config/hooks/normal"
+mkdir -p "$HOOKS_DIR"
+
+cat > "$HOOKS_DIR/0400-calamares.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+# Install Calamares graphical installer — non-fatal
+set +e
+
+echo "[calamares] Installing Calamares..."
+
+# Install calamares only — NOT calamares-settings-debian, which ships its own
+# settings.conf that conflicts with ours staged in includes.chroot.
+DEBIAN_FRONTEND=noninteractive apt-get install -y calamares 2>/dev/null || \
+{
+  echo "deb http://deb.debian.org/debian bookworm-backports main" >> /etc/apt/sources.list
+  apt-get update -qq
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -t bookworm-backports calamares 2>/dev/null
+} || echo "[calamares] Install failed — manual install needed after boot."
+
+cat > /usr/share/applications/install-cryogram.desktop << 'DESKTOP'
+[Desktop Entry]
+Name=Install Cryogram OS
+Comment=Install Cryogram OS to this computer
+Exec=pkexec calamares
+Icon=system-software-install
+Terminal=false
+Type=Application
+Categories=System;
+DESKTOP
+
+echo "[calamares] Done (failures are non-fatal)."
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0400-calamares.hook.chroot"
+echo "[build] Hook scripts written."
 
 # ---- 1. Generate graphic assets ----
 echo "[1/6] Generating GRUB theme and wallpaper assets..."
