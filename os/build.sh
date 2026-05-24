@@ -18,6 +18,7 @@ echo ""
 echo "╔══════════════════════════════════════════╗"
 echo "║        CRYOGRAM OS  BUILD  SYSTEM        ║"
 echo "║           Version ${VERSION} (${CODENAME})          ║"
+echo "║         build.sh rev 2026-05-24-v5       ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
 
@@ -316,6 +317,77 @@ exit 0
 HOOKEOF
 chmod +x "$HOOKS_DIR/0400-calamares.hook.chroot"
 echo "[build] Hook scripts written."
+
+# Stage a dpkg config into the chroot that suppresses conffile prompts.
+# This applies to ALL dpkg/apt operations inside the chroot (package installs,
+# hook scripts, etc.) so even an old hook can't hang on a conffile conflict.
+mkdir -p "$LB_DIR/config/includes.chroot/etc/dpkg/dpkg.cfg.d"
+printf 'force-confold\nforce-confdef\n' \
+  > "$LB_DIR/config/includes.chroot/etc/dpkg/dpkg.cfg.d/99-noconfprompt"
+
+# Remove calamares settings.conf from includes.chroot staging so the
+# package install never finds a pre-existing file to conflict with.
+# A post-install hook writes our custom config after calamares is installed.
+rm -f "$LB_DIR/config/includes.chroot/etc/calamares/settings.conf"
+
+# Write post-install hook that places our settings.conf after calamares lands
+cat > "$HOOKS_DIR/0401-calamares-config.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set +e
+echo "[calamares-config] Writing Cryogram calamares settings..."
+mkdir -p /etc/calamares
+cat > /etc/calamares/settings.conf << 'CONF'
+# Calamares settings for Cryogram OS installer
+---
+modules-search: [ local, /usr/lib/calamares/modules ]
+
+sequence:
+  - show:
+    - welcome
+    - locale
+    - keyboard
+    - partition
+    - users
+    - summary
+  - exec:
+    - partition
+    - mount
+    - unpackfs
+    - machineid
+    - fstab
+    - locale
+    - keyboard
+    - localecfg
+    - users
+    - displaymanager
+    - networkcfg
+    - hwclock
+    - services-systemd
+    - bootloader-config
+    - grubcfg
+    - bootloader
+    - packages
+    - luksbootkeyfile
+    - plymouthcfg
+    - initramfs
+    - removeuser
+    - umount
+  - show:
+    - finished
+
+branding: cryogram
+prompt-install: false
+dont-chroot: false
+oem-setup: false
+disable-cancel: false
+disable-cancel-during-exec: false
+quit-at-end: false
+CONF
+echo "[calamares-config] Done."
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0401-calamares-config.hook.chroot"
+echo "[build] Calamares config hook written."
 
 # ---- 1. Generate graphic assets ----
 echo "[1/6] Generating GRUB theme and wallpaper assets..."
