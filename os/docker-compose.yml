@@ -8,6 +8,8 @@ services:
     image: cryogram-builder:latest
     container_name: cryogram-build
     privileged: true        # Required for loopback mounts during ISO creation
+    security_opt:
+      - apparmor=unconfined  # Bypass AppArmor if apparmor_parser is missing on host
     volumes:
       # build.sh mounted directly — git pull is all that's needed to update it
       - ./build.sh:/build/build.sh
