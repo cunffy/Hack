@@ -166,6 +166,7 @@ lightdm-gtk-greeter
 lightdm-gtk-greeter-settings
 network-manager
 network-manager-gnome
+wpasupplicant
 pipewire
 pipewire-pulse
 pipewire-alsa
