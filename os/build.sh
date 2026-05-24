@@ -27,6 +27,18 @@ mkdir -p "$OUTPUT_DIR"
 find "$LB_DIR/config/hooks" -name "*.chroot" -exec chmod +x {} \; 2>/dev/null || true
 find "$LB_DIR/auto" -type f -exec chmod +x {} \; 2>/dev/null || true
 
+# Strip packages that don't exist in Debian Bookworm standard repos.
+# These cause lb build to abort with "Unable to locate package".
+# This guard means the build works even if the local package lists are stale.
+PKG_LISTS="$LB_DIR/config/package-lists"
+REMOVE_PKGS="radare2 mysql-client notify-send gamepad-tool wordlists \
+  metasploit-framework exploitdb airbase-ng volatility3 ddrescue \
+  theharvester maltego amass openvas bettercap"
+for pkg in $REMOVE_PKGS; do
+  sed -i "/^${pkg}$/d" "$PKG_LISTS"/*.chroot 2>/dev/null || true
+done
+echo "[build] Package list sanity check done."
+
 # ---- 1. Generate graphic assets ----
 echo "[1/6] Generating GRUB theme and wallpaper assets..."
 THEME_DIR="$LB_DIR/config/includes.chroot/usr/share/grub/themes/cryogram"
