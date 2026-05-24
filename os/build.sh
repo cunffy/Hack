@@ -316,6 +316,79 @@ echo "[calamares] Done (failures are non-fatal)."
 exit 0
 HOOKEOF
 chmod +x "$HOOKS_DIR/0400-calamares.hook.chroot"
+cat > "$HOOKS_DIR/0300-cryogram.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set +e
+
+INSTALL_DIR="/opt/cryogram"
+
+if [ ! -d "$INSTALL_DIR/out" ]; then
+  echo "ERROR: Cryogram pre-built files not found at $INSTALL_DIR/out"
+  exit 1
+fi
+
+# Install native Node dependencies that can't be pre-bundled.
+# electron ships a large binary, node-pty and better-sqlite3 are native addons.
+if command -v npm &>/dev/null; then
+  echo "[cryogram] Installing native Node dependencies via npm..."
+  cd "$INSTALL_DIR"
+  npm install --production electron node-pty better-sqlite3 2>&1 | tail -5 || \
+    echo "[cryogram] WARNING: npm install failed — app may not launch"
+  cd /
+else
+  echo "[cryogram] WARNING: npm not found — native deps missing, app may not launch"
+fi
+
+ELECTRON_BIN="$INSTALL_DIR/node_modules/electron/dist/electron"
+
+if [ -f "$ELECTRON_BIN" ]; then
+  chmod +x "$ELECTRON_BIN"
+  ln -sf "$ELECTRON_BIN" /usr/local/bin/electron
+else
+  echo "[cryogram] WARNING: Electron binary not found at $ELECTRON_BIN"
+fi
+
+# Python deps for security scripts
+if [ -f "$INSTALL_DIR/scripts/requirements.txt" ]; then
+  pip3 install -r "$INSTALL_DIR/scripts/requirements.txt" \
+    --break-system-packages --quiet 2>/dev/null || true
+fi
+
+cat > /usr/local/bin/cryogram << 'LAUNCHER'
+#!/bin/bash
+export ELECTRON_DISABLE_SANDBOX=1
+export DISPLAY="${DISPLAY:-:0}"
+exec /opt/cryogram/node_modules/electron/dist/electron \
+  /opt/cryogram/out/main/index.js "$@"
+LAUNCHER
+chmod +x /usr/local/bin/cryogram
+
+cat > /usr/local/bin/cryogram-kiosk << 'LAUNCHER'
+#!/bin/bash
+export ELECTRON_DISABLE_SANDBOX=1
+export DISPLAY="${DISPLAY:-:0}"
+exec /opt/cryogram/node_modules/electron/dist/electron \
+  /opt/cryogram/out/main/index.js --kiosk --start-maximized "$@"
+LAUNCHER
+chmod +x /usr/local/bin/cryogram-kiosk
+
+cat > /usr/share/applications/cryogram.desktop << 'DESKTOP'
+[Desktop Entry]
+Name=Cryogram
+Comment=Security Operations Platform
+Exec=/usr/local/bin/cryogram
+Icon=/opt/cryogram/resources/icon.png
+Terminal=false
+Type=Application
+Categories=Security;Network;System;
+StartupWMClass=cryogram
+DESKTOP
+
+echo "[cryogram] Setup complete at $INSTALL_DIR ($(du -sh $INSTALL_DIR | cut -f1))"
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0300-cryogram.hook.chroot"
+
 echo "[build] Hook scripts written."
 
 # Stage a dpkg config into the chroot that suppresses conffile prompts.
