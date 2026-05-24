@@ -18,7 +18,7 @@ echo ""
 echo "╔══════════════════════════════════════════╗"
 echo "║        CRYOGRAM OS  BUILD  SYSTEM        ║"
 echo "║           Version ${VERSION} (${CODENAME})          ║"
-echo "║         build.sh rev 2026-05-24-v5       ║"
+echo "║         build.sh rev 2026-05-24-v6       ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
 
@@ -103,15 +103,12 @@ PKGEOF
 
 cat > "$PKG_LISTS/dev.list.chroot" << 'PKGEOF'
 # Development tools
+# NOTE: clang/lldb/valgrind removed — they add ~500MB and can be installed post-boot
 gcc
 g++
 make
 cmake
 ninja-build
-clang
-clang-format
-lldb
-valgrind
 gdb
 python3
 python3-pip
@@ -131,16 +128,13 @@ zlib1g-dev
 git
 git-lfs
 tig
-gitk
 geany
-geany-plugins
 docker.io
 docker-compose
 sqlite3
 postgresql-client
 default-mysql-client
 jq
-yq
 httpie
 meld
 xz-utils
@@ -564,6 +558,151 @@ exit 0
 HOOKEOF
 chmod +x "$HOOKS_DIR/0512-hardware-support.hook.chroot"
 echo "[build] Hardware support hook written."
+
+# Opera GX — not in Debian repos, install from Opera's own repo (non-fatal)
+cat > "$HOOKS_DIR/0520-opera-gx.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set +e
+echo "[opera-gx] Installing Opera GX browser..."
+
+# Add Opera GX signing key and repo
+curl -fsSL https://deb.opera.com/archive.key \
+  | gpg --dearmor -o /usr/share/keyrings/opera-archive-keyring.gpg 2>/dev/null
+echo "deb [signed-by=/usr/share/keyrings/opera-archive-keyring.gpg arch=amd64] \
+  https://deb.opera.com/opera-gx-stable/ stable non-free" \
+  > /etc/apt/sources.list.d/opera-gx.list
+
+apt-get update -qq 2>/dev/null && \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y opera-gx 2>/dev/null && \
+  echo "[opera-gx] Installed successfully." || \
+  echo "[opera-gx] Install failed — will need manual install after boot."
+
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0520-opera-gx.hook.chroot"
+echo "[build] Opera GX hook written."
+
+# Plymouth boot theme — Cryogram branded, dark + teal (non-fatal)
+cat > "$HOOKS_DIR/0530-plymouth-theme.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set +e
+echo "[plymouth] Installing Cryogram boot theme..."
+
+THEME_DIR="/usr/share/plymouth/themes/cryogram"
+mkdir -p "$THEME_DIR"
+
+# Generate assets with ImageMagick
+W=1920; H=1080
+
+# Background
+convert -size "${W}x${H}" gradient:"#070b11-#050810" \
+  "$THEME_DIR/bg.png" 2>/dev/null || \
+  convert -size "${W}x${H}" xc:"#070b11" "$THEME_DIR/bg.png" 2>/dev/null || true
+
+# Progress bar track
+convert -size "560x3" xc:"#1a2840" "$THEME_DIR/track.png" 2>/dev/null || true
+
+# Progress bar fill (cyan → purple gradient)
+convert -size "560x3" gradient:"#00d4ff-#bb88ff" "$THEME_DIR/fill.png" 2>/dev/null || true
+
+# Spinner dot
+convert -size "8x8" xc:none \
+  -fill "#00d4ff" -draw "circle 4,4 4,0" \
+  "$THEME_DIR/dot.png" 2>/dev/null || true
+
+# Wordmark — white-on-transparent "CRYOGRAM"
+convert -size "480x80" xc:"#070b11" \
+  -fill "#00d4ff" \
+  -font DejaVu-Sans-Bold -pointsize 54 -gravity center \
+  -draw 'text 0,0 "CRYOGRAM"' \
+  "$THEME_DIR/wordmark.png" 2>/dev/null || true
+
+# Plymouth .script file
+cat > "$THEME_DIR/cryogram.script" << 'SCRIPT'
+# Cryogram OS Plymouth theme
+Window.SetBackgroundTopColor(0.027, 0.043, 0.067);
+Window.SetBackgroundBottomColor(0.020, 0.031, 0.050);
+
+bg      = Image("bg.png");
+bg_s    = Sprite(bg);       bg_s.SetX(0); bg_s.SetY(0); bg_s.SetZ(-1);
+
+logo    = Image("wordmark.png");
+logo_s  = Sprite(logo);
+logo_s.SetX((Window.GetWidth()  - logo.GetWidth())  / 2);
+logo_s.SetY((Window.GetHeight() * 0.40));
+
+track   = Image("track.png");
+track_s = Sprite(track);
+track_s.SetX((Window.GetWidth() - track.GetWidth()) / 2);
+track_s.SetY(Window.GetHeight() * 0.68);
+track_s.SetOpacity(0.3);
+
+fill_full = Image("fill.png");
+fill_s  = Sprite();
+fill_s.SetX((Window.GetWidth() - track.GetWidth()) / 2);
+fill_s.SetY(Window.GetHeight() * 0.68);
+
+dot_img = Image("dot.png");
+num_dots = 12;
+dots = [];
+for (i = 0; i < num_dots; i++) {
+    s = Sprite(dot_img);
+    s.SetZ(2);
+    dots[i] = s;
+}
+
+angle   = 0;
+radius  = 30;
+cx      = Window.GetWidth() / 2;
+cy      = Window.GetHeight() * 0.55;
+progress = 0;
+
+fun RefreshCallback() {
+    angle = (angle + 0.09) % (2 * 3.14159265);
+    for (i = 0; i < num_dots; i++) {
+        a = angle + (i * 2 * 3.14159265 / num_dots);
+        x = cx + Math.Cos(a) * radius;
+        y = cy + Math.Sin(a) * radius;
+        dots[i].SetX(x - dot_img.GetWidth()  / 2);
+        dots[i].SetY(y - dot_img.GetHeight() / 2);
+        opacity = (num_dots - i - 1) / num_dots;
+        dots[i].SetOpacity(opacity * opacity * 0.9);
+    }
+    if (progress > 0.01) {
+        fw = Math.Max(2, fill_full.GetWidth() * progress);
+        scaled = fill_full.Scale(fw, fill_full.GetHeight());
+        fill_s.SetImage(scaled);
+    }
+}
+Plymouth.SetRefreshFunction(RefreshCallback);
+
+fun BootProgressCallback(duration, p) { progress = p; }
+Plymouth.SetBootProgressFunction(BootProgressCallback);
+
+fun MessageCallback(text) { }
+Plymouth.SetDisplayMessageFunction(MessageCallback);
+SCRIPT
+
+# Plymouth descriptor
+cat > "$THEME_DIR/cryogram.plymouth" << 'PLYDESC'
+[Plymouth Theme]
+Name=Cryogram
+Description=Cryogram OS Boot Theme
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/cryogram
+ScriptFile=/usr/share/plymouth/themes/cryogram/cryogram.script
+PLYDESC
+
+# Activate the theme
+plymouth-set-default-theme cryogram 2>/dev/null || true
+update-initramfs -u -k all 2>/dev/null || true
+echo "[plymouth] Cryogram theme installed."
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0530-plymouth-theme.hook.chroot"
+echo "[build] Plymouth theme hook written."
 
 # ---- 1. Generate graphic assets ----
 echo "[1/6] Generating GRUB theme and wallpaper assets..."
