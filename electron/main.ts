@@ -34,9 +34,11 @@ import { registerPhoneHandlers } from './ipc/phone'
 import { registerUpdaterHandlers } from './ipc/updater'
 
 let mainWindow: BrowserWindow | null = null
+let screenLocked = false  // tracked in main so shortcuts can check it
 
 function lockScreen(): void {
   if (!mainWindow) return
+  screenLocked = true
   // Put Electron above every X11 window (Brave, terminals, etc.) so apps
   // cannot be seen or interacted with while the lock screen is active.
   mainWindow.setAlwaysOnTop(true, 'screen-saver')
@@ -72,10 +74,9 @@ function createWindow(): void {
 
     globalShortcut.register('Super+D', () => {})
     globalShortcut.register('Super+Tab', () => {})
-    globalShortcut.register('Super+L', () => {
-      lockScreen()
-    })
+    globalShortcut.register('Super+L', () => lockScreen())
     globalShortcut.register('CommandOrControl+Alt+T', () => {
+      if (screenLocked) return
       mainWindow?.webContents.send('open:app', 'terminal')
     })
 
@@ -124,9 +125,11 @@ function createWindow(): void {
 
     // ── Alt+Tab window switcher ────────────────────────────────────────────
     globalShortcut.register('Alt+Tab', () => {
+      if (screenLocked) return
       mainWindow?.webContents.send('app:switcher', 'next')
     })
     globalShortcut.register('Alt+Shift+Tab', () => {
+      if (screenLocked) return
       mainWindow?.webContents.send('app:switcher', 'prev')
     })
   })
@@ -160,6 +163,7 @@ app.whenReady().then(() => {
   // Raise Electron above all X11 windows when locked so apps like Brave
   // cannot be seen or clicked through the lock screen.
   ipcMain.on('screen:unlock', () => {
+    screenLocked = false
     mainWindow?.setAlwaysOnTop(false)
   })
 
