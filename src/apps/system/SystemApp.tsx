@@ -67,6 +67,7 @@ function NetworkPanel() {
   const [pwdFor, setPwdFor] = useState<string | null>(null)
   const [pwd, setPwd] = useState('')
   const [scanning, setScanning] = useState(false)
+  const [connectError, setConnectError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     const [nets, s] = await Promise.all([
@@ -81,8 +82,16 @@ function NetworkPanel() {
 
   const connect = async (ssid: string, password?: string) => {
     setConnecting(ssid)
+    setConnectError(null)
+    const result = await (window.cryogram.system as any).connectNetwork(ssid, password)
+    if (result?.success === false) {
+      setConnectError(result.message || 'Connection failed')
+      setConnecting(null)
+      // Keep the password dialog open so user can retry with correct password
+      return
+    }
     setPwdFor(null)
-    await window.cryogram.system.connectNetwork(ssid, password)
+    setPwd('')
     await load()
     setConnecting(null)
   }
@@ -176,15 +185,27 @@ function NetworkPanel() {
                 autoFocus
                 type="password"
                 value={pwd}
-                onChange={e => setPwd(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { connect(pwdFor, pwd); setPwd('') } if (e.key === 'Escape') setPwdFor(null) }}
-                className="w-full text-xs py-2 px-3 rounded-lg mb-3"
-                style={{ background: 'rgba(8,12,18,0.6)', border: '1px solid rgba(26,40,64,0.6)', color: '#c9d1d9' }}
+                onChange={e => { setPwd(e.target.value); setConnectError(null) }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') connect(pwdFor, pwd)
+                  if (e.key === 'Escape') { setPwdFor(null); setPwd(''); setConnectError(null) }
+                }}
+                className="w-full text-xs py-2 px-3 rounded-lg mb-2"
+                style={{
+                  background: 'rgba(8,12,18,0.6)',
+                  border: connectError ? '1px solid rgba(255,68,102,0.6)' : '1px solid rgba(26,40,64,0.6)',
+                  color: '#c9d1d9',
+                }}
                 placeholder="Password"
               />
+              {connectError && (
+                <p className="text-xs mb-3" style={{ color: '#ff4466' }}>⚠ {connectError}</p>
+              )}
               <div className="flex gap-2 justify-end">
-                <SettingBtn onClick={() => { setPwdFor(null); setPwd('') }}>Cancel</SettingBtn>
-                <SettingBtn primary onClick={() => { connect(pwdFor, pwd); setPwd('') }}>Connect</SettingBtn>
+                <SettingBtn onClick={() => { setPwdFor(null); setPwd(''); setConnectError(null) }}>Cancel</SettingBtn>
+                <SettingBtn primary onClick={() => connect(pwdFor, pwd)} disabled={connecting === pwdFor}>
+                  {connecting === pwdFor ? 'Connecting…' : 'Connect'}
+                </SettingBtn>
               </div>
             </div>
           </motion.div>

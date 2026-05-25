@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWindowStore } from '../store/windowStore'
+import { usePinnedStore } from '../store/pinnedStore'
 
 const APP_ICONS: Record<string, string> = {
   terminal:          '⌨',
@@ -427,8 +428,10 @@ export function AppSwitcher() {
 export function Taskbar() {
   const { windows, focusWindow, restoreWindow, minimizeWindow } = useWindowStore()
   const openApp = useWindowStore(s => s.openApp)
+  const { taskbar: pinnedApps, unpinTaskbar } = usePinnedStore()
   const [x11Wins, setX11Wins] = useState<Array<{ id: string; title: string }>>([])
   const [ctxMenu, setCtxMenu] = useState<{ x: number; winId: string } | null>(null)
+  const [pinnedCtx, setPinnedCtx] = useState<{ x: number; id: string } | null>(null)
 
   // Poll X11 windows every 3s to show external apps like Brave
   useEffect(() => {
@@ -487,6 +490,51 @@ export function Taskbar() {
         </button>
 
         <div className="w-px h-5 shrink-0 mx-0.5" style={{ background: 'rgba(0,212,255,0.1)' }} />
+
+        {/* Pinned external apps (always visible, click to launch/focus) */}
+        <AnimatePresence initial={false}>
+          {pinnedApps.map(app => {
+            const running = x11Wins.find(w => w.title.toLowerCase().includes(app.name.toLowerCase()))
+            return (
+              <motion.button
+                key={app.id}
+                initial={{ opacity: 0, scale: 0.78 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.78 }}
+                transition={{ type: 'spring', stiffness: 440, damping: 30 }}
+                title={app.name}
+                onClick={() => {
+                  if (running) (window as any).cryogram?.wm?.focusWindow(running.id)
+                  else (window as any).cryogram?.launcher?.launch(app)
+                }}
+                onContextMenu={e => { e.preventDefault(); setPinnedCtx({ x: e.clientX, id: app.id }) }}
+                className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 transition-all"
+                style={{
+                  background: running ? 'rgba(0,212,255,0.12)' : 'rgba(13,20,33,0.6)',
+                  border: running ? '1px solid rgba(0,212,255,0.3)' : '1px solid rgba(26,40,64,0.45)',
+                  position: 'relative',
+                }}
+              >
+                {app.icon ? (
+                  <img src={app.icon} alt="" style={{ width: 18, height: 18, objectFit: 'contain' }}
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                ) : (
+                  <span style={{ fontSize: 14 }}>🌐</span>
+                )}
+                {running && (
+                  <div style={{
+                    position: 'absolute', bottom: 1, left: '50%', transform: 'translateX(-50%)',
+                    width: 4, height: 4, borderRadius: '50%', background: '#00d4ff',
+                  }} />
+                )}
+              </motion.button>
+            )
+          })}
+        </AnimatePresence>
+
+        {pinnedApps.length > 0 && (
+          <div className="w-px h-5 shrink-0 mx-0.5" style={{ background: 'rgba(0,212,255,0.1)' }} />
+        )}
 
         {/* Window buttons */}
         <div className="flex items-center gap-1 flex-1 min-w-0 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
@@ -570,12 +618,52 @@ export function Taskbar() {
         </div>
       </div>
 
-      {/* Context menu portal */}
+      {/* Window right-click context menu */}
       <AnimatePresence>
         {ctxMenu && (() => {
           const win = windows.find(w => w.id === ctxMenu.winId)
           if (!win) return null
           return <WinContextMenu key="ctx" x={ctxMenu.x} win={win} onClose={() => setCtxMenu(null)} />
+        })()}
+      </AnimatePresence>
+
+      {/* Pinned app right-click context menu (unpin) */}
+      <AnimatePresence>
+        {pinnedCtx && (() => {
+          const app = pinnedApps.find(a => a.id === pinnedCtx.id)
+          if (!app) return null
+          return (
+            <motion.div
+              key="pinctx"
+              initial={{ opacity: 0, scale: 0.93, y: 6 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.93, y: 6 }}
+              transition={{ duration: 0.1 }}
+              style={{
+                position: 'fixed', left: pinnedCtx.x, bottom: 44,
+                background: 'rgba(13,20,33,0.99)', border: '1px solid rgba(0,212,255,0.2)',
+                borderRadius: 10, padding: 4, zIndex: 99999, minWidth: 160,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
+              }}
+              onContextMenu={e => e.preventDefault()}
+            >
+              <div className="px-3 py-1.5 text-xs font-semibold" style={{ color: '#00d4ff', fontFamily: 'monospace', borderBottom: '1px solid rgba(0,212,255,0.1)', marginBottom: 2 }}>
+                {app.name}
+              </div>
+              <button
+                onClick={() => { unpinTaskbar(app.id); setPinnedCtx(null) }}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  padding: '7px 12px', borderRadius: 6, border: 'none', background: 'none',
+                  cursor: 'pointer', fontSize: 12, fontFamily: 'monospace', color: '#ff4466',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,68,102,0.12)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+              >
+                Unpin from Taskbar
+              </button>
+            </motion.div>
+          )
         })()}
       </AnimatePresence>
     </>

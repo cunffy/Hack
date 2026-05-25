@@ -39,21 +39,25 @@ if [ -f "$CONF_FILE" ]; then
   source "$CONF_FILE"
 fi
 
-# First-run: ask for repo URL
+# First-run: ask for repo URL and branch
 if [ -z "${REPO_URL:-}" ]; then
-  echo "First-time setup. Enter the git URL of the Cryogram source repo."
-  echo "  Example: https://github.com/yourname/Hack"
+  echo "First-time setup — enter your Cryogram git repository details."
   echo ""
-  read -rp "  Git repo URL: " REPO_URL
+  read -rp "  Git repo URL  (e.g. https://github.com/yourname/Hack): " REPO_URL
   if [ -z "$REPO_URL" ]; then
     fail "No URL provided. Aborting."
   fi
+  read -rp "  Branch name   [press Enter for 'main']: " INPUT_BRANCH
+  BRANCH="${INPUT_BRANCH:-main}"
   {
     echo "# Cryogram update configuration"
     echo "REPO_URL=\"$REPO_URL\""
-    echo "BRANCH=\"main\""
+    echo "BRANCH=\"$BRANCH\""
   } > "$CONF_FILE"
-  ok "Config saved to $CONF_FILE"
+  ok "Config saved to $CONF_FILE  (branch: $BRANCH)"
+  echo ""
+  info "To change branch later:  sudo nano $CONF_FILE"
+  echo ""
 fi
 
 BRANCH="${BRANCH:-main}"

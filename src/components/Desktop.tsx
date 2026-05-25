@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion'
 import { AppId, useWindowStore } from '../store/windowStore'
 import { useDesktopStore, DesktopIcon } from '../store/desktopStore'
+import { usePinnedStore, PinnedApp } from '../store/pinnedStore'
 import { APP_META } from './Dock'
 import { ContextMenu, MenuItem } from './ContextMenu'
 
@@ -17,6 +18,7 @@ export function Desktop() {
   const hasWindows = useWindowStore(s => s.windows.some(w => !w.minimized))
   const { windows, openApp, focusWindow, restoreWindow } = useWindowStore()
   const { icons, wallpaper, removeIcon, moveIcon, addIcon, setWallpaper } = useDesktopStore()
+  const { desktop: pinnedDesktop, unpinDesktop } = usePinnedStore()
   const [ctx, setCtx] = useState<CtxState | null>(null)
   const [appPicker, setAppPicker] = useState(false)
 
@@ -126,7 +128,7 @@ export function Desktop() {
         </motion.div>
       </motion.div>
 
-      {/* Desktop icons */}
+      {/* Desktop icons — built-in Cryogram apps */}
       {icons.map(icon => {
         const meta = APP_META[icon.appId]
         if (!meta) return null
@@ -146,6 +148,16 @@ export function Desktop() {
           />
         )
       })}
+
+      {/* Desktop icons — pinned external apps (from launcher) */}
+      {pinnedDesktop.map((app, i) => (
+        <ExternalDesktopIcon
+          key={app.id}
+          app={app}
+          offsetIndex={icons.length + i}
+          onRemove={() => unpinDesktop(app.id)}
+        />
+      ))}
 
       {/* Bottom-left status */}
       <motion.div
@@ -260,6 +272,71 @@ function DesktopIconItem({ icon, meta, isOpen, onContextMenu, onMove, onOpen }: 
         {meta.label}
       </div>
     </motion.div>
+  )
+}
+
+// ── External app desktop icon ─────────────────────────────────────────────────
+function ExternalDesktopIcon({ app, offsetIndex, onRemove }: { app: PinnedApp; offsetIndex: number; onRemove: () => void }) {
+  const col = offsetIndex % 4
+  const row = Math.floor(offsetIndex / 4)
+  const defaultX = 24 + col * 104
+  const defaultY = 36 + row * 110
+  const [pos, setPos] = useState({ x: defaultX, y: defaultY })
+  const mx = useMotionValue(pos.x)
+  const my = useMotionValue(pos.y)
+  const [ctx, setCtx] = useState(false)
+
+  return (
+    <>
+      <motion.div
+        data-desktop-icon
+        drag dragMomentum={false}
+        style={{ position: 'absolute', top: 0, left: 0, x: mx, y: my, width: 72, touchAction: 'none', zIndex: 10 }}
+        onDragEnd={() => setPos({ x: Math.max(0, Math.round(mx.get())), y: Math.max(28, Math.round(my.get())) })}
+        className="flex flex-col items-center cursor-default"
+        onContextMenu={e => { e.preventDefault(); e.stopPropagation(); setCtx(true) }}
+        onDoubleClick={() => (window as any).cryogram?.launcher?.launch(app)}
+        whileTap={{ scale: 0.9 }}
+      >
+        <div
+          className="w-14 h-14 rounded-2xl flex items-center justify-center"
+          style={{
+            background: 'radial-gradient(ellipse at 38% 28%, rgba(0,212,255,0.18), rgba(8,12,20,0.88) 70%)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+            backdropFilter: 'blur(12px)',
+          }}
+        >
+          {app.icon ? (
+            <img src={app.icon} alt="" style={{ width: 36, height: 36, objectFit: 'contain' }}
+              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+          ) : (
+            <span style={{ fontSize: 28 }}>🌐</span>
+          )}
+        </div>
+        <div className="mt-1 text-center px-1 leading-tight" style={{
+          fontSize: 11, color: 'rgba(255,255,255,0.88)',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+          textShadow: '0 1px 5px rgba(0,0,0,0.95), 0 0 12px rgba(0,0,0,0.7)',
+          maxWidth: 72, wordBreak: 'break-word', lineHeight: 1.2,
+        }}>
+          {app.name}
+        </div>
+      </motion.div>
+      <AnimatePresence>
+        {ctx && (
+          <ContextMenu
+            x={pos.x + 36} y={pos.y + 40}
+            onClose={() => setCtx(false)}
+            items={[
+              { label: `Open ${app.name}`, action: () => { (window as any).cryogram?.launcher?.launch(app); setCtx(false) } },
+              { sep: true },
+              { label: 'Remove from Desktop', danger: true, action: () => { onRemove(); setCtx(false) } },
+            ]}
+          />
+        )}
+      </AnimatePresence>
+    </>
   )
 }
 
