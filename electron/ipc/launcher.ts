@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { readdir, readFile } from 'fs/promises'
+import { readdir, readFile, access } from 'fs/promises'
 import { join } from 'path'
 import { homedir } from 'os'
 import { spawn } from 'child_process'
@@ -37,6 +37,30 @@ const CATEGORY_MAP: Record<string, string> = {
   Office:      'Office',
 }
 
+async function resolveIconPath(name: string): Promise<string> {
+  if (!name) return ''
+  if (name.startsWith('/')) {
+    try { await access(name); return `file://${name}` } catch { return '' }
+  }
+  const candidates = [
+    `/usr/share/icons/hicolor/256x256/apps/${name}.png`,
+    `/usr/share/icons/hicolor/128x128/apps/${name}.png`,
+    `/usr/share/icons/hicolor/64x64/apps/${name}.png`,
+    `/usr/share/icons/hicolor/48x48/apps/${name}.png`,
+    `/usr/share/icons/hicolor/scalable/apps/${name}.svg`,
+    `/usr/share/pixmaps/${name}.png`,
+    `/usr/share/pixmaps/${name}.svg`,
+    `/usr/share/pixmaps/${name}.xpm`,
+    `/usr/share/icons/hicolor/32x32/apps/${name}.png`,
+    `/usr/share/icons/Adwaita/256x256/apps/${name}.png`,
+    `/usr/share/icons/Adwaita/48x48/apps/${name}.png`,
+  ]
+  for (const p of candidates) {
+    try { await access(p); return `file://${p}` } catch {}
+  }
+  return ''
+}
+
 async function parseDesktopFile(filePath: string): Promise<AppEntry | null> {
   try {
     const content = await readFile(filePath, 'utf8')
@@ -61,7 +85,7 @@ async function parseDesktopFile(filePath: string): Promise<AppEntry | null> {
     return {
       name,
       exec: exec.replace(/%[uUfFdDnNickvm]/g, '').trim(),
-      icon:       get('Icon'),
+      icon:       await resolveIconPath(get('Icon')),
       comment:    get('Comment') || get('GenericName'),
       categories: rawCats,
       category,

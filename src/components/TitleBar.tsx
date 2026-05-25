@@ -256,9 +256,11 @@ function TrayIcon({ children, onClick, active, title }: { children: React.ReactN
 // ── SVG Status Icons ───────────────────────────────────────────────────────
 function WifiIcon({ connected, signal }: { connected: boolean; signal: number }) {
   const c = connected ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)'
-  const s1 = signal > 25  ? c : 'rgba(255,255,255,0.2)'
-  const s2 = signal > 50  ? c : 'rgba(255,255,255,0.2)'
-  const s3 = signal > 75  ? c : 'rgba(255,255,255,0.2)'
+  // When connected but signal is 0 (nmcli returned unknown), assume full signal
+  const eff = connected && signal === 0 ? 100 : signal
+  const s1 = connected || eff > 25 ? c : 'rgba(255,255,255,0.2)'
+  const s2 = eff > 40              ? c : 'rgba(255,255,255,0.2)'
+  const s3 = eff > 70              ? c : 'rgba(255,255,255,0.2)'
   return (
     <svg width="14" height="12" viewBox="0 0 24 18">
       <path d="M12 14.5 a1.5 1.5 0 1 1 0 0.1Z" fill={c} />
