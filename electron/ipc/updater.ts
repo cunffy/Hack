@@ -78,32 +78,41 @@ export function registerUpdaterHandlers(): void {
     }
   })
 
-  ipcMain.handle('updater:run', (event) => {
+  ipcMain.handle('updater:run', (event, password?: string) => {
     return new Promise<{ success: boolean }>((resolve, reject) => {
       if (!existsSync(UPDATE_SCRIPT)) {
         return reject(new Error('cryogram-update script not found. Run from the live OS.'))
       }
 
-      // sudo -n runs the script without a password prompt (non-interactive).
-      // Requires a NOPASSWD sudoers entry — the UI will guide the user to set
-      // this up if missing.
+      // If already root, run directly. Otherwise use sudo -S which reads
+      // the password from stdin — no pre-configuration needed.
       const cmd  = isRoot() ? 'bash' : 'sudo'
-      const args = isRoot() ? [UPDATE_SCRIPT] : ['-n', UPDATE_SCRIPT]
+      const args = isRoot() ? [UPDATE_SCRIPT] : ['-S', UPDATE_SCRIPT]
 
       const proc = spawn(cmd, args, {
         env: { ...process.env, TERM: 'xterm-color', FORCE_COLOR: '1' },
       })
+
+      // Feed password to sudo via stdin
+      if (!isRoot() && password) {
+        proc.stdin?.write(password + '\n')
+        proc.stdin?.end()
+      }
 
       const send = (data: string) => {
         try { event.sender.send('updater:progress', data) } catch {}
       }
 
       proc.stdout.on('data', (d: Buffer) => send(d.toString()))
-      proc.stderr.on('data', (d: Buffer) => send(d.toString()))
+      proc.stderr.on('data', (d: Buffer) => {
+        const s = d.toString()
+        // Filter sudo's own prompts — don't show them in the update log
+        if (!s.match(/^\[sudo\]|password for |Sorry, try again/)) send(s)
+      })
 
-      // null exit = OS killed us during reboot = success
       proc.on('close', (code) => {
         if (code === 0 || code === null) resolve({ success: true })
+        else if (!isRoot() && code === 1) reject(new Error('wrong-password'))
         else reject(new Error(`Update exited with code ${code}`))
       })
       proc.on('error', (err) => reject(err))

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-type Phase = 'starting' | 'updating' | 'countdown' | 'rebooting'
+type Phase = 'auth' | 'starting' | 'updating' | 'countdown' | 'rebooting'
 
 interface Props {
   onCancel?: () => void
@@ -97,11 +97,13 @@ function stripAnsi(s: string) {
 }
 
 export function UpdateScreen({ onCancel }: Props) {
-  const [phase, setPhase]         = useState<Phase>('starting')
+  const [phase, setPhase]         = useState<Phase>('auth')
   const [log, setLog]             = useState<string[]>([])
   const [countdown, setCount]     = useState(10)
   const [error, setError]         = useState<string | null>(null)
   const [needsSudoSetup, setNeedsSudoSetup] = useState(false)
+  const [password, setPassword]   = useState('')
+  const [wrongPassword, setWrongPassword] = useState(false)
   const logRef = useRef<HTMLDivElement>(null)
   const countdownRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -138,46 +140,53 @@ export function UpdateScreen({ onCancel }: Props) {
     return () => { if (countdownRef.current) clearInterval(countdownRef.current) }
   }, [phase])
 
-  // Run the update
+  // Check if we're running as root — if so skip auth phase
   useEffect(() => {
-    setPhase('starting')
-    setTimeout(() => {
-      setPhase('updating')
-      ;(async () => {
-        try {
-          const api = (window as any).cryogram?.updater
-          if (!api) {
-            setError('Updater API not available — run from the live OS.')
-            return
-          }
-
-          // Subscribe to progress
-          const unsub = api.onProgress((line: string) => appendLog(line))
-          try {
-            await api.run()
-            // If we get here (script didn't reboot yet), move to countdown
-            if (phase !== 'countdown' && phase !== 'rebooting') {
-              setPhase('countdown')
-            }
-          } finally {
-            unsub()
-          }
-        } catch (err: any) {
-          const msg = String(err?.message ?? err)
-          if (msg.includes('code null') || msg.includes('killed')) {
-            setPhase('rebooting')
-          } else if (msg.includes('password is required') || msg.includes('sudo:')) {
-            setNeedsSudoSetup(true)
-          } else {
-            setError(msg)
-          }
-        }
-      })()
-    }, 1200)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    const api = (window as any).cryogram?.updater
+    if (!api) return
+    // Try running without password first (works if root)
+    // We detect root by attempting a no-password run; if it errors with
+    // wrong-password we know we need auth. Start in auth phase to be safe.
   }, [])
 
+  const runUpdate = useCallback(async (pw?: string) => {
+    setPhase('starting')
+    setError(null)
+    setNeedsSudoSetup(false)
+    setWrongPassword(false)
+
+    await new Promise(r => setTimeout(r, 800))
+    setPhase('updating')
+
+    try {
+      const api = (window as any).cryogram?.updater
+      if (!api) { setError('Updater API not available — run from the live OS.'); return }
+
+      const unsub = api.onProgress((line: string) => appendLog(line))
+      try {
+        await api.run(pw)
+        if (phase !== 'countdown' && phase !== 'rebooting') setPhase('countdown')
+      } finally {
+        unsub()
+      }
+    } catch (err: any) {
+      const msg = String(err?.message ?? err)
+      if (msg.includes('code null') || msg.includes('killed')) {
+        setPhase('rebooting')
+      } else if (msg === 'wrong-password' || msg.includes('wrong-password')) {
+        setPhase('auth')
+        setWrongPassword(true)
+      } else if (msg.includes('password is required') || msg.includes('sudo:')) {
+        setNeedsSudoSetup(true)
+        setPhase('auth')
+      } else {
+        setError(msg)
+      }
+    }
+  }, [phase, appendLog])
+
   const phaseLabel: Record<Phase, string> = {
+    auth:      'Install Update',
     starting:  'Preparing update…',
     updating:  'Installing update…',
     countdown: 'Update complete',
@@ -185,6 +194,7 @@ export function UpdateScreen({ onCancel }: Props) {
   }
 
   const phaseColor: Record<Phase, string> = {
+    auth:      'var(--cryo-accent)',
     starting:  'var(--cryo-accent)',
     updating:  'var(--cryo-accent)',
     countdown: '#00ff88',
@@ -222,9 +232,9 @@ export function UpdateScreen({ onCancel }: Props) {
 
         {/* Logo + spinner cluster */}
         <div style={{ position: 'relative', width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <SpinRing size={120} color={color} speed={3} gap={0.3} />
-          <SpinRing size={96}  color={`${color}80`} speed={2.1} gap={0.5} />
-          <SpinRing size={74}  color={`${color}40`} speed={1.5} gap={0.7} />
+          {phase !== 'auth' && <SpinRing size={120} color={color} speed={3} gap={0.3} />}
+          {phase !== 'auth' && <SpinRing size={96}  color={`${color}80`} speed={2.1} gap={0.5} />}
+          {phase !== 'auth' && <SpinRing size={74}  color={`${color}40`} speed={1.5} gap={0.7} />}
 
           {/* Center icon */}
           <motion.div
@@ -278,6 +288,83 @@ export function UpdateScreen({ onCancel }: Props) {
               : 'Downloading code changes only — not a new OS'}
           </div>
         </div>
+
+        {/* Auth panel — password prompt */}
+        <AnimatePresence>
+          {phase === 'auth' && !needsSudoSetup && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              style={{ width: '100%', maxWidth: 380 }}
+            >
+              <div style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 16,
+                padding: '20px 22px',
+              }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 12 }}>
+                  Enter your account password to install the update
+                </div>
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  autoFocus
+                  onChange={e => { setPassword(e.target.value); setWrongPassword(false) }}
+                  onKeyDown={e => { if (e.key === 'Enter' && password) runUpdate(password) }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    background: 'rgba(0,0,0,0.4)',
+                    border: `1px solid ${wrongPassword ? '#ef4444' : 'rgba(255,255,255,0.12)'}`,
+                    color: '#fff',
+                    fontSize: 14,
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    fontFamily: 'inherit',
+                  }}
+                />
+                {wrongPassword && (
+                  <div style={{ fontSize: 11, color: '#f87171', marginTop: 6 }}>
+                    Incorrect password — try again
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+                  {onCancel && (
+                    <button
+                      onClick={onCancel}
+                      style={{
+                        flex: 1, padding: '9px 0', borderRadius: 10, fontSize: 13, fontWeight: 500,
+                        background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                        color: 'rgba(255,255,255,0.6)', cursor: 'pointer',
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button
+                    onClick={() => password && runUpdate(password)}
+                    disabled={!password}
+                    style={{
+                      flex: 2, padding: '9px 0', borderRadius: 10, fontSize: 13, fontWeight: 700,
+                      background: password ? 'linear-gradient(135deg, var(--cryo-accent), #7c3aed)' : 'rgba(255,255,255,0.05)',
+                      border: 'none',
+                      color: password ? '#fff' : 'rgba(255,255,255,0.25)',
+                      cursor: password ? 'pointer' : 'default',
+                      boxShadow: password ? '0 0 20px var(--cryo-a30)' : 'none',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    Install Update & Reboot
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Countdown */}
         <AnimatePresence>
