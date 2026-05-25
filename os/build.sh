@@ -240,6 +240,9 @@ plymouth-themes
 libinput-tools
 python3-evdev
 squashfs-tools
+grub-efi-amd64
+grub-pc-bin
+grub-common
 PKGEOF
 
 cat > "$PKG_LISTS/gaming.list.chroot" << 'PKGEOF'
