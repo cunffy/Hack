@@ -179,7 +179,7 @@ function StatusIcons() {
       try { setVol(await window.cryogram.system.getVolume()) } catch {}
     }
     load()
-    const t = setInterval(load, 15000)
+    const t = setInterval(load, 5000)
     return () => clearInterval(t)
   }, [])
 
@@ -228,7 +228,7 @@ function StatusIcons() {
               boxShadow: '0 16px 48px rgba(0,0,0,0.7)',
             }}
           >
-            {popup === 'wifi'  && <WifiPanel wifi={wifi} />}
+            {popup === 'wifi'  && <WifiPanel wifi={wifi} onWifiChange={setWifi} />}
             {popup === 'vol'   && <VolumePanel vol={vol} setVol={setVol} />}
             {popup === 'bat'   && <BattPanel battery={battery} />}
           </motion.div>
@@ -304,32 +304,161 @@ function PanelLabel({ children }: { children: React.ReactNode }) {
   return <div className="text-xs font-semibold mb-3" style={{ color: '#00d4ff', letterSpacing: '0.06em', textTransform: 'uppercase', fontSize: 10 }}>{children}</div>
 }
 
-function WifiPanel({ wifi }: { wifi: WifiStatus | null }) {
-  const openApp = useWindowStore(s => s.openApp)
+type NetworkEntry = { ssid: string; signal: number; security: string; active: boolean }
+
+function WifiPanel({ wifi, onWifiChange }: { wifi: WifiStatus | null; onWifiChange: (w: WifiStatus) => void }) {
+  const [networks, setNetworks] = useState<NetworkEntry[]>([])
+  const [loading, setLoading] = useState(true)
+  const [connecting, setConnecting] = useState<string | null>(null)
+  const [selected, setSelected] = useState<NetworkEntry | null>(null)
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      try {
+        const nets = await window.cryogram.system.getNetworks()
+        setNetworks(nets)
+      } catch {}
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const connect = async (net: NetworkEntry, pw: string) => {
+    setConnecting(net.ssid)
+    setError('')
+    try {
+      const ok = await window.cryogram.system.connectNetwork(net.ssid, pw || undefined)
+      if (ok) {
+        setSelected(null)
+        setPassword('')
+        // Immediately update the parent WiFi status so the icon/bar refreshes
+        const updated = await window.cryogram.system.getWifiStatus()
+        onWifiChange(updated)
+      } else {
+        setError('Connection failed — check your password')
+      }
+    } catch {
+      setError('Connection error')
+    }
+    setConnecting(null)
+  }
+
   return (
-    <div>
+    <div style={{ width: 260 }}>
       <PanelLabel>Wi-Fi</PanelLabel>
-      {wifi?.connected ? (
-        <>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 rounded-full bg-green-400" style={{ boxShadow: '0 0 6px #4ade80' }} />
-            <span className="text-sm font-medium" style={{ color: '#e2e8f0' }}>{wifi.ssid}</span>
-          </div>
-          <div className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>Signal: {wifi.signal}%</div>
-        </>
-      ) : (
-        <div className="text-sm mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>Not connected</div>
+
+      {/* Current connection */}
+      {wifi?.connected && (
+        <div className="flex items-center gap-2 mb-3 px-1">
+          <div className="w-2 h-2 rounded-full shrink-0" style={{ background: '#4ade80', boxShadow: '0 0 6px #4ade80' }} />
+          <span className="text-xs font-medium truncate" style={{ color: '#e2e8f0' }}>{wifi.ssid}</span>
+          <span className="text-xs ml-auto shrink-0" style={{ color: 'rgba(255,255,255,0.35)' }}>{wifi.signal}%</span>
+        </div>
       )}
-      <button
-        onClick={() => openApp('system')}
-        className="w-full text-xs py-1.5 rounded-lg text-center transition-colors"
-        style={{ background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.2)', color: '#00d4ff' }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,212,255,0.2)' }}
-        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,212,255,0.12)' }}
-      >
-        Network Settings
-      </button>
+
+      {/* Network list */}
+      <div className="space-y-0.5 max-h-52 overflow-y-auto mb-2">
+        {loading ? (
+          <div className="text-xs text-center py-4" style={{ color: 'rgba(255,255,255,0.3)' }}>Scanning…</div>
+        ) : networks.length === 0 ? (
+          <div className="text-xs text-center py-4" style={{ color: 'rgba(255,255,255,0.3)' }}>No networks found</div>
+        ) : (
+          networks.map(net => (
+            <button
+              key={net.ssid}
+              onClick={() => { setSelected(s => s?.ssid === net.ssid ? null : net); setPassword(''); setError('') }}
+              className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors"
+              style={{
+                background: net.active
+                  ? 'rgba(0,212,255,0.12)'
+                  : selected?.ssid === net.ssid
+                    ? 'rgba(255,255,255,0.08)'
+                    : 'transparent',
+                border: net.active ? '1px solid rgba(0,212,255,0.2)' : '1px solid transparent',
+              }}
+              onMouseEnter={e => { if (!net.active) e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
+              onMouseLeave={e => { if (!net.active) e.currentTarget.style.background = selected?.ssid === net.ssid ? 'rgba(255,255,255,0.08)' : 'transparent' }}
+            >
+              <SignalBars signal={net.signal} active={net.active} />
+              <span className="flex-1 text-xs truncate" style={{ color: net.active ? '#00d4ff' : 'rgba(255,255,255,0.75)' }}>
+                {net.ssid}
+              </span>
+              {net.security && <LockTinyIcon />}
+              {net.active && <span className="text-xs" style={{ color: '#00d4ff' }}>✓</span>}
+            </button>
+          ))
+        )}
+      </div>
+
+      {/* Password field for selected network */}
+      <AnimatePresence>
+        {selected && !selected.active && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="pt-2 space-y-2">
+              {selected.security && (
+                <input
+                  type="password"
+                  placeholder="Wi-Fi password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') connect(selected, password) }}
+                  autoFocus
+                  className="w-full px-3 py-2 rounded-lg text-xs outline-none"
+                  style={{
+                    background: 'rgba(255,255,255,0.07)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: '#e2e8f0',
+                  }}
+                />
+              )}
+              {error && <div className="text-xs" style={{ color: '#f87171' }}>{error}</div>}
+              <button
+                onClick={() => connect(selected, password)}
+                disabled={!!connecting}
+                className="w-full py-1.5 rounded-lg text-xs font-medium transition-colors"
+                style={{
+                  background: connecting ? 'rgba(0,212,255,0.1)' : 'rgba(0,212,255,0.18)',
+                  border: '1px solid rgba(0,212,255,0.25)',
+                  color: connecting ? 'rgba(0,212,255,0.5)' : '#00d4ff',
+                }}
+              >
+                {connecting === selected.ssid ? 'Connecting…' : `Connect to ${selected.ssid}`}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
+  )
+}
+
+function SignalBars({ signal, active }: { signal: number; active: boolean }) {
+  const color = active ? '#00d4ff' : 'rgba(255,255,255,0.6)'
+  const dim   = 'rgba(255,255,255,0.18)'
+  return (
+    <svg width="14" height="12" viewBox="0 0 14 12" className="shrink-0">
+      <rect x="0"  y="8"  width="3" height="4" rx="1" fill={signal > 20  ? color : dim} />
+      <rect x="4"  y="5"  width="3" height="7" rx="1" fill={signal > 40  ? color : dim} />
+      <rect x="8"  y="2"  width="3" height="10" rx="1" fill={signal > 65 ? color : dim} />
+      <rect x="12" y="0"  width="2" height="12" rx="1" fill={signal > 85 ? color : dim} />
+    </svg>
+  )
+}
+
+function LockTinyIcon() {
+  return (
+    <svg width="9" height="10" viewBox="0 0 9 10" fill="none" className="shrink-0">
+      <rect x="0.5" y="4" width="8" height="5.5" rx="1.5" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+      <path d="M2.5 4V3a2 2 0 0 1 4 0v1" stroke="rgba(255,255,255,0.3)" strokeWidth="1" strokeLinecap="round" />
+    </svg>
   )
 }
 

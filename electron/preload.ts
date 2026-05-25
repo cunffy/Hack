@@ -105,6 +105,13 @@ contextBridge.exposeInMainWorld('cryogram', {
     launch:  (app: unknown) => ipcRenderer.invoke('launcher:launch', app),
   },
 
+  // X11 window manager (wmctrl) — tracks ALL open apps including external ones
+  wm: {
+    getWindows:  ()             => ipcRenderer.invoke('wm:getWindows'),
+    focusWindow: (id: string)   => ipcRenderer.invoke('wm:focusWindow', id),
+    closeWindow: (id: string)   => ipcRenderer.invoke('wm:closeWindow', id),
+  },
+
   // Notifications from main
   onNotification: (cb: (n: { title: string; body: string }) => void) => {
     const listener = (_: unknown, n: unknown) => cb(n as { title: string; body: string })

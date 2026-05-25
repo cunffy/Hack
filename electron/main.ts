@@ -19,7 +19,8 @@ function createWindow(): void {
     minHeight: 700,
     frame: false,
     titleBarStyle: 'hidden',
-    backgroundColor: '#080c12',
+    backgroundColor: '#070b11',
+    skipTaskbar: true,     // Don't show in any system taskbar — WE are the taskbar
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -32,6 +33,8 @@ function createWindow(): void {
   mainWindow.on('ready-to-show', () => {
     mainWindow!.show()
     mainWindow!.maximize()
+    // Re-maximize if something else pushes us out of fullscreen
+    mainWindow!.on('restore', () => mainWindow?.maximize())
   })
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {

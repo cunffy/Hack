@@ -42,10 +42,14 @@ export function registerSystemHandlers(): void {
   })
 
   ipcMain.handle('system:connectNetwork', async (_, ssid: string, password?: string) => {
+    // Always specify the wifi interface so nmcli doesn't fail silently,
+    // which would cause nm-applet to show its own auth dialog.
+    const dev = await sh("nmcli -t -f DEVICE,TYPE dev 2>/dev/null | grep ':wifi' | head -1 | cut -d: -f1")
+    const ifarg = dev ? `ifname "${dev}"` : ''
     const cmd = password
-      ? `nmcli dev wifi connect "${ssid}" password "${password}"`
-      : `nmcli dev wifi connect "${ssid}"`
-    const out = await sh(`${cmd} 2>&1`)
+      ? `nmcli dev wifi connect "${ssid}" password "${password}" ${ifarg} 2>&1`
+      : `nmcli dev wifi connect "${ssid}" ${ifarg} 2>&1`
+    const out = await sh(cmd)
     return out.toLowerCase().includes('successfully') || out.toLowerCase().includes('activated')
   })
 
@@ -179,4 +183,27 @@ export function registerSystemHandlers(): void {
   ipcMain.handle('system:shutdown', async () => { await sh('systemctl poweroff') })
   ipcMain.handle('system:reboot',   async () => { await sh('systemctl reboot') })
   ipcMain.handle('system:lock',     async () => { await sh('i3lock -c 080c12 -e &') })
+
+  // ── X11 window management (wmctrl) ────────────────────────────────────────
+  // Lets the Dock track ALL open apps — not just internal Cryogram windows.
+
+  ipcMain.handle('wm:getWindows', async () => {
+    const out = await sh('wmctrl -l 2>/dev/null')
+    if (!out) return []
+    return out.split('\n').filter(Boolean).map(line => {
+      const match = line.match(/^(0x\w+)\s+(-?\d+)\s+(\S+)\s+(.+)$/)
+      if (!match) return null
+      return { id: match[1], desktop: parseInt(match[2]), title: match[4] }
+    }).filter(Boolean)
+  })
+
+  ipcMain.handle('wm:focusWindow', async (_, id: string) => {
+    await sh(`wmctrl -ia ${id} 2>/dev/null`)
+    return true
+  })
+
+  ipcMain.handle('wm:closeWindow', async (_, id: string) => {
+    await sh(`wmctrl -ic ${id} 2>/dev/null`)
+    return true
+  })
 }
