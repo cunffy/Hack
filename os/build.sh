@@ -361,6 +361,29 @@ Type=Application
 Categories=System;
 DESKTOP
 
+# Auto-launch Calamares when booting from the live USB.
+# The live environment sets boot=live in the kernel cmdline.
+# We check for this so the installer only pops up on live boot,
+# not on the installed system.
+cat > /etc/xdg/autostart/cryogram-installer.desktop << 'AUTOSTART'
+[Desktop Entry]
+Name=Cryogram OS Installer
+Exec=/usr/local/bin/cryogram-installer-launch
+Terminal=false
+Type=Application
+X-GNOME-Autostart-enabled=true
+AUTOSTART
+
+cat > /usr/local/bin/cryogram-installer-launch << 'LAUNCHER'
+#!/bin/bash
+# Only launch installer when running from live USB
+if grep -q "boot=live" /proc/cmdline 2>/dev/null; then
+  sleep 4  # wait for desktop to fully load
+  pkexec calamares
+fi
+LAUNCHER
+chmod +x /usr/local/bin/cryogram-installer-launch
+
 echo "[calamares] Done (failures are non-fatal)."
 exit 0
 HOOKEOF
