@@ -97,6 +97,8 @@ contextBridge.exposeInMainWorld('cryogram', {
     shutdown:             ()                            => ipcRenderer.invoke('system:shutdown'),
     reboot:               ()                            => ipcRenderer.invoke('system:reboot'),
     lock:                 ()                            => ipcRenderer.invoke('system:lock'),
+    pickWallpaper:        ()                            => ipcRenderer.invoke('system:pickWallpaper'),
+    setWallpaper:         (path: string)                => ipcRenderer.invoke('system:setWallpaper', path),
   },
 
   // App launcher

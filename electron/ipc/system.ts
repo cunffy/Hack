@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, dialog, BrowserWindow } from 'electron'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import { readFile } from 'fs/promises'
@@ -183,6 +183,25 @@ export function registerSystemHandlers(): void {
   ipcMain.handle('system:shutdown', async () => { await sh('systemctl poweroff') })
   ipcMain.handle('system:reboot',   async () => { await sh('systemctl reboot') })
   ipcMain.handle('system:lock',     async () => { await sh('i3lock -c 080c12 -e &') })
+
+  // ── Wallpaper ─────────────────────────────────────────────────────────────
+
+  ipcMain.handle('system:pickWallpaper', async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const result = await dialog.showOpenDialog(win!, {
+      title: 'Choose Wallpaper',
+      filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tiff'] }],
+      properties: ['openFile'],
+    })
+    if (result.canceled || result.filePaths.length === 0) return null
+    return result.filePaths[0]
+  })
+
+  ipcMain.handle('system:setWallpaper', async (_, path: string) => {
+    const safe = path.replace(/'/g, "'\\''")
+    await sh(`feh --bg-scale '${safe}' 2>/dev/null`)
+    return true
+  })
 
   // ── X11 window management (wmctrl) ────────────────────────────────────────
   // Lets the Dock track ALL open apps — not just internal Cryogram windows.

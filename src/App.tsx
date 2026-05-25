@@ -7,9 +7,11 @@ import { TitleBar } from './components/TitleBar'
 import { NotificationToast } from './components/NotificationToast'
 import { AnimatedBackground } from './components/AnimatedBackground'
 import { BootSplash } from './components/BootSplash'
+import { useDesktopStore } from './store/desktopStore'
 
 export default function App() {
   const [booted, setBooted] = useState(false)
+  const wallpaper = useDesktopStore(s => s.wallpaper)
 
   useEffect(() => {
     const cleanup = window.cryogram.onNotification((n) => {
@@ -34,7 +36,7 @@ export default function App() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <AnimatedBackground />
+            {!wallpaper && <AnimatedBackground />}
             <TitleBar />
             {/* Desktop area: windows float here, dock overlaid at bottom */}
             <div className="flex-1 relative overflow-hidden">
