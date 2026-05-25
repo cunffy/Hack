@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-rPjlG451.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-Cb2nKcsy.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -16493,13 +16493,6 @@ function Desktop() {
     "div",
     {
       className: "absolute inset-0 select-none",
-      style: {
-        backgroundImage: wallpaper ? `url('${(wallpaper.startsWith("file://") ? wallpaper : `file://${wallpaper}`).replace(/'/g, "\\'")}')` : void 0,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        imageRendering: "auto"
-      },
       onContextMenu: handleBgCtx,
       children: [
         !wallpaper && /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -16985,14 +16978,14 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-rPjlG451.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-fz58eLAq.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-mt_HB1Di.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-DEpn-JAa.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-Bu833MQy.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-0jgKx6Et.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-BYd4W0w2.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-dm01UdX5.js"), true ? [] : void 0, import.meta.url));
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-Cb2nKcsy.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-CWJGem2X.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-hk93x0CC.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-BCeXVGGC.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-B3-Xq0qy.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-BWSIVxrY.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-CwwRJ_YK.js"), true ? [] : void 0, import.meta.url));
+const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-BKxWuh66.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -17430,10 +17423,10 @@ function TitleBar() {
     {
       className: "flex items-center h-7 px-2 shrink-0 select-none relative",
       style: {
-        background: "rgba(6,9,15,0.92)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
-        backdropFilter: "blur(24px) saturate(1.8)",
-        WebkitBackdropFilter: "blur(24px) saturate(1.8)",
+        background: "rgba(6,9,15,0.75)",
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        backdropFilter: "blur(40px) saturate(2)",
+        WebkitBackdropFilter: "blur(40px) saturate(2)",
         WebkitAppRegion: "drag",
         zIndex: 100
       },
@@ -18815,6 +18808,18 @@ function App() {
         transition: { duration: 0.5 },
         children: [
           !wallpaper && /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatedBackground, {}),
+          wallpaper && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "absolute inset-0",
+              style: {
+                backgroundImage: `url("${encodeURI(wallpaper.startsWith("file://") ? wallpaper : "file://" + wallpaper)}")`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat"
+              }
+            }
+          ),
           /* @__PURE__ */ jsxRuntimeExports.jsx(TitleBar, {}),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 relative overflow-hidden", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(Desktop, {}),

@@ -212,10 +212,10 @@ export function TitleBar() {
     <div
       className="flex items-center h-7 px-2 shrink-0 select-none relative"
       style={{
-        background: 'rgba(6,9,15,0.92)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        backdropFilter: 'blur(24px) saturate(1.8)',
-        WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+        background: 'rgba(6,9,15,0.75)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        backdropFilter: 'blur(40px) saturate(2)',
+        WebkitBackdropFilter: 'blur(40px) saturate(2)',
         WebkitAppRegion: 'drag',
         zIndex: 100,
       } as React.CSSProperties}

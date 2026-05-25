@@ -93,7 +93,19 @@ export default function App() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
+            {/* Full-screen background layer — animated grid OR wallpaper image */}
             {!wallpaper && <AnimatedBackground />}
+            {wallpaper && (
+              <div
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `url("${encodeURI(wallpaper.startsWith('file://') ? wallpaper : 'file://' + wallpaper)}")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                }}
+              />
+            )}
             <TitleBar />
             {/* Desktop area: windows float here, dock overlaid at bottom */}
             <div className="flex-1 relative overflow-hidden">
