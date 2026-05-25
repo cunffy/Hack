@@ -44,6 +44,13 @@ export function registerUpdaterHandlers(): void {
 
     const { branch } = readConf()
 
+    // Git refuses to operate on repos owned by a different user unless we
+    // explicitly mark them safe. This happens when cryogram-update cloned
+    // the repo as root but Electron runs as the desktop user (or vice-versa).
+    for (const dir of SRC_CANDIDATES) {
+      await execFileP('git', ['config', '--global', '--add', 'safe.directory', dir]).catch(() => {})
+    }
+
     try {
       // Fetch silently — if this fails we still try the local compare
       await execFileP('git', ['-C', srcDir, 'fetch', 'origin', '--quiet'], { timeout: 16000 })
