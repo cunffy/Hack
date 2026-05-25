@@ -44,37 +44,36 @@ export function registerUpdaterHandlers(): void {
 
     const { branch } = readConf()
 
-    // Git refuses to operate on repos owned by a different user unless we
-    // explicitly mark them safe. This happens when cryogram-update cloned
-    // the repo as root but Electron runs as the desktop user (or vice-versa).
+    // Mark dirs safe so git doesn't refuse due to ownership mismatch
+    // (repo cloned as root, Electron runs as desktop user)
     for (const dir of SRC_CANDIDATES) {
       await execFileP('git', ['config', '--global', '--add', 'safe.directory', dir]).catch(() => {})
     }
 
     try {
-      // Fetch silently — if this fails we still try the local compare
-      await execFileP('git', ['-C', srcDir, 'fetch', 'origin', '--quiet'], { timeout: 16000 })
+      // Use ls-remote instead of fetch — it queries the remote over the network
+      // without writing to .git/FETCH_HEAD, so it works even when the desktop
+      // user doesn't have write permission to the root-owned .git directory.
+      const { stdout: remoteOut } = await execFileP(
+        'git', ['-C', srcDir, 'ls-remote', 'origin', `refs/heads/${branch}`],
+        { timeout: 16000 }
+      )
+      const remoteSha = remoteOut.trim().split(/\s+/)[0]
+      if (!remoteSha) {
+        return { hasUpdate: false, error: 'fetch-failed', message: `Branch '${branch}' not found on remote.` }
+      }
+
+      const { stdout: localOut } = await execFileP('git', ['-C', srcDir, 'rev-parse', 'HEAD'])
+      const localSha = localOut.trim()
+
+      if (remoteSha === localSha) return { hasUpdate: false }
+
+      return { hasUpdate: true, commitCount: 1, changes: ['New updates are available — click Update Now to install.'] }
     } catch (e) {
       return {
         hasUpdate: false,
         error: 'fetch-failed',
         message: `Could not reach update server: ${(e as Error).message}`,
-      }
-    }
-
-    try {
-      const { stdout: countOut } = await execFileP('git', ['-C', srcDir, 'rev-list', `HEAD..origin/${branch}`, '--count'])
-      const count = parseInt(countOut.trim(), 10) || 0
-      if (count <= 0) return { hasUpdate: false }
-
-      const { stdout: logOut } = await execFileP('git', ['-C', srcDir, 'log', `HEAD..origin/${branch}`, '--pretty=format:%s', '-8'])
-      const changes = logOut.trim().split('\n').filter(Boolean)
-      return { hasUpdate: true, commitCount: count, changes }
-    } catch (e) {
-      return {
-        hasUpdate: false,
-        error: 'compare-failed',
-        message: `Branch compare failed (branch: ${branch}): ${(e as Error).message}`,
       }
     }
   })
