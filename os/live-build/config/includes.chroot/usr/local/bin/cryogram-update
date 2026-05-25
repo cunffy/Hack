@@ -166,11 +166,6 @@ echo ""
 #  - Display server, WM, and Electron all restart from a clean slate
 #  - No DISPLAY/DBUS env var guessing needed
 #  - Matches how macOS and Windows handle shell updates
+# Session ends here — systemctl kills the X session immediately.
+# The lines below this will never execute. Cryogram relaunches via autologin.
 systemctl restart display-manager
-
-echo ""
-echo -e "${GREEN}${BOLD}✓  Update complete!${NC}"
-echo ""
-echo -e "  Run ${CYAN}sudo cryogram-update${NC} anytime to apply new changes."
-echo -e "  Edit ${CYAN}$CONF_FILE${NC} to change the repo URL or branch."
-echo ""

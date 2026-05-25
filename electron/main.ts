@@ -35,11 +35,6 @@ function createWindow(): void {
     mainWindow!.maximize()
     // Re-maximize if something else pushes us out of fullscreen
     mainWindow!.on('restore', () => mainWindow?.maximize())
-    // Re-focus if another X11 window steals focus
-    mainWindow!.on('blur', () => {
-      // Only reclaim focus if no child window (file picker, etc.) is open
-      if (BrowserWindow.getAllWindows().length === 1) mainWindow?.focus()
-    })
 
     // ── Block WM-level shortcuts that would expose the underlying desktop ──
     // Super+D  = "show desktop" in most WMs — we swallow it

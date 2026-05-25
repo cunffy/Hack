@@ -434,6 +434,38 @@ StartupWMClass=cryogram
 NoDisplay=true
 DESKTOP
 
+# ── OS identity ───────────────────────────────────────────────────────────
+# Sets PRETTY_NAME so the installed GRUB entry and system info show
+# "Cryogram OS" instead of "Debian GNU/Linux".
+cat > /etc/os-release << 'OSRELEASE'
+PRETTY_NAME="Cryogram OS"
+NAME="Cryogram OS"
+ID=cryogram
+ID_LIKE=debian
+VERSION="1.0"
+VERSION_ID="1.0"
+HOME_URL="https://github.com/cunffy/hack"
+SUPPORT_URL=""
+BUG_REPORT_URL=""
+OSRELEASE
+
+# ── GRUB defaults for installed system ────────────────────────────────────
+# quiet splash  → Plymouth boot animation plays instead of text boot log.
+# GRUB_TIMEOUT=3 with style=menu → shows the branded GRUB screen for 3 s,
+#                                   then auto-boots (no user action needed).
+cat > /etc/default/grub << 'GRUBDEFAULT'
+GRUB_DEFAULT=0
+GRUB_TIMEOUT=3
+GRUB_TIMEOUT_STYLE=menu
+GRUB_DISTRIBUTOR="Cryogram OS"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+GRUB_CMDLINE_LINUX=""
+GRUB_BACKGROUND="/usr/share/backgrounds/cryogram/wallpaper.png"
+GRUB_THEME="/usr/share/grub/themes/cryogram/theme.txt"
+GRUB_GFXMODE="1920x1080,1280x720,auto"
+GRUB_GFXPAYLOAD_LINUX=keep
+GRUBDEFAULT
+
 echo "[cryogram] Setup complete at $INSTALL_DIR ($(du -sh $INSTALL_DIR | cut -f1))"
 exit 0
 HOOKEOF
@@ -749,7 +781,7 @@ openbox --config-file /etc/xdg/openbox/cryogram-rc.xml &
 WM_PID=$!
 
 # Hide cursor when idle — security OS aesthetic
-unclutter -root -idle 5 -noevents 2>/dev/null &
+unclutter -root -idle 5 2>/dev/null &
 
 # ── Launch Cryogram OS shell ──────────────────────────────────────────────
 # Auto-restart on crash (exit non-zero). Exit 0 = clean shutdown/update,
@@ -850,6 +882,37 @@ HOOKEOF
 chmod +x "$HOOKS_DIR/0545-cryogram-os-session.hook.chroot"
 echo "[build] OS session hook written."
 
+# Binary hook — patches the live ISO's GRUB config after live-build assembles it.
+# Binary hooks run with CWD = $LB_DIR; the ISO binary tree is in binary/.
+cat > "$HOOKS_DIR/0560-grub-live.hook.binary" << 'HOOKEOF'
+#!/bin/bash
+set +e
+echo "[grub-live] Configuring Cryogram OS live boot GRUB..."
+
+# live-build assembles the binary tree in binary/ relative to $LB_DIR.
+# Patch all GRUB configs we can find (BIOS and EFI paths vary by live-build version).
+for GRUB_CFG in \
+  "binary/boot/grub/grub.cfg" \
+  "binary/EFI/boot/grub.cfg" \
+  "binary/EFI/BOOT/grub.cfg"; do
+  [ -f "$GRUB_CFG" ] || continue
+
+  # 5-second countdown — shows branded screen, then auto-boots
+  sed -i 's/set timeout=[0-9][0-9]*/set timeout=5/g' "$GRUB_CFG"
+
+  # Apply Cryogram theme (files are staged in binary/boot/grub/themes/cryogram/)
+  if ! grep -q "set theme" "$GRUB_CFG"; then
+    sed -i '1a set theme=/boot/grub/themes/cryogram/theme.txt' "$GRUB_CFG"
+  fi
+
+  echo "[grub-live] Patched: $GRUB_CFG"
+done
+
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0560-grub-live.hook.binary"
+echo "[build] GRUB live config hook written."
+
 # ---- 1. Generate graphic assets ----
 echo "[1/6] Generating GRUB theme and wallpaper assets..."
 THEME_DIR="$LB_DIR/config/includes.chroot/usr/share/grub/themes/cryogram"
@@ -874,6 +937,15 @@ else
 fi
 
 bash "$THEME_DIR/generate-assets.sh"
+
+# Copy GRUB theme into the binary includes so the live ISO boot menu is themed.
+# The chroot copy (above) is for the *installed* system's GRUB.
+# The binary copy is for the live ISO's GRUB, which runs before squashfs mounts.
+BINARY_GRUB_THEME="$LB_DIR/config/includes.binary/boot/grub/themes/cryogram"
+mkdir -p "$BINARY_GRUB_THEME"
+cp "$THEME_DIR/theme.txt" "$BINARY_GRUB_THEME/" 2>/dev/null || true
+find "$THEME_DIR" -name "*.png" -exec cp {} "$BINARY_GRUB_THEME/" \; 2>/dev/null || true
+echo "  GRUB theme staged for live ISO binary ($(ls "$BINARY_GRUB_THEME" | wc -l) files)."
 
 # ---- 2. Stage pre-built Cryogram app into chroot ----
 # The app is already built on the host (out/ exists in the source tree).
