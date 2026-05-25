@@ -4,7 +4,7 @@ import { AppId } from './windowStore'
 
 export const DEFAULT_DOCK: AppId[] = [
   'terminal', 'editor', 'password-tester', 'leaker',
-  'files', 'launcher', 'settings', 'system',
+  'files', 'opticseo', 'phone', 'launcher', 'settings', 'system',
 ]
 
 interface DockStore {
@@ -22,6 +22,16 @@ export const useDockStore = create<DockStore>()(
       addApp:   (id) => set(s => ({ order: s.order.includes(id) ? s.order : [...s.order, id] })),
       removeApp:(id) => set(s => ({ order: s.order.filter(a => a !== id) })),
     }),
-    { name: 'cryogram-dock-order' },
+    {
+      name: 'cryogram-dock-order',
+      merge: (persisted: any, current) => {
+        const stored: AppId[] = persisted?.order ?? current.order
+        const merged = [...stored]
+        for (const id of DEFAULT_DOCK) {
+          if (!merged.includes(id)) merged.push(id)
+        }
+        return { ...current, order: merged }
+      },
+    },
   ),
 )

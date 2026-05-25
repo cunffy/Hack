@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-BB8DNeJe.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-BDUa-VMt.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -15496,7 +15496,9 @@ const APP_META$1 = {
   settings: { title: "Settings", width: 600, height: 480 },
   files: { title: "Files", width: 860, height: 580 },
   launcher: { title: "App Launcher", width: 760, height: 560 },
-  system: { title: "System", width: 680, height: 520 }
+  system: { title: "System", width: 680, height: 520 },
+  opticseo: { title: "OpticSEO Pro", width: 1280, height: 820 },
+  phone: { title: "Phone", width: 780, height: 600 }
 };
 let instanceCounter = 0;
 const useWindowStore = create((set, get) => ({
@@ -15973,6 +15975,8 @@ const DEFAULT_DOCK = [
   "password-tester",
   "leaker",
   "files",
+  "opticseo",
+  "phone",
   "launcher",
   "settings",
   "system"
@@ -15985,7 +15989,17 @@ const useDockStore = create()(
       addApp: (id2) => set((s) => ({ order: s.order.includes(id2) ? s.order : [...s.order, id2] })),
       removeApp: (id2) => set((s) => ({ order: s.order.filter((a) => a !== id2) }))
     }),
-    { name: "cryogram-dock-order" }
+    {
+      name: "cryogram-dock-order",
+      merge: (persisted, current) => {
+        const stored = persisted?.order ?? current.order;
+        const merged = [...stored];
+        for (const id2 of DEFAULT_DOCK) {
+          if (!merged.includes(id2)) merged.push(id2);
+        }
+        return { ...current, order: merged };
+      }
+    }
   )
 );
 function ContextMenu({ x: x2, y: y2, items, onClose }) {
@@ -16175,7 +16189,9 @@ const APP_META = {
   files: { label: "Files", color: "#f59e0b", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(FolderIcon, {}) },
   launcher: { label: "Launcher", color: "#34d399", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(GridIcon, {}) },
   settings: { label: "Settings", color: "#bb88ff", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(GearIcon, {}) },
-  system: { label: "System", color: "#818cf8", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(DisplayIcon, {}) }
+  system: { label: "System", color: "#818cf8", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(DisplayIcon, {}) },
+  opticseo: { label: "OpticSEO Pro", color: "#10b981", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(SEOIcon, {}) },
+  phone: { label: "Phone", color: "#a855f7", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PhoneIcon, {}) }
 };
 function Dock() {
   const { order, setOrder, removeApp } = useDockStore();
@@ -16526,6 +16542,20 @@ function DisplayIcon() {
     /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "2", y: "3", width: "20", height: "14", rx: "2" }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "21", x2: "16", y2: "21" }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "17", x2: "12", y2: "21" })
+  ] });
+}
+function SEOIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "11", cy: "11", r: "8" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "11", y1: "8", x2: "11", y2: "14" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "11", x2: "14", y2: "11" })
+  ] });
+}
+function PhoneIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "5", y: "2", width: "14", height: "20", rx: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "18", x2: "12.01", y2: "18" })
   ] });
 }
 function Desktop() {
@@ -17273,14 +17303,16 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-BB8DNeJe.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-CirRS994.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-DAH5eOj_.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-CUDEEe9_.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-B4grtnzK.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-C38NQzHQ.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-CXUnZ00d.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-wwhF2qPD.js"), true ? [] : void 0, import.meta.url));
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-BDUa-VMt.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-BV_EY-f9.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-CsgVm9Rd.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-DlvEATnI.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-DXR4Iccm.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-BiAIpW3Q.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-D8tfcl4p.js"), true ? [] : void 0, import.meta.url));
+const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-DLtih8rq.js"), true ? [] : void 0, import.meta.url));
+const OpticSEOApp = reactExports.lazy(() => __vitePreload(() => import("./OpticSEOApp-B1z3Kms4.js"), true ? [] : void 0, import.meta.url));
+const PhoneApp = reactExports.lazy(() => __vitePreload(() => import("./PhoneApp-C3GfQrvA.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -17289,7 +17321,9 @@ const APP_COLORS$1 = {
   settings: "#bb88ff",
   files: "#f59e0b",
   launcher: "#34d399",
-  system: "#818cf8"
+  system: "#818cf8",
+  opticseo: "#10b981",
+  phone: "#a855f7"
 };
 function AppContent({ appId }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -17312,7 +17346,9 @@ function AppContent({ appId }) {
         appId === "settings" && /* @__PURE__ */ jsxRuntimeExports.jsx(SettingsApp, {}),
         appId === "files" && /* @__PURE__ */ jsxRuntimeExports.jsx(FilesApp, {}),
         appId === "launcher" && /* @__PURE__ */ jsxRuntimeExports.jsx(LauncherApp, {}),
-        appId === "system" && /* @__PURE__ */ jsxRuntimeExports.jsx(SystemApp, {})
+        appId === "system" && /* @__PURE__ */ jsxRuntimeExports.jsx(SystemApp, {}),
+        appId === "opticseo" && /* @__PURE__ */ jsxRuntimeExports.jsx(OpticSEOApp, {}),
+        appId === "phone" && /* @__PURE__ */ jsxRuntimeExports.jsx(PhoneApp, {})
       ]
     }
   );

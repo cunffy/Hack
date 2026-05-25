@@ -118,6 +118,24 @@ contextBridge.exposeInMainWorld('cryogram', {
     closeWindow: (id: string)   => ipcRenderer.invoke('wm:closeWindow', id),
   },
 
+  // Phone companion (ADB + scrcpy)
+  phone: {
+    getDevices:     ()                               => ipcRenderer.invoke('phone:getDevices'),
+    getInfo:        (serial: string)                 => ipcRenderer.invoke('phone:getInfo', serial),
+    getBattery:     (serial: string)                 => ipcRenderer.invoke('phone:getBattery', serial),
+    getStorage:     (serial: string)                 => ipcRenderer.invoke('phone:getStorage', serial),
+    checkScrcpy:    ()                               => ipcRenderer.invoke('phone:checkScrcpy'),
+    installScrcpy:  ()                               => ipcRenderer.invoke('phone:installScrcpy'),
+    startMirror:    (serial: string)                 => ipcRenderer.invoke('phone:startMirror', serial),
+    stopMirror:     ()                               => ipcRenderer.invoke('phone:stopMirror'),
+    isMirroring:    ()                               => ipcRenderer.invoke('phone:isMirroring'),
+    enableWireless: (serial: string, port?: number)  => ipcRenderer.invoke('phone:enableWireless', serial, port),
+    connectWifi:    (ip: string, port?: number)      => ipcRenderer.invoke('phone:connectWifi', ip, port),
+    disconnect:     (address: string)                => ipcRenderer.invoke('phone:disconnect', address),
+    getDeviceIp:    (serial: string)                 => ipcRenderer.invoke('phone:getDeviceIp', serial),
+    screenshot:     (serial: string)                 => ipcRenderer.invoke('phone:screenshot', serial),
+  },
+
   // Tell main process the lock screen was dismissed so it clears alwaysOnTop
   notifyUnlock: () => ipcRenderer.send('screen:unlock'),
 

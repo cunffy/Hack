@@ -108,6 +108,23 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
     focusWindow: (id) => electron.ipcRenderer.invoke("wm:focusWindow", id),
     closeWindow: (id) => electron.ipcRenderer.invoke("wm:closeWindow", id)
   },
+  // Phone companion (ADB + scrcpy)
+  phone: {
+    getDevices: () => electron.ipcRenderer.invoke("phone:getDevices"),
+    getInfo: (serial) => electron.ipcRenderer.invoke("phone:getInfo", serial),
+    getBattery: (serial) => electron.ipcRenderer.invoke("phone:getBattery", serial),
+    getStorage: (serial) => electron.ipcRenderer.invoke("phone:getStorage", serial),
+    checkScrcpy: () => electron.ipcRenderer.invoke("phone:checkScrcpy"),
+    installScrcpy: () => electron.ipcRenderer.invoke("phone:installScrcpy"),
+    startMirror: (serial) => electron.ipcRenderer.invoke("phone:startMirror", serial),
+    stopMirror: () => electron.ipcRenderer.invoke("phone:stopMirror"),
+    isMirroring: () => electron.ipcRenderer.invoke("phone:isMirroring"),
+    enableWireless: (serial, port) => electron.ipcRenderer.invoke("phone:enableWireless", serial, port),
+    connectWifi: (ip, port) => electron.ipcRenderer.invoke("phone:connectWifi", ip, port),
+    disconnect: (address) => electron.ipcRenderer.invoke("phone:disconnect", address),
+    getDeviceIp: (serial) => electron.ipcRenderer.invoke("phone:getDeviceIp", serial),
+    screenshot: (serial) => electron.ipcRenderer.invoke("phone:screenshot", serial)
+  },
   // Tell main process the lock screen was dismissed so it clears alwaysOnTop
   notifyUnlock: () => electron.ipcRenderer.send("screen:unlock"),
   // Lock screen events from main (system resume, manual lock)

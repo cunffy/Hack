@@ -1,4 +1,4 @@
-import { j as jsxRuntimeExports, r as reactExports, m as motion, A as AnimatePresence } from "./index-DgtnlLYr.js";
+import { j as jsxRuntimeExports, r as reactExports, m as motion, A as AnimatePresence } from "./index-DCNe8ATZ.js";
 function AuthDisclaimer({ onAccept }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex items-center justify-center p-8", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "panel max-w-lg w-full p-6 border-cryo-yellow/40", style: { borderColor: "rgba(255,204,0,0.4)" }, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 mb-4", children: [

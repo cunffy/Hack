@@ -20,6 +20,9 @@ const store = new Store({
     'theme.accent':  '#00d4ff',
     'theme.accent2': '#00ff88',
     'theme.bg':      '#070b11',
+    'opticseo.email':    '',
+    'opticseo.password': '',
+    'opticseo.autoLogin': true,
   },
 })
 

@@ -177,7 +177,10 @@ const store = new Store({
     "theme.preset": "cyber",
     "theme.accent": "#00d4ff",
     "theme.accent2": "#00ff88",
-    "theme.bg": "#070b11"
+    "theme.bg": "#070b11",
+    "opticseo.email": "",
+    "opticseo.password": "",
+    "opticseo.autoLogin": true
   }
 });
 function registerSettingsHandlers() {
@@ -501,12 +504,12 @@ function registerEditorHandlers() {
   });
 }
 const execAsync = util.promisify(child_process.exec);
-function sh(cmd) {
+function sh$1(cmd) {
   return execAsync(cmd).then((r) => r.stdout.trim()).catch(() => "");
 }
 function registerSystemHandlers() {
   electron.ipcMain.handle("system:getNetworks", async () => {
-    const out = await sh("nmcli -t -f SSID,SIGNAL,SECURITY,IN-USE dev wifi list 2>/dev/null");
+    const out = await sh$1("nmcli -t -f SSID,SIGNAL,SECURITY,IN-USE dev wifi list 2>/dev/null");
     const seen = /* @__PURE__ */ new Set();
     return out.split("\n").filter(Boolean).map((line) => {
       const parts = line.split(":");
@@ -523,7 +526,7 @@ function registerSystemHandlers() {
     }).sort((a, b) => b.signal - a.signal);
   });
   electron.ipcMain.handle("system:getWifiStatus", async () => {
-    const out = await sh("nmcli -t -f IN-USE,SSID,SIGNAL dev wifi list 2>/dev/null");
+    const out = await sh$1("nmcli -t -f IN-USE,SSID,SIGNAL dev wifi list 2>/dev/null");
     const active = out.split("\n").find((l) => l.startsWith("*:"));
     if (!active) return { connected: false, ssid: "", signal: 0 };
     const parts = active.split(":");
@@ -532,7 +535,7 @@ function registerSystemHandlers() {
     return { connected: true, ssid, signal };
   });
   electron.ipcMain.handle("system:connectNetwork", async (_, ssid, password) => {
-    const dev = await sh("nmcli -t -f DEVICE,TYPE dev 2>/dev/null | grep ':wifi' | head -1 | cut -d: -f1");
+    const dev = await sh$1("nmcli -t -f DEVICE,TYPE dev 2>/dev/null | grep ':wifi' | head -1 | cut -d: -f1");
     const ifarg = dev ? `ifname "${dev}"` : "";
     const escapedSsid = ssid.replace(/"/g, '\\"');
     const escapedPwd = password?.replace(/"/g, '\\"') ?? "";
@@ -555,17 +558,17 @@ function registerSystemHandlers() {
     }
   });
   electron.ipcMain.handle("system:disconnectNetwork", async () => {
-    await sh("nmcli dev disconnect $(nmcli -t -f DEVICE,TYPE dev | grep wifi | cut -d: -f1 | head -1) 2>/dev/null");
+    await sh$1("nmcli dev disconnect $(nmcli -t -f DEVICE,TYPE dev | grep wifi | cut -d: -f1 | head -1) 2>/dev/null");
     return true;
   });
   electron.ipcMain.handle("system:rescanNetworks", async () => {
-    await sh("nmcli dev wifi rescan 2>/dev/null");
+    await sh$1("nmcli dev wifi rescan 2>/dev/null");
     return true;
   });
   electron.ipcMain.handle("system:getBattery", async () => {
     try {
       const base = "/sys/class/power_supply";
-      const entries = await sh(`ls ${base} 2>/dev/null`);
+      const entries = await sh$1(`ls ${base} 2>/dev/null`);
       const bat = entries.split("\n").find((b) => b.startsWith("BAT"));
       if (!bat) return null;
       const [capacity, status] = await Promise.all([
@@ -578,33 +581,33 @@ function registerSystemHandlers() {
     }
   });
   electron.ipcMain.handle("system:getVolume", async () => {
-    const vol = await sh("pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null");
-    const mute = await sh("pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null");
+    const vol = await sh$1("pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null");
+    const mute = await sh$1("pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null");
     const match = vol.match(/(\d+)%/);
     return { level: match ? parseInt(match[1]) : 100, muted: mute.includes("yes") };
   });
   electron.ipcMain.handle("system:setVolume", async (_, level) => {
-    await sh(`pactl set-sink-volume @DEFAULT_SINK@ ${Math.max(0, Math.min(150, level))}% 2>/dev/null`);
+    await sh$1(`pactl set-sink-volume @DEFAULT_SINK@ ${Math.max(0, Math.min(150, level))}% 2>/dev/null`);
     return true;
   });
   electron.ipcMain.handle("system:toggleMute", async () => {
-    await sh("pactl set-sink-mute @DEFAULT_SINK@ toggle 2>/dev/null");
+    await sh$1("pactl set-sink-mute @DEFAULT_SINK@ toggle 2>/dev/null");
     return true;
   });
   electron.ipcMain.handle("system:getBrightness", async () => {
-    const cur = await sh("brightnessctl get 2>/dev/null");
-    const max = await sh("brightnessctl max 2>/dev/null");
+    const cur = await sh$1("brightnessctl get 2>/dev/null");
+    const max = await sh$1("brightnessctl max 2>/dev/null");
     const c = parseInt(cur) || 100;
     const m = parseInt(max) || 100;
     return Math.round(c * 100 / m);
   });
   electron.ipcMain.handle("system:setBrightness", async (_, pct) => {
-    await sh(`brightnessctl set ${Math.max(5, Math.min(100, pct))}% 2>/dev/null`);
+    await sh$1(`brightnessctl set ${Math.max(5, Math.min(100, pct))}% 2>/dev/null`);
     return true;
   });
   electron.ipcMain.handle("system:getBluetoothDevices", async () => {
-    const out = await sh("bluetoothctl devices 2>/dev/null");
-    const connected = await sh("bluetoothctl info 2>/dev/null");
+    const out = await sh$1("bluetoothctl devices 2>/dev/null");
+    const connected = await sh$1("bluetoothctl info 2>/dev/null");
     return out.split("\n").filter(Boolean).map((line) => {
       const parts = line.replace("Device ", "").split(" ");
       const address = parts[0];
@@ -613,25 +616,25 @@ function registerSystemHandlers() {
     }).filter((d) => d.address);
   });
   electron.ipcMain.handle("system:bluetoothConnect", async (_, address) => {
-    const out = await sh(`bluetoothctl connect ${address} 2>&1`);
+    const out = await sh$1(`bluetoothctl connect ${address} 2>&1`);
     return out.toLowerCase().includes("successful");
   });
   electron.ipcMain.handle("system:bluetoothDisconnect", async (_, address) => {
-    await sh(`bluetoothctl disconnect ${address} 2>/dev/null`);
+    await sh$1(`bluetoothctl disconnect ${address} 2>/dev/null`);
     return true;
   });
   electron.ipcMain.handle("system:bluetoothScan", async () => {
-    sh("bluetoothctl scan on 2>/dev/null &");
+    sh$1("bluetoothctl scan on 2>/dev/null &");
     await new Promise((r) => setTimeout(r, 5e3));
-    await sh("bluetoothctl scan off 2>/dev/null");
+    await sh$1("bluetoothctl scan off 2>/dev/null");
     return true;
   });
   electron.ipcMain.handle("system:getInfo", async () => {
     try {
       const [hostname, kernel, uptime] = await Promise.all([
-        sh("hostname"),
-        sh("uname -r"),
-        sh("uptime -p")
+        sh$1("hostname"),
+        sh$1("uname -r"),
+        sh$1("uptime -p")
       ]);
       const cpuInfo = await promises.readFile("/proc/cpuinfo", "utf8").catch(() => "");
       const cpuLine = cpuInfo.split("\n").find((l) => l.startsWith("model name"));
@@ -657,10 +660,10 @@ function registerSystemHandlers() {
     }
   });
   electron.ipcMain.handle("system:shutdown", async () => {
-    await sh("sudo systemctl poweroff");
+    await sh$1("sudo systemctl poweroff");
   });
   electron.ipcMain.handle("system:reboot", async () => {
-    await sh("sudo systemctl reboot");
+    await sh$1("sudo systemctl reboot");
   });
   electron.ipcMain.handle("system:lock", async () => {
     electron.BrowserWindow.getAllWindows()[0]?.webContents.send("screen:lock");
@@ -708,11 +711,11 @@ function registerSystemHandlers() {
   });
   electron.ipcMain.handle("system:setWallpaper", async (_, path2) => {
     const safe = path2.replace(/'/g, "'\\''");
-    await sh(`feh --bg-scale '${safe}' 2>/dev/null`);
+    await sh$1(`feh --bg-scale '${safe}' 2>/dev/null`);
     return true;
   });
   electron.ipcMain.handle("wm:getWindows", async () => {
-    const out = await sh("wmctrl -l 2>/dev/null");
+    const out = await sh$1("wmctrl -l 2>/dev/null");
     if (!out) return [];
     return out.split("\n").filter(Boolean).map((line) => {
       const match = line.match(/^(0x\w+)\s+(-?\d+)\s+(\S+)\s+(.+)$/);
@@ -721,11 +724,11 @@ function registerSystemHandlers() {
     }).filter(Boolean);
   });
   electron.ipcMain.handle("wm:focusWindow", async (_, id) => {
-    await sh(`wmctrl -ia ${id} 2>/dev/null`);
+    await sh$1(`wmctrl -ia ${id} 2>/dev/null`);
     return true;
   });
   electron.ipcMain.handle("wm:closeWindow", async (_, id) => {
-    await sh(`wmctrl -ic ${id} 2>/dev/null`);
+    await sh$1(`wmctrl -ic ${id} 2>/dev/null`);
     return true;
   });
 }
@@ -863,6 +866,185 @@ function registerLauncherHandlers() {
     }
   });
 }
+const sh = util.promisify(child_process.exec);
+let scrcpyProc = null;
+async function adb(serial, ...args) {
+  const { stdout } = await sh(`adb -s '${serial}' ${args.join(" ")} 2>/dev/null`);
+  return stdout.trim();
+}
+async function adbGlobal(...args) {
+  const { stdout } = await sh(`adb ${args.join(" ")} 2>/dev/null`);
+  return stdout.trim();
+}
+function registerPhoneHandlers() {
+  electron.ipcMain.handle("phone:getDevices", async () => {
+    try {
+      const out = await adbGlobal("devices", "-l");
+      const lines = out.split("\n").slice(1).filter((l) => l.trim() && !l.startsWith("*") && !l.startsWith("List"));
+      const devices = lines.map((line) => {
+        const serial = line.trim().split(/\s+/)[0];
+        const status = line.trim().split(/\s+/)[1];
+        const model = (line.match(/model:(\S+)/)?.[1] ?? "Unknown").replace(/_/g, " ");
+        const product = line.match(/product:(\S+)/)?.[1] ?? "";
+        const transport = line.match(/transport_id:(\d+)/)?.[1] ?? "";
+        const isWifi = serial.includes(":");
+        return { serial, status, model, product, transport, isWifi };
+      }).filter((d) => d.serial && d.status === "device");
+      return { ok: true, devices };
+    } catch (e) {
+      return { ok: false, error: e.message, devices: [] };
+    }
+  });
+  electron.ipcMain.handle("phone:getInfo", async (_, serial) => {
+    const prop = async (key) => {
+      try {
+        return await adb(serial, `shell getprop ${key}`);
+      } catch {
+        return "";
+      }
+    };
+    const [model, brand, android, sdk, cpuAbi, screenSize] = await Promise.all([
+      prop("ro.product.model"),
+      prop("ro.product.brand"),
+      prop("ro.build.version.release"),
+      prop("ro.build.version.sdk"),
+      prop("ro.product.cpu.abi"),
+      (async () => {
+        try {
+          const out = await adb(serial, "shell wm size");
+          return out.match(/Physical size: (\S+)/)?.[1] ?? "";
+        } catch {
+          return "";
+        }
+      })()
+    ]);
+    return { model, brand, android, sdk, cpuAbi, screenSize };
+  });
+  electron.ipcMain.handle("phone:getBattery", async (_, serial) => {
+    try {
+      const out = await adb(serial, "shell dumpsys battery");
+      const level = parseInt(out.match(/level: (\d+)/)?.[1] ?? "0");
+      const status = out.match(/status: (\d+)/)?.[1];
+      const voltage = parseInt(out.match(/voltage: (\d+)/)?.[1] ?? "0");
+      const temp = parseInt(out.match(/temperature: (\d+)/)?.[1] ?? "0");
+      const charging = status === "2" || status === "5";
+      const plugged = out.match(/plugged: (\d+)/)?.[1] !== "0";
+      return { level, charging, plugged, voltage: voltage / 1e3, temp: temp / 10 };
+    } catch {
+      return { level: 0, charging: false, plugged: false, voltage: 0, temp: 0 };
+    }
+  });
+  electron.ipcMain.handle("phone:getStorage", async (_, serial) => {
+    try {
+      const out = await adb(serial, "shell df /storage/emulated/0");
+      const row = out.trim().split("\n").pop()?.trim().split(/\s+/) ?? [];
+      const total = parseInt(row[1] ?? "0") * 1024;
+      const used = parseInt(row[2] ?? "0") * 1024;
+      const free = parseInt(row[3] ?? "0") * 1024;
+      return { total, used, free };
+    } catch {
+      return { total: 0, used: 0, free: 0 };
+    }
+  });
+  electron.ipcMain.handle("phone:checkScrcpy", async () => {
+    try {
+      const { stdout } = await sh("scrcpy --version 2>&1");
+      const version = stdout.match(/scrcpy\s+(\S+)/)?.[1] ?? "unknown";
+      return { installed: true, version };
+    } catch {
+      return { installed: false, version: null };
+    }
+  });
+  electron.ipcMain.handle("phone:installScrcpy", async () => {
+    try {
+      await sh("apt-get install -y scrcpy 2>&1 || snap install scrcpy 2>&1");
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+  electron.ipcMain.handle("phone:startMirror", async (_, serial) => {
+    if (scrcpyProc) {
+      scrcpyProc.kill();
+      scrcpyProc = null;
+    }
+    try {
+      scrcpyProc = child_process.spawn("scrcpy", [
+        "-s",
+        serial,
+        "--video-bit-rate",
+        "4M",
+        "--max-fps",
+        "60",
+        "--window-title",
+        "Phone — Cryogram",
+        "--shortcut-mod",
+        "lctrl,rctrl"
+      ], { detached: false });
+      scrcpyProc.on("exit", () => {
+        scrcpyProc = null;
+      });
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+  electron.ipcMain.handle("phone:stopMirror", async () => {
+    if (scrcpyProc) {
+      scrcpyProc.kill();
+      scrcpyProc = null;
+    }
+    return { ok: true };
+  });
+  electron.ipcMain.handle("phone:isMirroring", async () => ({ active: !!scrcpyProc }));
+  electron.ipcMain.handle("phone:enableWireless", async (_, serial, port = 5555) => {
+    try {
+      const result = await sh(`adb -s '${serial}' tcpip ${port} 2>&1`);
+      return { ok: true, message: result.stdout.trim() };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+  electron.ipcMain.handle("phone:connectWifi", async (_, ip, port = 5555) => {
+    try {
+      await new Promise((r) => setTimeout(r, 1200));
+      const { stdout } = await sh(`adb connect ${ip}:${port} 2>&1`);
+      const ok = stdout.toLowerCase().includes("connected");
+      return { ok, message: stdout.trim() };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+  electron.ipcMain.handle("phone:disconnect", async (_, address) => {
+    try {
+      const { stdout } = await sh(`adb disconnect '${address}' 2>&1`);
+      return { ok: true, message: stdout.trim() };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+  electron.ipcMain.handle("phone:getDeviceIp", async (_, serial) => {
+    try {
+      const out = await adb(serial, "shell ip route show");
+      const ip = out.match(/src\s+(\d+\.\d+\.\d+\.\d+)/)?.[1];
+      if (ip) return { ok: true, ip };
+      const wlan = await adb(serial, "shell ip addr show wlan0");
+      const wlanIp = wlan.match(/inet (\d+\.\d+\.\d+\.\d+)/)?.[1];
+      return { ok: !!wlanIp, ip: wlanIp ?? null };
+    } catch (e) {
+      return { ok: false, ip: null };
+    }
+  });
+  electron.ipcMain.handle("phone:screenshot", async (_, serial) => {
+    try {
+      const dest = path.join(os.homedir(), `Pictures/phone-screenshot-${Date.now()}.png`);
+      await sh(`adb -s '${serial}' exec-out screencap -p > '${dest}' 2>/dev/null`);
+      return { ok: true, path: dest };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+}
 let mainWindow = null;
 function lockScreen() {
   if (!mainWindow) return;
@@ -885,7 +1067,8 @@ function createWindow() {
       preload: path.join(__dirname, "../preload/index.js"),
       sandbox: false,
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      webviewTag: true
     },
     icon: path.join(__dirname, "../../resources/icon.png")
   });
@@ -972,6 +1155,7 @@ electron.app.whenReady().then(() => {
   registerSettingsHandlers();
   registerSystemHandlers();
   registerLauncherHandlers();
+  registerPhoneHandlers();
   createWindow();
   electron.powerMonitor.on("resume", () => lockScreen());
   electron.powerMonitor.on("lock-screen", () => lockScreen());

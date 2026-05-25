@@ -9,6 +9,7 @@ import { registerEditorHandlers } from './ipc/editor'
 import { registerSettingsHandlers } from './ipc/settings'
 import { registerSystemHandlers } from './ipc/system'
 import { registerLauncherHandlers, killLaunchedApps } from './ipc/launcher'
+import { registerPhoneHandlers } from './ipc/phone'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -37,6 +38,7 @@ function createWindow(): void {
       sandbox: false,
       contextIsolation: true,
       nodeIntegration: false,
+      webviewTag: true,
     },
     icon: join(__dirname, '../../resources/icon.png'),
   })
@@ -146,6 +148,7 @@ app.whenReady().then(() => {
   registerSettingsHandlers()
   registerSystemHandlers()
   registerLauncherHandlers()
+  registerPhoneHandlers()
 
   createWindow()
 

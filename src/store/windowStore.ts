@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system'
+export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone'
 
 export interface AppWindow {
   id: string
@@ -37,8 +37,10 @@ const APP_META: Record<AppId, { title: string; width: number; height: number }> 
   leaker:           { title: 'Leaker — Breach Monitor', width: 860, height: 560 },
   settings:         { title: 'Settings',            width: 600, height: 480 },
   files:            { title: 'Files',               width: 860, height: 580 },
-  launcher:         { title: 'App Launcher',        width: 760, height: 560 },
-  system:           { title: 'System',              width: 680, height: 520 },
+  launcher:         { title: 'App Launcher',        width: 760,  height: 560 },
+  system:           { title: 'System',              width: 680,  height: 520 },
+  opticseo:         { title: 'OpticSEO Pro',        width: 1280, height: 820 },
+  phone:            { title: 'Phone',               width: 780,  height: 600 },
 }
 
 let instanceCounter = 0

@@ -10,6 +10,8 @@ const SettingsApp       = lazy(() => import('../apps/settings/SettingsApp'))
 const FilesApp          = lazy(() => import('../apps/files/FilesApp'))
 const LauncherApp       = lazy(() => import('../apps/launcher/LauncherApp'))
 const SystemApp         = lazy(() => import('../apps/system/SystemApp'))
+const OpticSEOApp       = lazy(() => import('../apps/opticseo/OpticSEOApp'))
+const PhoneApp          = lazy(() => import('../apps/phone/PhoneApp'))
 
 const APP_COLORS: Record<string, string> = {
   terminal:          '#00ff88',
@@ -20,6 +22,8 @@ const APP_COLORS: Record<string, string> = {
   files:             '#f59e0b',
   launcher:          '#34d399',
   system:            '#818cf8',
+  opticseo:          '#10b981',
+  phone:             '#a855f7',
 }
 
 function AppContent({ appId }: { appId: string }) {
@@ -44,6 +48,8 @@ function AppContent({ appId }: { appId: string }) {
       {appId === 'files'           && <FilesApp />}
       {appId === 'launcher'        && <LauncherApp />}
       {appId === 'system'          && <SystemApp />}
+      {appId === 'opticseo'        && <OpticSEOApp />}
+      {appId === 'phone'           && <PhoneApp />}
     </Suspense>
   )
 }
