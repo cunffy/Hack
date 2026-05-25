@@ -904,15 +904,15 @@ function createWindow() {
         });
       });
     };
-    electron.globalShortcut.register("AudioVolumeUp", () => {
+    electron.globalShortcut.register("VolumeUp", () => {
       child_process.execFile("pactl", ["set-sink-volume", "@DEFAULT_SINK@", "+5%"]);
       setTimeout(sendVolHud, 60);
     });
-    electron.globalShortcut.register("AudioVolumeDown", () => {
+    electron.globalShortcut.register("VolumeDown", () => {
       child_process.execFile("pactl", ["set-sink-volume", "@DEFAULT_SINK@", "-5%"]);
       setTimeout(sendVolHud, 60);
     });
-    electron.globalShortcut.register("AudioVolumeMute", () => {
+    electron.globalShortcut.register("VolumeMute", () => {
       child_process.execFile("pactl", ["set-sink-mute", "@DEFAULT_SINK@", "toggle"]);
       setTimeout(sendVolHud, 60);
     });
@@ -926,14 +926,17 @@ function createWindow() {
         });
       });
     };
-    electron.globalShortcut.register("BrightnessUp", () => {
-      child_process.execFile("brightnessctl", ["set", "5%+"]);
-      setTimeout(sendBrightHud, 80);
-    });
-    electron.globalShortcut.register("BrightnessDown", () => {
-      child_process.execFile("brightnessctl", ["set", "5%-"]);
-      setTimeout(sendBrightHud, 80);
-    });
+    try {
+      electron.globalShortcut.register("BrightnessUp", () => {
+        child_process.execFile("brightnessctl", ["set", "5%+"]);
+        setTimeout(sendBrightHud, 80);
+      });
+      electron.globalShortcut.register("BrightnessDown", () => {
+        child_process.execFile("brightnessctl", ["set", "5%-"]);
+        setTimeout(sendBrightHud, 80);
+      });
+    } catch {
+    }
     electron.globalShortcut.register("Alt+Tab", () => {
       mainWindow?.webContents.send("app:switcher", "next");
     });
