@@ -564,6 +564,30 @@ HOOKEOF
 chmod +x "$HOOKS_DIR/0401-calamares-config.hook.chroot"
 echo "[build] Calamares config hook written."
 
+cat > "$HOOKS_DIR/0402-calamares-unpackfs.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set +e
+echo "[unpackfs] Writing unpackfs.conf for live squashfs..."
+mkdir -p /etc/calamares/modules
+
+# live-boot mounts the live medium at /run/live/medium (newer) or
+# /lib/live/mount/medium (older). Write both as fallback candidates so
+# the config works across live-boot versions.
+# Calamares uses the first source that exists at install time.
+cat > /etc/calamares/modules/unpackfs.conf << 'CONF'
+---
+unpack:
+  - source: /run/live/medium/live/filesystem.squashfs
+    sourcefs: squashfs
+    destination: ""
+CONF
+
+echo "[unpackfs] Done."
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0402-calamares-unpackfs.hook.chroot"
+echo "[build] unpackfs config hook written."
+
 # Fix skel timing: write a hook that copies /etc/skel to /home/cryogram
 # AFTER all other hooks have populated skel. The configure-system hook
 # creates the user early (before skel is filled), so the home dir misses
