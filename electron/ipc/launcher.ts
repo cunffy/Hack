@@ -97,6 +97,16 @@ async function parseDesktopFile(filePath: string): Promise<AppEntry | null> {
   }
 }
 
+// Track PIDs of apps launched from the launcher so we can kill them on exit
+const launchedPids = new Set<number>()
+
+export function killLaunchedApps(): void {
+  for (const pid of launchedPids) {
+    try { process.kill(pid, 'SIGTERM') } catch {}
+  }
+  launchedPids.clear()
+}
+
 export function registerLauncherHandlers(): void {
   ipcMain.handle('launcher:getApps', async () => {
     const results: AppEntry[] = []
@@ -132,6 +142,10 @@ export function registerLauncherHandlers(): void {
         stdio: 'ignore',
         env: { ...process.env },
       })
+      if (proc.pid) {
+        launchedPids.add(proc.pid)
+        proc.on('exit', () => launchedPids.delete(proc.pid!))
+      }
       proc.unref()
       return true
     } catch {

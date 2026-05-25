@@ -7,7 +7,7 @@ import { registerLeakerHandlers } from './ipc/leaker'
 import { registerEditorHandlers } from './ipc/editor'
 import { registerSettingsHandlers } from './ipc/settings'
 import { registerSystemHandlers } from './ipc/system'
-import { registerLauncherHandlers } from './ipc/launcher'
+import { registerLauncherHandlers, killLaunchedApps } from './ipc/launcher'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -82,6 +82,10 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+app.on('before-quit', () => {
+  killLaunchedApps()
 })
 
 app.on('window-all-closed', () => {

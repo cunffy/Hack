@@ -160,20 +160,54 @@ warn "If you are running this from the Cryogram Terminal, that window will close
 echo ""
 sleep 3
 
-pkill -f "electron.*cryogram" 2>/dev/null || true
+# Close apps launched from the launcher (browsers, tools, etc.)
+info "Closing open apps..."
+pkill -f "brave-browser|opera|firefox|chromium" 2>/dev/null || true
+# Gracefully close all X11 windows before killing Electron
+if command -v wmctrl &>/dev/null; then
+  wmctrl -l 2>/dev/null | awk '{print $1}' | while read -r wid; do
+    wmctrl -ic "$wid" 2>/dev/null || true
+  done
+  sleep 1
+fi
+
+# SIGTERM first so Electron runs its before-quit handler (kills tracked child PIDs)
+pkill -TERM -f "electron.*cryogram" 2>/dev/null || true
+sleep 2
+pkill -KILL -f "electron.*cryogram" 2>/dev/null || true
 sleep 1
 
-# Relaunch as desktop user with the correct X session environment
+# Read the real X/DBUS session environment from an existing user process
+# (avoids hardcoding DISPLAY=:0 which breaks when the session is on :1 or :2)
+USER_PID=$(pgrep -u "$DESKTOP_USER" -x "openbox\|xfwm4\|i3\|kwin\|xfce4-session" 2>/dev/null | head -1 || true)
+if [ -z "$USER_PID" ]; then
+  USER_PID=$(pgrep -u "$DESKTOP_USER" 2>/dev/null | head -1 || true)
+fi
+
+XDISPLAY=":0"
 DBUS_ADDR="unix:path=/run/user/${DESKTOP_UID}/bus"
+XDG_RT="/run/user/${DESKTOP_UID}"
+
+if [ -n "$USER_PID" ] && [ -f "/proc/$USER_PID/environ" ]; then
+  _D=$(tr '\0' '\n' < "/proc/$USER_PID/environ" 2>/dev/null | grep '^DISPLAY='                   | cut -d= -f2- | head -1 || true)
+  _B=$(tr '\0' '\n' < "/proc/$USER_PID/environ" 2>/dev/null | grep '^DBUS_SESSION_BUS_ADDRESS=' | cut -d= -f2- | head -1 || true)
+  _X=$(tr '\0' '\n' < "/proc/$USER_PID/environ" 2>/dev/null | grep '^XDG_RUNTIME_DIR='           | cut -d= -f2- | head -1 || true)
+  [ -n "$_D" ] && XDISPLAY="$_D"
+  [ -n "$_B" ] && DBUS_ADDR="$_B"
+  [ -n "$_X" ] && XDG_RT="$_X"
+fi
+
+info "Relaunching as $DESKTOP_USER on $XDISPLAY"
+
 sudo -u "$DESKTOP_USER" \
-  env DISPLAY=:0 \
+  env DISPLAY="$XDISPLAY" \
       DBUS_SESSION_BUS_ADDRESS="$DBUS_ADDR" \
-      XDG_RUNTIME_DIR="/run/user/${DESKTOP_UID}" \
-  /usr/local/bin/cryogram &>/dev/null &
+      XDG_RUNTIME_DIR="$XDG_RT" \
+  /usr/local/bin/cryogram >>/tmp/cryogram-restart.log 2>&1 &
 
 disown
 
-ok "Cryogram restarted as $DESKTOP_USER"
+ok "Cryogram restarted as $DESKTOP_USER (log: /tmp/cryogram-restart.log)"
 
 echo ""
 echo -e "${GREEN}${BOLD}✓  Update complete!${NC}"
