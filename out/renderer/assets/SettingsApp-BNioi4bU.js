@@ -1,4 +1,4 @@
-import { a as useThemeStore, r as reactExports, j as jsxRuntimeExports, T as THEME_PRESETS } from "./index-l7bYAHmS.js";
+import { a as useThemeStore, r as reactExports, j as jsxRuntimeExports, T as THEME_PRESETS } from "./index-D1cCCGNU.js";
 function SettingsApp() {
   const { preset: activePreset, accent, setPreset, setCustomAccent } = useThemeStore();
   const [hexInput, setHexInput] = reactExports.useState(accent);
@@ -417,20 +417,26 @@ function UpdateSection() {
   const [status, setStatus] = reactExports.useState("idle");
   const [commitCount, setCount] = reactExports.useState(0);
   const [changes, setChanges] = reactExports.useState([]);
+  const [errorMsg, setErrorMsg] = reactExports.useState("");
   const check = async () => {
     setChecking(true);
     setStatus("idle");
+    setErrorMsg("");
     try {
       const result = await window.__cryogram_checkUpdate?.();
       if (result?.hasUpdate) {
         setStatus("available");
         setCount(result.commitCount ?? 1);
         setChanges(result.changes ?? []);
+      } else if (result?.error) {
+        setStatus("error");
+        setErrorMsg(result.message ?? result.error);
       } else {
         setStatus("uptodate");
       }
-    } catch {
+    } catch (e) {
       setStatus("error");
+      setErrorMsg(String(e?.message ?? e));
     }
     setChecking(false);
   };
@@ -451,7 +457,7 @@ function UpdateSection() {
         }
       ),
       status === "uptodate" && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 12, color: "#4ade80" }, children: "✓ Cryogram OS is up to date" }),
-      status === "error" && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 12, color: "#f87171" }, children: "Could not reach update server" })
+      status === "error" && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "#f87171", maxWidth: 360, lineHeight: 1.5 }, children: errorMsg || "Could not reach update server" })
     ] }),
     status === "available" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
       background: "rgba(0,212,255,0.06)",

@@ -423,21 +423,27 @@ function UpdateSection() {
   const [status, setStatus]       = useState<'idle' | 'uptodate' | 'available' | 'error'>('idle')
   const [commitCount, setCount]   = useState(0)
   const [changes, setChanges]     = useState<string[]>([])
+  const [errorMsg, setErrorMsg]   = useState('')
 
   const check = async () => {
     setChecking(true)
     setStatus('idle')
+    setErrorMsg('')
     try {
       const result = await (window as any).__cryogram_checkUpdate?.()
       if (result?.hasUpdate) {
         setStatus('available')
         setCount(result.commitCount ?? 1)
         setChanges(result.changes ?? [])
+      } else if (result?.error) {
+        setStatus('error')
+        setErrorMsg(result.message ?? result.error)
       } else {
         setStatus('uptodate')
       }
-    } catch {
+    } catch (e: any) {
       setStatus('error')
+      setErrorMsg(String(e?.message ?? e))
     }
     setChecking(false)
   }
@@ -463,7 +469,9 @@ function UpdateSection() {
           <span style={{ fontSize: 12, color: '#4ade80' }}>✓ Cryogram OS is up to date</span>
         )}
         {status === 'error' && (
-          <span style={{ fontSize: 12, color: '#f87171' }}>Could not reach update server</span>
+          <div style={{ fontSize: 11, color: '#f87171', maxWidth: 360, lineHeight: 1.5 }}>
+            {errorMsg || 'Could not reach update server'}
+          </div>
         )}
       </div>
 

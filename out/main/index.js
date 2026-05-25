@@ -1047,15 +1047,22 @@ function registerPhoneHandlers() {
   });
 }
 const execFileP = util.promisify(child_process.execFile);
-const SRC_DIR = "/opt/cryogram-src";
 const UPDATE_SCRIPT = "/usr/local/bin/cryogram-update";
-function readBranch() {
+const SRC_CANDIDATES = ["/opt/cryogram-src", "/opt/cryogram"];
+function findSrcDir() {
+  for (const dir of SRC_CANDIDATES) {
+    if (fs.existsSync(`${dir}/.git`)) return dir;
+  }
+  return null;
+}
+function readConf() {
   try {
     const conf = fs.readFileSync("/etc/cryogram/update.conf", "utf8");
-    const m = conf.match(/BRANCH="([^"]+)"/);
-    return m ? m[1] : "main";
+    const repoUrl = conf.match(/REPO_URL="([^"]+)"/)?.[1] ?? "";
+    const branch = conf.match(/BRANCH="([^"]+)"/)?.[1] ?? "main";
+    return { repoUrl, branch };
   } catch {
-    return "main";
+    return { repoUrl: "", branch: "main" };
   }
 }
 function isRoot() {
@@ -1067,28 +1074,47 @@ function isRoot() {
 }
 function registerUpdaterHandlers() {
   electron.ipcMain.handle("updater:check", async () => {
+    const srcDir = findSrcDir();
+    if (!srcDir) {
+      return {
+        hasUpdate: false,
+        error: "no-source-dir",
+        message: "Source directory not found. Run sudo cryogram-update once from a terminal to set up automatic updates."
+      };
+    }
+    const { branch } = readConf();
     try {
-      if (!fs.existsSync(`${SRC_DIR}/.git`)) return { hasUpdate: false };
-      const branch = readBranch();
-      await execFileP("git", ["-C", SRC_DIR, "fetch", "origin", "--quiet"], { timeout: 14e3 }).catch(() => {
-      });
-      const { stdout: countOut } = await execFileP("git", ["-C", SRC_DIR, "rev-list", `HEAD..origin/${branch}`, "--count"]);
+      await execFileP("git", ["-C", srcDir, "fetch", "origin", "--quiet"], { timeout: 16e3 });
+    } catch (e) {
+      return {
+        hasUpdate: false,
+        error: "fetch-failed",
+        message: `Could not reach update server: ${e.message}`
+      };
+    }
+    try {
+      const { stdout: countOut } = await execFileP("git", ["-C", srcDir, "rev-list", `HEAD..origin/${branch}`, "--count"]);
       const count = parseInt(countOut.trim(), 10) || 0;
       if (count <= 0) return { hasUpdate: false };
-      const { stdout: logOut } = await execFileP("git", ["-C", SRC_DIR, "log", `HEAD..origin/${branch}`, "--pretty=format:%s", "-8"]);
+      const { stdout: logOut } = await execFileP("git", ["-C", srcDir, "log", `HEAD..origin/${branch}`, "--pretty=format:%s", "-8"]);
       const changes = logOut.trim().split("\n").filter(Boolean);
       return { hasUpdate: true, commitCount: count, changes };
-    } catch {
-      return { hasUpdate: false };
+    } catch (e) {
+      return {
+        hasUpdate: false,
+        error: "compare-failed",
+        message: `Branch compare failed (branch: ${branch}): ${e.message}`
+      };
     }
   });
   electron.ipcMain.handle("updater:run", (event) => {
     return new Promise((resolve, reject) => {
       if (!fs.existsSync(UPDATE_SCRIPT)) {
-        return reject(new Error("Update script not found — run from the live OS."));
+        return reject(new Error("cryogram-update script not found. Run from the live OS."));
       }
-      const args = isRoot() ? ["bash", [UPDATE_SCRIPT]] : ["sudo", ["-n", UPDATE_SCRIPT]];
-      const proc = child_process.spawn(args[0], args[1], {
+      const cmd = isRoot() ? "bash" : "sudo";
+      const args = isRoot() ? [UPDATE_SCRIPT] : ["-n", UPDATE_SCRIPT];
+      const proc = child_process.spawn(cmd, args, {
         env: { ...process.env, TERM: "xterm-color", FORCE_COLOR: "1" }
       });
       const send = (data) => {
@@ -1106,10 +1132,6 @@ function registerUpdaterHandlers() {
       proc.on("error", (err) => reject(err));
     });
   });
-}
-try {
-  electron.app.setPath("userData", "/etc/cryogram/userdata");
-} catch {
 }
 let mainWindow = null;
 function lockScreen() {
