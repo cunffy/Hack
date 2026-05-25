@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Update Cryogram
+Comment=Pull latest code and redeploy the Cryogram desktop app
+Exec=pkexec /usr/local/bin/cryogram-update
+Icon=system-software-update
+Terminal=true
+Type=Application
+Categories=System;
+Keywords=update;upgrade;cryogram;
