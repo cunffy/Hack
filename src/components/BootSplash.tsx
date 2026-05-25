@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const STEPS = [
-  { text: 'Initializing secure kernel modules…',  ms: 0 },
+  { text: 'Initializing secure kernel modules…',   ms: 0 },
   { text: 'Mounting encrypted workspace…',        ms: 320 },
   { text: 'Starting PTY subsystem…',             ms: 600 },
   { text: 'Loading breach intelligence engine…', ms: 860 },
