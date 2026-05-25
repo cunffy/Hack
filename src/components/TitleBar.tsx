@@ -135,7 +135,7 @@ function CryogramMenu() {
             <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/>
           </svg>
           <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', color: 'var(--cryo-accent)' }}>
-            CRYO OS
+            CryoOS
           </span>
         </button>
 
