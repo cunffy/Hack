@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-DlkqJ9Kl.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-De5fIhYm.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -15568,7 +15568,7 @@ const useWindowStore = create((set, get) => ({
   toggleMaximize(id2) {
     const z2 = get().nextZ;
     const W2 = typeof window !== "undefined" ? window.innerWidth : 1440;
-    const H2 = typeof window !== "undefined" ? window.innerHeight - 28 : 872;
+    const H2 = typeof window !== "undefined" ? window.innerHeight - 28 - 88 : 784;
     set((s) => ({
       nextZ: s.nextZ + 1,
       windows: s.windows.map((w2) => {
@@ -16521,7 +16521,7 @@ function Desktop() {
                 style: {
                   fontFamily: '"JetBrains Mono", monospace',
                   fontSize: "22vw",
-                  color: "#00d4ff",
+                  color: "var(--cryo-accent)",
                   letterSpacing: "0.08em"
                 },
                 children: "CG"
@@ -16744,7 +16744,7 @@ function ExternalDesktopIcon({ app, offsetIndex, onRemove }) {
             {
               className: "w-14 h-14 rounded-2xl flex items-center justify-center",
               style: {
-                background: "radial-gradient(ellipse at 38% 28%, rgba(0,212,255,0.18), rgba(8,12,20,0.88) 70%)",
+                background: "radial-gradient(ellipse at 38% 28%, var(--cryo-a18), rgba(8,12,20,0.88) 70%)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
                 backdropFilter: "blur(12px)"
@@ -16847,7 +16847,7 @@ function AppPickerOverlay({ onClose, onPick }) {
                     border: "1px solid rgba(255,255,255,0.06)"
                   },
                   onMouseEnter: (e) => {
-                    if (!added) e.currentTarget.style.background = "rgba(0,212,255,0.1)";
+                    if (!added) e.currentTarget.style.background = "var(--cryo-a08)";
                   },
                   onMouseLeave: (e) => {
                     e.currentTarget.style.background = "rgba(255,255,255,0.04)";
@@ -16872,7 +16872,7 @@ function AppPickerOverlay({ onClose, onPick }) {
                         children: meta.label
                       }
                     ),
-                    added && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 8, color: "rgba(0,212,255,0.5)", fontFamily: "-apple-system, sans-serif" }, children: "Added" })
+                    added && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 8, color: "var(--cryo-a50)", fontFamily: "-apple-system, sans-serif" }, children: "Added" })
                   ]
                 },
                 appId
@@ -16992,14 +16992,14 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-DlkqJ9Kl.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-BX7ZhRUT.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-DMKHkySg.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-D2oD2vyF.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-BSSp2U1T.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-hr5MYMD9.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-DwwvOaiQ.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-x4kvPTxs.js"), true ? [] : void 0, import.meta.url));
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-De5fIhYm.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-CiIDDa5p.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-Bovq8IW1.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-DE7vjDy_.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-Yhf1k1Qk.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-DMJZC7kE.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-ChQaMOVO.js"), true ? [] : void 0, import.meta.url));
+const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-Bc2Xfe5a.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -17216,7 +17216,7 @@ function PowerModal({ action, onCancel }) {
   const title = isRestart ? "Restart Cryogram OS?" : "Shut Down Cryogram OS?";
   const body = isRestart ? "The OS will restart. Any open terminals or running tools will be closed." : "The system will power off. Make sure your work is saved.";
   const confirmLabel = isRestart ? "Restart" : "Shut Down";
-  const confirmColor = isRestart ? "#00d4ff" : "#ef4444";
+  const confirmColor = isRestart ? "var(--cryo-accent)" : "#ef4444";
   const confirm = () => {
     if (isRestart) window.cryogram.system.reboot();
     else window.cryogram.system.shutdown();
@@ -17256,7 +17256,7 @@ function PowerModal({ action, onCancel }) {
               "div",
               {
                 className: "w-12 h-12 rounded-full flex items-center justify-center",
-                style: { background: isRestart ? "rgba(0,212,255,0.1)" : "rgba(239,68,68,0.1)", border: `1px solid ${confirmColor}30` },
+                style: { background: isRestart ? "var(--cryo-a08)" : "rgba(239,68,68,0.1)", border: `1px solid ${confirmColor}30` },
                 children: isRestart ? /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: confirmColor, strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "1 4 1 10 7 10" }),
                   /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M3.51 15a9 9 0 1 0 .49-4.95" })
@@ -17367,7 +17367,7 @@ function CryogramMenu() {
           },
           children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "13", height: "13", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z" }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: "#00d4ff" }, children: "CRYOGRAM" })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: "var(--cryo-accent)" }, children: "CRYOGRAM" })
           ]
         }
       ),
@@ -17393,7 +17393,7 @@ function CryogramMenu() {
                 className: "w-full text-left px-4 py-1.5 text-sm transition-colors",
                 style: { color: "rgba(255,255,255,0.78)", fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif' },
                 onMouseEnter: (e) => {
-                  e.currentTarget.style.background = "rgba(0,212,255,0.15)";
+                  e.currentTarget.style.background = "var(--cryo-a12)";
                   e.currentTarget.style.color = "#fff";
                 },
                 onMouseLeave: (e) => {
@@ -17449,7 +17449,7 @@ function TitleBar() {
           "div",
           {
             className: "absolute inset-x-0 top-0 h-px pointer-events-none",
-            style: { background: "linear-gradient(90deg, transparent, rgba(0,212,255,0.45) 35%, rgba(187,136,255,0.25) 65%, transparent)" }
+            style: { background: "linear-gradient(90deg, transparent, var(--cryo-a45) 35%, var(--cryo-a20) 65%, transparent)" }
           }
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsx(CryogramMenu, {}),
@@ -17603,7 +17603,7 @@ function BattIcon({ level, charging }) {
   ] });
 }
 function PanelLabel({ children }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs font-semibold mb-3", style: { color: "#00d4ff", letterSpacing: "0.06em", textTransform: "uppercase", fontSize: 10 }, children });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs font-semibold mb-3", style: { color: "var(--cryo-accent)", letterSpacing: "0.06em", textTransform: "uppercase", fontSize: 10 }, children });
 }
 function WifiPanel({ wifi, onWifiChange }) {
   const [networks, setNetworks] = reactExports.useState([]);
@@ -17662,8 +17662,8 @@ function WifiPanel({ wifi, onWifiChange }) {
         },
         className: "w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors",
         style: {
-          background: net.active ? "rgba(0,212,255,0.12)" : selected?.ssid === net.ssid ? "rgba(255,255,255,0.08)" : "transparent",
-          border: net.active ? "1px solid rgba(0,212,255,0.2)" : "1px solid transparent"
+          background: net.active ? "var(--cryo-a12)" : selected?.ssid === net.ssid ? "rgba(255,255,255,0.08)" : "transparent",
+          border: net.active ? "1px solid var(--cryo-a20)" : "1px solid transparent"
         },
         onMouseEnter: (e) => {
           if (!net.active) e.currentTarget.style.background = "rgba(255,255,255,0.06)";
@@ -17673,9 +17673,9 @@ function WifiPanel({ wifi, onWifiChange }) {
         },
         children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(SignalBars, { signal: net.signal, active: net.active }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "flex-1 text-xs truncate", style: { color: net.active ? "#00d4ff" : "rgba(255,255,255,0.75)" }, children: net.ssid }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "flex-1 text-xs truncate", style: { color: net.active ? "var(--cryo-accent)" : "rgba(255,255,255,0.75)" }, children: net.ssid }),
           net.security && /* @__PURE__ */ jsxRuntimeExports.jsx(LockTinyIcon, {}),
-          net.active && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs", style: { color: "#00d4ff" }, children: "✓" })
+          net.active && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs", style: { color: "var(--cryo-accent)" }, children: "✓" })
         ]
       },
       net.ssid
@@ -17715,9 +17715,9 @@ function WifiPanel({ wifi, onWifiChange }) {
               disabled: !!connecting,
               className: "w-full py-1.5 rounded-lg text-xs font-medium transition-colors",
               style: {
-                background: connecting ? "rgba(0,212,255,0.1)" : "rgba(0,212,255,0.18)",
-                border: "1px solid rgba(0,212,255,0.25)",
-                color: connecting ? "rgba(0,212,255,0.5)" : "#00d4ff"
+                background: connecting ? "var(--cryo-a08)" : "var(--cryo-a18)",
+                border: "1px solid var(--cryo-a25)",
+                color: connecting ? "var(--cryo-a50)" : "var(--cryo-accent)"
               },
               children: connecting === selected.ssid ? "Connecting…" : `Connect to ${selected.ssid}`
             }
@@ -17728,7 +17728,7 @@ function WifiPanel({ wifi, onWifiChange }) {
   ] });
 }
 function SignalBars({ signal, active }) {
-  const color2 = active ? "#00d4ff" : "rgba(255,255,255,0.6)";
+  const color2 = active ? "var(--cryo-accent)" : "rgba(255,255,255,0.6)";
   const dim = "rgba(255,255,255,0.18)";
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "14", height: "12", viewBox: "0 0 14 12", className: "shrink-0", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "0", y: "8", width: "3", height: "4", rx: "1", fill: signal > 20 ? color2 : dim }),
@@ -17949,7 +17949,7 @@ function SystemHUD() {
         left: "50%",
         transform: "translateX(-50%)",
         background: "rgba(13,20,33,0.96)",
-        border: "1px solid rgba(0,212,255,0.25)",
+        border: "1px solid var(--cryo-a25)",
         borderRadius: 14,
         padding: "10px 18px",
         display: "flex",
@@ -17968,13 +17968,13 @@ function SystemHUD() {
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { background: "rgba(0,212,255,0.1)", borderRadius: 4, height: 5, overflow: "hidden" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
             motion.div,
             {
-              style: { height: "100%", background: "linear-gradient(90deg, #00d4ff, #00ff88)", borderRadius: 4 },
+              style: { height: "100%", background: "linear-gradient(90deg, var(--cryo-accent), var(--cryo-accent2))", borderRadius: 4 },
               animate: { width: `${hud.muted ? 0 : hud.value}%` },
               transition: { type: "spring", stiffness: 280, damping: 22 }
             }
           ) })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 13, color: "#00d4ff", fontFamily: "monospace", width: 34, textAlign: "right" }, children: hud.muted ? "M" : `${hud.value}%` })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 13, color: "var(--cryo-accent)", fontFamily: "monospace", width: 34, textAlign: "right" }, children: hud.muted ? "M" : `${hud.value}%` })
       ]
     },
     "hud"
@@ -18576,7 +18576,7 @@ function LockScreen() {
           "div",
           {
             className: "absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full",
-            style: { background: "radial-gradient(circle, rgba(0,212,255,0.035) 0%, transparent 65%)" }
+            style: { background: "radial-gradient(circle, var(--cryo-a05) 0%, transparent 65%)" }
           }
         ) }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-10 text-center", children: [
@@ -18584,11 +18584,11 @@ function LockScreen() {
             "div",
             {
               className: "tracking-[0.5em] uppercase text-xs mb-1",
-              style: { color: "rgba(0,212,255,0.45)", fontFamily: '"JetBrains Mono", monospace' },
+              style: { color: "var(--cryo-a45)", fontFamily: '"JetBrains Mono", monospace' },
               children: "CRYOGRAM OS"
             }
           ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-12 h-px mx-auto", style: { background: "rgba(0,212,255,0.2)" } })
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-12 h-px mx-auto", style: { background: "var(--cryo-a20)" } })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-10 select-none", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(BlinkingClock, { h, m: m2, seconds: time2.getSeconds() }),
@@ -18610,8 +18610,8 @@ function LockScreen() {
                     className: "rounded-full",
                     animate: {
                       scale: filled ? 1.15 : 1,
-                      background: isErr ? "#f87171" : filled ? "#00d4ff" : "rgba(255,255,255,0.18)",
-                      boxShadow: filled && !isErr ? "0 0 10px rgba(0,212,255,0.7)" : "none"
+                      background: isErr ? "#f87171" : filled ? "var(--cryo-accent)" : "rgba(255,255,255,0.18)",
+                      boxShadow: filled && !isErr ? `0 0 10px var(--cryo-a50)` : "none"
                     },
                     transition: { duration: 0.12 },
                     style: { width: 11, height: 11 }
@@ -18646,9 +18646,9 @@ function LockScreen() {
               whileTap: { scale: 0.95 },
               className: "mt-1 px-10 py-2 rounded-lg text-sm font-medium",
               style: {
-                background: pin.length >= MIN_DIGITS ? "rgba(0,212,255,0.14)" : "rgba(255,255,255,0.05)",
-                border: `1px solid ${pin.length >= MIN_DIGITS ? "rgba(0,212,255,0.45)" : "rgba(255,255,255,0.07)"}`,
-                color: pin.length >= MIN_DIGITS ? "#00d4ff" : "rgba(255,255,255,0.25)",
+                background: pin.length >= MIN_DIGITS ? "var(--cryo-a12)" : "rgba(255,255,255,0.05)",
+                border: `1px solid ${pin.length >= MIN_DIGITS ? "var(--cryo-a45)" : "rgba(255,255,255,0.07)"}`,
+                color: pin.length >= MIN_DIGITS ? "var(--cryo-accent)" : "rgba(255,255,255,0.25)",
                 fontFamily: "-apple-system, sans-serif",
                 cursor: pin.length >= MIN_DIGITS ? "pointer" : "default",
                 transition: "all 0.15s"
@@ -18668,12 +18668,12 @@ function LockScreen() {
                 whileTap: { scale: 0.95 },
                 className: "px-10 py-2.5 rounded-xl text-sm font-medium",
                 style: {
-                  background: "rgba(0,212,255,0.1)",
-                  border: "1px solid rgba(0,212,255,0.3)",
-                  color: "#00d4ff",
+                  background: "var(--cryo-a08)",
+                  border: "1px solid var(--cryo-a30)",
+                  color: "var(--cryo-accent)",
                   fontFamily: "-apple-system, sans-serif"
                 },
-                whileHover: { background: "rgba(0,212,255,0.18)" },
+                whileHover: { background: "var(--cryo-a18)" },
                 children: "Unlock"
               }
             )
@@ -18694,7 +18694,7 @@ function BlinkingClock({ h, m: m2, seconds }) {
         color: "#ffffff",
         fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
         letterSpacing: "-0.03em",
-        textShadow: "0 0 60px rgba(0,212,255,0.12)"
+        textShadow: "0 0 60px var(--cryo-a10)"
       },
       children: [
         h,
@@ -18724,6 +18724,89 @@ function NumKey({ label, onClick, dim }) {
       children: label
     }
   );
+}
+const THEME_PRESETS = [
+  { id: "cyber", name: "Cyber", accent: "#00d4ff", accent2: "#00ff88", bg: "#070b11" },
+  { id: "phantom", name: "Phantom", accent: "#a855f7", accent2: "#ec4899", bg: "#09070f" },
+  { id: "emerald", name: "Emerald", accent: "#10b981", accent2: "#06b6d4", bg: "#060d0a" },
+  { id: "fire", name: "Fire", accent: "#f97316", accent2: "#ef4444", bg: "#0e0805" },
+  { id: "slate", name: "Slate", accent: "#94a3b8", accent2: "#e2e8f0", bg: "#0a0c10" }
+];
+const DEFAULT = THEME_PRESETS[0];
+const useThemeStore = create((set) => ({
+  preset: DEFAULT.id,
+  accent: DEFAULT.accent,
+  accent2: DEFAULT.accent2,
+  bg: DEFAULT.bg,
+  setPreset(id2) {
+    const p2 = THEME_PRESETS.find((t2) => t2.id === id2) ?? DEFAULT;
+    set({ preset: p2.id, accent: p2.accent, accent2: p2.accent2, bg: p2.bg });
+    const api = window.cryogram;
+    api?.settings?.set("theme.preset", p2.id);
+    api?.settings?.set("theme.accent", p2.accent);
+    api?.settings?.set("theme.accent2", p2.accent2);
+    api?.settings?.set("theme.bg", p2.bg);
+  },
+  setCustomAccent(accent) {
+    set({ preset: "custom", accent });
+    const api = window.cryogram;
+    api?.settings?.set("theme.preset", "custom");
+    api?.settings?.set("theme.accent", accent);
+  },
+  async loadFromSettings() {
+    try {
+      const api = window.cryogram;
+      if (!api?.settings) return;
+      const all = await api.settings.getAll();
+      const id2 = all["theme.preset"];
+      const accent = all["theme.accent"];
+      const accent2 = all["theme.accent2"];
+      const bg2 = all["theme.bg"];
+      if (id2 && id2 !== "custom") {
+        const p2 = THEME_PRESETS.find((t2) => t2.id === id2);
+        if (p2) {
+          set({ preset: p2.id, accent: p2.accent, accent2: p2.accent2, bg: p2.bg });
+          return;
+        }
+      }
+      if (accent) {
+        set({
+          preset: id2 ?? "custom",
+          accent,
+          accent2: accent2 ?? DEFAULT.accent2,
+          bg: bg2 ?? DEFAULT.bg
+        });
+      }
+    } catch {
+    }
+  }
+}));
+function hexAlpha(hex2, pct) {
+  const h = Math.round(pct * 255).toString(16).padStart(2, "0");
+  return hex2 + h;
+}
+function ThemeProvider({ children }) {
+  const { accent, accent2, bg: bg2, loadFromSettings } = useThemeStore();
+  reactExports.useEffect(() => {
+    loadFromSettings();
+  }, []);
+  reactExports.useEffect(() => {
+    const r2 = document.documentElement.style;
+    r2.setProperty("--cryo-accent", accent);
+    r2.setProperty("--cryo-accent2", accent2);
+    r2.setProperty("--cryo-bg", bg2);
+    r2.setProperty("--cryo-a05", hexAlpha(accent, 0.05));
+    r2.setProperty("--cryo-a08", hexAlpha(accent, 0.08));
+    r2.setProperty("--cryo-a10", hexAlpha(accent, 0.1));
+    r2.setProperty("--cryo-a12", hexAlpha(accent, 0.12));
+    r2.setProperty("--cryo-a18", hexAlpha(accent, 0.18));
+    r2.setProperty("--cryo-a20", hexAlpha(accent, 0.2));
+    r2.setProperty("--cryo-a25", hexAlpha(accent, 0.25));
+    r2.setProperty("--cryo-a30", hexAlpha(accent, 0.3));
+    r2.setProperty("--cryo-a45", hexAlpha(accent, 0.45));
+    r2.setProperty("--cryo-a50", hexAlpha(accent, 0.5));
+  }, [accent, accent2, bg2]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children });
 }
 function App() {
   const [booted, setBooted] = reactExports.useState(false);
@@ -18770,19 +18853,19 @@ function App() {
     const handler = (e) => {
       if (e.altKey && e.key === "Tab") {
         e.preventDefault();
-        window.cryogram.onAppSwitcher?.window.dispatchEvent(new CustomEvent("cryogram:switcher", { detail: e.shiftKey ? "prev" : "next" }));
+        window.dispatchEvent(new CustomEvent("cryogram:switcher", { detail: e.shiftKey ? "prev" : "next" }));
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ThemeProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: !booted && /* @__PURE__ */ jsxRuntimeExports.jsx(BootSplash, { onDone: handleBooted }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: booted && /* @__PURE__ */ jsxRuntimeExports.jsxs(
       motion.div,
       {
         className: "flex flex-col h-screen w-screen overflow-hidden",
-        style: { background: "#070b11" },
+        style: { background: "var(--cryo-bg, #070b11)" },
         initial: { opacity: 0 },
         animate: { opacity: 1 },
         transition: { duration: 0.5 },
@@ -18801,7 +18884,7 @@ function App() {
       }
     ) }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: booted && isLocked && /* @__PURE__ */ jsxRuntimeExports.jsx(LockScreen, {}, "lock") })
-  ] });
+  ] }) });
 }
 const sleep = (ms) => new Promise((r2) => setTimeout(r2, ms));
 const settingsStore = (() => {
@@ -19115,7 +19198,9 @@ client.createRoot(document.getElementById("root")).render(
 );
 export {
   AnimatePresence as A,
+  THEME_PRESETS as T,
   We$1 as W,
+  useThemeStore as a,
   jsxRuntimeExports as j,
   motion as m,
   reactExports as r,

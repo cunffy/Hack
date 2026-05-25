@@ -124,9 +124,9 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
 
   toggleMaximize(id) {
     const z = get().nextZ
-    // Content area: full width, full height minus menubar (28px) and dock clearance (88px)
+    // Content area: full width, height minus TitleBar (28px) and Dock clearance (88px)
     const W = typeof window !== 'undefined' ? window.innerWidth : 1440
-    const H = typeof window !== 'undefined' ? window.innerHeight - 28 : 872
+    const H = typeof window !== 'undefined' ? window.innerHeight - 28 - 88 : 784
     set((s) => ({
       nextZ: s.nextZ + 1,
       windows: s.windows.map((w) => {

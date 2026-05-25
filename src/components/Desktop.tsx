@@ -89,7 +89,7 @@ export function Desktop() {
             style={{
               fontFamily: '"JetBrains Mono", monospace',
               fontSize: '22vw',
-              color: '#00d4ff',
+              color: 'var(--cryo-accent)',
               letterSpacing: '0.08em',
             }}
           >
@@ -305,7 +305,7 @@ function ExternalDesktopIcon({ app, offsetIndex, onRemove }: { app: PinnedApp; o
         <div
           className="w-14 h-14 rounded-2xl flex items-center justify-center"
           style={{
-            background: 'radial-gradient(ellipse at 38% 28%, rgba(0,212,255,0.18), rgba(8,12,20,0.88) 70%)',
+            background: 'radial-gradient(ellipse at 38% 28%, var(--cryo-a18), rgba(8,12,20,0.88) 70%)',
             border: '1px solid rgba(255,255,255,0.1)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
             backdropFilter: 'blur(12px)',
@@ -395,7 +395,7 @@ function AppPickerOverlay({ onClose, onPick }: { onClose: () => void; onPick: (a
                   background: 'rgba(255,255,255,0.04)',
                   border: '1px solid rgba(255,255,255,0.06)',
                 }}
-                onMouseEnter={e => { if (!added) (e.currentTarget as HTMLElement).style.background = 'rgba(0,212,255,0.1)' }}
+                onMouseEnter={e => { if (!added) (e.currentTarget as HTMLElement).style.background = 'var(--cryo-a08)' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)' }}
               >
                 <div
@@ -414,7 +414,7 @@ function AppPickerOverlay({ onClose, onPick }: { onClose: () => void; onPick: (a
                   {meta.label}
                 </div>
                 {added && (
-                  <div style={{ fontSize: 8, color: 'rgba(0,212,255,0.5)', fontFamily: '-apple-system, sans-serif' }}>
+                  <div style={{ fontSize: 8, color: 'var(--cryo-a50)', fontFamily: '-apple-system, sans-serif' }}>
                     Added
                   </div>
                 )}

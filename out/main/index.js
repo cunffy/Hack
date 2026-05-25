@@ -174,7 +174,10 @@ const store = new Store({
     dehashedApiKey: "",
     workspace: "",
     ptDisclaimerAccepted: null,
-    theme: "dark"
+    "theme.preset": "cyber",
+    "theme.accent": "#00d4ff",
+    "theme.accent2": "#00ff88",
+    "theme.bg": "#070b11"
   }
 });
 function registerSettingsHandlers() {

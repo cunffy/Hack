@@ -9,6 +9,7 @@ import { SystemHUD, AppSwitcher } from './components/Taskbar'
 import { AnimatedBackground } from './components/AnimatedBackground'
 import { BootSplash } from './components/BootSplash'
 import { LockScreen } from './components/LockScreen'
+import { ThemeProvider } from './components/ThemeProvider'
 import { useDesktopStore } from './store/desktopStore'
 import { useLockStore } from './store/lockStore'
 import { useWindowStore } from './store/windowStore'
@@ -77,6 +78,7 @@ export default function App() {
   }, [])
 
   return (
+    <ThemeProvider>
     <>
       <AnimatePresence>
         {!booted && <BootSplash onDone={handleBooted} />}
@@ -86,7 +88,7 @@ export default function App() {
         {booted && (
           <motion.div
             className="flex flex-col h-screen w-screen overflow-hidden"
-            style={{ background: '#070b11' }}
+            style={{ background: 'var(--cryo-bg, #070b11)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
@@ -111,5 +113,6 @@ export default function App() {
         {booted && isLocked && <LockScreen key="lock" />}
       </AnimatePresence>
     </>
+    </ThemeProvider>
   )
 }

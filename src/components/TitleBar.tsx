@@ -10,7 +10,7 @@ function PowerModal({ action, onCancel }: { action: 'restart' | 'shutdown'; onCa
     ? 'The OS will restart. Any open terminals or running tools will be closed.'
     : 'The system will power off. Make sure your work is saved.'
   const confirmLabel = isRestart ? 'Restart' : 'Shut Down'
-  const confirmColor = isRestart ? '#00d4ff' : '#ef4444'
+  const confirmColor = isRestart ? 'var(--cryo-accent)' : '#ef4444'
 
   const confirm = () => {
     if (isRestart) window.cryogram.system.reboot()
@@ -49,7 +49,7 @@ function PowerModal({ action, onCancel }: { action: 'restart' | 'shutdown'; onCa
         {/* Icon */}
         <div className="flex justify-center mb-4">
           <div className="w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ background: isRestart ? 'rgba(0,212,255,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${confirmColor}30` }}>
+            style={{ background: isRestart ? 'var(--cryo-a08)' : 'rgba(239,68,68,0.1)', border: `1px solid ${confirmColor}30` }}>
             {isRestart ? (
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={confirmColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="1 4 1 10 7 10" />
@@ -134,7 +134,7 @@ function CryogramMenu() {
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/>
           </svg>
-          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', color: '#00d4ff' }}>
+          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', color: 'var(--cryo-accent)' }}>
             CRYOGRAM
           </span>
         </button>
@@ -164,7 +164,7 @@ function CryogramMenu() {
                       onClick={item.action}
                       className="w-full text-left px-4 py-1.5 text-sm transition-colors"
                       style={{ color: 'rgba(255,255,255,0.78)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,212,255,0.15)'; e.currentTarget.style.color = '#fff' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'var(--cryo-a12)'; e.currentTarget.style.color = '#fff' }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.78)' }}
                     >
                       {item.label}
@@ -223,7 +223,7 @@ export function TitleBar() {
       {/* Top accent line */}
       <div
         className="absolute inset-x-0 top-0 h-px pointer-events-none"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.45) 35%, rgba(187,136,255,0.25) 65%, transparent)' }}
+        style={{ background: 'linear-gradient(90deg, transparent, var(--cryo-a45) 35%, var(--cryo-a20) 65%, transparent)' }}
       />
 
       {/* Left: Cryogram menu */}
@@ -408,7 +408,7 @@ function BattIcon({ level, charging }: { level: number; charging: boolean }) {
 
 // ── Popover panels ─────────────────────────────────────────────────────────
 function PanelLabel({ children }: { children: React.ReactNode }) {
-  return <div className="text-xs font-semibold mb-3" style={{ color: '#00d4ff', letterSpacing: '0.06em', textTransform: 'uppercase', fontSize: 10 }}>{children}</div>
+  return <div className="text-xs font-semibold mb-3" style={{ color: 'var(--cryo-accent)', letterSpacing: '0.06em', textTransform: 'uppercase', fontSize: 10 }}>{children}</div>
 }
 
 type NetworkEntry = { ssid: string; signal: number; security: string; active: boolean }
@@ -479,21 +479,21 @@ function WifiPanel({ wifi, onWifiChange }: { wifi: WifiStatus | null; onWifiChan
               className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors"
               style={{
                 background: net.active
-                  ? 'rgba(0,212,255,0.12)'
+                  ? 'var(--cryo-a12)'
                   : selected?.ssid === net.ssid
                     ? 'rgba(255,255,255,0.08)'
                     : 'transparent',
-                border: net.active ? '1px solid rgba(0,212,255,0.2)' : '1px solid transparent',
+                border: net.active ? '1px solid var(--cryo-a20)' : '1px solid transparent',
               }}
               onMouseEnter={e => { if (!net.active) e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
               onMouseLeave={e => { if (!net.active) e.currentTarget.style.background = selected?.ssid === net.ssid ? 'rgba(255,255,255,0.08)' : 'transparent' }}
             >
               <SignalBars signal={net.signal} active={net.active} />
-              <span className="flex-1 text-xs truncate" style={{ color: net.active ? '#00d4ff' : 'rgba(255,255,255,0.75)' }}>
+              <span className="flex-1 text-xs truncate" style={{ color: net.active ? 'var(--cryo-accent)' : 'rgba(255,255,255,0.75)' }}>
                 {net.ssid}
               </span>
               {net.security && <LockTinyIcon />}
-              {net.active && <span className="text-xs" style={{ color: '#00d4ff' }}>✓</span>}
+              {net.active && <span className="text-xs" style={{ color: 'var(--cryo-accent)' }}>✓</span>}
             </button>
           ))
         )}
@@ -531,9 +531,9 @@ function WifiPanel({ wifi, onWifiChange }: { wifi: WifiStatus | null; onWifiChan
                 disabled={!!connecting}
                 className="w-full py-1.5 rounded-lg text-xs font-medium transition-colors"
                 style={{
-                  background: connecting ? 'rgba(0,212,255,0.1)' : 'rgba(0,212,255,0.18)',
-                  border: '1px solid rgba(0,212,255,0.25)',
-                  color: connecting ? 'rgba(0,212,255,0.5)' : '#00d4ff',
+                  background: connecting ? 'var(--cryo-a08)' : 'var(--cryo-a18)',
+                  border: '1px solid var(--cryo-a25)',
+                  color: connecting ? 'var(--cryo-a50)' : 'var(--cryo-accent)',
                 }}
               >
                 {connecting === selected.ssid ? 'Connecting…' : `Connect to ${selected.ssid}`}
@@ -547,7 +547,7 @@ function WifiPanel({ wifi, onWifiChange }: { wifi: WifiStatus | null; onWifiChan
 }
 
 function SignalBars({ signal, active }: { signal: number; active: boolean }) {
-  const color = active ? '#00d4ff' : 'rgba(255,255,255,0.6)'
+  const color = active ? 'var(--cryo-accent)' : 'rgba(255,255,255,0.6)'
   const dim   = 'rgba(255,255,255,0.18)'
   return (
     <svg width="14" height="12" viewBox="0 0 14 12" className="shrink-0">

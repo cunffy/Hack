@@ -1,6 +1,6 @@
 #!/bin/bash
 # cryogram-update — pull latest Cryogram app code and redeploy in-place.
-# No ISO rebuild needed for UI/feature changes.
+# No ISO rebuild needed for UI/feature/theme changes.
 # Usage: sudo cryogram-update
 
 set -euo pipefail
@@ -64,9 +64,11 @@ BRANCH="${BRANCH:-main}"
 step "Checking dependencies"
 
 missing=()
-command -v git  &>/dev/null || missing+=(git)
-command -v node &>/dev/null || missing+=(nodejs)
-command -v npm  &>/dev/null || missing+=(npm)
+command -v git     &>/dev/null || missing+=(git)
+command -v node    &>/dev/null || missing+=(nodejs)
+command -v npm     &>/dev/null || missing+=(npm)
+command -v python3 &>/dev/null || missing+=(python3)
+command -v rsync   &>/dev/null || missing+=(rsync)
 
 if [ ${#missing[@]} -gt 0 ]; then
   info "Installing: ${missing[*]}"
@@ -74,7 +76,7 @@ if [ ${#missing[@]} -gt 0 ]; then
   apt-get install -y -qq "${missing[@]}"
 fi
 
-ok "git $(git --version | awk '{print $3}')  ·  node $(node -v)  ·  npm $(npm -v)"
+ok "git $(git --version | awk '{print $3}')  ·  node $(node -v)  ·  npm $(npm -v)  ·  python3 $(python3 --version | awk '{print $2}')"
 
 # ── Fetch latest code ─────────────────────────────────────────────────────────────────
 step "Fetching latest code  ($REPO_URL  [$BRANCH])"
@@ -96,28 +98,55 @@ step "Installing build dependencies  (first run downloads ~300 MB)"
 
 cd "$SRC_DIR"
 npm install --loglevel=warn
-ok "Dependencies ready"
+ok "npm dependencies ready"
+
+# ── Python requirements ───────────────────────────────────────────────────────
+if [ -f "$SRC_DIR/scripts/requirements.txt" ]; then
+  step "Installing Python requirements"
+  pip3 install -r "$SRC_DIR/scripts/requirements.txt" --quiet --break-system-packages 2>/dev/null \
+    || pip3 install -r "$SRC_DIR/scripts/requirements.txt" --quiet 2>/dev/null \
+    || warn "pip3 install failed — Python features may be limited"
+  ok "Python requirements installed"
+fi
 
 # ── Build ────────────────────────────────────────────────────────────────────────────
 step "Building  (takes ~1-2 minutes)"
 
 npm run build
-ok "Build complete  ($(du -sh out | cut -f1))"
+ok "Build complete  ($(du -sh out 2>/dev/null | cut -f1 || echo '?'))"
 
 # ── Deploy ────────────────────────────────────────────────────────────────────────────
 step "Deploying to $APP_DIR"
 
+# Ensure target directories exist
+mkdir -p "$APP_DIR/out" "$APP_DIR/node_modules"
+
+# Renderer, preload, and main process
 rsync -a --delete "$SRC_DIR/out/"         "$APP_DIR/out/"
 cp               "$SRC_DIR/package.json"  "$APP_DIR/package.json"
 
-[ -d "$SRC_DIR/scripts" ] && rsync -a --delete "$SRC_DIR/scripts/" "$APP_DIR/scripts/"
+# Python security scripts
+if [ -d "$SRC_DIR/scripts" ]; then
+  rsync -a --delete "$SRC_DIR/scripts/" "$APP_DIR/scripts/"
+  info "Scripts synced"
+fi
 
-for dep in node-pty better-sqlite3; do
-  if [ -d "$SRC_DIR/node_modules/$dep" ]; then
-    rsync -a --delete "$SRC_DIR/node_modules/$dep" "$APP_DIR/node_modules/"
-    info "Synced native addon: $dep"
+# Native addons — detect automatically by scanning for compiled .node files.
+SYNCED_ADDONS=()
+while IFS= read -r nodefile; do
+  module=$(echo "$nodefile" | sed "s|$SRC_DIR/node_modules/||" | cut -d'/' -f1)
+  [[ "$module" == electron ]] && continue
+  [[ "$module" == .* ]] && continue
+  if [ -d "$SRC_DIR/node_modules/$module" ] && [[ ! " ${SYNCED_ADDONS[*]} " =~ " $module " ]]; then
+    rsync -a --delete "$SRC_DIR/node_modules/$module" "$APP_DIR/node_modules/"
+    SYNCED_ADDONS+=("$module")
+    info "Synced native addon: $module"
   fi
-done
+done < <(find "$SRC_DIR/node_modules" -name "*.node" -not -path "*/electron/*" 2>/dev/null)
+
+if [ ${#SYNCED_ADDONS[@]} -eq 0 ]; then
+  info "No native addons detected"
+fi
 
 ok "Deployed"
 
@@ -163,6 +192,7 @@ ACPIEOF
   systemctl restart acpid 2>/dev/null && ok "Brightness keys active via ACPI" || warn "acpid restart failed (non-fatal)"
 else
   warn "brightnessctl or acpid not found — brightness keys will be software-only"
+  info "To fix:  sudo apt install brightnessctl acpid"
 fi
 
 # ── Reboot ────────────────────────────────────────────────────────────────────────────

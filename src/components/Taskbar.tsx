@@ -76,9 +76,9 @@ function Clock() {
             transition={{ duration: 0.12 }}
             style={{
               position: 'absolute', bottom: '100%', right: 0, marginBottom: 8,
-              background: 'rgba(13,20,33,0.98)', border: '1px solid rgba(0,212,255,0.2)',
+              background: 'rgba(13,20,33,0.98)', border: '1px solid var(--cryo-a20)',
               borderRadius: 8, padding: '6px 14px', whiteSpace: 'nowrap',
-              color: '#00d4ff', fontFamily: 'monospace', fontSize: 11, letterSpacing: 1,
+              color: 'var(--cryo-accent)', fontFamily: 'monospace', fontSize: 11, letterSpacing: 1,
               zIndex: 9999, boxShadow: '0 4px 24px rgba(0,0,0,0.6)',
             }}
           >
@@ -160,7 +160,7 @@ function VolumeTray() {
             <input
               type="range" min={0} max={100} value={vol}
               onChange={e => setVolume(Number(e.target.value))}
-              style={{ writingMode: 'vertical-lr', direction: 'rtl', height: 80, accentColor: '#00d4ff' }}
+              style={{ writingMode: 'vertical-lr', direction: 'rtl', height: 80, accentColor: 'var(--cryo-accent)' }}
             />
             <span style={{ fontSize: 10, color: '#8b949e', fontFamily: 'monospace' }}>{vol}%</span>
           </motion.div>
@@ -192,7 +192,7 @@ function WifiTray() {
       className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/5 transition-colors select-none"
       title={ssid ? `WiFi: ${ssid}` : 'Not connected — click to open Settings'}
       onClick={() => useWindowStore.getState().openApp('settings')}
-      style={{ fontSize: 14, color: ssid ? '#00d4ff' : '#3d4a55' }}
+      style={{ fontSize: 14, color: ssid ? 'var(--cryo-accent)' : '#3d4a55' }}
     >
       {ssid ? '📶' : '📵'}
     </button>
@@ -302,7 +302,7 @@ export function SystemHUD() {
         transition={{ duration: 0.18 }}
         style={{
           position: 'fixed', top: 38, left: '50%', transform: 'translateX(-50%)',
-          background: 'rgba(13,20,33,0.96)', border: '1px solid rgba(0,212,255,0.25)',
+          background: 'rgba(13,20,33,0.96)', border: '1px solid var(--cryo-a25)',
           borderRadius: 14, padding: '10px 18px',
           display: 'flex', alignItems: 'center', gap: 12,
           zIndex: 99999, boxShadow: '0 8px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(0,212,255,0.08)',
@@ -316,13 +316,13 @@ export function SystemHUD() {
           </div>
           <div style={{ background: 'rgba(0,212,255,0.1)', borderRadius: 4, height: 5, overflow: 'hidden' }}>
             <motion.div
-              style={{ height: '100%', background: 'linear-gradient(90deg, #00d4ff, #00ff88)', borderRadius: 4 }}
+              style={{ height: '100%', background: 'linear-gradient(90deg, var(--cryo-accent), var(--cryo-accent2))', borderRadius: 4 }}
               animate={{ width: `${hud.muted ? 0 : hud.value}%` }}
               transition={{ type: 'spring', stiffness: 280, damping: 22 }}
             />
           </div>
         </div>
-        <span style={{ fontSize: 13, color: '#00d4ff', fontFamily: 'monospace', width: 34, textAlign: 'right' }}>
+        <span style={{ fontSize: 13, color: 'var(--cryo-accent)', fontFamily: 'monospace', width: 34, textAlign: 'right' }}>
           {hud.muted ? 'M' : `${hud.value}%`}
         </span>
       </motion.div>
@@ -540,14 +540,14 @@ export function Taskbar() {
         className="flex items-center h-10 px-2 gap-1.5 shrink-0 relative select-none"
         style={{
           background: 'rgba(7,11,17,0.96)',
-          borderTop: '1px solid rgba(0,212,255,0.09)',
+          borderTop: '1px solid var(--cryo-a08)',
           backdropFilter: 'blur(28px)',
         }}
       >
         {/* Accent line */}
         <div
           className="absolute inset-x-0 top-0 h-px pointer-events-none"
-          style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.22) 50%, transparent 100%)' }}
+          style={{ background: 'linear-gradient(90deg, transparent 0%, var(--cryo-a20) 50%, transparent 100%)' }}
         />
 
         {/* Logo → opens launcher */}
@@ -555,12 +555,12 @@ export function Taskbar() {
           onClick={() => openApp('launcher')}
           className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 transition-all hover:scale-105 active:scale-95"
           title="Launcher"
-          style={{ background: 'rgba(0,212,255,0.07)', border: '1px solid rgba(0,212,255,0.18)' }}
+          style={{ background: 'var(--cryo-a05)', border: '1px solid var(--cryo-a18)' }}
         >
           <motion.span
             animate={{ opacity: [1, 0.45, 1] }}
             transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ fontSize: 15, filter: 'drop-shadow(0 0 5px rgba(0,212,255,0.85))' }}
+            style={{ fontSize: 15, filter: 'drop-shadow(0 0 5px var(--cryo-a50))' }}
           >
             ⬡
           </motion.span>
@@ -655,28 +655,33 @@ export function Taskbar() {
             })}
           </AnimatePresence>
 
-          {/* External X11 windows (Brave, etc.) */}
+          {/* External X11 windows (Brave, etc.) — use getX11Meta for proper icons */}
           <AnimatePresence initial={false}>
-            {x11Wins.map(xw => (
-              <motion.button
-                key={xw.id}
-                initial={{ opacity: 0, scale: 0.78, x: -10 }}
-                animate={{ opacity: 1, scale: 1, x: 0 }}
-                exit={{ opacity: 0, scale: 0.78, x: -10 }}
-                transition={{ type: 'spring', stiffness: 440, damping: 30 }}
-                onClick={() => (window as any).cryogram?.wm?.focusWindow(xw.id)}
-                className="flex items-center gap-1.5 px-2 h-7 rounded-lg text-xs shrink-0"
-                style={{
-                  background: 'rgba(13,20,33,0.65)', border: '1px solid rgba(26,40,64,0.5)',
-                  color: '#8b949e', maxWidth: 156,
-                }}
-              >
-                <span style={{ fontSize: 12 }}>🌐</span>
-                <span className="truncate" style={{ fontFamily: 'monospace', letterSpacing: 0.2 }}>
-                  {cleanTitle(xw.title)}
-                </span>
-              </motion.button>
-            ))}
+            {x11Wins.map(xw => {
+              const meta = getX11Meta(xw.title)
+              return (
+                <motion.button
+                  key={xw.id}
+                  initial={{ opacity: 0, scale: 0.78, x: -10 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.78, x: -10 }}
+                  transition={{ type: 'spring', stiffness: 440, damping: 30 }}
+                  onClick={() => (window as any).cryogram?.wm?.focusWindow(xw.id)}
+                  className="flex items-center gap-1.5 px-2 h-7 rounded-lg text-xs shrink-0"
+                  style={{
+                    background: `${meta.color}10`,
+                    border: `1px solid ${meta.color}28`,
+                    color: meta.color,
+                    maxWidth: 156,
+                  }}
+                >
+                  <span style={{ fontSize: 12 }}>{meta.icon}</span>
+                  <span className="truncate" style={{ fontFamily: 'monospace', letterSpacing: 0.2 }}>
+                    {meta.name}
+                  </span>
+                </motion.button>
+              )
+            })}
           </AnimatePresence>
 
           {windows.length === 0 && x11Wins.length === 0 && (

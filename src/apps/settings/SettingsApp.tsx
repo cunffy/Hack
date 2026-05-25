@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useThemeStore, THEME_PRESETS } from '../../store/themeStore'
 
 interface SettingsValues {
   hibpApiKey: string
@@ -8,6 +9,15 @@ interface SettingsValues {
 }
 
 export default function SettingsApp() {
+  const { preset: activePreset, accent, setPreset, setCustomAccent } = useThemeStore()
+  const [hexInput, setHexInput] = useState(accent)
+
+  useEffect(() => setHexInput(accent), [accent])
+
+  const handleHexCommit = (v: string) => {
+    if (/^#[0-9a-fA-F]{6}$/.test(v)) setCustomAccent(v)
+  }
+
   const [vals, setVals] = useState<SettingsValues>({
     hibpApiKey: '',
     dehashedEmail: '',
@@ -112,6 +122,99 @@ export default function SettingsApp() {
         <h2 className="text-sm font-bold text-cryo-text mb-1">Settings</h2>
         <p className="text-xs text-cryo-muted">API keys are stored encrypted on your local machine.</p>
       </div>
+
+      {/* ── Appearance ───────────────────────────────────────────────────────── */}
+      <section className="panel p-4 space-y-4">
+        <div className="text-xs text-cryo-muted uppercase tracking-wider font-bold">Appearance</div>
+
+        <div>
+          <div className="text-xs text-cryo-muted mb-2.5">Theme Preset</div>
+          <div className="flex flex-wrap gap-2">
+            {THEME_PRESETS.map(p => {
+              const active = activePreset === p.id
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => setPreset(p.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    padding: '7px 14px', borderRadius: 10, cursor: 'pointer',
+                    border: active ? `1px solid ${p.accent}55` : '1px solid rgba(255,255,255,0.08)',
+                    background: active ? `${p.accent}12` : 'rgba(255,255,255,0.04)',
+                    transition: 'all 0.15s',
+                    boxShadow: active ? `0 0 12px ${p.accent}20` : 'none',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 10, height: 10, borderRadius: '50%', display: 'inline-block',
+                      background: p.accent,
+                      boxShadow: active ? `0 0 8px ${p.accent}` : 'none',
+                    }}
+                  />
+                  <span style={{
+                    fontSize: 12, fontFamily: 'monospace', letterSpacing: '0.04em',
+                    color: active ? p.accent : 'rgba(255,255,255,0.5)',
+                    transition: 'color 0.15s',
+                  }}>
+                    {p.name}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div>
+          <div className="text-xs text-cryo-muted mb-2.5">Custom Accent Color</div>
+          <div className="flex items-center gap-3">
+            <label
+              style={{
+                position: 'relative', width: 36, height: 36, borderRadius: 8,
+                background: accent, cursor: 'pointer', overflow: 'hidden',
+                border: '2px solid rgba(255,255,255,0.15)',
+                boxShadow: `0 0 12px ${accent}40`,
+                flexShrink: 0,
+              }}
+            >
+              <input
+                type="color"
+                value={hexInput}
+                onChange={e => { setHexInput(e.target.value); setCustomAccent(e.target.value) }}
+                style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+              />
+            </label>
+            <input
+              type="text"
+              className="w-28"
+              value={hexInput}
+              maxLength={7}
+              placeholder="#00d4ff"
+              onChange={e => setHexInput(e.target.value)}
+              onBlur={e => handleHexCommit(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleHexCommit(hexInput) }}
+              style={{ fontFamily: 'monospace', fontSize: 12, textTransform: 'uppercase' }}
+            />
+            <span className="text-xs text-cryo-muted">Overrides the preset accent</span>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mt-3">
+            {['#00d4ff','#a855f7','#10b981','#f97316','#ef4444','#f59e0b','#ec4899','#94a3b8'].map(c => (
+              <button
+                key={c}
+                onClick={() => { setHexInput(c); setCustomAccent(c) }}
+                title={c}
+                style={{
+                  width: 22, height: 22, borderRadius: '50%', background: c, cursor: 'pointer',
+                  border: accent === c ? `2px solid white` : '2px solid transparent',
+                  boxShadow: accent === c ? `0 0 8px ${c}` : 'none',
+                  transition: 'all 0.15s',
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── Security & Lock Screen ──────────────────────────────────────────── */}
       <section className="panel p-4 space-y-4">

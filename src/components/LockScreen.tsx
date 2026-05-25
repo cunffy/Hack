@@ -85,18 +85,18 @@ export function LockScreen() {
       {/* Ambient glow */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.035) 0%, transparent 65%)' }} />
+          style={{ background: 'radial-gradient(circle, var(--cryo-a05) 0%, transparent 65%)' }} />
       </div>
 
       {/* Brand */}
       <div className="mb-10 text-center">
         <div
           className="tracking-[0.5em] uppercase text-xs mb-1"
-          style={{ color: 'rgba(0,212,255,0.45)', fontFamily: '"JetBrains Mono", monospace' }}
+          style={{ color: 'var(--cryo-a45)', fontFamily: '"JetBrains Mono", monospace' }}
         >
           CRYOGRAM OS
         </div>
-        <div className="w-12 h-px mx-auto" style={{ background: 'rgba(0,212,255,0.2)' }} />
+        <div className="w-12 h-px mx-auto" style={{ background: 'var(--cryo-a20)' }} />
       </div>
 
       {/* Clock */}
@@ -125,8 +125,8 @@ export function LockScreen() {
                   className="rounded-full"
                   animate={{
                     scale: filled ? 1.15 : 1,
-                    background: isErr ? '#f87171' : filled ? '#00d4ff' : 'rgba(255,255,255,0.18)',
-                    boxShadow: filled && !isErr ? '0 0 10px rgba(0,212,255,0.7)' : 'none',
+                    background: isErr ? '#f87171' : filled ? 'var(--cryo-accent)' : 'rgba(255,255,255,0.18)',
+                    boxShadow: filled && !isErr ? `0 0 10px var(--cryo-a50)` : 'none',
                   }}
                   transition={{ duration: 0.12 }}
                   style={{ width: 11, height: 11 }}
@@ -167,9 +167,9 @@ export function LockScreen() {
             whileTap={{ scale: 0.95 }}
             className="mt-1 px-10 py-2 rounded-lg text-sm font-medium"
             style={{
-              background: pin.length >= MIN_DIGITS ? 'rgba(0,212,255,0.14)' : 'rgba(255,255,255,0.05)',
-              border: `1px solid ${pin.length >= MIN_DIGITS ? 'rgba(0,212,255,0.45)' : 'rgba(255,255,255,0.07)'}`,
-              color: pin.length >= MIN_DIGITS ? '#00d4ff' : 'rgba(255,255,255,0.25)',
+              background: pin.length >= MIN_DIGITS ? 'var(--cryo-a12)' : 'rgba(255,255,255,0.05)',
+              border: `1px solid ${pin.length >= MIN_DIGITS ? 'var(--cryo-a45)' : 'rgba(255,255,255,0.07)'}`,
+              color: pin.length >= MIN_DIGITS ? 'var(--cryo-accent)' : 'rgba(255,255,255,0.25)',
               fontFamily: '-apple-system, sans-serif',
               cursor: pin.length >= MIN_DIGITS ? 'pointer' : 'default',
               transition: 'all 0.15s',
@@ -193,12 +193,12 @@ export function LockScreen() {
             whileTap={{ scale: 0.95 }}
             className="px-10 py-2.5 rounded-xl text-sm font-medium"
             style={{
-              background: 'rgba(0,212,255,0.1)',
-              border: '1px solid rgba(0,212,255,0.3)',
-              color: '#00d4ff',
+              background: 'var(--cryo-a08)',
+              border: '1px solid var(--cryo-a30)',
+              color: 'var(--cryo-accent)',
               fontFamily: '-apple-system, sans-serif',
             }}
-            whileHover={{ background: 'rgba(0,212,255,0.18)' }}
+            whileHover={{ background: 'var(--cryo-a18)' }}
           >
             Unlock
           </motion.button>
@@ -219,7 +219,7 @@ function BlinkingClock({ h, m, seconds }: { h: string; m: string; seconds: numbe
         color: '#ffffff',
         fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
         letterSpacing: '-0.03em',
-        textShadow: '0 0 60px rgba(0,212,255,0.12)',
+        textShadow: '0 0 60px var(--cryo-a10)',
       }}
     >
       {h}
