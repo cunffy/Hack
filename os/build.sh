@@ -912,16 +912,32 @@ cat > "$HOOKS_DIR/0560-grub-live.hook.binary" << 'HOOKEOF'
 set +e
 echo "[grub-live] Configuring Cryogram OS live boot GRUB..."
 
-# live-build assembles the binary tree in binary/ relative to $LB_DIR.
-# Patch all GRUB configs we can find (BIOS and EFI paths vary by live-build version).
 for GRUB_CFG in \
   "binary/boot/grub/grub.cfg" \
   "binary/EFI/boot/grub.cfg" \
   "binary/EFI/BOOT/grub.cfg"; do
   [ -f "$GRUB_CFG" ] || continue
 
-  # 5-second countdown — shows branded screen, then auto-boots
-  sed -i 's/set timeout=[0-9][0-9]*/set timeout=5/g' "$GRUB_CFG"
+  # Auto-select first entry: handle both timeout=-1 (wait forever) and numeric values
+  sed -i 's/set timeout=-1/set timeout=3/g; s/set timeout=[0-9][0-9]*/set timeout=3/g' "$GRUB_CFG"
+
+  # Ensure default=0 so the first entry (live boot) is pre-selected
+  if grep -q "set default=" "$GRUB_CFG"; then
+    sed -i 's/set default=.*/set default=0/' "$GRUB_CFG"
+  else
+    sed -i '1i set default=0' "$GRUB_CFG"
+  fi
+
+  # Add quiet splash to live kernel cmdline — enables Plymouth boot animation
+  # Only add if not already present to avoid duplication on re-runs
+  grep -q "quiet splash" "$GRUB_CFG" || \
+    sed -i '/linux.*boot=live/ s/$/ quiet splash/' "$GRUB_CFG"
+
+  # Rename generic Debian entry to Cryogram OS branding
+  sed -i 's/menuentry "Debian GNU\/Linux Live (amd64)"/menuentry "Boot Cryogram OS"/g' "$GRUB_CFG"
+  sed -i 's/menuentry "Debian GNU\/Linux Live ([^"]*)"/menuentry "Boot Cryogram OS (Live)"/g' "$GRUB_CFG"
+  # Catch any remaining generic labels that still reference Debian Live
+  sed -i 's/menuentry "Debian GNU\/Linux/menuentry "Cryogram OS/g' "$GRUB_CFG"
 
   # Apply Cryogram theme (files are staged in binary/boot/grub/themes/cryogram/)
   if ! grep -q "set theme" "$GRUB_CFG"; then
