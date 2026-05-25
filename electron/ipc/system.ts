@@ -2,6 +2,8 @@ import { ipcMain, dialog, BrowserWindow } from 'electron'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import { readFile } from 'fs/promises'
+import { createHash } from 'crypto'
+import { store } from './settings'
 
 const execAsync = promisify(exec)
 
@@ -182,7 +184,48 @@ export function registerSystemHandlers(): void {
 
   ipcMain.handle('system:shutdown', async () => { await sh('systemctl poweroff') })
   ipcMain.handle('system:reboot',   async () => { await sh('systemctl reboot') })
-  ipcMain.handle('system:lock',     async () => { await sh('i3lock -c 080c12 -e &') })
+  ipcMain.handle('system:lock', async () => {
+    // Tell renderer to show in-app lock screen
+    BrowserWindow.getAllWindows()[0]?.webContents.send('screen:lock')
+    return true
+  })
+
+  // ── PIN management ────────────────────────────────────────────────────────
+
+  ipcMain.handle('system:verifyPin', async (_, pin: string) => {
+    const hash = store.get('pin.hash') as string | undefined
+    if (!hash) return true
+    return createHash('sha256').update(String(pin)).digest('hex') === hash
+  })
+
+  ipcMain.handle('system:setPin', async (_, newPin: string, currentPin?: string) => {
+    // If a PIN already exists, verify current first
+    const existing = store.get('pin.hash') as string | undefined
+    if (existing && currentPin !== undefined) {
+      const chk = createHash('sha256').update(String(currentPin)).digest('hex')
+      if (chk !== existing) return { success: false, error: 'Incorrect current PIN' }
+    }
+    if (!/^[0-9]{4,8}$/.test(newPin)) return { success: false, error: 'PIN must be 4–8 digits' }
+    store.set('pin.hash', createHash('sha256').update(newPin).digest('hex'))
+    store.set('pin.enabled', true)
+    return { success: true }
+  })
+
+  ipcMain.handle('system:removePin', async (_, currentPin: string) => {
+    const existing = store.get('pin.hash') as string | undefined
+    if (existing) {
+      const chk = createHash('sha256').update(String(currentPin)).digest('hex')
+      if (chk !== existing) return { success: false, error: 'Incorrect PIN' }
+    }
+    store.delete('pin.hash' as any)
+    store.set('pin.enabled', false)
+    return { success: true }
+  })
+
+  ipcMain.handle('system:setPinEnabled', async (_, enabled: boolean) => {
+    store.set('pin.enabled', enabled)
+    return true
+  })
 
   // ── Wallpaper ─────────────────────────────────────────────────────────────
 

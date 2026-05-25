@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, powerMonitor } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerTerminalHandlers } from './ipc/terminal'
@@ -74,6 +74,10 @@ app.whenReady().then(() => {
   registerLauncherHandlers()
 
   createWindow()
+
+  // Lock screen on system resume (lid open / wake from sleep) and OS lock-screen
+  powerMonitor.on('resume',      () => mainWindow?.webContents.send('screen:lock'))
+  powerMonitor.on('lock-screen', () => mainWindow?.webContents.send('screen:lock'))
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

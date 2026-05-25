@@ -94,11 +94,15 @@ contextBridge.exposeInMainWorld('cryogram', {
     bluetoothDisconnect:  (address: string)             => ipcRenderer.invoke('system:bluetoothDisconnect', address),
     bluetoothScan:        ()                            => ipcRenderer.invoke('system:bluetoothScan'),
     getInfo:              ()                            => ipcRenderer.invoke('system:getInfo'),
-    shutdown:             ()                            => ipcRenderer.invoke('system:shutdown'),
-    reboot:               ()                            => ipcRenderer.invoke('system:reboot'),
-    lock:                 ()                            => ipcRenderer.invoke('system:lock'),
-    pickWallpaper:        ()                            => ipcRenderer.invoke('system:pickWallpaper'),
-    setWallpaper:         (path: string)                => ipcRenderer.invoke('system:setWallpaper', path),
+    shutdown:             ()                              => ipcRenderer.invoke('system:shutdown'),
+    reboot:               ()                              => ipcRenderer.invoke('system:reboot'),
+    lock:                 ()                              => ipcRenderer.invoke('system:lock'),
+    pickWallpaper:        ()                              => ipcRenderer.invoke('system:pickWallpaper'),
+    setWallpaper:         (path: string)                  => ipcRenderer.invoke('system:setWallpaper', path),
+    verifyPin:            (pin: string)                   => ipcRenderer.invoke('system:verifyPin', pin),
+    setPin:               (pin: string, cur?: string)     => ipcRenderer.invoke('system:setPin', pin, cur),
+    removePin:            (cur: string)                   => ipcRenderer.invoke('system:removePin', cur),
+    setPinEnabled:        (on: boolean)                   => ipcRenderer.invoke('system:setPinEnabled', on),
   },
 
   // App launcher
@@ -112,6 +116,13 @@ contextBridge.exposeInMainWorld('cryogram', {
     getWindows:  ()             => ipcRenderer.invoke('wm:getWindows'),
     focusWindow: (id: string)   => ipcRenderer.invoke('wm:focusWindow', id),
     closeWindow: (id: string)   => ipcRenderer.invoke('wm:closeWindow', id),
+  },
+
+  // Lock screen events from main (system resume, manual lock)
+  onLock: (cb: () => void) => {
+    const listener = () => cb()
+    ipcRenderer.on('screen:lock', listener)
+    return () => ipcRenderer.removeListener('screen:lock', listener)
   },
 
   // Notifications from main
