@@ -84,10 +84,11 @@ export function registerUpdaterHandlers(): void {
         return reject(new Error('cryogram-update script not found. Run from the live OS.'))
       }
 
-      // pkexec shows a graphical polkit password dialog — no terminal needed.
-      // Fall back to running directly if already root.
-      const cmd  = isRoot() ? 'bash' : 'pkexec'
-      const args = [UPDATE_SCRIPT]
+      // sudo -n runs the script without a password prompt (non-interactive).
+      // Requires a NOPASSWD sudoers entry — the UI will guide the user to set
+      // this up if missing.
+      const cmd  = isRoot() ? 'bash' : 'sudo'
+      const args = isRoot() ? [UPDATE_SCRIPT] : ['-n', UPDATE_SCRIPT]
 
       const proc = spawn(cmd, args, {
         env: { ...process.env, TERM: 'xterm-color', FORCE_COLOR: '1' },

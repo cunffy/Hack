@@ -1,9 +1,28 @@
 import { app, BrowserWindow, shell, ipcMain, powerMonitor, globalShortcut } from 'electron'
 import { join } from 'path'
 import { exec, execFile } from 'child_process'
-
+import { existsSync, mkdirSync, cpSync } from 'fs'
 
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+
+// Persist user data (settings, localStorage) to a fixed location that survives
+// updates. The default Electron userData path may be under /root/ which isn't
+// always included in the overlay persistence layer on the live OS.
+// We only activate this on the live OS where /etc/cryogram exists.
+const PERSISTENT_USERDATA = '/etc/cryogram/userdata'
+if (existsSync('/etc/cryogram')) {
+  try {
+    const defaultPath = app.getPath('userData')
+    if (!existsSync(PERSISTENT_USERDATA)) {
+      mkdirSync(PERSISTENT_USERDATA, { recursive: true, mode: 0o755 })
+      // Migrate any existing settings so nothing is lost
+      if (existsSync(defaultPath) && defaultPath !== PERSISTENT_USERDATA) {
+        try { cpSync(defaultPath, PERSISTENT_USERDATA, { recursive: true }) } catch {}
+      }
+    }
+    app.setPath('userData', PERSISTENT_USERDATA)
+  } catch {}
+}
 import { registerTerminalHandlers } from './ipc/terminal'
 import { registerPasswordTesterHandlers } from './ipc/password-tester'
 import { registerLeakerHandlers } from './ipc/leaker'

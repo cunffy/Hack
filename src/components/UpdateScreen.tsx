@@ -97,10 +97,11 @@ function stripAnsi(s: string) {
 }
 
 export function UpdateScreen({ onCancel }: Props) {
-  const [phase, setPhase]     = useState<Phase>('starting')
-  const [log, setLog]         = useState<string[]>([])
-  const [countdown, setCount] = useState(10)
-  const [error, setError]     = useState<string | null>(null)
+  const [phase, setPhase]         = useState<Phase>('starting')
+  const [log, setLog]             = useState<string[]>([])
+  const [countdown, setCount]     = useState(10)
+  const [error, setError]         = useState<string | null>(null)
+  const [needsSudoSetup, setNeedsSudoSetup] = useState(false)
   const logRef = useRef<HTMLDivElement>(null)
   const countdownRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -164,8 +165,9 @@ export function UpdateScreen({ onCancel }: Props) {
         } catch (err: any) {
           const msg = String(err?.message ?? err)
           if (msg.includes('code null') || msg.includes('killed')) {
-            // Killed by OS reboot — that's expected
             setPhase('rebooting')
+          } else if (msg.includes('password is required') || msg.includes('sudo:')) {
+            setNeedsSudoSetup(true)
           } else {
             setError(msg)
           }
@@ -264,10 +266,12 @@ export function UpdateScreen({ onCancel }: Props) {
             animate={{ opacity: 1, y: 0 }}
             style={{ fontSize: 22, fontWeight: 700, color: 'rgba(255,255,255,0.92)', letterSpacing: '-0.02em' }}
           >
-            {error ? 'Update Failed' : phaseLabel[phase]}
+            {needsSudoSetup ? 'One-Time Setup Required' : error ? 'Update Failed' : phaseLabel[phase]}
           </motion.div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', marginTop: 5 }}>
-            {error
+            {needsSudoSetup
+              ? 'Run the command below once in a terminal, then try again'
+              : error
               ? 'Check log below for details'
               : phase === 'countdown' || phase === 'rebooting'
               ? 'Your laptop will fully restart'
@@ -352,14 +356,52 @@ export function UpdateScreen({ onCancel }: Props) {
           </motion.div>
         )}
 
+        {/* Sudo setup panel */}
+        {needsSudoSetup && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ width: '100%' }}
+          >
+            <div style={{
+              background: 'rgba(251,191,36,0.07)',
+              border: '1px solid rgba(251,191,36,0.25)',
+              borderRadius: 12,
+              padding: '16px 18px',
+            }}>
+              <div style={{ fontSize: 11, color: 'rgba(251,191,36,0.8)', marginBottom: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                Open a terminal and run this command once:
+              </div>
+              <div style={{
+                background: 'rgba(0,0,0,0.5)',
+                borderRadius: 8,
+                padding: '10px 14px',
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: 11,
+                color: '#00d4ff',
+                wordBreak: 'break-all',
+                lineHeight: 1.7,
+                userSelect: 'text',
+              }}>
+                echo "$(whoami) ALL=(ALL) NOPASSWD: /usr/local/bin/cryogram-update" | sudo tee /etc/sudoers.d/cryogram && sudo chmod 440 /etc/sudoers.d/cryogram
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 10 }}>
+                After running it, click Update Now again — no password will be needed from that point on.
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Error cancel */}
-        {error && onCancel && (
+        {(error || needsSudoSetup) && onCancel && (
           <button
             onClick={onCancel}
             style={{
               padding: '8px 24px', borderRadius: 10, fontSize: 13, fontWeight: 600,
-              background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)',
-              color: '#f87171', cursor: 'pointer',
+              background: needsSudoSetup ? 'rgba(251,191,36,0.1)' : 'rgba(239,68,68,0.15)',
+              border: `1px solid ${needsSudoSetup ? 'rgba(251,191,36,0.3)' : 'rgba(239,68,68,0.35)'}`,
+              color: needsSudoSetup ? '#fbbf24' : '#f87171',
+              cursor: 'pointer',
             }}
           >
             Close
