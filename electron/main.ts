@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, powerMonitor } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, powerMonitor, globalShortcut } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerTerminalHandlers } from './ipc/terminal'
@@ -35,6 +35,25 @@ function createWindow(): void {
     mainWindow!.maximize()
     // Re-maximize if something else pushes us out of fullscreen
     mainWindow!.on('restore', () => mainWindow?.maximize())
+    // Re-focus if another X11 window steals focus
+    mainWindow!.on('blur', () => {
+      // Only reclaim focus if no child window (file picker, etc.) is open
+      if (BrowserWindow.getAllWindows().length === 1) mainWindow?.focus()
+    })
+
+    // ── Block WM-level shortcuts that would expose the underlying desktop ──
+    // Super+D  = "show desktop" in most WMs — we swallow it
+    globalShortcut.register('Super+D', () => {})
+    // Super+Tab = WM window switcher — Cryogram's own task switcher handles this
+    globalShortcut.register('Super+Tab', () => {})
+    // Super+L = OS lock — redirect to Cryogram's lock screen
+    globalShortcut.register('Super+L', () => {
+      mainWindow?.webContents.send('screen:lock')
+    })
+    // Ctrl+Alt+T = terminal shortcut some WMs bind — open Cryogram terminal instead
+    globalShortcut.register('CommandOrControl+Alt+T', () => {
+      mainWindow?.webContents.send('open:app', 'terminal')
+    })
   })
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -85,6 +104,7 @@ app.whenReady().then(() => {
 })
 
 app.on('before-quit', () => {
+  globalShortcut.unregisterAll()
   killLaunchedApps()
 })
 

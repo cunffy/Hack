@@ -233,6 +233,7 @@ gparted
 copyq
 i3lock
 xss-lock
+unclutter
 brightnessctl
 plymouth
 plymouth-themes
@@ -710,6 +711,144 @@ exit 0
 HOOKEOF
 chmod +x "$HOOKS_DIR/0530-plymouth-theme.hook.chroot"
 echo "[build] Plymouth theme hook written."
+
+# Cryogram OS Session — makes Cryogram the entire UI, not an app on a desktop.
+# Creates a dedicated X session, configures LightDM autologin, sudoers power rules.
+cat > "$HOOKS_DIR/0545-cryogram-os-session.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set -e
+echo "[session] Configuring Cryogram OS dedicated session..."
+
+# ── 1. Session launcher script ────────────────────────────────────────────
+# This script IS the desktop session. LightDM runs it after autologin.
+# Cryogram is the only application; openbox is an invisible WM backend.
+cat > /usr/local/bin/cryogram-session << 'SESSION'
+#!/bin/bash
+export DISPLAY="${DISPLAY:-:0}"
+export HOME="${HOME:-/home/cryogram}"
+export XDG_SESSION_TYPE=x11
+export XDG_CURRENT_DESKTOP=Cryogram
+
+# Paint the screen dark immediately — eliminates white flash before Electron loads
+xsetroot -solid '#070b11' 2>/dev/null || true
+
+# Disable X11 power management and screensaver.
+# Cryogram handles its own lock screen and session management.
+xset s off 2>/dev/null || true
+xset s noblank 2>/dev/null || true
+xset -dpms 2>/dev/null || true
+
+# Lightweight GPU compositor — Electron uses GPU compositing and needs a compositor
+# for proper transparency/shadows. Fall back to software renderer if GPU fails.
+picom --backend glx --vsync --no-fading-openclose --daemon 2>/dev/null || \
+  picom --backend xrender --daemon 2>/dev/null || true
+
+# Openbox as invisible WM backend — provides the EWMH/ICCCM window management
+# that Electron expects. All user-facing features are disabled via config.
+openbox --config-file /etc/xdg/openbox/cryogram-rc.xml &
+WM_PID=$!
+
+# Hide cursor when idle — security OS aesthetic
+unclutter -root -idle 5 -noevents 2>/dev/null &
+
+# ── Launch Cryogram OS shell ──────────────────────────────────────────────
+# Auto-restart on crash (exit non-zero). Exit 0 = clean shutdown/update,
+# which triggers session end via systemctl restart display-manager.
+while true; do
+  /usr/local/bin/cryogram
+  STATUS=$?
+  [ $STATUS -eq 0 ] && break
+  sleep 1  # brief pause to prevent crash-loop thrashing
+done
+
+# Session ending — kill the WM
+kill $WM_PID 2>/dev/null || true
+SESSION
+chmod +x /usr/local/bin/cryogram-session
+
+# ── 2. X session descriptor ───────────────────────────────────────────────
+mkdir -p /usr/share/xsessions
+cat > /usr/share/xsessions/cryogram.desktop << 'XSESSION'
+[Desktop Entry]
+Name=Cryogram OS
+Comment=Cryogram Security Operating System
+Exec=/usr/local/bin/cryogram-session
+TryExec=/usr/local/bin/cryogram
+Type=Application
+DesktopNames=Cryogram
+X-LightDM-DesktopName=Cryogram
+XSESSION
+
+# ── 3. Minimal openbox config ─────────────────────────────────────────────
+# No keybindings, no decorations, no taskbar — just EWMH compliance.
+mkdir -p /etc/xdg/openbox
+cat > /etc/xdg/openbox/cryogram-rc.xml << 'OBCONF'
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_config xmlns="http://openbox.org/3.4/rc">
+  <resistance>
+    <strength>0</strength>
+    <screen_edge_strength>0</screen_edge_strength>
+  </resistance>
+  <focus>
+    <followMouse>no</followMouse>
+    <focusNew>yes</focusNew>
+    <focusLast>yes</focusLast>
+  </focus>
+  <placement>
+    <policy>Smart</policy>
+  </placement>
+  <theme>
+    <name>Clearlooks</name>
+    <titleLayout></titleLayout>
+  </theme>
+  <keyboard>
+    <!-- No keybindings — Cryogram registers global shortcuts via Electron -->
+  </keyboard>
+  <mouse>
+    <context name="Root">
+      <!-- No right-click menu on root window — Cryogram is fullscreen anyway -->
+    </context>
+    <context name="Desktop">
+    </context>
+  </mouse>
+  <applications>
+    <application class="*">
+      <decor>no</decor>
+      <border>no</border>
+      <skip_taskbar>yes</skip_taskbar>
+      <skip_pager>yes</skip_pager>
+    </application>
+  </applications>
+</openbox_config>
+OBCONF
+
+# ── 4. LightDM autologin into the Cryogram session ───────────────────────
+# No greeter is shown. The OS boots directly into Cryogram (just like macOS).
+mkdir -p /etc/lightdm/lightdm.conf.d
+cat > /etc/lightdm/lightdm.conf.d/50-cryogram.conf << 'LDMCONF'
+[Seat:*]
+# Boot directly into the Cryogram OS session — no login screen
+autologin-user=cryogram
+autologin-user-timeout=0
+user-session=cryogram
+# Keep the greeter configured for if autologin ever fails (fallback only)
+greeter-session=lightdm-gtk-greeter
+LDMCONF
+
+# ── 5. Sudoers rules for power management ────────────────────────────────
+# cryogram user (and its Electron process) must be able to poweroff/reboot
+# without a password prompt — same as macOS/Windows power button behavior.
+cat > /etc/sudoers.d/cryogram-power << 'SUDOERS'
+# Cryogram OS — power management without sudo password
+cryogram ALL=(ALL) NOPASSWD: /bin/systemctl poweroff, /bin/systemctl reboot, /bin/systemctl hibernate, /bin/systemctl suspend, /bin/systemctl restart lightdm, /bin/systemctl restart display-manager
+SUDOERS
+chmod 440 /etc/sudoers.d/cryogram-power
+
+echo "[session] Cryogram OS session configured."
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0545-cryogram-os-session.hook.chroot"
+echo "[build] OS session hook written."
 
 # ---- 1. Generate graphic assets ----
 echo "[1/6] Generating GRUB theme and wallpaper assets..."

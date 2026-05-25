@@ -10,11 +10,13 @@ import { BootSplash } from './components/BootSplash'
 import { LockScreen } from './components/LockScreen'
 import { useDesktopStore } from './store/desktopStore'
 import { useLockStore } from './store/lockStore'
+import { useWindowStore } from './store/windowStore'
 
 export default function App() {
   const [booted, setBooted] = useState(false)
   const wallpaper = useDesktopStore(s => s.wallpaper)
   const { isLocked, lock } = useLockStore()
+  const openApp = useWindowStore(s => s.openApp)
 
   // After boot splash: check if PIN is enabled and lock if so
   const handleBooted = useCallback(async () => {
@@ -52,6 +54,14 @@ export default function App() {
     })
     return cleanup ?? undefined
   }, [booted, lock])
+
+  // Global shortcut → open app (e.g. Ctrl+Alt+T opens terminal)
+  useEffect(() => {
+    const cleanup = (window.cryogram as any).onOpenApp?.((appId: string) => {
+      openApp(appId as any)
+    })
+    return cleanup ?? undefined
+  }, [openApp])
 
   return (
     <>

@@ -2,9 +2,101 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWindowStore } from '../store/windowStore'
 
+// ── Power confirmation modal ───────────────────────────────────────────────
+function PowerModal({ action, onCancel }: { action: 'restart' | 'shutdown'; onCancel: () => void }) {
+  const isRestart = action === 'restart'
+  const title = isRestart ? 'Restart Cryogram OS?' : 'Shut Down Cryogram OS?'
+  const body  = isRestart
+    ? 'The OS will restart. Any open terminals or running tools will be closed.'
+    : 'The system will power off. Make sure your work is saved.'
+  const confirmLabel = isRestart ? 'Restart' : 'Shut Down'
+  const confirmColor = isRestart ? '#00d4ff' : '#ef4444'
+
+  const confirm = () => {
+    if (isRestart) window.cryogram.system.reboot()
+    else           window.cryogram.system.shutdown()
+  }
+
+  // Close on Escape
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel() }
+    window.addEventListener('keydown', h)
+    return () => window.removeEventListener('keydown', h)
+  }, [onCancel])
+
+  return (
+    <motion.div
+      className="fixed inset-0 flex items-center justify-center z-[99999]"
+      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onCancel}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 12 }}
+        transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+        className="rounded-2xl p-6 w-80"
+        style={{
+          background: 'rgba(12,18,28,0.98)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.8)',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Icon */}
+        <div className="flex justify-center mb-4">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center"
+            style={{ background: isRestart ? 'rgba(0,212,255,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${confirmColor}30` }}>
+            {isRestart ? (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={confirmColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="1 4 1 10 7 10" />
+                <path d="M3.51 15a9 9 0 1 0 .49-4.95" />
+              </svg>
+            ) : (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={confirmColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+                <line x1="12" y1="2" x2="12" y2="12" />
+              </svg>
+            )}
+          </div>
+        </div>
+
+        <h2 className="text-base font-semibold text-center mb-2" style={{ color: '#f0f4f8' }}>{title}</h2>
+        <p className="text-xs text-center mb-5" style={{ color: 'rgba(255,255,255,0.45)', lineHeight: 1.5 }}>{body}</p>
+
+        <div className="flex gap-2">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
+            style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)' }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={confirm}
+            autoFocus
+            className="flex-1 py-2 rounded-xl text-sm font-semibold transition-colors"
+            style={{ background: `${confirmColor}22`, border: `1px solid ${confirmColor}50`, color: confirmColor }}
+            onMouseEnter={e => { e.currentTarget.style.background = `${confirmColor}33` }}
+            onMouseLeave={e => { e.currentTarget.style.background = `${confirmColor}22` }}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 // ── Apple-menu equivalent ──────────────────────────────────────────────────
 function CryogramMenu() {
   const [open, setOpen] = useState(false)
+  const [powerModal, setPowerModal] = useState<'restart' | 'shutdown' | null>(null)
   const ref = useRef<HTMLDivElement>(null)
   const openApp = useWindowStore(s => s.openApp)
   const isMock = !window.cryogram?.system?.shutdown
@@ -21,68 +113,81 @@ function CryogramMenu() {
     { label: 'System Preferences',   action: () => { openApp('system'); setOpen(false) } },
     { sep: true },
     { label: 'Lock Screen',          action: () => { !isMock && window.cryogram.system.lock(); setOpen(false) } },
-    { label: 'Restart…',             action: () => { !isMock && window.cryogram.system.reboot(); setOpen(false) } },
-    { label: 'Shut Down…',           action: () => { !isMock && window.cryogram.system.shutdown(); setOpen(false) } },
+    { label: 'Restart…',             action: () => { if (!isMock) { setPowerModal('restart'); setOpen(false) } } },
+    { label: 'Shut Down…',           action: () => { if (!isMock) { setPowerModal('shutdown'); setOpen(false) } } },
   ]
 
   return (
-    <div ref={ref} className="relative" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 px-2.5 h-7 rounded-md transition-colors"
-        style={{
-          background: open ? 'rgba(255,255,255,0.1)' : 'transparent',
-          color: open ? '#fff' : 'rgba(255,255,255,0.7)',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
-        onMouseLeave={e => { e.currentTarget.style.background = open ? 'rgba(255,255,255,0.1)' : 'transparent' }}
-      >
-        {/* Cryogram hex logo */}
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/>
-        </svg>
-        <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', color: '#00d4ff' }}>
-          CRYOGRAM
-        </span>
-      </button>
+    <>
+      <div ref={ref} className="relative" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+        <button
+          onClick={() => setOpen(o => !o)}
+          className="flex items-center gap-1.5 px-2.5 h-7 rounded-md transition-colors"
+          style={{
+            background: open ? 'rgba(255,255,255,0.1)' : 'transparent',
+            color: open ? '#fff' : 'rgba(255,255,255,0.7)',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = open ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+        >
+          {/* Cryogram hex logo */}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+          </svg>
+          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', color: '#00d4ff' }}>
+            CRYOGRAM
+          </span>
+        </button>
 
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, y: -4, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -4, scale: 0.97 }}
+              transition={{ duration: 0.12 }}
+              className="absolute top-full left-0 mt-1 min-w-44 rounded-xl overflow-hidden z-[999]"
+              style={{
+                background: 'rgba(18,24,36,0.97)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(32px)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.7)',
+              }}
+            >
+              <div className="py-1.5">
+                {items.map((item, i) =>
+                  item.sep ? (
+                    <div key={i} className="my-1 mx-3 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
+                  ) : (
+                    <button
+                      key={i}
+                      onClick={item.action}
+                      className="w-full text-left px-4 py-1.5 text-sm transition-colors"
+                      style={{ color: 'rgba(255,255,255,0.78)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,212,255,0.15)'; e.currentTarget.style.color = '#fff' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.78)' }}
+                    >
+                      {item.label}
+                    </button>
+                  )
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Power confirmation modal — rendered at root level so it covers everything */}
       <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -4, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.97 }}
-            transition={{ duration: 0.12 }}
-            className="absolute top-full left-0 mt-1 min-w-44 rounded-xl overflow-hidden z-[999]"
-            style={{
-              background: 'rgba(18,24,36,0.97)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(32px)',
-              boxShadow: '0 12px 40px rgba(0,0,0,0.7)',
-            }}
-          >
-            <div className="py-1.5">
-              {items.map((item, i) =>
-                item.sep ? (
-                  <div key={i} className="my-1 mx-3 h-px" style={{ background: 'rgba(255,255,255,0.07)' }} />
-                ) : (
-                  <button
-                    key={i}
-                    onClick={item.action}
-                    className="w-full text-left px-4 py-1.5 text-sm transition-colors"
-                    style={{ color: 'rgba(255,255,255,0.78)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,212,255,0.15)'; e.currentTarget.style.color = '#fff' }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.78)' }}
-                  >
-                    {item.label}
-                  </button>
-                )
-              )}
-            </div>
-          </motion.div>
+        {powerModal && (
+          <PowerModal
+            key={powerModal}
+            action={powerModal}
+            onCancel={() => setPowerModal(null)}
+          />
         )}
       </AnimatePresence>
-    </div>
+    </>
   )
 }
 

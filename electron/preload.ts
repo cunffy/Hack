@@ -125,6 +125,13 @@ contextBridge.exposeInMainWorld('cryogram', {
     return () => ipcRenderer.removeListener('screen:lock', listener)
   },
 
+  // Global shortcut → open a named app (e.g. Ctrl+Alt+T → terminal)
+  onOpenApp: (cb: (appId: string) => void) => {
+    const listener = (_: unknown, appId: string) => cb(appId)
+    ipcRenderer.on('open:app', listener)
+    return () => ipcRenderer.removeListener('open:app', listener)
+  },
+
   // Notifications from main
   onNotification: (cb: (n: { title: string; body: string }) => void) => {
     const listener = (_: unknown, n: unknown) => cb(n as { title: string; body: string })
