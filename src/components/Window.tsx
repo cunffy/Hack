@@ -1,15 +1,15 @@
-import { useRef, useCallback, lazy, Suspense } from 'react'
+import { useRef, useCallback, lazy, Suspense, useState } from 'react'
 import { motion } from 'framer-motion'
 import { AppWindow as AppWindowType, useWindowStore } from '../store/windowStore'
 
-const TerminalApp    = lazy(() => import('../apps/terminal/Terminal'))
-const EditorApp      = lazy(() => import('../apps/editor/Editor'))
+const TerminalApp       = lazy(() => import('../apps/terminal/Terminal'))
+const EditorApp         = lazy(() => import('../apps/editor/Editor'))
 const PasswordTesterApp = lazy(() => import('../apps/password-tester/PasswordTester'))
-const LeakerApp      = lazy(() => import('../apps/leaker/LeakerApp'))
-const SettingsApp    = lazy(() => import('../apps/settings/SettingsApp'))
-const FilesApp       = lazy(() => import('../apps/files/FilesApp'))
-const LauncherApp    = lazy(() => import('../apps/launcher/LauncherApp'))
-const SystemApp      = lazy(() => import('../apps/system/SystemApp'))
+const LeakerApp         = lazy(() => import('../apps/leaker/LeakerApp'))
+const SettingsApp       = lazy(() => import('../apps/settings/SettingsApp'))
+const FilesApp          = lazy(() => import('../apps/files/FilesApp'))
+const LauncherApp       = lazy(() => import('../apps/launcher/LauncherApp'))
+const SystemApp         = lazy(() => import('../apps/system/SystemApp'))
 
 const APP_COLORS: Record<string, string> = {
   terminal:          '#00ff88',
@@ -29,7 +29,7 @@ function AppContent({ appId }: { appId: string }) {
         <div className="flex-1 flex items-center justify-center">
           <motion.div
             className="w-5 h-5 rounded-full border-2"
-            style={{ borderColor: 'rgba(0,212,255,0.35)', borderTopColor: '#00d4ff' }}
+            style={{ borderColor: 'rgba(255,255,255,0.1)', borderTopColor: 'var(--cryo-accent)' }}
             animate={{ rotate: 360 }}
             transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
           />
@@ -51,7 +51,8 @@ function AppContent({ appId }: { appId: string }) {
 export function AppWindow({ window: win }: { window: AppWindowType }) {
   const { closeWindow, focusWindow, moveWindow, minimizeWindow, toggleMaximize } = useWindowStore()
   const dragRef = useRef<{ startX: number; startY: number; winX: number; winY: number } | null>(null)
-  const accent = APP_COLORS[win.appId] ?? '#00d4ff'
+  const [titleHovered, setTitleHovered] = useState(false)
+  const accent = APP_COLORS[win.appId] ?? 'var(--cryo-accent)'
 
   const onTitleBarMouseDown = useCallback(
     (e: React.MouseEvent) => {
@@ -78,9 +79,13 @@ export function AppWindow({ window: win }: { window: AppWindowType }) {
     [win.id, win.x, win.y, win.maximized, focusWindow, moveWindow]
   )
 
-  if (win.minimized) return null
-
   const radius = win.maximized ? 0 : 12
+
+  // Keep minimized windows in the tree so we can animate them away smoothly.
+  // pointerEvents prevents interaction while invisible.
+  const minimizeAnim = win.minimized
+    ? { opacity: 0, scale: 0.55, y: 140, filter: 'blur(8px)' }
+    : { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }
 
   return (
     <motion.div
@@ -93,39 +98,48 @@ export function AppWindow({ window: win }: { window: AppWindowType }) {
         height: win.height,
         zIndex: win.zIndex,
         borderRadius: radius,
-        background: 'rgba(10,15,24,0.93)',
-        backdropFilter: 'blur(24px)',
+        background: 'rgba(10,14,22,0.94)',
+        backdropFilter: 'blur(32px) saturate(1.6)',
+        WebkitBackdropFilter: 'blur(32px) saturate(1.6)',
         border: win.maximized
           ? 'none'
           : win.focused
-            ? `1px solid ${accent}44`
-            : '1px solid rgba(26,40,64,0.7)',
+          ? `1px solid ${accent}50`
+          : '1px solid rgba(255,255,255,0.07)',
         boxShadow: win.maximized
           ? 'none'
           : win.focused
-            ? `0 0 0 1px ${accent}18, 0 24px 64px rgba(0,0,0,0.85)`
-            : '0 8px 32px rgba(0,0,0,0.7)',
-        transition: 'border-color 0.15s, box-shadow 0.15s',
+          ? `0 0 0 1px ${accent}14, 0 28px 72px rgba(0,0,0,0.9), 0 4px 16px rgba(0,0,0,0.5)`
+          : '0 8px 40px rgba(0,0,0,0.7)',
+        pointerEvents: win.minimized ? 'none' : undefined,
+        transition: 'border-color 0.15s, box-shadow 0.2s',
       }}
-      initial={{ opacity: 0, scale: 0.94, y: 10 }}
+      initial={{ opacity: 0, scale: 0.9, y: 20, filter: 'blur(4px)' }}
       animate={{
-        opacity: 1, scale: 1, y: 0,
+        ...minimizeAnim,
         borderRadius: radius,
-        left: win.x, top: win.y, width: win.width, height: win.height,
+        left: win.x,
+        top: win.y,
+        width: win.width,
+        height: win.height,
       }}
-      exit={{ opacity: 0, scale: 0.92, y: 6 }}
-      transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+      exit={{ opacity: 0, scale: 0.86, y: -12, filter: 'blur(6px)' }}
+      transition={
+        win.minimized
+          ? { type: 'spring', stiffness: 340, damping: 26 }
+          : { type: 'spring', stiffness: 420, damping: 24 }
+      }
       onMouseDown={() => focusWindow(win.id)}
     >
-      {/* Accent top line */}
+      {/* Accent top glow line */}
       {!win.maximized && (
         <div
           className="absolute inset-x-0 top-0 h-px pointer-events-none"
           style={{
             background: win.focused
-              ? `linear-gradient(90deg, transparent, ${accent}70, transparent)`
+              ? `linear-gradient(90deg, transparent 5%, ${accent}80 40%, ${accent}80 60%, transparent 95%)`
               : 'transparent',
-            transition: 'background 0.25s',
+            transition: 'background 0.3s',
           }}
         />
       )}
@@ -134,19 +148,43 @@ export function AppWindow({ window: win }: { window: AppWindowType }) {
       <div
         className="flex items-center h-10 px-3 shrink-0 select-none relative"
         style={{
-          background: win.focused ? 'rgba(14,20,32,0.9)' : 'rgba(10,15,24,0.75)',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          background: win.focused
+            ? 'rgba(16,22,34,0.92)'
+            : 'rgba(11,16,26,0.8)',
+          borderBottom: '1px solid rgba(255,255,255,0.055)',
           cursor: win.maximized ? 'default' : 'move',
         }}
         onMouseDown={onTitleBarMouseDown}
         onDoubleClick={() => toggleMaximize(win.id)}
+        onMouseEnter={() => setTitleHovered(true)}
+        onMouseLeave={() => setTitleHovered(false)}
       >
         {/* Traffic lights */}
-        <div className="flex items-center gap-1.5 shrink-0" onMouseDown={e => e.stopPropagation()}>
-          <TrafficLight color="#ff5f57" title="Close"    onClick={() => closeWindow(win.id)} />
-          <TrafficLight color="#ffbd2e" title="Minimize" onClick={() => minimizeWindow(win.id)} />
+        <div
+          className="flex items-center gap-1.5 shrink-0 z-10"
+          onMouseDown={e => e.stopPropagation()}
+        >
+          <TrafficLight
+            color="#ff5f57"
+            hoverColor="#ff3b30"
+            symbol="✕"
+            shown={titleHovered}
+            title="Close"
+            onClick={() => closeWindow(win.id)}
+          />
+          <TrafficLight
+            color="#ffbd2e"
+            hoverColor="#ff9500"
+            symbol="–"
+            shown={titleHovered}
+            title="Minimize"
+            onClick={() => minimizeWindow(win.id)}
+          />
           <TrafficLight
             color="#28c840"
+            hoverColor="#34c759"
+            symbol={win.maximized ? '⤡' : '⤢'}
+            shown={titleHovered}
             title={win.maximized ? 'Restore' : 'Maximize'}
             onClick={() => toggleMaximize(win.id)}
           />
@@ -155,9 +193,9 @@ export function AppWindow({ window: win }: { window: AppWindowType }) {
         {/* Centered title */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <span
-            className="text-xs font-medium truncate max-w-[60%]"
+            className="text-xs font-medium truncate max-w-[55%]"
             style={{
-              color: win.focused ? 'rgba(255,255,255,0.48)' : 'rgba(255,255,255,0.22)',
+              color: win.focused ? 'rgba(255,255,255,0.52)' : 'rgba(255,255,255,0.22)',
               letterSpacing: '0.02em',
               fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
             }}
@@ -166,15 +204,16 @@ export function AppWindow({ window: win }: { window: AppWindowType }) {
           </span>
         </div>
 
-        {/* Right: accent dot */}
-        <div className="ml-auto shrink-0">
-          <div
-            className="w-1.5 h-1.5 rounded-full transition-all duration-300"
-            style={{
+        {/* Right accent dot */}
+        <div className="ml-auto shrink-0 z-10">
+          <motion.div
+            className="w-1.5 h-1.5 rounded-full"
+            animate={{
               background: accent,
-              boxShadow: win.focused ? `0 0 6px ${accent}` : 'none',
-              opacity: win.focused ? 1 : 0.22,
+              boxShadow: win.focused ? `0 0 8px ${accent}` : 'none',
+              opacity: win.focused ? 1 : 0.2,
             }}
+            transition={{ duration: 0.2 }}
           />
         </div>
       </div>
@@ -184,7 +223,7 @@ export function AppWindow({ window: win }: { window: AppWindowType }) {
         <AppContent appId={win.appId} />
       </div>
 
-      {/* Resize handle — bottom-right corner */}
+      {/* Resize handle */}
       {!win.maximized && (
         <ResizeHandle winId={win.id} winWidth={win.width} winHeight={win.height} />
       )}
@@ -192,41 +231,94 @@ export function AppWindow({ window: win }: { window: AppWindowType }) {
   )
 }
 
-function TrafficLight({ color, title, onClick }: { color: string; title: string; onClick: () => void }) {
+function TrafficLight({
+  color, hoverColor, symbol, shown, title, onClick,
+}: {
+  color: string
+  hoverColor: string
+  symbol: string
+  shown: boolean
+  title: string
+  onClick: () => void
+}) {
+  const [hov, setHov] = useState(false)
   return (
     <motion.button
       onClick={onClick}
       title={title}
-      className="w-3 h-3 rounded-full"
-      style={{ background: color, opacity: 0.85 }}
-      whileHover={{ scale: 1.22, opacity: 1 }}
-      whileTap={{ scale: 0.8 }}
-    />
+      className="w-3 h-3 rounded-full flex items-center justify-center"
+      style={{ background: hov ? hoverColor : color }}
+      animate={{ scale: hov ? 1.15 : 1 }}
+      transition={{ type: 'spring', stiffness: 600, damping: 24 }}
+      whileTap={{ scale: 0.78 }}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+    >
+      <motion.span
+        animate={{ opacity: shown ? 1 : 0 }}
+        transition={{ duration: 0.12 }}
+        style={{
+          fontSize: 7,
+          lineHeight: 1,
+          color: 'rgba(0,0,0,0.75)',
+          fontWeight: 700,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      >
+        {symbol}
+      </motion.span>
+    </motion.button>
   )
 }
 
-function ResizeHandle({ winId, winWidth, winHeight }: { winId: string; winWidth: number; winHeight: number }) {
+function ResizeHandle({
+  winId,
+  winWidth,
+  winHeight,
+}: {
+  winId: string
+  winWidth: number
+  winHeight: number
+}) {
   const resizeWindow = useWindowStore(s => s.resizeWindow)
   const ref = useRef<{ sx: number; sy: number; w: number; h: number } | null>(null)
 
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
-    ref.current = { sx: e.clientX, sy: e.clientY, w: winWidth, h: winHeight }
-    const onMove = (ev: MouseEvent) => {
-      if (!ref.current) return
-      resizeWindow(winId, Math.max(400, ref.current.w + ev.clientX - ref.current.sx), Math.max(300, ref.current.h + ev.clientY - ref.current.sy))
-    }
-    const onUp = () => { ref.current = null; window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp) }
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup', onUp)
-  }, [winId, winWidth, winHeight, resizeWindow])
+  const onMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      ref.current = { sx: e.clientX, sy: e.clientY, w: winWidth, h: winHeight }
+      const onMove = (ev: MouseEvent) => {
+        if (!ref.current) return
+        resizeWindow(
+          winId,
+          Math.max(400, ref.current.w + ev.clientX - ref.current.sx),
+          Math.max(300, ref.current.h + ev.clientY - ref.current.sy)
+        )
+      }
+      const onUp = () => {
+        ref.current = null
+        window.removeEventListener('mousemove', onMove)
+        window.removeEventListener('mouseup', onUp)
+      }
+      window.addEventListener('mousemove', onMove)
+      window.addEventListener('mouseup', onUp)
+    },
+    [winId, winWidth, winHeight, resizeWindow]
+  )
 
   return (
     <div
       className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-10"
       onMouseDown={onMouseDown}
     >
-      <svg width="10" height="10" viewBox="0 0 10 10" className="absolute bottom-1 right-1" style={{ opacity: 0.2 }}>
+      <svg
+        width="10"
+        height="10"
+        viewBox="0 0 10 10"
+        className="absolute bottom-1 right-1"
+        style={{ opacity: 0.18 }}
+      >
         <line x1="10" y1="2" x2="2" y2="10" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
         <line x1="10" y1="6" x2="6" y2="10" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
       </svg>

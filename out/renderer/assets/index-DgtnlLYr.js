@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-Cb2nKcsy.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-BB8DNeJe.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -15990,72 +15990,159 @@ const useDockStore = create()(
 );
 function ContextMenu({ x: x2, y: y2, items, onClose }) {
   const ref = reactExports.useRef(null);
+  const [focused, setFocused] = reactExports.useState(-1);
+  const actionItems = items.map((item, i) => ({ item, i })).filter(({ item }) => !item.sep && !item.disabled);
   reactExports.useEffect(() => {
-    const handler = (e) => {
+    const onDown = (e) => {
       if (ref.current && !ref.current.contains(e.target)) onClose();
     };
-    const keyHandler = (e) => {
-      if (e.key === "Escape") onClose();
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setFocused((f2) => (f2 + 1) % actionItems.length);
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setFocused((f2) => (f2 - 1 + actionItems.length) % actionItems.length);
+      }
+      if (e.key === "Enter" && focused >= 0) {
+        actionItems[focused]?.item.action?.();
+        onClose();
+      }
     };
-    const t2 = setTimeout(() => document.addEventListener("mousedown", handler), 50);
-    document.addEventListener("keydown", keyHandler);
+    const t2 = setTimeout(() => document.addEventListener("mousedown", onDown), 60);
+    document.addEventListener("keydown", onKey);
     return () => {
       clearTimeout(t2);
-      document.removeEventListener("mousedown", handler);
-      document.removeEventListener("keydown", keyHandler);
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
     };
-  }, [onClose]);
-  const menuW = 200;
-  const menuH = items.length * 34;
-  const cx = Math.min(x2, window.innerWidth - menuW - 8);
-  const cy = Math.min(y2, window.innerHeight - menuH - 8);
+  }, [onClose, focused, actionItems]);
+  const menuW = 230;
+  const rows = items.filter((i) => !i.sep).length;
+  const menuH = rows * 34 + items.filter((i) => !!i.sep).length * 9 + 10;
+  const cx = Math.min(x2, window.innerWidth - menuW - 10);
+  const cy = Math.min(y2, window.innerHeight - menuH - 10);
+  let actionIdx = -1;
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     motion.div,
     {
       ref,
-      initial: { opacity: 0, scale: 0.93, y: -4 },
+      className: "fixed z-[9000]",
+      style: { left: cx, top: cy, minWidth: menuW },
+      initial: { opacity: 0, scale: 0.88, y: -8 },
       animate: { opacity: 1, scale: 1, y: 0 },
-      exit: { opacity: 0, scale: 0.93, y: -4 },
-      transition: { duration: 0.1 },
-      className: "fixed z-[9000] rounded-xl overflow-hidden py-1.5",
-      style: {
-        left: cx,
-        top: cy,
-        minWidth: menuW,
-        background: "rgba(16,22,34,0.97)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        backdropFilter: "blur(32px)",
-        boxShadow: "0 16px 48px rgba(0,0,0,0.75)"
-      },
-      children: items.map(
-        (item, i) => item.sep ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "my-1 mx-3 h-px", style: { background: "rgba(255,255,255,0.07)" } }, i) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "button",
-          {
-            onClick: () => {
-              item.action?.();
-              onClose();
-            },
-            className: "w-full flex items-center gap-2.5 px-3.5 py-1.5 text-sm text-left transition-colors",
-            style: {
-              color: item.danger ? "#f87171" : "rgba(255,255,255,0.8)",
-              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif'
-            },
-            onMouseEnter: (e) => {
-              e.currentTarget.style.background = item.danger ? "rgba(248,113,113,0.12)" : "rgba(0,212,255,0.12)";
-              e.currentTarget.style.color = item.danger ? "#fca5a5" : "#fff";
-            },
-            onMouseLeave: (e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = item.danger ? "#f87171" : "rgba(255,255,255,0.8)";
-            },
-            children: [
-              item.icon && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "w-4 h-4 flex items-center justify-center opacity-60", children: item.icon }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: item.label })
-            ]
+      exit: { opacity: 0, scale: 0.88, y: -8 },
+      transition: { type: "spring", stiffness: 520, damping: 30, mass: 0.5 },
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          style: {
+            background: "rgba(18,24,36,0.96)",
+            backdropFilter: "blur(48px) saturate(2)",
+            WebkitBackdropFilter: "blur(48px) saturate(2)",
+            border: "1px solid rgba(255,255,255,0.10)",
+            borderRadius: 14,
+            boxShadow: "0 24px 64px rgba(0,0,0,0.85), 0 0 0 0.5px rgba(255,255,255,0.04) inset, 0 1px 0 rgba(255,255,255,0.06) inset",
+            padding: "5px 0",
+            overflow: "hidden"
           },
-          i
-        )
+          children: items.map((item, i) => {
+            if (item.sep) {
+              return /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  style: {
+                    height: 1,
+                    margin: "4px 6px",
+                    background: "rgba(255,255,255,0.07)"
+                  }
+                },
+                i
+              );
+            }
+            actionIdx++;
+            const myIdx = actionIdx;
+            const isFocused = focused === myIdx;
+            return /* @__PURE__ */ jsxRuntimeExports.jsx(
+              ContextItem,
+              {
+                item,
+                isFocused,
+                onHover: () => setFocused(myIdx),
+                onLeave: () => setFocused(-1),
+                onClose
+              },
+              i
+            );
+          })
+        }
       )
+    }
+  );
+}
+function ContextItem({
+  item,
+  isFocused,
+  onHover,
+  onLeave,
+  onClose
+}) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    motion.button,
+    {
+      animate: {
+        background: isFocused ? item.danger ? "rgba(239,68,68,0.16)" : "var(--cryo-a12)" : "rgba(0,0,0,0)"
+      },
+      transition: { duration: 0.08 },
+      onClick: () => {
+        if (!item.disabled) {
+          item.action?.();
+          onClose();
+        }
+      },
+      onMouseEnter: onHover,
+      onMouseLeave: onLeave,
+      disabled: item.disabled,
+      className: "w-full flex items-center gap-2.5 px-3.5 text-sm text-left select-none",
+      style: {
+        height: 34,
+        color: item.danger ? isFocused ? "#fca5a5" : "#f87171" : isFocused ? "#ffffff" : "rgba(255,255,255,0.82)",
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+        fontWeight: 400,
+        cursor: item.disabled ? "default" : "pointer",
+        opacity: item.disabled ? 0.35 : 1,
+        transition: "color 0.08s",
+        border: "none",
+        borderRadius: 0
+      },
+      children: [
+        item.icon && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "span",
+          {
+            className: "w-4 h-4 flex items-center justify-center shrink-0",
+            style: { opacity: 0.65 },
+            children: item.icon
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "flex-1 truncate", children: item.label }),
+        item.shortcut && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "span",
+          {
+            style: {
+              fontSize: 11,
+              opacity: 0.38,
+              marginLeft: 8,
+              fontFamily: "-apple-system, sans-serif"
+            },
+            children: item.shortcut
+          }
+        )
+      ]
     }
   );
 }
@@ -16447,7 +16534,7 @@ function Desktop() {
   const { icons, wallpaper, removeIcon, moveIcon, addIcon, setWallpaper } = useDesktopStore();
   const { desktop: pinnedDesktop, unpinDesktop } = usePinnedStore();
   const [ctx, setCtx] = reactExports.useState(null);
-  const [appPicker, setAppPicker] = reactExports.useState(false);
+  const [appChooser, setAppChooser] = reactExports.useState(false);
   const handleBgCtx = reactExports.useCallback((e) => {
     if (e.target.closest("[data-desktop-icon]")) return;
     e.preventDefault();
@@ -16468,15 +16555,19 @@ function Desktop() {
     } catch {
     }
   }, [setWallpaper]);
+  const removeWallpaper = reactExports.useCallback(() => setWallpaper(""), [setWallpaper]);
   const bgItems = [
-    { label: "Add App to Desktop", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PlusIcon, {}), action: () => setAppPicker(true) },
-    { label: "Change Wallpaper", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ImageIcon, {}), action: pickWallpaper }
+    { label: "Add App to Desktop", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PlusIcon, {}), action: () => setAppChooser(true) },
+    { sep: true },
+    { label: "Change Wallpaper", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ImageIcon, {}), action: pickWallpaper },
+    ...wallpaper ? [{ label: "Remove Wallpaper", action: removeWallpaper }] : []
   ];
   const iconItems = (icon) => {
     const win = windows.find((w2) => w2.appId === icon.appId);
     return [
       {
         label: win ? "Focus Window" : "Open",
+        icon: win ? /* @__PURE__ */ jsxRuntimeExports.jsx(FocusIcon, {}) : /* @__PURE__ */ jsxRuntimeExports.jsx(OpenIcon, {}),
         action: () => {
           if (!win) openApp(icon.appId);
           else {
@@ -16486,153 +16577,146 @@ function Desktop() {
         }
       },
       { sep: true },
-      { label: "Remove from Desktop", danger: true, action: () => removeIcon(icon.id) }
+      { label: "Remove from Desktop", danger: true, icon: /* @__PURE__ */ jsxRuntimeExports.jsx(TrashIcon, {}), action: () => removeIcon(icon.id) }
     ];
   };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-    "div",
-    {
-      className: "absolute inset-0 select-none",
-      onContextMenu: handleBgCtx,
-      children: [
-        !wallpaper && /* @__PURE__ */ jsxRuntimeExports.jsx(
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute inset-0 select-none", onContextMenu: handleBgCtx, children: [
+    !wallpaper && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        className: "absolute inset-0 flex items-center justify-center pointer-events-none",
+        style: { opacity: 0.012 },
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
           "div",
           {
-            className: "absolute inset-0 flex items-center justify-center pointer-events-none",
-            style: { opacity: 0.014 },
-            children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "div",
-              {
-                className: "font-black",
-                style: {
-                  fontFamily: '"JetBrains Mono", monospace',
-                  fontSize: "22vw",
-                  color: "var(--cryo-accent)",
-                  letterSpacing: "0.08em"
-                },
-                children: "CG"
-              }
-            )
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          motion.div,
-          {
-            className: "absolute inset-0 flex flex-col items-center justify-center gap-3 pb-32 pointer-events-none",
-            animate: { opacity: hasWindows || icons.length > 0 ? 0 : 1 },
-            transition: { duration: 0.4 },
-            children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              motion.div,
-              {
-                initial: { opacity: 0, y: 12 },
-                animate: { opacity: 1, y: 0 },
-                transition: { delay: 0.8, duration: 0.6 },
-                className: "flex flex-col items-center gap-2",
-                children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(
-                    "div",
-                    {
-                      className: "text-sm font-medium",
-                      style: {
-                        color: "rgba(255,255,255,0.22)",
-                        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
-                        letterSpacing: "0.02em"
-                      },
-                      children: "Open an app from the dock · Right-click for options"
-                    }
-                  ),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(
-                    motion.div,
-                    {
-                      animate: { y: [0, 5, 0] },
-                      transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-                      children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "rgba(255,255,255,0.2)", strokeWidth: "2", strokeLinecap: "round", children: [
-                        /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "5", x2: "12", y2: "19" }),
-                        /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "19 12 12 19 5 12" })
-                      ] })
-                    }
-                  )
-                ]
-              }
-            )
-          }
-        ),
-        icons.map((icon) => {
-          const meta = APP_META[icon.appId];
-          if (!meta) return null;
-          const win = windows.find((w2) => w2.appId === icon.appId);
-          return /* @__PURE__ */ jsxRuntimeExports.jsx(
-            DesktopIconItem,
-            {
-              icon,
-              meta,
-              isOpen: !!win,
-              onContextMenu: handleIconCtx,
-              onMove: moveIcon,
-              onOpen: () => {
-                if (!win) openApp(icon.appId);
-                else {
-                  restoreWindow(win.id);
-                  focusWindow(win.id);
-                }
-              }
+            className: "font-black",
+            style: {
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: "22vw",
+              color: "var(--cryo-accent)",
+              letterSpacing: "0.08em"
             },
-            icon.id
-          );
-        }),
-        pinnedDesktop.map((app, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-          ExternalDesktopIcon,
-          {
-            app,
-            offsetIndex: icons.length + i,
-            onRemove: () => unpinDesktop(app.id)
-          },
-          app.id
-        )),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            children: "CG"
+          }
+        )
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        className: "absolute inset-0 flex flex-col items-center justify-center gap-3 pb-32 pointer-events-none",
+        animate: { opacity: hasWindows || icons.length > 0 || pinnedDesktop.length > 0 ? 0 : 1 },
+        transition: { duration: 0.5 },
+        children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
           motion.div,
           {
-            className: "absolute left-6 flex items-center gap-2 text-xs pointer-events-none",
-            style: { bottom: 88, color: "rgba(78,93,110,0.45)", fontFamily: '"JetBrains Mono", monospace' },
-            initial: { opacity: 0 },
-            animate: { opacity: 1 },
-            transition: { delay: 1.4, duration: 0.8 },
+            initial: { opacity: 0, y: 12 },
+            animate: { opacity: 1, y: 0 },
+            transition: { delay: 0.9, duration: 0.6 },
+            className: "flex flex-col items-center gap-2.5",
             children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx(
-                motion.span,
+                "div",
                 {
-                  className: "w-1.5 h-1.5 rounded-full inline-block",
-                  style: { background: "#00ff88", boxShadow: "0 0 6px rgba(0,255,136,0.8)" },
-                  animate: { opacity: [1, 0.3, 1] },
-                  transition: { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
+                  style: {
+                    fontSize: 13,
+                    color: "rgba(255,255,255,0.2)",
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+                    letterSpacing: "0.01em"
+                  },
+                  children: "Open an app from the dock · Right-click for options"
                 }
               ),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { letterSpacing: "0.1em", fontSize: 10 }, children: "ALL SYSTEMS OPERATIONAL" })
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                motion.div,
+                {
+                  animate: { y: [0, 5, 0] },
+                  transition: { duration: 2.2, repeat: Infinity, ease: "easeInOut" },
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "rgba(255,255,255,0.18)", strokeWidth: "2", strokeLinecap: "round", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "5", x2: "12", y2: "19" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "19 12 12 19 5 12" })
+                  ] })
+                }
+              )
             ]
           }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: ctx && /* @__PURE__ */ jsxRuntimeExports.jsx(
-          ContextMenu,
-          {
-            x: ctx.x,
-            y: ctx.y,
-            onClose: () => setCtx(null),
-            items: ctx.type === "bg" ? bgItems : iconItems({ id: ctx.iconId, appId: ctx.iconAppId })
-          }
-        ) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: appPicker && /* @__PURE__ */ jsxRuntimeExports.jsx(
-          AppPickerOverlay,
-          {
-            onClose: () => setAppPicker(false),
-            onPick: (appId) => {
-              addIcon(appId);
-              setAppPicker(false);
+        )
+      }
+    ),
+    icons.map((icon) => {
+      const meta = APP_META[icon.appId];
+      if (!meta) return null;
+      const win = windows.find((w2) => w2.appId === icon.appId);
+      return /* @__PURE__ */ jsxRuntimeExports.jsx(
+        DesktopIconItem,
+        {
+          icon,
+          meta,
+          isOpen: !!win,
+          onContextMenu: handleIconCtx,
+          onMove: moveIcon,
+          onOpen: () => {
+            if (!win) openApp(icon.appId);
+            else {
+              restoreWindow(win.id);
+              focusWindow(win.id);
             }
           }
-        ) })
-      ]
-    }
-  );
+        },
+        icon.id
+      );
+    }),
+    pinnedDesktop.map((app, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ExternalDesktopIcon,
+      {
+        app,
+        offsetIndex: icons.length + i,
+        onRemove: () => unpinDesktop(app.id)
+      },
+      app.id
+    )),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      motion.div,
+      {
+        className: "absolute left-5 flex items-center gap-2 pointer-events-none",
+        style: { bottom: 88, fontFamily: '"JetBrains Mono", monospace', fontSize: 9.5 },
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { delay: 1.5, duration: 0.8 },
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            motion.span,
+            {
+              className: "w-1.5 h-1.5 rounded-full",
+              style: { background: "#00ff88", boxShadow: "0 0 6px rgba(0,255,136,0.8)" },
+              animate: { opacity: [1, 0.3, 1] },
+              transition: { duration: 2.8, repeat: Infinity, ease: "easeInOut" }
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { color: "rgba(80,100,120,0.45)", letterSpacing: "0.1em" }, children: "ALL SYSTEMS OPERATIONAL" })
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: ctx && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ContextMenu,
+      {
+        x: ctx.x,
+        y: ctx.y,
+        onClose: () => setCtx(null),
+        items: ctx.type === "bg" ? bgItems : iconItems({ id: ctx.iconId, appId: ctx.iconAppId })
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: appChooser && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      AppChooserOverlay,
+      {
+        onClose: () => setAppChooser(false),
+        onPickInternal: (appId) => {
+          addIcon(appId);
+          setAppChooser(false);
+        }
+      }
+    ) })
+  ] });
 }
 function DesktopIconItem({ icon, meta, isOpen, onContextMenu, onMove, onOpen }) {
   const x2 = useMotionValue(icon.x);
@@ -16647,28 +16731,36 @@ function DesktopIconItem({ icon, meta, isOpen, onContextMenu, onMove, onOpen }) 
       "data-desktop-icon": true,
       drag: true,
       dragMomentum: false,
-      style: { position: "absolute", top: 0, left: 0, x: x2, y: y2, width: 72, touchAction: "none", zIndex: 10 },
-      onDragEnd: () => {
-        const nx = Math.max(0, Math.round(x2.get()));
-        const ny = Math.max(28, Math.round(y2.get()));
-        onMove(icon.id, nx, ny);
-      },
+      style: { position: "absolute", top: 0, left: 0, x: x2, y: y2, width: 76, touchAction: "none", zIndex: 10 },
+      onDragEnd: () => onMove(icon.id, Math.max(0, Math.round(x2.get())), Math.max(28, Math.round(y2.get()))),
       className: "flex flex-col items-center cursor-default",
       onContextMenu: (e) => onContextMenu(e, icon),
       onDoubleClick: onOpen,
-      whileTap: { scale: 0.9 },
+      whileTap: { scale: 0.88 },
+      initial: { opacity: 0, scale: 0.8 },
+      animate: { opacity: 1, scale: 1 },
+      transition: { type: "spring", stiffness: 440, damping: 22 },
       children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "div",
           {
-            className: "w-14 h-14 rounded-2xl flex items-center justify-center",
+            className: "w-[56px] h-[56px] rounded-[16px] flex items-center justify-center relative overflow-hidden",
             style: {
-              background: `radial-gradient(ellipse at 38% 28%, ${meta.color}28, rgba(8,12,20,0.88) 70%)`,
-              border: `1px solid ${isOpen ? `${meta.color}40` : "rgba(255,255,255,0.1)"}`,
-              boxShadow: isOpen ? `0 0 18px ${meta.color}20, 0 4px 16px rgba(0,0,0,0.55)` : "0 4px 16px rgba(0,0,0,0.5)",
+              background: `radial-gradient(ellipse at 38% 28%, ${meta.color}28, rgba(8,12,20,0.9) 70%)`,
+              border: `1px solid ${isOpen ? `${meta.color}45` : "rgba(255,255,255,0.1)"}`,
+              boxShadow: isOpen ? `0 0 18px ${meta.color}22, 0 4px 18px rgba(0,0,0,0.6)` : "0 4px 16px rgba(0,0,0,0.55)",
               backdropFilter: "blur(12px)"
             },
-            children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: meta.color }, children: meta.icon })
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  className: "absolute inset-0 pointer-events-none",
+                  style: { background: "linear-gradient(145deg, rgba(255,255,255,0.07) 0%, transparent 55%)" }
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: meta.color }, children: meta.icon })
+            ]
           }
         ),
         isOpen && /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -16681,15 +16773,14 @@ function DesktopIconItem({ icon, meta, isOpen, onContextMenu, onMove, onOpen }) 
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "div",
           {
-            className: "mt-1 text-center px-1 leading-tight",
+            className: "mt-1.5 text-center px-1 leading-snug",
             style: {
-              fontSize: 11,
-              color: "rgba(255,255,255,0.88)",
+              fontSize: 10.5,
+              color: "rgba(255,255,255,0.9)",
               fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
-              textShadow: "0 1px 5px rgba(0,0,0,0.95), 0 0 12px rgba(0,0,0,0.7)",
-              maxWidth: 72,
-              wordBreak: "break-word",
-              lineHeight: 1.2
+              textShadow: "0 1px 6px rgba(0,0,0,0.95)",
+              maxWidth: 76,
+              wordBreak: "break-word"
             },
             children: meta.label
           }
@@ -16698,15 +16789,17 @@ function DesktopIconItem({ icon, meta, isOpen, onContextMenu, onMove, onOpen }) 
     }
   );
 }
-function ExternalDesktopIcon({ app, offsetIndex, onRemove }) {
+function ExternalDesktopIcon({
+  app,
+  offsetIndex,
+  onRemove
+}) {
   const col = offsetIndex % 4;
   const row = Math.floor(offsetIndex / 4);
-  const defaultX = 24 + col * 104;
-  const defaultY = 36 + row * 110;
-  const [pos, setPos] = reactExports.useState({ x: defaultX, y: defaultY });
+  const [pos, setPos] = reactExports.useState({ x: 24 + col * 104, y: 36 + row * 110 });
   const mx = useMotionValue(pos.x);
   const my = useMotionValue(pos.y);
-  const [ctx, setCtx] = reactExports.useState(false);
+  const [ctxOpen, setCtxOpen] = reactExports.useState(false);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs(
       motion.div,
@@ -16714,179 +16807,360 @@ function ExternalDesktopIcon({ app, offsetIndex, onRemove }) {
         "data-desktop-icon": true,
         drag: true,
         dragMomentum: false,
-        style: { position: "absolute", top: 0, left: 0, x: mx, y: my, width: 72, touchAction: "none", zIndex: 10 },
+        style: { position: "absolute", top: 0, left: 0, x: mx, y: my, width: 76, touchAction: "none", zIndex: 10 },
         onDragEnd: () => setPos({ x: Math.max(0, Math.round(mx.get())), y: Math.max(28, Math.round(my.get())) }),
         className: "flex flex-col items-center cursor-default",
         onContextMenu: (e) => {
           e.preventDefault();
           e.stopPropagation();
-          setCtx(true);
+          setCtxOpen(true);
         },
         onDoubleClick: () => window.cryogram?.launcher?.launch(app),
-        whileTap: { scale: 0.9 },
+        whileTap: { scale: 0.88 },
+        initial: { opacity: 0, scale: 0.8 },
+        animate: { opacity: 1, scale: 1 },
+        transition: { type: "spring", stiffness: 440, damping: 22 },
         children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: "w-[56px] h-[56px] rounded-[16px] flex items-center justify-center relative overflow-hidden",
+              style: {
+                background: "radial-gradient(ellipse at 38% 28%, var(--cryo-a18), rgba(8,12,20,0.9) 70%)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.55)",
+                backdropFilter: "blur(12px)"
+              },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "div",
+                  {
+                    className: "absolute inset-0 pointer-events-none",
+                    style: { background: "linear-gradient(145deg, rgba(255,255,255,0.07) 0%, transparent 55%)" }
+                  }
+                ),
+                app.icon ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "img",
+                  {
+                    src: app.icon,
+                    alt: "",
+                    style: { width: 34, height: 34, objectFit: "contain" },
+                    onError: (e) => {
+                      e.target.style.display = "none";
+                    }
+                  }
+                ) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 26 }, children: "📦" })
+              ]
+            }
+          ),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             "div",
             {
-              className: "w-14 h-14 rounded-2xl flex items-center justify-center",
+              className: "mt-1.5 text-center px-1 leading-snug",
               style: {
-                background: "radial-gradient(ellipse at 38% 28%, var(--cryo-a18), rgba(8,12,20,0.88) 70%)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
-                backdropFilter: "blur(12px)"
+                fontSize: 10.5,
+                color: "rgba(255,255,255,0.9)",
+                fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+                textShadow: "0 1px 6px rgba(0,0,0,0.95)",
+                maxWidth: 76,
+                wordBreak: "break-word"
               },
-              children: app.icon ? /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "img",
-                {
-                  src: app.icon,
-                  alt: "",
-                  style: { width: 36, height: 36, objectFit: "contain" },
-                  onError: (e) => {
-                    e.target.style.display = "none";
-                  }
-                }
-              ) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 28 }, children: "🌐" })
+              children: app.name
             }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-1 text-center px-1 leading-tight", style: {
-            fontSize: 11,
-            color: "rgba(255,255,255,0.88)",
-            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
-            textShadow: "0 1px 5px rgba(0,0,0,0.95), 0 0 12px rgba(0,0,0,0.7)",
-            maxWidth: 72,
-            wordBreak: "break-word",
-            lineHeight: 1.2
-          }, children: app.name })
+          )
         ]
       }
     ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: ctx && /* @__PURE__ */ jsxRuntimeExports.jsx(
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: ctxOpen && /* @__PURE__ */ jsxRuntimeExports.jsx(
       ContextMenu,
       {
-        x: pos.x + 36,
-        y: pos.y + 40,
-        onClose: () => setCtx(false),
+        x: pos.x + 38,
+        y: pos.y + 44,
+        onClose: () => setCtxOpen(false),
         items: [
-          { label: `Open ${app.name}`, action: () => {
+          { label: `Open ${app.name}`, icon: /* @__PURE__ */ jsxRuntimeExports.jsx(OpenIcon, {}), action: () => {
             window.cryogram?.launcher?.launch(app);
-            setCtx(false);
           } },
           { sep: true },
-          { label: "Remove from Desktop", danger: true, action: () => {
-            onRemove();
-            setCtx(false);
-          } }
+          { label: "Remove from Desktop", danger: true, icon: /* @__PURE__ */ jsxRuntimeExports.jsx(TrashIcon, {}), action: onRemove }
         ]
       }
     ) })
   ] });
 }
-function AppPickerOverlay({ onClose, onPick }) {
-  const allAppIds = Object.keys(APP_META);
+function AppChooserOverlay({
+  onClose,
+  onPickInternal
+}) {
+  const [search, setSearch] = reactExports.useState("");
+  const [externalApps, setExternal] = reactExports.useState([]);
+  const [launching, setLaunching] = reactExports.useState(null);
   const existingIds = useDesktopStore((s) => s.icons.map((i) => i.appId));
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+  const searchRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    searchRef.current?.focus();
+    window.cryogram.launcher.getApps().then(setExternal).catch(() => {
+    });
+  }, []);
+  reactExports.useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  const internalApps = Object.entries(APP_META);
+  const lc2 = search.toLowerCase();
+  const filteredInternal = lc2 ? internalApps.filter(([, m2]) => m2.label.toLowerCase().includes(lc2)) : internalApps;
+  const filteredExternal = lc2 ? externalApps.filter((a) => a.name.toLowerCase().includes(lc2) || a.comment?.toLowerCase().includes(lc2)) : externalApps;
+  const launchExternal = async (app) => {
+    setLaunching(app.desktopFile);
+    try {
+      await window.cryogram.launcher.launch(app);
+    } catch {
+    }
+    setTimeout(() => setLaunching(null), 1500);
+    onClose();
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     motion.div,
     {
-      className: "absolute inset-0 flex items-center justify-center",
-      style: { background: "rgba(0,0,0,0.55)", backdropFilter: "blur(10px)", zIndex: 8e3 },
+      className: "absolute inset-0 flex flex-col items-center",
+      style: {
+        background: "rgba(5,8,15,0.88)",
+        backdropFilter: "blur(40px)",
+        zIndex: 8e3
+      },
       initial: { opacity: 0 },
       animate: { opacity: 1 },
       exit: { opacity: 0 },
-      onClick: onClose,
-      children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        motion.div,
-        {
-          className: "rounded-2xl p-6",
-          style: {
-            background: "rgba(8,14,24,0.98)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            boxShadow: "0 24px 80px rgba(0,0,0,0.85)",
-            minWidth: 380
-          },
-          initial: { scale: 0.9, opacity: 0 },
-          animate: { scale: 1, opacity: 1 },
-          exit: { scale: 0.9, opacity: 0 },
-          transition: { type: "spring", stiffness: 400, damping: 28 },
-          onClick: (e) => e.stopPropagation(),
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
+      transition: { duration: 0.22 },
+      onClick: (e) => {
+        if (e.target === e.currentTarget) onClose();
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          motion.div,
+          {
+            className: "mt-16 mb-8",
+            initial: { opacity: 0, y: -20 },
+            animate: { opacity: 1, y: 0 },
+            transition: { type: "spring", stiffness: 400, damping: 28, delay: 0.04 },
+            children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
               "div",
               {
-                className: "text-sm font-semibold mb-5",
-                style: { color: "rgba(255,255,255,0.65)", fontFamily: "-apple-system, sans-serif", letterSpacing: "0.01em" },
-                children: "Add App to Desktop"
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-4 gap-2.5", children: allAppIds.map((appId) => {
-              const meta = APP_META[appId];
-              const added = existingIds.includes(appId);
-              return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                "button",
-                {
-                  onClick: () => !added && onPick(appId),
-                  disabled: added,
-                  className: "flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all",
-                  style: {
-                    opacity: added ? 0.4 : 1,
-                    cursor: added ? "default" : "pointer",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.06)"
-                  },
-                  onMouseEnter: (e) => {
-                    if (!added) e.currentTarget.style.background = "var(--cryo-a08)";
-                  },
-                  onMouseLeave: (e) => {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                  },
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      "div",
-                      {
-                        className: "w-11 h-11 rounded-xl flex items-center justify-center",
-                        style: {
-                          background: `radial-gradient(ellipse at 38% 28%, ${meta.color}25, rgba(8,14,24,0.9) 70%)`,
-                          border: "1px solid rgba(255,255,255,0.08)"
-                        },
-                        children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: meta.color }, children: meta.icon })
-                      }
-                    ),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      "div",
-                      {
-                        className: "text-center leading-tight",
-                        style: { fontSize: 9.5, color: "rgba(255,255,255,0.55)", fontFamily: "-apple-system, sans-serif" },
-                        children: meta.label
-                      }
-                    ),
-                    added && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 8, color: "var(--cryo-a50)", fontFamily: "-apple-system, sans-serif" }, children: "Added" })
-                  ]
-                },
-                appId
-              );
-            }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-5 flex justify-end", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "button",
-              {
-                onClick: onClose,
-                className: "px-4 py-1.5 rounded-lg text-sm",
+                className: "flex items-center gap-3 px-4 py-2.5",
                 style: {
-                  background: "rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.55)",
-                  fontFamily: "-apple-system, sans-serif",
-                  border: "1px solid rgba(255,255,255,0.06)"
+                  background: "rgba(255,255,255,0.07)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: 14,
+                  width: 380,
+                  boxShadow: "0 4px 24px rgba(0,0,0,0.4)"
                 },
-                onMouseEnter: (e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.13)";
-                },
-                onMouseLeave: (e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-                },
-                children: "Done"
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "rgba(255,255,255,0.35)", strokeWidth: "2", strokeLinecap: "round", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "11", cy: "11", r: "8" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "input",
+                    {
+                      ref: searchRef,
+                      value: search,
+                      onChange: (e) => setSearch(e.target.value),
+                      placeholder: "Search apps…",
+                      className: "flex-1 bg-transparent outline-none",
+                      style: {
+                        color: "rgba(255,255,255,0.88)",
+                        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+                        fontSize: 15,
+                        caretColor: "var(--cryo-accent)"
+                      }
+                    }
+                  ),
+                  search && /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setSearch(""), style: { color: "rgba(255,255,255,0.3)", fontSize: 16, lineHeight: 1 }, children: "✕" })
+                ]
               }
-            ) })
-          ]
-        }
-      )
+            )
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto w-full px-8 pb-16", style: { maxWidth: 900 }, children: [
+          filteredInternal.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 16 },
+              animate: { opacity: 1, y: 0 },
+              transition: { type: "spring", stiffness: 380, damping: 28, delay: 0.07 },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "div",
+                  {
+                    className: "text-xs font-semibold mb-3 pl-1",
+                    style: {
+                      color: "rgba(255,255,255,0.28)",
+                      fontFamily: "-apple-system, sans-serif",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase"
+                    },
+                    children: "Cryogram Apps"
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-6 gap-3 mb-8", children: filteredInternal.map(([appId, meta]) => {
+                  const added = existingIds.includes(appId);
+                  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    AppTile,
+                    {
+                      label: meta.label,
+                      color: meta.color,
+                      icon: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: meta.color }, children: meta.icon }),
+                      added,
+                      onClick: () => {
+                        if (!added) onPickInternal(appId);
+                      },
+                      buttonLabel: added ? "Added" : "Add to Desktop"
+                    },
+                    appId
+                  );
+                }) })
+              ]
+            }
+          ),
+          filteredExternal.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 16 },
+              animate: { opacity: 1, y: 0 },
+              transition: { type: "spring", stiffness: 380, damping: 28, delay: 0.12 },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "div",
+                  {
+                    className: "text-xs font-semibold mb-3 pl-1",
+                    style: {
+                      color: "rgba(255,255,255,0.28)",
+                      fontFamily: "-apple-system, sans-serif",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase"
+                    },
+                    children: "Installed Apps"
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid grid-cols-6 gap-3", children: filteredExternal.map((app) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  AppTile,
+                  {
+                    label: app.name,
+                    color: "var(--cryo-accent)",
+                    icon: app.icon ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "img",
+                      {
+                        src: app.icon,
+                        alt: "",
+                        style: { width: 32, height: 32, objectFit: "contain" },
+                        onError: (e) => {
+                          e.target.style.display = "none";
+                        }
+                      }
+                    ) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 26 }, children: "📦" }),
+                    added: false,
+                    onClick: () => launchExternal(app),
+                    buttonLabel: launching === app.desktopFile ? "Launching…" : "Launch"
+                  },
+                  app.desktopFile
+                )) })
+              ]
+            }
+          ),
+          filteredInternal.length === 0 && filteredExternal.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: "text-center mt-20",
+              style: { color: "rgba(255,255,255,0.25)", fontFamily: "-apple-system, sans-serif", fontSize: 14 },
+              children: [
+                'No apps found for "',
+                search,
+                '"'
+              ]
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            className: "mb-6",
+            style: { fontSize: 11, color: "rgba(255,255,255,0.18)", fontFamily: "-apple-system, sans-serif" },
+            children: "Press Esc or click outside to dismiss"
+          }
+        )
+      ]
+    }
+  );
+}
+function AppTile({
+  label,
+  color: color2,
+  icon,
+  added,
+  onClick,
+  buttonLabel
+}) {
+  const [hov, setHov] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    motion.button,
+    {
+      onClick,
+      disabled: added,
+      className: "flex flex-col items-center gap-2 p-3 rounded-2xl",
+      style: {
+        background: hov && !added ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)",
+        border: hov && !added ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(255,255,255,0.05)",
+        cursor: added ? "default" : "pointer",
+        opacity: added ? 0.45 : 1,
+        transition: "background 0.12s, border-color 0.12s"
+      },
+      onMouseEnter: () => setHov(true),
+      onMouseLeave: () => setHov(false),
+      whileTap: !added ? { scale: 0.9 } : {},
+      transition: { type: "spring", stiffness: 500, damping: 24 },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "div",
+          {
+            className: "w-14 h-14 rounded-[16px] flex items-center justify-center relative overflow-hidden",
+            style: {
+              background: `radial-gradient(ellipse at 38% 28%, ${color2 === "var(--cryo-accent)" ? "rgba(0,212,255,0.18)" : color2 + "25"}, rgba(8,12,20,0.92) 70%)`,
+              border: `1px solid rgba(255,255,255,${hov ? "0.14" : "0.07"})`,
+              boxShadow: hov ? `0 0 20px ${color2 === "var(--cryo-accent)" ? "rgba(0,212,255,0.15)" : color2 + "20"}` : "none",
+              transition: "box-shadow 0.15s, border-color 0.15s"
+            },
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  className: "absolute inset-0 pointer-events-none",
+                  style: { background: "linear-gradient(145deg, rgba(255,255,255,0.07) 0%, transparent 55%)" }
+                }
+              ),
+              icon
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            style: {
+              fontSize: 10,
+              color: "rgba(255,255,255,0.72)",
+              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+              textAlign: "center",
+              lineHeight: 1.3,
+              maxWidth: 80,
+              wordBreak: "break-word"
+            },
+            children: label
+          }
+        ),
+        added && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 9, color: "var(--cryo-a50)", fontFamily: "-apple-system, sans-serif" }, children: buttonLabel })
+      ]
     }
   );
 }
@@ -16901,6 +17175,27 @@ function ImageIcon() {
     /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "3", width: "18", height: "18", rx: "2" }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "8.5", cy: "8.5", r: "1.5" }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "21 15 16 10 5 21" })
+  ] });
+}
+function OpenIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "13", height: "13", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "15 3 21 3 21 9" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "10", y1: "14", x2: "21", y2: "3" })
+  ] });
+}
+function FocusIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "13", height: "13", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 2v4M12 18v4M2 12h4M18 12h4" })
+  ] });
+}
+function TrashIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "13", height: "13", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "3 6 5 6 21 6" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M10 11v6M14 11v6" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" })
   ] });
 }
 const scriptRel = function detectScriptRel() {
@@ -16978,14 +17273,14 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-Cb2nKcsy.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-CWJGem2X.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-hk93x0CC.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-BCeXVGGC.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-B3-Xq0qy.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-BWSIVxrY.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-CwwRJ_YK.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-BKxWuh66.js"), true ? [] : void 0, import.meta.url));
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-BB8DNeJe.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-CirRS994.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-DAH5eOj_.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-CUDEEe9_.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-B4grtnzK.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-C38NQzHQ.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-CXUnZ00d.js"), true ? [] : void 0, import.meta.url));
+const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-wwhF2qPD.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -17004,7 +17299,7 @@ function AppContent({ appId }) {
         motion.div,
         {
           className: "w-5 h-5 rounded-full border-2",
-          style: { borderColor: "rgba(0,212,255,0.35)", borderTopColor: "#00d4ff" },
+          style: { borderColor: "rgba(255,255,255,0.1)", borderTopColor: "var(--cryo-accent)" },
           animate: { rotate: 360 },
           transition: { duration: 0.8, repeat: Infinity, ease: "linear" }
         }
@@ -17025,7 +17320,8 @@ function AppContent({ appId }) {
 function AppWindow({ window: win }) {
   const { closeWindow, focusWindow, moveWindow, minimizeWindow, toggleMaximize } = useWindowStore();
   const dragRef = reactExports.useRef(null);
-  const accent = APP_COLORS$1[win.appId] ?? "#00d4ff";
+  const [titleHovered, setTitleHovered] = reactExports.useState(false);
+  const accent = APP_COLORS$1[win.appId] ?? "var(--cryo-accent)";
   const onTitleBarMouseDown = reactExports.useCallback(
     (e) => {
       if (e.button !== 0 || win.maximized) return;
@@ -17049,8 +17345,8 @@ function AppWindow({ window: win }) {
     },
     [win.id, win.x, win.y, win.maximized, focusWindow, moveWindow]
   );
-  if (win.minimized) return null;
   const radius = win.maximized ? 0 : 12;
+  const minimizeAnim = win.minimized ? { opacity: 0, scale: 0.55, y: 140, filter: "blur(8px)" } : { opacity: 1, scale: 1, y: 0, filter: "blur(0px)" };
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     motion.div,
     {
@@ -17062,25 +17358,25 @@ function AppWindow({ window: win }) {
         height: win.height,
         zIndex: win.zIndex,
         borderRadius: radius,
-        background: "rgba(10,15,24,0.93)",
-        backdropFilter: "blur(24px)",
-        border: win.maximized ? "none" : win.focused ? `1px solid ${accent}44` : "1px solid rgba(26,40,64,0.7)",
-        boxShadow: win.maximized ? "none" : win.focused ? `0 0 0 1px ${accent}18, 0 24px 64px rgba(0,0,0,0.85)` : "0 8px 32px rgba(0,0,0,0.7)",
-        transition: "border-color 0.15s, box-shadow 0.15s"
+        background: "rgba(10,14,22,0.94)",
+        backdropFilter: "blur(32px) saturate(1.6)",
+        WebkitBackdropFilter: "blur(32px) saturate(1.6)",
+        border: win.maximized ? "none" : win.focused ? `1px solid ${accent}50` : "1px solid rgba(255,255,255,0.07)",
+        boxShadow: win.maximized ? "none" : win.focused ? `0 0 0 1px ${accent}14, 0 28px 72px rgba(0,0,0,0.9), 0 4px 16px rgba(0,0,0,0.5)` : "0 8px 40px rgba(0,0,0,0.7)",
+        pointerEvents: win.minimized ? "none" : void 0,
+        transition: "border-color 0.15s, box-shadow 0.2s"
       },
-      initial: { opacity: 0, scale: 0.94, y: 10 },
+      initial: { opacity: 0, scale: 0.9, y: 20, filter: "blur(4px)" },
       animate: {
-        opacity: 1,
-        scale: 1,
-        y: 0,
+        ...minimizeAnim,
         borderRadius: radius,
         left: win.x,
         top: win.y,
         width: win.width,
         height: win.height
       },
-      exit: { opacity: 0, scale: 0.92, y: 6 },
-      transition: { type: "spring", stiffness: 380, damping: 28 },
+      exit: { opacity: 0, scale: 0.86, y: -12, filter: "blur(6px)" },
+      transition: win.minimized ? { type: "spring", stiffness: 340, damping: 26 } : { type: "spring", stiffness: 420, damping: 24 },
       onMouseDown: () => focusWindow(win.id),
       children: [
         !win.maximized && /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -17088,8 +17384,8 @@ function AppWindow({ window: win }) {
           {
             className: "absolute inset-x-0 top-0 h-px pointer-events-none",
             style: {
-              background: win.focused ? `linear-gradient(90deg, transparent, ${accent}70, transparent)` : "transparent",
-              transition: "background 0.25s"
+              background: win.focused ? `linear-gradient(90deg, transparent 5%, ${accent}80 40%, ${accent}80 60%, transparent 95%)` : "transparent",
+              transition: "background 0.3s"
             }
           }
         ),
@@ -17098,46 +17394,79 @@ function AppWindow({ window: win }) {
           {
             className: "flex items-center h-10 px-3 shrink-0 select-none relative",
             style: {
-              background: win.focused ? "rgba(14,20,32,0.9)" : "rgba(10,15,24,0.75)",
-              borderBottom: "1px solid rgba(255,255,255,0.05)",
+              background: win.focused ? "rgba(16,22,34,0.92)" : "rgba(11,16,26,0.8)",
+              borderBottom: "1px solid rgba(255,255,255,0.055)",
               cursor: win.maximized ? "default" : "move"
             },
             onMouseDown: onTitleBarMouseDown,
             onDoubleClick: () => toggleMaximize(win.id),
+            onMouseEnter: () => setTitleHovered(true),
+            onMouseLeave: () => setTitleHovered(false),
             children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1.5 shrink-0", onMouseDown: (e) => e.stopPropagation(), children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(TrafficLight, { color: "#ff5f57", title: "Close", onClick: () => closeWindow(win.id) }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(TrafficLight, { color: "#ffbd2e", title: "Minimize", onClick: () => minimizeWindow(win.id) }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  TrafficLight,
-                  {
-                    color: "#28c840",
-                    title: win.maximized ? "Restore" : "Maximize",
-                    onClick: () => toggleMaximize(win.id)
-                  }
-                )
-              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "div",
+                {
+                  className: "flex items-center gap-1.5 shrink-0 z-10",
+                  onMouseDown: (e) => e.stopPropagation(),
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      TrafficLight,
+                      {
+                        color: "#ff5f57",
+                        hoverColor: "#ff3b30",
+                        symbol: "✕",
+                        shown: titleHovered,
+                        title: "Close",
+                        onClick: () => closeWindow(win.id)
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      TrafficLight,
+                      {
+                        color: "#ffbd2e",
+                        hoverColor: "#ff9500",
+                        symbol: "–",
+                        shown: titleHovered,
+                        title: "Minimize",
+                        onClick: () => minimizeWindow(win.id)
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      TrafficLight,
+                      {
+                        color: "#28c840",
+                        hoverColor: "#34c759",
+                        symbol: win.maximized ? "⤡" : "⤢",
+                        shown: titleHovered,
+                        title: win.maximized ? "Restore" : "Maximize",
+                        onClick: () => toggleMaximize(win.id)
+                      }
+                    )
+                  ]
+                }
+              ),
               /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 flex items-center justify-center pointer-events-none", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
                 "span",
                 {
-                  className: "text-xs font-medium truncate max-w-[60%]",
+                  className: "text-xs font-medium truncate max-w-[55%]",
                   style: {
-                    color: win.focused ? "rgba(255,255,255,0.48)" : "rgba(255,255,255,0.22)",
+                    color: win.focused ? "rgba(255,255,255,0.52)" : "rgba(255,255,255,0.22)",
                     letterSpacing: "0.02em",
                     fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif'
                   },
                   children: win.title
                 }
               ) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "ml-auto shrink-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "div",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "ml-auto shrink-0 z-10", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                motion.div,
                 {
-                  className: "w-1.5 h-1.5 rounded-full transition-all duration-300",
-                  style: {
+                  className: "w-1.5 h-1.5 rounded-full",
+                  animate: {
                     background: accent,
-                    boxShadow: win.focused ? `0 0 6px ${accent}` : "none",
-                    opacity: win.focused ? 1 : 0.22
-                  }
+                    boxShadow: win.focused ? `0 0 8px ${accent}` : "none",
+                    opacity: win.focused ? 1 : 0.2
+                  },
+                  transition: { duration: 0.2 }
                 }
               ) })
             ]
@@ -17150,46 +17479,94 @@ function AppWindow({ window: win }) {
     win.id
   );
 }
-function TrafficLight({ color: color2, title, onClick }) {
+function TrafficLight({
+  color: color2,
+  hoverColor,
+  symbol,
+  shown,
+  title,
+  onClick
+}) {
+  const [hov, setHov] = reactExports.useState(false);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     motion.button,
     {
       onClick,
       title,
-      className: "w-3 h-3 rounded-full",
-      style: { background: color2, opacity: 0.85 },
-      whileHover: { scale: 1.22, opacity: 1 },
-      whileTap: { scale: 0.8 }
+      className: "w-3 h-3 rounded-full flex items-center justify-center",
+      style: { background: hov ? hoverColor : color2 },
+      animate: { scale: hov ? 1.15 : 1 },
+      transition: { type: "spring", stiffness: 600, damping: 24 },
+      whileTap: { scale: 0.78 },
+      onMouseEnter: () => setHov(true),
+      onMouseLeave: () => setHov(false),
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        motion.span,
+        {
+          animate: { opacity: shown ? 1 : 0 },
+          transition: { duration: 0.12 },
+          style: {
+            fontSize: 7,
+            lineHeight: 1,
+            color: "rgba(0,0,0,0.75)",
+            fontWeight: 700,
+            pointerEvents: "none",
+            userSelect: "none"
+          },
+          children: symbol
+        }
+      )
     }
   );
 }
-function ResizeHandle({ winId, winWidth, winHeight }) {
+function ResizeHandle({
+  winId,
+  winWidth,
+  winHeight
+}) {
   const resizeWindow2 = useWindowStore((s) => s.resizeWindow);
   const ref = reactExports.useRef(null);
-  const onMouseDown = reactExports.useCallback((e) => {
-    e.stopPropagation();
-    ref.current = { sx: e.clientX, sy: e.clientY, w: winWidth, h: winHeight };
-    const onMove = (ev) => {
-      if (!ref.current) return;
-      resizeWindow2(winId, Math.max(400, ref.current.w + ev.clientX - ref.current.sx), Math.max(300, ref.current.h + ev.clientY - ref.current.sy));
-    };
-    const onUp = () => {
-      ref.current = null;
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-  }, [winId, winWidth, winHeight, resizeWindow2]);
+  const onMouseDown = reactExports.useCallback(
+    (e) => {
+      e.stopPropagation();
+      ref.current = { sx: e.clientX, sy: e.clientY, w: winWidth, h: winHeight };
+      const onMove = (ev) => {
+        if (!ref.current) return;
+        resizeWindow2(
+          winId,
+          Math.max(400, ref.current.w + ev.clientX - ref.current.sx),
+          Math.max(300, ref.current.h + ev.clientY - ref.current.sy)
+        );
+      };
+      const onUp = () => {
+        ref.current = null;
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+      };
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    },
+    [winId, winWidth, winHeight, resizeWindow2]
+  );
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
     "div",
     {
       className: "absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-10",
       onMouseDown,
-      children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "10", height: "10", viewBox: "0 0 10 10", className: "absolute bottom-1 right-1", style: { opacity: 0.2 }, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "10", y1: "2", x2: "2", y2: "10", stroke: "white", strokeWidth: "1.2", strokeLinecap: "round" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "10", y1: "6", x2: "6", y2: "10", stroke: "white", strokeWidth: "1.2", strokeLinecap: "round" })
-      ] })
+      children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "svg",
+        {
+          width: "10",
+          height: "10",
+          viewBox: "0 0 10 10",
+          className: "absolute bottom-1 right-1",
+          style: { opacity: 0.18 },
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "10", y1: "2", x2: "2", y2: "10", stroke: "white", strokeWidth: "1.2", strokeLinecap: "round" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "10", y1: "6", x2: "6", y2: "10", stroke: "white", strokeWidth: "1.2", strokeLinecap: "round" })
+          ]
+        }
+      )
     }
   );
 }
@@ -18241,15 +18618,15 @@ function AnimatedBackground() {
 }
 const STEPS = [
   { text: "Initializing secure kernel modules…", ms: 0 },
-  { text: "Mounting encrypted workspace…", ms: 340 },
-  { text: "Starting PTY subsystem…", ms: 640 },
-  { text: "Loading breach intelligence engine…", ms: 920 },
-  { text: "Calibrating network interfaces…", ms: 1180 },
-  { text: "All systems nominal — welcome back.", ms: 1420 }
+  { text: "Mounting encrypted workspace…", ms: 320 },
+  { text: "Starting PTY subsystem…", ms: 600 },
+  { text: "Loading breach intelligence engine…", ms: 860 },
+  { text: "Calibrating network interfaces…", ms: 1100 },
+  { text: "All systems nominal — welcome back.", ms: 1320 }
 ];
 function BootSplash({ onDone }) {
   const [phase, setPhase] = reactExports.useState("scan");
-  const [visibleSteps, setVisibleSteps] = reactExports.useState(0);
+  const [visibleSteps, setVisible] = reactExports.useState(0);
   const [progress2, setProgress] = reactExports.useState(0);
   const canvasRef = reactExports.useRef(null);
   const rafRef = reactExports.useRef(0);
@@ -18258,21 +18635,24 @@ function BootSplash({ onDone }) {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const cols = Math.floor(canvas.width / 18);
-    const drops = Array(cols).fill(1).map(() => Math.random() * -canvas.height / 18);
-    const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノ";
+    const resize2 = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize2();
+    const cols = Math.floor(canvas.width / 22);
+    const drops = Array(cols).fill(1).map(() => Math.random() * -canvas.height / 22);
+    const chars = "01アイウエオカキクケコサシスセソ";
     const draw = () => {
-      ctx.fillStyle = "rgba(7,11,17,0.18)";
+      ctx.fillStyle = "rgba(6,10,16,0.22)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.font = '13px "JetBrains Mono", monospace';
+      ctx.font = '12px "JetBrains Mono", monospace';
       drops.forEach((y2, i) => {
-        const char = chars[Math.floor(Math.random() * chars.length)];
-        const alpha2 = Math.random() > 0.92 ? 0.9 : 0.18;
+        const ch2 = chars[Math.floor(Math.random() * chars.length)];
+        const alpha2 = Math.random() > 0.93 ? 0.65 : 0.1;
         ctx.fillStyle = `rgba(0,212,255,${alpha2})`;
-        ctx.fillText(char, i * 18, y2 * 18);
-        if (y2 * 18 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        ctx.fillText(ch2, i * 22, y2 * 22);
+        if (y2 * 22 > canvas.height && Math.random() > 0.977) drops[i] = 0;
         else drops[i] = y2 + 1;
       });
       rafRef.current = requestAnimationFrame(draw);
@@ -18281,64 +18661,66 @@ function BootSplash({ onDone }) {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
   reactExports.useEffect(() => {
-    const t1 = setTimeout(() => setPhase("logo"), 600);
-    const t2 = setTimeout(() => setPhase("boot"), 1200);
+    const t1 = setTimeout(() => setPhase("logo"), 500);
+    const t2 = setTimeout(() => setPhase("boot"), 1100);
     STEPS.forEach((step, i) => {
       setTimeout(() => {
-        setVisibleSteps(i + 1);
+        setVisible(i + 1);
         setProgress(Math.round((i + 1) / STEPS.length * 100));
-      }, 1200 + step.ms);
+      }, 1100 + step.ms);
     });
     const lastMs = STEPS[STEPS.length - 1].ms;
-    const t3 = setTimeout(() => setPhase("exit"), 1200 + lastMs + 600);
-    const t4 = setTimeout(onDone, 1200 + lastMs + 1200);
+    const t3 = setTimeout(() => setPhase("exit"), 1100 + lastMs + 500);
+    const t4 = setTimeout(onDone, 1100 + lastMs + 1100);
     return () => [t1, t2, t3, t4].forEach(clearTimeout);
   }, [onDone]);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     motion.div,
     {
       className: "fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden",
-      style: { background: "#070b11" },
-      animate: phase === "exit" ? { opacity: 0, scale: 1.04 } : { opacity: 1, scale: 1 },
-      transition: { duration: 0.7, ease: [0.4, 0, 0.2, 1] },
+      style: { background: "#060a10" },
+      animate: phase === "exit" ? { opacity: 0, scale: 1.03 } : { opacity: 1, scale: 1 },
+      transition: { duration: 0.65, ease: [0.4, 0, 0.2, 1] },
       children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("canvas", { ref: canvasRef, className: "absolute inset-0 pointer-events-none", style: { opacity: 0.5 } }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("canvas", { ref: canvasRef, className: "absolute inset-0 pointer-events-none", style: { opacity: 0.38 } }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "div",
           {
             className: "absolute inset-0 pointer-events-none",
-            style: {
-              background: "radial-gradient(ellipse 55% 45% at 50% 50%, rgba(0,212,255,0.07) 0%, transparent 70%)"
-            }
+            style: { background: "radial-gradient(ellipse 60% 50% at 50% 52%, rgba(0,212,255,0.055) 0%, transparent 70%)" }
           }
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: phase === "scan" && /* @__PURE__ */ jsxRuntimeExports.jsx(
           motion.div,
           {
             className: "absolute left-0 right-0 pointer-events-none",
-            style: { height: 2, background: "linear-gradient(90deg, transparent 5%, rgba(0,212,255,0.8) 40%, rgba(0,255,136,0.9) 50%, rgba(0,212,255,0.8) 60%, transparent 95%)" },
-            initial: { top: 0, opacity: 0 },
+            style: {
+              height: 1.5,
+              background: "linear-gradient(90deg, transparent 8%, rgba(0,212,255,0.9) 38%, rgba(0,255,136,1) 50%, rgba(0,212,255,0.9) 62%, transparent 92%)",
+              boxShadow: "0 0 20px rgba(0,212,255,0.7)"
+            },
+            initial: { top: "0%", opacity: 0 },
             animate: { top: "100%", opacity: [0, 1, 1, 0] },
-            transition: { duration: 0.55, ease: "linear" }
+            transition: { duration: 0.48, ease: "linear" }
           }
         ) }),
         ["tl", "tr", "bl", "br"].map((corner, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
           motion.div,
           {
-            className: "absolute w-10 h-10 pointer-events-none",
+            className: "absolute w-8 h-8 pointer-events-none",
             style: {
-              top: corner.startsWith("t") ? 24 : void 0,
-              bottom: corner.startsWith("b") ? 24 : void 0,
-              left: corner.endsWith("l") ? 24 : void 0,
-              right: corner.endsWith("r") ? 24 : void 0,
-              borderTop: corner.startsWith("t") ? "1.5px solid rgba(0,212,255,0.35)" : void 0,
-              borderBottom: corner.startsWith("b") ? "1.5px solid rgba(0,212,255,0.35)" : void 0,
-              borderLeft: corner.endsWith("l") ? "1.5px solid rgba(0,212,255,0.35)" : void 0,
-              borderRight: corner.endsWith("r") ? "1.5px solid rgba(0,212,255,0.35)" : void 0
+              top: corner.startsWith("t") ? 28 : void 0,
+              bottom: corner.startsWith("b") ? 28 : void 0,
+              left: corner.endsWith("l") ? 28 : void 0,
+              right: corner.endsWith("r") ? 28 : void 0,
+              borderTop: corner.startsWith("t") ? "1px solid rgba(0,212,255,0.28)" : void 0,
+              borderBottom: corner.startsWith("b") ? "1px solid rgba(0,212,255,0.28)" : void 0,
+              borderLeft: corner.endsWith("l") ? "1px solid rgba(0,212,255,0.28)" : void 0,
+              borderRight: corner.endsWith("r") ? "1px solid rgba(0,212,255,0.28)" : void 0
             },
-            initial: { opacity: 0, scale: 0.6 },
+            initial: { opacity: 0, scale: 0.5 },
             animate: { opacity: 1, scale: 1 },
-            transition: { delay: 0.5 + i * 0.06, duration: 0.35 }
+            transition: { delay: 0.45 + i * 0.05, duration: 0.3, ease: [0.34, 1.4, 0.64, 1] }
           },
           corner
         )),
@@ -18346,50 +18728,62 @@ function BootSplash({ onDone }) {
           motion.div,
           {
             className: "flex flex-col items-center mb-10",
-            initial: { opacity: 0, y: 16, scale: 0.88 },
+            initial: { opacity: 0, y: 20, scale: 0.85 },
             animate: { opacity: 1, y: 0, scale: 1 },
-            transition: { duration: 0.55, ease: [0.34, 1.4, 0.64, 1] },
+            transition: { duration: 0.5, ease: [0.34, 1.3, 0.64, 1] },
             children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative mb-5", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative mb-6", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
                   motion.div,
                   {
-                    className: "w-20 h-20 flex items-center justify-center",
+                    className: "w-[88px] h-[88px] flex items-center justify-center",
                     style: {
-                      background: "rgba(0,212,255,0.05)",
-                      border: "1.5px solid rgba(0,212,255,0.3)",
-                      borderRadius: 18,
-                      boxShadow: "0 0 40px rgba(0,212,255,0.1), inset 0 0 20px rgba(0,212,255,0.04)"
+                      background: "radial-gradient(circle at 38% 32%, rgba(0,212,255,0.12) 0%, rgba(0,212,255,0.03) 60%, transparent 100%)",
+                      border: "1px solid rgba(0,212,255,0.28)",
+                      borderRadius: 24,
+                      boxShadow: "0 0 48px rgba(0,212,255,0.08), inset 0 1px 0 rgba(0,212,255,0.15)"
                     },
-                    children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "38", height: "38", viewBox: "0 0 24 24", fill: "none", stroke: "#00d4ff", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z" }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "9 12 11 14 15 10" })
-                    ] })
+                    animate: { boxShadow: ["0 0 30px rgba(0,212,255,0.08)", "0 0 55px rgba(0,212,255,0.16)", "0 0 30px rgba(0,212,255,0.08)"] },
+                    transition: { duration: 2.4, repeat: Infinity, ease: "easeInOut" },
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(
+                        "div",
+                        {
+                          className: "absolute inset-0 rounded-[23px] pointer-events-none",
+                          style: { background: "linear-gradient(145deg, rgba(255,255,255,0.07) 0%, transparent 60%)" }
+                        }
+                      ),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "40", height: "40", viewBox: "0 0 24 24", fill: "none", stroke: "#00d4ff", strokeWidth: "1.4", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "9 12 11 14 15 10" })
+                      ] })
+                    ]
                   }
                 ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                [1, 1.35].map((scale2, ri2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
                   motion.div,
                   {
-                    className: "absolute inset-0 rounded-[18px]",
-                    style: { border: "1px solid rgba(0,212,255,0.5)" },
-                    animate: { scale: [1, 1.18, 1], opacity: [0.5, 0, 0.5] },
-                    transition: { duration: 2.2, repeat: Infinity, ease: "easeInOut" }
-                  }
-                )
+                    className: "absolute inset-0 rounded-[24px] pointer-events-none",
+                    style: { border: "1px solid rgba(0,212,255,0.35)" },
+                    animate: { scale: [1, scale2], opacity: [0.4, 0] },
+                    transition: { duration: 2.2, delay: ri2 * 0.7, repeat: Infinity, ease: "easeOut" }
+                  },
+                  ri2
+                ))
               ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex overflow-hidden mb-1", children: "CRYOGRAM".split("").map((ch2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex mb-2", style: { gap: 2 }, children: "CRYOGRAM".split("").map((ch2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
                 motion.span,
                 {
-                  initial: { opacity: 0, y: 20 },
+                  initial: { opacity: 0, y: 18 },
                   animate: { opacity: 1, y: 0 },
-                  transition: { delay: i * 0.055, duration: 0.35, ease: [0.2, 0, 0, 1] },
-                  className: "font-black",
+                  transition: { delay: i * 0.048, duration: 0.32, ease: [0.2, 0, 0, 1] },
                   style: {
                     fontFamily: '"JetBrains Mono", monospace',
-                    fontSize: 42,
-                    color: "#00d4ff",
-                    textShadow: "0 0 24px rgba(0,212,255,0.55), 0 0 60px rgba(0,212,255,0.18)",
-                    letterSpacing: "0.22em",
+                    fontSize: 44,
+                    fontWeight: 900,
+                    color: "var(--cryo-accent, #00d4ff)",
+                    textShadow: "0 0 22px rgba(0,212,255,0.5), 0 0 60px rgba(0,212,255,0.14)",
+                    letterSpacing: "0.18em",
                     lineHeight: 1
                   },
                   children: ch2
@@ -18401,9 +18795,14 @@ function BootSplash({ onDone }) {
                 {
                   initial: { opacity: 0 },
                   animate: { opacity: 1 },
-                  transition: { delay: 0.6, duration: 0.5 },
-                  className: "text-xs tracking-[0.5em] uppercase",
-                  style: { color: "rgba(0,212,255,0.42)" },
+                  transition: { delay: 0.55, duration: 0.5 },
+                  style: {
+                    fontSize: 11,
+                    letterSpacing: "0.45em",
+                    textTransform: "uppercase",
+                    color: "rgba(0,212,255,0.36)",
+                    fontFamily: '"JetBrains Mono", monospace'
+                  },
                   children: "Security Operations Platform"
                 }
               )
@@ -18413,42 +18812,33 @@ function BootSplash({ onDone }) {
         /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: (phase === "boot" || phase === "exit") && /* @__PURE__ */ jsxRuntimeExports.jsxs(
           motion.div,
           {
-            className: "flex flex-col items-center gap-4 w-80",
-            initial: { opacity: 0, y: 10 },
+            className: "flex flex-col items-center gap-4 w-72",
+            initial: { opacity: 0, y: 12 },
             animate: { opacity: 1, y: 0 },
-            transition: { duration: 0.4 },
+            exit: { opacity: 0 },
+            transition: { duration: 0.35 },
             children: [
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  "div",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-[2px] rounded-full overflow-hidden", style: { background: "rgba(0,212,255,0.08)" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  motion.div,
                   {
-                    className: "h-0.5 rounded-full overflow-hidden",
-                    style: { background: "rgba(26,40,64,0.7)" },
+                    className: "h-full rounded-full relative",
+                    style: { background: "linear-gradient(90deg, #00d4ff 0%, #00ff88 100%)", boxShadow: "0 0 10px rgba(0,212,255,0.9)" },
+                    initial: { width: "0%" },
+                    animate: { width: `${progress2}%` },
+                    transition: { ease: [0.4, 0, 0.2, 1], duration: 0.28 },
                     children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      motion.div,
+                      "div",
                       {
-                        className: "h-full rounded-full relative",
-                        style: {
-                          background: "linear-gradient(90deg, #00d4ff, #bb88ff)",
-                          boxShadow: "0 0 8px rgba(0,212,255,0.8)"
-                        },
-                        initial: { width: "0%" },
-                        animate: { width: `${progress2}%` },
-                        transition: { ease: [0.4, 0, 0.2, 1], duration: 0.3 },
-                        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                          "div",
-                          {
-                            className: "absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full",
-                            style: { background: "#00d4ff", boxShadow: "0 0 8px 3px rgba(0,212,255,0.7)" }
-                          }
-                        )
+                        className: "absolute right-0 top-1/2 -translate-y-1/2 rounded-full",
+                        style: { width: 6, height: 6, background: "#00d4ff", boxShadow: "0 0 10px 4px rgba(0,212,255,0.8)" }
                       }
                     )
                   }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between mt-1", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] font-mono", style: { color: "rgba(0,212,255,0.35)", letterSpacing: "0.1em" }, children: "BOOT" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-[10px] font-mono", style: { color: "rgba(0,212,255,0.35)" }, children: [
+                ) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between mt-1.5", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 9, fontFamily: '"JetBrains Mono", monospace', color: "rgba(0,212,255,0.3)", letterSpacing: "0.1em" }, children: "BOOT" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { fontSize: 9, fontFamily: '"JetBrains Mono", monospace', color: progress2 === 100 ? "#00ff88" : "rgba(0,212,255,0.38)" }, children: [
                     progress2,
                     "%"
                   ] })
@@ -18457,13 +18847,14 @@ function BootSplash({ onDone }) {
               /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full space-y-1.5", children: STEPS.slice(0, visibleSteps).map((step, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
                 motion.div,
                 {
-                  initial: { opacity: 0, x: -10 },
+                  initial: { opacity: 0, x: -12 },
                   animate: { opacity: 1, x: 0 },
-                  transition: { duration: 0.22 },
-                  className: "flex items-center gap-2 font-mono text-[11px]",
+                  transition: { duration: 0.2 },
+                  className: "flex items-center gap-2.5",
+                  style: { fontFamily: '"JetBrains Mono", monospace', fontSize: 10 },
                   children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { color: "#00ff88" }, children: "✓" }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { color: i === visibleSteps - 1 ? "rgba(201,209,217,0.75)" : "rgba(78,93,110,0.6)" }, children: step.text })
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { color: i === visibleSteps - 1 ? "#00ff88" : "#00ff8855" }, children: "✓" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { color: i === visibleSteps - 1 ? "rgba(200,210,220,0.8)" : "rgba(80,95,115,0.5)" }, children: step.text })
                   ]
                 },
                 i
