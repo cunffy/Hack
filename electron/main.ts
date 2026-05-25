@@ -1,23 +1,23 @@
 import { app, BrowserWindow, shell, ipcMain, powerMonitor, globalShortcut } from 'electron'
 import { join } from 'path'
-import { exec, execFile } from 'child_process'
-import { existsSync, mkdirSync, cpSync } from 'fs'
+import { exec, execFileSync } from 'child_process'
+import { existsSync, mkdirSync } from 'fs'
 
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
-// Persist user data (settings, localStorage) to a fixed location that survives
-// updates. The default Electron userData path may be under /root/ which isn't
-// always included in the overlay persistence layer on the live OS.
-// We only activate this on the live OS where /etc/cryogram exists.
-const PERSISTENT_USERDATA = '/etc/cryogram/userdata'
-if (existsSync('/etc/cryogram')) {
+// On the live OS, store userData at a fixed path inside /opt/ which is
+// guaranteed persistent (the app itself lives there). The default path
+// (/root/.config/...) is often on a tmpfs or un-persisted overlay layer.
+// Must be called before app.ready.
+if (!is.dev) {
   try {
+    const PERSISTENT_USERDATA = '/opt/cryogram-data'
     const defaultPath = app.getPath('userData')
     if (!existsSync(PERSISTENT_USERDATA)) {
       mkdirSync(PERSISTENT_USERDATA, { recursive: true, mode: 0o755 })
-      // Migrate any existing settings so nothing is lost
+      // Migrate any existing settings so the user doesn't lose their config
       if (existsSync(defaultPath) && defaultPath !== PERSISTENT_USERDATA) {
-        try { cpSync(defaultPath, PERSISTENT_USERDATA, { recursive: true }) } catch {}
+        try { execFileSync('cp', ['-rp', defaultPath + '/.', PERSISTENT_USERDATA]) } catch {}
       }
     }
     app.setPath('userData', PERSISTENT_USERDATA)
