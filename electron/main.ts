@@ -10,6 +10,7 @@ import { registerSettingsHandlers } from './ipc/settings'
 import { registerSystemHandlers } from './ipc/system'
 import { registerLauncherHandlers, killLaunchedApps } from './ipc/launcher'
 import { registerPhoneHandlers } from './ipc/phone'
+import { registerUpdaterHandlers } from './ipc/updater'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -149,6 +150,7 @@ app.whenReady().then(() => {
   registerSystemHandlers()
   registerLauncherHandlers()
   registerPhoneHandlers()
+  registerUpdaterHandlers()
 
   createWindow()
 

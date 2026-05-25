@@ -125,6 +125,16 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
     getDeviceIp: (serial) => electron.ipcRenderer.invoke("phone:getDeviceIp", serial),
     screenshot: (serial) => electron.ipcRenderer.invoke("phone:screenshot", serial)
   },
+  // Update checker + runner
+  updater: {
+    check: () => electron.ipcRenderer.invoke("updater:check"),
+    run: () => electron.ipcRenderer.invoke("updater:run"),
+    onProgress: (cb) => {
+      const listener = (_, line) => cb(line);
+      electron.ipcRenderer.on("updater:progress", listener);
+      return () => electron.ipcRenderer.removeListener("updater:progress", listener);
+    }
+  },
   // Tell main process the lock screen was dismissed so it clears alwaysOnTop
   notifyUnlock: () => electron.ipcRenderer.send("screen:unlock"),
   // Lock screen events from main (system resume, manual lock)

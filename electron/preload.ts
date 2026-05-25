@@ -136,6 +136,17 @@ contextBridge.exposeInMainWorld('cryogram', {
     screenshot:     (serial: string)                 => ipcRenderer.invoke('phone:screenshot', serial),
   },
 
+  // Update checker + runner
+  updater: {
+    check:      () => ipcRenderer.invoke('updater:check'),
+    run:        () => ipcRenderer.invoke('updater:run'),
+    onProgress: (cb: (line: string) => void) => {
+      const listener = (_: unknown, line: string) => cb(line)
+      ipcRenderer.on('updater:progress', listener)
+      return () => ipcRenderer.removeListener('updater:progress', listener)
+    },
+  },
+
   // Tell main process the lock screen was dismissed so it clears alwaysOnTop
   notifyUnlock: () => ipcRenderer.send('screen:unlock'),
 

@@ -10,9 +10,13 @@ import { AnimatedBackground } from './components/AnimatedBackground'
 import { BootSplash } from './components/BootSplash'
 import { LockScreen } from './components/LockScreen'
 import { ThemeProvider } from './components/ThemeProvider'
+import { UpdateNotification } from './components/UpdateNotification'
+import { UpdateScreen } from './components/UpdateScreen'
 import { useDesktopStore } from './store/desktopStore'
 import { useLockStore } from './store/lockStore'
 import { useWindowStore } from './store/windowStore'
+
+interface UpdateInfo { commitCount: number; changes: string[] }
 
 export default function App() {
   const [booted, setBooted] = useState(false)
@@ -20,18 +24,60 @@ export default function App() {
   const { isLocked, lock } = useLockStore()
   const openApp = useWindowStore(s => s.openApp)
 
+  const [updateInfo, setUpdateInfo]       = useState<UpdateInfo | null>(null)
+  const [showUpdateScreen, setShowScreen] = useState(false)
+
   // After boot splash: check if PIN is enabled and lock if so
   const handleBooted = useCallback(async () => {
     try {
       const enabled = await window.cryogram.settings.get('pin.enabled')
       const hash    = await window.cryogram.settings.get('pin.hash')
       if (enabled && hash) lock(true)
-      else if (enabled) lock(false)  // enabled but no PIN set → just show lock screen without PIN
-    } catch {
-      // settings unavailable (browser mode) — proceed unlocked
-    }
+      else if (enabled) lock(false)
+    } catch {}
     setBooted(true)
   }, [lock])
+
+  // Check for updates 8s after boot (non-blocking)
+  useEffect(() => {
+    if (!booted) return
+    const t = setTimeout(async () => {
+      try {
+        const api = (window as any).cryogram?.updater
+        if (!api) return
+        const result = await api.check()
+        if (result?.hasUpdate) {
+          setUpdateInfo({ commitCount: result.commitCount, changes: result.changes ?? [] })
+        }
+      } catch {}
+    }, 8000)
+    return () => clearTimeout(t)
+  }, [booted])
+
+  // Expose manual update trigger globally so Settings can call it
+  useEffect(() => {
+    ;(window as any).__cryogram_checkUpdate = async () => {
+      try {
+        const api = (window as any).cryogram?.updater
+        if (!api) return
+        const result = await api.check()
+        if (result?.hasUpdate) {
+          setUpdateInfo({ commitCount: result.commitCount, changes: result.changes ?? [] })
+        } else {
+          setUpdateInfo(null)
+        }
+        return result
+      } catch { return { hasUpdate: false } }
+    }
+    ;(window as any).__cryogram_startUpdate = () => {
+      setUpdateInfo(null)
+      setShowScreen(true)
+    }
+    return () => {
+      delete (window as any).__cryogram_checkUpdate
+      delete (window as any).__cryogram_startUpdate
+    }
+  }, [])
 
   // Forward system notifications to custom event bus
   useEffect(() => {
@@ -42,7 +88,7 @@ export default function App() {
     return cleanup
   }, [])
 
-  // Listen for lock events from main process (resume from sleep, manual lock)
+  // Listen for lock events from main process
   useEffect(() => {
     const cleanup = (window.cryogram as any).onLock?.(async () => {
       if (!booted) return
@@ -50,14 +96,12 @@ export default function App() {
         const enabled = await window.cryogram.settings.get('pin.enabled')
         const hash    = await window.cryogram.settings.get('pin.hash')
         lock(!!(enabled && hash))
-      } catch {
-        lock(false)
-      }
+      } catch { lock(false) }
     })
     return cleanup ?? undefined
   }, [booted, lock])
 
-  // Global shortcut → open app (e.g. Ctrl+Alt+T opens terminal)
+  // Global shortcut → open app
   useEffect(() => {
     const cleanup = (window.cryogram as any).onOpenApp?.((appId: string) => {
       openApp(appId as any)
@@ -65,7 +109,7 @@ export default function App() {
     return cleanup ?? undefined
   }, [openApp])
 
-  // Alt+Tab — captured in renderer so Openbox doesn't swallow it
+  // Alt+Tab
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.altKey && e.key === 'Tab') {
@@ -93,7 +137,7 @@ export default function App() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            {/* Full-screen background layer — animated grid OR wallpaper image */}
+            {/* Full-screen background layer */}
             {!wallpaper && <AnimatedBackground />}
             {wallpaper && (
               <img
@@ -113,7 +157,6 @@ export default function App() {
               }}
             />
             <TitleBar />
-            {/* Desktop area: windows float here, dock overlaid at bottom */}
             <div className="flex-1 relative overflow-hidden">
               <Desktop />
               <WindowManager />
@@ -126,9 +169,31 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Lock screen — rendered on top of everything */}
+      {/* Lock screen */}
       <AnimatePresence>
         {booted && isLocked && <LockScreen key="lock" />}
+      </AnimatePresence>
+
+      {/* Update notification popup */}
+      <AnimatePresence>
+        {booted && updateInfo && !showUpdateScreen && (
+          <UpdateNotification
+            key="update-notif"
+            info={updateInfo}
+            onUpdate={() => { setUpdateInfo(null); setShowScreen(true) }}
+            onDismiss={() => setUpdateInfo(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Update screen overlay */}
+      <AnimatePresence>
+        {showUpdateScreen && (
+          <UpdateScreen
+            key="update-screen"
+            onCancel={() => setShowScreen(false)}
+          />
+        )}
       </AnimatePresence>
     </>
     </ThemeProvider>

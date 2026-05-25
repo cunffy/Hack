@@ -11,6 +11,7 @@ const Store = require("electron-store");
 const crypto = require("crypto");
 const promises = require("fs/promises");
 const util = require("util");
+const fs = require("fs");
 function _interopNamespaceDefault(e) {
   const n = Object.create(null, { [Symbol.toStringTag]: { value: "Module" } });
   if (e) {
@@ -1045,6 +1046,59 @@ function registerPhoneHandlers() {
     }
   });
 }
+const execFileP = util.promisify(child_process.execFile);
+const SRC_DIR = "/opt/cryogram-src";
+const UPDATE_SCRIPT = "/usr/local/bin/cryogram-update";
+function readBranch() {
+  try {
+    const conf = fs.readFileSync("/etc/cryogram/update.conf", "utf8");
+    const m = conf.match(/BRANCH="([^"]+)"/);
+    return m ? m[1] : "main";
+  } catch {
+    return "main";
+  }
+}
+function registerUpdaterHandlers() {
+  electron.ipcMain.handle("updater:check", async () => {
+    try {
+      if (!fs.existsSync(`${SRC_DIR}/.git`)) return { hasUpdate: false };
+      const branch = readBranch();
+      await execFileP("git", ["-C", SRC_DIR, "fetch", "origin", "--quiet"], { timeout: 14e3 }).catch(() => {
+      });
+      const { stdout: countOut } = await execFileP("git", ["-C", SRC_DIR, "rev-list", `HEAD..origin/${branch}`, "--count"]);
+      const count = parseInt(countOut.trim(), 10) || 0;
+      if (count <= 0) return { hasUpdate: false };
+      const { stdout: logOut } = await execFileP("git", ["-C", SRC_DIR, "log", `HEAD..origin/${branch}`, "--pretty=format:%s", "-8"]);
+      const changes = logOut.trim().split("\n").filter(Boolean);
+      return { hasUpdate: true, commitCount: count, changes };
+    } catch {
+      return { hasUpdate: false };
+    }
+  });
+  electron.ipcMain.handle("updater:run", (event) => {
+    return new Promise((resolve, reject) => {
+      if (!fs.existsSync(UPDATE_SCRIPT)) {
+        return reject(new Error("Update script not found — run from the live OS."));
+      }
+      const proc = child_process.spawn("sudo", ["-n", UPDATE_SCRIPT], {
+        env: { ...process.env, TERM: "xterm-color", FORCE_COLOR: "1" }
+      });
+      const send = (data) => {
+        try {
+          event.sender.send("updater:progress", data);
+        } catch {
+        }
+      };
+      proc.stdout.on("data", (d) => send(d.toString()));
+      proc.stderr.on("data", (d) => send(d.toString()));
+      proc.on("close", (code) => {
+        if (code === 0 || code === null) resolve({ success: true });
+        else reject(new Error(`Update exited with code ${code}`));
+      });
+      proc.on("error", (err) => reject(err));
+    });
+  });
+}
 let mainWindow = null;
 function lockScreen() {
   if (!mainWindow) return;
@@ -1156,6 +1210,7 @@ electron.app.whenReady().then(() => {
   registerSystemHandlers();
   registerLauncherHandlers();
   registerPhoneHandlers();
+  registerUpdaterHandlers();
   createWindow();
   electron.powerMonitor.on("resume", () => lockScreen());
   electron.powerMonitor.on("lock-screen", () => lockScreen());

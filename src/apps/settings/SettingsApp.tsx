@@ -408,9 +408,102 @@ export default function SettingsApp() {
         </div>
       </section>
 
+      {/* ── System Update ──────────────────────────────────────────────────────── */}
+      <UpdateSection />
+
       <button className="btn btn-primary w-fit" onClick={save}>
         {saved ? '✓ Saved' : 'Save Settings'}
       </button>
     </div>
+  )
+}
+
+function UpdateSection() {
+  const [checking, setChecking]   = useState(false)
+  const [status, setStatus]       = useState<'idle' | 'uptodate' | 'available' | 'error'>('idle')
+  const [commitCount, setCount]   = useState(0)
+  const [changes, setChanges]     = useState<string[]>([])
+
+  const check = async () => {
+    setChecking(true)
+    setStatus('idle')
+    try {
+      const result = await (window as any).__cryogram_checkUpdate?.()
+      if (result?.hasUpdate) {
+        setStatus('available')
+        setCount(result.commitCount ?? 1)
+        setChanges(result.changes ?? [])
+      } else {
+        setStatus('uptodate')
+      }
+    } catch {
+      setStatus('error')
+    }
+    setChecking(false)
+  }
+
+  const startUpdate = () => {
+    ;(window as any).__cryogram_startUpdate?.()
+  }
+
+  return (
+    <section className="panel p-4 space-y-3">
+      <div className="text-xs text-cryo-muted uppercase tracking-wider font-bold">System Update</div>
+      <div className="flex items-center gap-3 flex-wrap">
+        <button
+          className="btn"
+          onClick={check}
+          disabled={checking}
+          style={{ opacity: checking ? 0.6 : 1 }}
+        >
+          {checking ? 'Checking…' : 'Check for Updates'}
+        </button>
+
+        {status === 'uptodate' && (
+          <span style={{ fontSize: 12, color: '#4ade80' }}>✓ Cryogram OS is up to date</span>
+        )}
+        {status === 'error' && (
+          <span style={{ fontSize: 12, color: '#f87171' }}>Could not reach update server</span>
+        )}
+      </div>
+
+      {status === 'available' && (
+        <div style={{
+          background: 'rgba(0,212,255,0.06)',
+          border: '1px solid rgba(0,212,255,0.18)',
+          borderRadius: 10,
+          padding: '12px 14px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+        }}>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+            {commitCount} update{commitCount !== 1 ? 's' : ''} available
+          </div>
+          {changes.length > 0 && (
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {changes.map((c, i) => (
+                <li key={i} style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', display: 'flex', gap: 8 }}>
+                  <span style={{ color: 'var(--cryo-accent)', opacity: 0.7 }}>›</span>
+                  {c}
+                </li>
+              ))}
+            </ul>
+          )}
+          <button
+            onClick={startUpdate}
+            style={{
+              alignSelf: 'flex-start',
+              padding: '6px 18px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+              background: 'linear-gradient(135deg, var(--cryo-accent) 0%, #00ff88 100%)',
+              border: 'none', color: '#000', cursor: 'pointer',
+              boxShadow: '0 0 12px rgba(0,212,255,0.3)',
+            }}
+          >
+            Update &amp; Reboot
+          </button>
+        </div>
+      )}
+    </section>
   )
 }

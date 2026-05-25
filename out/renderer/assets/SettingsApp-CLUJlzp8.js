@@ -1,4 +1,4 @@
-import { a as useThemeStore, r as reactExports, j as jsxRuntimeExports, T as THEME_PRESETS } from "./index-XtxnP-XJ.js";
+import { a as useThemeStore, r as reactExports, j as jsxRuntimeExports, T as THEME_PRESETS } from "./index-CtaS1aAT.js";
 function SettingsApp() {
   const { preset: activePreset, accent, setPreset, setCustomAccent } = useThemeStore();
   const [hexInput, setHexInput] = reactExports.useState(accent);
@@ -408,7 +408,90 @@ function SettingsApp() {
         /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn", onClick: openWorkspace, children: "Browse" })
       ] })
     ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(UpdateSection, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "btn btn-primary w-fit", onClick: save, children: saved ? "✓ Saved" : "Save Settings" })
+  ] });
+}
+function UpdateSection() {
+  const [checking, setChecking] = reactExports.useState(false);
+  const [status, setStatus] = reactExports.useState("idle");
+  const [commitCount, setCount] = reactExports.useState(0);
+  const [changes, setChanges] = reactExports.useState([]);
+  const check = async () => {
+    setChecking(true);
+    setStatus("idle");
+    try {
+      const result = await window.__cryogram_checkUpdate?.();
+      if (result?.hasUpdate) {
+        setStatus("available");
+        setCount(result.commitCount ?? 1);
+        setChanges(result.changes ?? []);
+      } else {
+        setStatus("uptodate");
+      }
+    } catch {
+      setStatus("error");
+    }
+    setChecking(false);
+  };
+  const startUpdate = () => {
+    window.__cryogram_startUpdate?.();
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "panel p-4 space-y-3", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-cryo-muted uppercase tracking-wider font-bold", children: "System Update" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3 flex-wrap", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          className: "btn",
+          onClick: check,
+          disabled: checking,
+          style: { opacity: checking ? 0.6 : 1 },
+          children: checking ? "Checking…" : "Check for Updates"
+        }
+      ),
+      status === "uptodate" && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 12, color: "#4ade80" }, children: "✓ Cryogram OS is up to date" }),
+      status === "error" && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 12, color: "#f87171" }, children: "Could not reach update server" })
+    ] }),
+    status === "available" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+      background: "rgba(0,212,255,0.06)",
+      border: "1px solid rgba(0,212,255,0.18)",
+      borderRadius: 10,
+      padding: "12px 14px",
+      display: "flex",
+      flexDirection: "column",
+      gap: 10
+    }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.8)", fontWeight: 600 }, children: [
+        commitCount,
+        " update",
+        commitCount !== 1 ? "s" : "",
+        " available"
+      ] }),
+      changes.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("ul", { style: { margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 4 }, children: changes.map((c, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { style: { fontSize: 11, color: "rgba(255,255,255,0.5)", display: "flex", gap: 8 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { color: "var(--cryo-accent)", opacity: 0.7 }, children: "›" }),
+        c
+      ] }, i)) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          onClick: startUpdate,
+          style: {
+            alignSelf: "flex-start",
+            padding: "6px 18px",
+            borderRadius: 8,
+            fontSize: 12,
+            fontWeight: 700,
+            background: "linear-gradient(135deg, var(--cryo-accent) 0%, #00ff88 100%)",
+            border: "none",
+            color: "#000",
+            cursor: "pointer",
+            boxShadow: "0 0 12px rgba(0,212,255,0.3)"
+          },
+          children: "Update & Reboot"
+        }
+      )
+    ] })
   ] });
 }
 export {

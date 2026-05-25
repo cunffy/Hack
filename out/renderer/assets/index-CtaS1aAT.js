@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-DDhx-bWi.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-CRkqfOR_.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -17303,16 +17303,16 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-DDhx-bWi.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-C-CoQ33V.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-Bdy8ThiZ.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-KBTHkpuj.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-DYWNBTdz.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-FSLwHw9p.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-DyXHVh5V.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-Cj90-BW7.js"), true ? [] : void 0, import.meta.url));
-const OpticSEOApp = reactExports.lazy(() => __vitePreload(() => import("./OpticSEOApp-Cus3MzIm.js"), true ? [] : void 0, import.meta.url));
-const PhoneApp = reactExports.lazy(() => __vitePreload(() => import("./PhoneApp-qt7hGbQU.js"), true ? [] : void 0, import.meta.url));
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-CRkqfOR_.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-CMgEF-H3.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-CRS_zXbI.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-BhzjwZOe.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-CLUJlzp8.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-duOJZGYO.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-sj-bVCFP.js"), true ? [] : void 0, import.meta.url));
+const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-B401prs4.js"), true ? [] : void 0, import.meta.url));
+const OpticSEOApp = reactExports.lazy(() => __vitePreload(() => import("./OpticSEOApp-CqS6jJHH.js"), true ? [] : void 0, import.meta.url));
+const PhoneApp = reactExports.lazy(() => __vitePreload(() => import("./PhoneApp-Dpdd4J5F.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -19163,11 +19163,475 @@ function ThemeProvider({ children }) {
   }, [accent, accent2, bg2]);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children });
 }
+function UpdateNotification({ info, onUpdate, onDismiss }) {
+  const [expanded, setExpanded] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    const h = (e) => {
+      if (e.key === "Escape") onDismiss();
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [onDismiss]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    motion.div,
+    {
+      initial: { opacity: 0, y: 32, scale: 0.94 },
+      animate: { opacity: 1, y: 0, scale: 1 },
+      exit: { opacity: 0, y: 24, scale: 0.92 },
+      transition: { type: "spring", stiffness: 420, damping: 30 },
+      style: {
+        position: "fixed",
+        bottom: 90,
+        right: 20,
+        width: 340,
+        zIndex: 99e3,
+        background: "rgba(10,16,26,0.97)",
+        border: "1px solid rgba(0,212,255,0.25)",
+        borderRadius: 18,
+        boxShadow: "0 0 0 1px rgba(0,212,255,0.08), 0 24px 64px rgba(0,0,0,0.85), 0 0 40px rgba(0,212,255,0.06)",
+        backdropFilter: "blur(40px)",
+        overflow: "hidden",
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif'
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { height: 2, background: "linear-gradient(90deg, transparent, var(--cryo-accent) 40%, #00ff88 60%, transparent)", opacity: 0.7 } }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "14px 16px" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+              width: 34,
+              height: 34,
+              borderRadius: 10,
+              background: "rgba(0,212,255,0.12)",
+              border: "1px solid rgba(0,212,255,0.25)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0
+            }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "16", height: "16", viewBox: "0 0 24 24", fill: "none", stroke: "var(--cryo-accent)", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "17 8 12 3 7 8" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "3", x2: "12", y2: "15" })
+            ] }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.92)" }, children: "Update Available" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.45)", marginTop: 1 }, children: [
+                info.commitCount,
+                " new ",
+                info.commitCount === 1 ? "change" : "changes",
+                " ready to install"
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                onClick: onDismiss,
+                style: { marginLeft: "auto", background: "none", border: "none", color: "rgba(255,255,255,0.3)", cursor: "pointer", padding: 4, borderRadius: 6 },
+                onMouseEnter: (e) => e.currentTarget.style.color = "rgba(255,255,255,0.6)",
+                onMouseLeave: (e) => e.currentTarget.style.color = "rgba(255,255,255,0.3)",
+                children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.5", strokeLinecap: "round", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
+                ] })
+              }
+            )
+          ] }),
+          info.changes.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: 12 }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: (expanded ? info.changes : info.changes.slice(0, 2)).map((c, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              motion.div,
+              {
+                initial: { opacity: 0, height: 0 },
+                animate: { opacity: 1, height: "auto" },
+                style: { display: "flex", alignItems: "flex-start", gap: 7, marginBottom: 4 },
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { width: 4, height: 4, borderRadius: 2, background: "var(--cryo-accent)", marginTop: 5, flexShrink: 0, opacity: 0.7 } }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 11, color: "rgba(255,255,255,0.55)", lineHeight: 1.5 }, children: c })
+                ]
+              },
+              i
+            )) }),
+            info.changes.length > 2 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                onClick: () => setExpanded((v2) => !v2),
+                style: { background: "none", border: "none", color: "var(--cryo-accent)", fontSize: 11, cursor: "pointer", padding: 0, opacity: 0.75 },
+                children: expanded ? "Show less" : `+${info.changes.length - 2} more changes`
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: 8 }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                onClick: onUpdate,
+                style: {
+                  flex: 1,
+                  padding: "8px 0",
+                  borderRadius: 10,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  background: "linear-gradient(135deg, var(--cryo-accent) 0%, #00ff88 100%)",
+                  border: "none",
+                  color: "#000",
+                  cursor: "pointer",
+                  boxShadow: "0 0 16px rgba(0,212,255,0.3)"
+                },
+                children: "Update Now"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                onClick: onDismiss,
+                style: {
+                  padding: "8px 16px",
+                  borderRadius: 10,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  background: "rgba(255,255,255,0.07)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  color: "rgba(255,255,255,0.55)",
+                  cursor: "pointer"
+                },
+                onMouseEnter: (e) => e.currentTarget.style.background = "rgba(255,255,255,0.12)",
+                onMouseLeave: (e) => e.currentTarget.style.background = "rgba(255,255,255,0.07)",
+                children: "Not Now"
+              }
+            )
+          ] })
+        ] })
+      ]
+    }
+  );
+}
+function HexGrid() {
+  const canvasRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const resize2 = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize2();
+    window.addEventListener("resize", resize2);
+    const SIZE = 32;
+    const W2 = SIZE * 2;
+    const H2 = Math.sqrt(3) * SIZE;
+    let frame2 = 0;
+    const hexPath = (cx, cy, r2) => {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = Math.PI / 3 * i - Math.PI / 6;
+        const x2 = cx + r2 * Math.cos(angle);
+        const y2 = cy + r2 * Math.sin(angle);
+        if (i === 0) ctx.moveTo(x2, y2);
+        else ctx.lineTo(x2, y2);
+      }
+      ctx.closePath();
+    };
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      frame2++;
+      const cols = Math.ceil(canvas.width / W2) + 2;
+      const rows = Math.ceil(canvas.height / H2) + 2;
+      for (let row = -1; row < rows; row++) {
+        for (let col = -1; col < cols; col++) {
+          const cx = col * W2 + (row % 2 === 0 ? 0 : W2 / 2);
+          const cy = row * H2;
+          const pulse = Math.sin(frame2 * 0.018 + col * 0.4 + row * 0.3) * 0.5 + 0.5;
+          const alpha2 = pulse * 0.12 + 0.02;
+          ctx.strokeStyle = `rgba(0, 212, 255, ${alpha2})`;
+          ctx.lineWidth = 0.8;
+          hexPath(cx, cy, SIZE - 2);
+          ctx.stroke();
+        }
+      }
+      requestAnimationFrame(animate);
+    };
+    const animId = requestAnimationFrame(animate);
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize2);
+    };
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("canvas", { ref: canvasRef, style: { position: "absolute", inset: 0, opacity: 0.6 } });
+}
+function SpinRing({ size, color: color2, speed = 2, gap = 0.25 }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    motion.div,
+    {
+      style: { width: size, height: size, borderRadius: "50%", position: "absolute" },
+      animate: { rotate: 360 },
+      transition: { duration: speed, repeat: Infinity, ease: "linear" },
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+        width: "100%",
+        height: "100%",
+        borderRadius: "50%",
+        border: `2px solid transparent`,
+        borderTopColor: color2,
+        borderRightColor: gap < 0.5 ? color2 : "transparent",
+        boxShadow: `0 0 12px ${color2}60`
+      } })
+    }
+  );
+}
+function stripAnsi(s) {
+  return s.replace(/\x1B\[[0-9;]*[mGKH]/g, "").replace(/\r/g, "");
+}
+function UpdateScreen({ onCancel }) {
+  const [phase, setPhase] = reactExports.useState("starting");
+  const [log, setLog] = reactExports.useState([]);
+  const [countdown, setCount] = reactExports.useState(10);
+  const [error, setError] = reactExports.useState(null);
+  const logRef = reactExports.useRef(null);
+  const countdownRef = reactExports.useRef(null);
+  const appendLog = reactExports.useCallback((raw) => {
+    const lines = stripAnsi(raw).split("\n").filter((l2) => l2.trim());
+    setLog((prev) => [...prev, ...lines].slice(-120));
+    if (raw.includes("Rebooting in") || raw.includes("Rebooting")) {
+      setPhase("countdown");
+    }
+  }, []);
+  reactExports.useEffect(() => {
+    const el2 = logRef.current;
+    if (el2) el2.scrollTop = el2.scrollHeight;
+  }, [log]);
+  reactExports.useEffect(() => {
+    if (phase !== "countdown") return;
+    setCount(10);
+    countdownRef.current = setInterval(() => {
+      setCount((n2) => {
+        if (n2 <= 1) {
+          clearInterval(countdownRef.current);
+          setPhase("rebooting");
+          return 0;
+        }
+        return n2 - 1;
+      });
+    }, 1e3);
+    return () => {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, [phase]);
+  reactExports.useEffect(() => {
+    setPhase("starting");
+    setTimeout(() => {
+      setPhase("updating");
+      (async () => {
+        try {
+          const api = window.cryogram?.updater;
+          if (!api) {
+            setError("Updater API not available — run from the live OS.");
+            return;
+          }
+          const unsub = api.onProgress((line) => appendLog(line));
+          try {
+            await api.run();
+            if (phase !== "countdown" && phase !== "rebooting") {
+              setPhase("countdown");
+            }
+          } finally {
+            unsub();
+          }
+        } catch (err) {
+          const msg = String(err?.message ?? err);
+          if (msg.includes("code null") || msg.includes("killed")) {
+            setPhase("rebooting");
+          } else {
+            setError(msg);
+          }
+        }
+      })();
+    }, 1200);
+  }, []);
+  const phaseLabel = {
+    starting: "Preparing update…",
+    updating: "Installing update…",
+    countdown: "Update complete",
+    rebooting: "Rebooting…"
+  };
+  const phaseColor = {
+    starting: "var(--cryo-accent)",
+    updating: "var(--cryo-accent)",
+    countdown: "#00ff88",
+    rebooting: "#a855f7"
+  };
+  const color2 = error ? "#ef4444" : phaseColor[phase];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    motion.div,
+    {
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      exit: { opacity: 0 },
+      transition: { duration: 0.4 },
+      style: {
+        position: "fixed",
+        inset: 0,
+        zIndex: 2e5,
+        background: "rgba(4,7,14,0.98)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+        overflow: "hidden"
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(HexGrid, {}),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          background: `radial-gradient(ellipse 60% 50% at 50% 50%, ${color2}08, transparent 70%)`,
+          transition: "background 1s"
+        } }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 32, width: "100%", maxWidth: 680, padding: "0 24px" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { position: "relative", width: 120, height: 120, display: "flex", alignItems: "center", justifyContent: "center" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(SpinRing, { size: 120, color: color2, speed: 3, gap: 0.3 }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(SpinRing, { size: 96, color: `${color2}80`, speed: 2.1, gap: 0.5 }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(SpinRing, { size: 74, color: `${color2}40`, speed: 1.5, gap: 0.7 }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              motion.div,
+              {
+                animate: { scale: [1, 1.06, 1] },
+                transition: { duration: 2.4, repeat: Infinity, ease: "easeInOut" },
+                style: {
+                  position: "absolute",
+                  width: 50,
+                  height: 50,
+                  borderRadius: 16,
+                  background: `${color2}15`,
+                  border: `1.5px solid ${color2}40`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: `0 0 24px ${color2}40`
+                },
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "wait", children: phase === "countdown" || phase === "rebooting" ? /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { initial: { scale: 0 }, animate: { scale: 1 }, transition: { type: "spring", stiffness: 500, damping: 24 }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: color2, strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "20 6 9 17 4 12" }) }) }, "check") : /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { initial: { opacity: 0 }, animate: { opacity: 1 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: color2, strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "17 8 12 3 7 8" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "3", x2: "12", y2: "15" })
+                ] }) }, "arrow") })
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { textAlign: "center" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              motion.div,
+              {
+                initial: { opacity: 0, y: 8 },
+                animate: { opacity: 1, y: 0 },
+                style: { fontSize: 22, fontWeight: 700, color: "rgba(255,255,255,0.92)", letterSpacing: "-0.02em" },
+                children: error ? "Update Failed" : phaseLabel[phase]
+              },
+              phase
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 13, color: "rgba(255,255,255,0.38)", marginTop: 5 }, children: error ? "Check log below for details" : "Cryogram OS" })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: (phase === "countdown" || phase === "rebooting") && !error && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0, scale: 0.5 },
+              animate: { opacity: 1, scale: 1 },
+              exit: { opacity: 0 },
+              transition: { type: "spring", stiffness: 380, damping: 24 },
+              style: { textAlign: "center" },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  motion.div,
+                  {
+                    initial: { opacity: 0, scale: 0.4, y: -12 },
+                    animate: { opacity: 1, scale: 1, y: 0 },
+                    exit: { opacity: 0, scale: 1.2, y: 8 },
+                    transition: { type: "spring", stiffness: 500, damping: 26 },
+                    style: {
+                      fontSize: 80,
+                      fontWeight: 900,
+                      lineHeight: 1,
+                      color: color2,
+                      textShadow: `0 0 40px ${color2}80, 0 0 80px ${color2}40`,
+                      letterSpacing: "-0.05em",
+                      fontVariantNumeric: "tabular-nums"
+                    },
+                    children: phase === "rebooting" ? "↺" : countdown
+                  },
+                  countdown
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 8 }, children: phase === "rebooting" ? "Restarting system…" : `Rebooting in ${countdown} second${countdown !== 1 ? "s" : ""}…` })
+              ]
+            }
+          ) }),
+          (phase === "updating" || error) && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 12 },
+              animate: { opacity: 1, y: 0 },
+              style: { width: "100%" },
+              children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  ref: logRef,
+                  style: {
+                    height: 200,
+                    overflowY: "auto",
+                    background: "rgba(0,0,0,0.55)",
+                    border: `1px solid ${error ? "rgba(239,68,68,0.25)" : "rgba(0,212,255,0.12)"}`,
+                    borderRadius: 12,
+                    padding: "10px 14px",
+                    fontFamily: '"JetBrains Mono", "Fira Code", monospace',
+                    fontSize: 11,
+                    lineHeight: 1.65,
+                    scrollbarWidth: "thin",
+                    scrollbarColor: "rgba(255,255,255,0.12) transparent"
+                  },
+                  children: log.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: "rgba(255,255,255,0.25)" }, children: "Starting update process…" }) : log.map((line, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+                    color: line.includes("FAIL") || line.includes("error") || line.includes("Error") ? "#f87171" : line.includes("OK") || line.includes("ok") || line.includes("✓") ? "#4ade80" : line.includes("──") || line.includes("WARN") ? "#fbbf24" : "rgba(255,255,255,0.62)"
+                  }, children: line }, i))
+                }
+              )
+            }
+          ),
+          error && onCancel && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              onClick: onCancel,
+              style: {
+                padding: "8px 24px",
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: 600,
+                background: "rgba(239,68,68,0.15)",
+                border: "1px solid rgba(239,68,68,0.35)",
+                color: "#f87171",
+                cursor: "pointer"
+              },
+              children: "Close"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          position: "absolute",
+          bottom: 28,
+          fontSize: 10,
+          letterSpacing: "0.3em",
+          fontWeight: 700,
+          color: "rgba(255,255,255,0.12)",
+          fontFamily: '"JetBrains Mono", monospace',
+          textTransform: "uppercase"
+        }, children: "CRYOGRAM OS" })
+      ]
+    }
+  );
+}
 function App() {
   const [booted, setBooted] = reactExports.useState(false);
   const wallpaper = useDesktopStore((s) => s.wallpaper);
   const { isLocked, lock } = useLockStore();
   const openApp = useWindowStore((s) => s.openApp);
+  const [updateInfo, setUpdateInfo] = reactExports.useState(null);
+  const [showUpdateScreen, setShowScreen] = reactExports.useState(false);
   const handleBooted = reactExports.useCallback(async () => {
     try {
       const enabled = await window.cryogram.settings.get("pin.enabled");
@@ -19178,6 +19642,46 @@ function App() {
     }
     setBooted(true);
   }, [lock]);
+  reactExports.useEffect(() => {
+    if (!booted) return;
+    const t2 = setTimeout(async () => {
+      try {
+        const api = window.cryogram?.updater;
+        if (!api) return;
+        const result = await api.check();
+        if (result?.hasUpdate) {
+          setUpdateInfo({ commitCount: result.commitCount, changes: result.changes ?? [] });
+        }
+      } catch {
+      }
+    }, 8e3);
+    return () => clearTimeout(t2);
+  }, [booted]);
+  reactExports.useEffect(() => {
+    window.__cryogram_checkUpdate = async () => {
+      try {
+        const api = window.cryogram?.updater;
+        if (!api) return;
+        const result = await api.check();
+        if (result?.hasUpdate) {
+          setUpdateInfo({ commitCount: result.commitCount, changes: result.changes ?? [] });
+        } else {
+          setUpdateInfo(null);
+        }
+        return result;
+      } catch {
+        return { hasUpdate: false };
+      }
+    };
+    window.__cryogram_startUpdate = () => {
+      setUpdateInfo(null);
+      setShowScreen(true);
+    };
+    return () => {
+      delete window.__cryogram_checkUpdate;
+      delete window.__cryogram_startUpdate;
+    };
+  }, []);
   reactExports.useEffect(() => {
     const cleanup = window.cryogram.onNotification((n2) => {
       const event = new CustomEvent("cryogram:notification", { detail: n2 });
@@ -19258,7 +19762,26 @@ function App() {
         ]
       }
     ) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: booted && isLocked && /* @__PURE__ */ jsxRuntimeExports.jsx(LockScreen, {}, "lock") })
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: booted && isLocked && /* @__PURE__ */ jsxRuntimeExports.jsx(LockScreen, {}, "lock") }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: booted && updateInfo && !showUpdateScreen && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      UpdateNotification,
+      {
+        info: updateInfo,
+        onUpdate: () => {
+          setUpdateInfo(null);
+          setShowScreen(true);
+        },
+        onDismiss: () => setUpdateInfo(null)
+      },
+      "update-notif"
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: showUpdateScreen && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      UpdateScreen,
+      {
+        onCancel: () => setShowScreen(false)
+      },
+      "update-screen"
+    ) })
   ] }) });
 }
 const sleep = (ms) => new Promise((r2) => setTimeout(r2, ms));
