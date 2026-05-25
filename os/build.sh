@@ -239,6 +239,7 @@ plymouth
 plymouth-themes
 libinput-tools
 python3-evdev
+squashfs-tools
 PKGEOF
 
 cat > "$PKG_LISTS/gaming.list.chroot" << 'PKGEOF'
