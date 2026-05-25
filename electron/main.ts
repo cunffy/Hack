@@ -1,6 +1,10 @@
 import { app, BrowserWindow, shell, ipcMain, powerMonitor, globalShortcut } from 'electron'
 import { join } from 'path'
 import { exec, execFile } from 'child_process'
+
+// Pin userData to /etc/cryogram/userdata so Zustand localStorage + electron-store
+// survive OS updates and live-system reboots regardless of which user is running the app.
+try { app.setPath('userData', '/etc/cryogram/userdata') } catch {}
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerTerminalHandlers } from './ipc/terminal'
 import { registerPasswordTesterHandlers } from './ipc/password-tester'

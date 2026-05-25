@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-CRkqfOR_.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-w33kt2-K.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -16490,7 +16490,7 @@ function Dock() {
           animate: { opacity: 1 },
           transition: { delay: 3, duration: 0.5 },
           style: { fontSize: 9, color: "rgba(255,255,255,0.18)", fontFamily: "-apple-system, sans-serif" },
-          children: "Drag to reorder · Right-click to customize"
+          children: "Drag to reorder · Right-click for options"
         }
       )
     ] }) })
@@ -17303,16 +17303,16 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-CRkqfOR_.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-CMgEF-H3.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-CRS_zXbI.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-BhzjwZOe.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-CLUJlzp8.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-duOJZGYO.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-sj-bVCFP.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-B401prs4.js"), true ? [] : void 0, import.meta.url));
-const OpticSEOApp = reactExports.lazy(() => __vitePreload(() => import("./OpticSEOApp-CqS6jJHH.js"), true ? [] : void 0, import.meta.url));
-const PhoneApp = reactExports.lazy(() => __vitePreload(() => import("./PhoneApp-Dpdd4J5F.js"), true ? [] : void 0, import.meta.url));
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-w33kt2-K.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-Bq4_Sp1b.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-B-i1Blb4.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-Bsa2AHq3.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-CbxCLxLa.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-D8G6l1eu.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-h6oP8Gzl.js"), true ? [] : void 0, import.meta.url));
+const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-C3UmUNiw.js"), true ? [] : void 0, import.meta.url));
+const OpticSEOApp = reactExports.lazy(() => __vitePreload(() => import("./OpticSEOApp-CM8qFCXA.js"), true ? [] : void 0, import.meta.url));
+const PhoneApp = reactExports.lazy(() => __vitePreload(() => import("./PhoneApp-CqIrl3Md.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -19528,7 +19528,7 @@ function UpdateScreen({ onCancel }) {
               },
               phase
             ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 13, color: "rgba(255,255,255,0.38)", marginTop: 5 }, children: error ? "Check log below for details" : "Cryogram OS" })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 13, color: "rgba(255,255,255,0.38)", marginTop: 5 }, children: error ? "Check log below for details" : phase === "countdown" || phase === "rebooting" ? "Your laptop will fully restart" : "Downloading code changes only — not a new OS" })
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: (phase === "countdown" || phase === "rebooting") && !error && /* @__PURE__ */ jsxRuntimeExports.jsxs(
             motion.div,

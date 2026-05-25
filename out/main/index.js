@@ -1058,6 +1058,13 @@ function readBranch() {
     return "main";
   }
 }
+function isRoot() {
+  try {
+    return process.getuid?.() === 0;
+  } catch {
+    return false;
+  }
+}
 function registerUpdaterHandlers() {
   electron.ipcMain.handle("updater:check", async () => {
     try {
@@ -1080,7 +1087,8 @@ function registerUpdaterHandlers() {
       if (!fs.existsSync(UPDATE_SCRIPT)) {
         return reject(new Error("Update script not found — run from the live OS."));
       }
-      const proc = child_process.spawn("sudo", ["-n", UPDATE_SCRIPT], {
+      const args = isRoot() ? ["bash", [UPDATE_SCRIPT]] : ["sudo", ["-n", UPDATE_SCRIPT]];
+      const proc = child_process.spawn(args[0], args[1], {
         env: { ...process.env, TERM: "xterm-color", FORCE_COLOR: "1" }
       });
       const send = (data) => {
@@ -1098,6 +1106,10 @@ function registerUpdaterHandlers() {
       proc.on("error", (err) => reject(err));
     });
   });
+}
+try {
+  electron.app.setPath("userData", "/etc/cryogram/userdata");
+} catch {
 }
 let mainWindow = null;
 function lockScreen() {

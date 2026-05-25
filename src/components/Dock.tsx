@@ -291,7 +291,7 @@ export function Dock() {
             transition={{ delay: 3, duration: 0.5 }}
             style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', fontFamily: '-apple-system, sans-serif' }}
           >
-            Drag to reorder · Right-click to customize
+            Drag to reorder · Right-click for options
           </motion.div>
         </div>
       </div>

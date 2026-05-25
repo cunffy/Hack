@@ -1,4 +1,4 @@
-import { r as reactExports, j as jsxRuntimeExports, A as AnimatePresence, m as motion } from "./index-CtaS1aAT.js";
+import { r as reactExports, j as jsxRuntimeExports, A as AnimatePresence, m as motion } from "./index-8rF7n8W2.js";
 const TABS = [
   { id: "network", label: "Network", icon: "📶" },
   { id: "bluetooth", label: "Bluetooth", icon: "🔵" },

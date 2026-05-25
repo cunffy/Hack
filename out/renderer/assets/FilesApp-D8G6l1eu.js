@@ -1,4 +1,4 @@
-import { r as reactExports, j as jsxRuntimeExports, A as AnimatePresence, m as motion } from "./index-CtaS1aAT.js";
+import { r as reactExports, j as jsxRuntimeExports, A as AnimatePresence, m as motion } from "./index-8rF7n8W2.js";
 const SIDEBAR_LOCS = [
   { label: "Home", icon: "⌂", key: "home" },
   { label: "Desktop", icon: "🖥", key: "desktop" },

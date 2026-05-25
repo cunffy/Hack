@@ -1,4 +1,4 @@
-import { a as useThemeStore, r as reactExports, j as jsxRuntimeExports, T as THEME_PRESETS } from "./index-CtaS1aAT.js";
+import { a as useThemeStore, r as reactExports, j as jsxRuntimeExports, T as THEME_PRESETS } from "./index-8rF7n8W2.js";
 function SettingsApp() {
   const { preset: activePreset, accent, setPreset, setCustomAccent } = useThemeStore();
   const [hexInput, setHexInput] = reactExports.useState(accent);

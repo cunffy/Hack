@@ -267,7 +267,11 @@ export function UpdateScreen({ onCancel }: Props) {
             {error ? 'Update Failed' : phaseLabel[phase]}
           </motion.div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', marginTop: 5 }}>
-            {error ? 'Check log below for details' : 'Cryogram OS'}
+            {error
+              ? 'Check log below for details'
+              : phase === 'countdown' || phase === 'rebooting'
+              ? 'Your laptop will fully restart'
+              : 'Downloading code changes only — not a new OS'}
           </div>
         </div>
 
