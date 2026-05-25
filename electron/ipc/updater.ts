@@ -111,9 +111,20 @@ export function registerUpdaterHandlers(): void {
       })
 
       proc.on('close', (code) => {
-        if (code === 0 || code === null) resolve({ success: true })
-        else if (!isRoot() && code === 1) reject(new Error('wrong-password'))
-        else reject(new Error(`Update exited with code ${code}`))
+        if (code === null) {
+          // OS killed the process — reboot is already underway
+          resolve({ success: true })
+        } else if (code === 0) {
+          // Script exited cleanly but didn't reboot (shouldn't happen).
+          // Force reboot so the user's machine always restarts after an update.
+          const { exec: execRaw } = require('child_process')
+          execRaw('shutdown -r now || reboot')
+          resolve({ success: true })
+        } else if (!isRoot() && code === 1) {
+          reject(new Error('wrong-password'))
+        } else {
+          reject(new Error(`Update exited with code ${code}`))
+        }
       })
       proc.on('error', (err) => reject(err))
     })

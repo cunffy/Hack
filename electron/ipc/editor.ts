@@ -2,10 +2,10 @@ import { ipcMain, dialog, app, shell } from 'electron'
 import { readdir, readFile, writeFile, stat, copyFile, rename, rm, mkdir } from 'fs/promises'
 import { join, extname, basename, dirname } from 'path'
 import { homedir } from 'os'
-import { store } from './settings'
+import { getSettingsStore } from './settings'
 
 function getWorkspacePath(): string {
-  const saved = store.get('workspace') as string
+  const saved = getSettingsStore().get('workspace') as string
   return saved || join(app.getPath('documents'), 'Cryogram', 'workspace')
 }
 
@@ -66,7 +66,7 @@ export function registerEditorHandlers(): void {
       title: 'Select Workspace Folder',
     })
     if (!result.canceled && result.filePaths[0]) {
-      store.set('workspace', result.filePaths[0])
+      getSettingsStore().set('workspace', result.filePaths[0])
       return result.filePaths[0]
     }
     return null
