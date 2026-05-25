@@ -54,7 +54,6 @@ export function Dock() {
   const [ctx, setCtx]           = useState<CtxState | null>(null)
   const dockRef = useRef<HTMLDivElement>(null)
 
-  // Poll external X11 windows every 2 s
   useEffect(() => {
     const poll = async () => {
       try {
@@ -104,16 +103,9 @@ export function Dock() {
                   else { restoreWindow(win.id); focusWindow(win.id) }
                 },
               },
-              {
-                label: 'Add to Desktop',
-                action: () => addDesktopIcon(ctx.appId),
-              },
+              { label: 'Add to Desktop', action: () => addDesktopIcon(ctx.appId) },
               { sep: true },
-              {
-                label: 'Remove from Dock',
-                danger: true,
-                action: () => removeApp(ctx.appId),
-              },
+              { label: 'Remove from Dock', danger: true, action: () => removeApp(ctx.appId) },
             ] as MenuItem[]}
           />
         )}
@@ -121,7 +113,6 @@ export function Dock() {
 
       <div className="absolute bottom-3 left-0 right-0 flex justify-center pointer-events-none z-50">
         <div className="relative flex flex-col items-center">
-          {/* Tooltip */}
           <AnimatePresence>
             {hovered && !dragging && (
               <motion.div
@@ -145,7 +136,6 @@ export function Dock() {
             )}
           </AnimatePresence>
 
-          {/* Dock glass pill */}
           <div
             ref={dockRef}
             className="flex items-end pointer-events-auto"
@@ -162,7 +152,6 @@ export function Dock() {
             onMouseMove={onMouseMove}
             onMouseLeave={onMouseLeave}
           >
-            {/* Reorderable internal apps */}
             <Reorder.Group
               axis="x"
               values={order}
@@ -177,8 +166,8 @@ export function Dock() {
                 const isOpen      = !!win
                 const isMinimized = !!win?.minimized
                 const isFocused   = win?.focused && !win.minimized
-                const scale     = getScale(idx)
-                const size      = BASE * scale
+                const scale = getScale(idx)
+                const size  = BASE * scale
 
                 return (
                   <Reorder.Item
@@ -192,10 +181,7 @@ export function Dock() {
                       className="flex flex-col items-center cursor-default"
                       style={{ width: BASE }}
                       onMouseEnter={() => setHovered(meta.label)}
-                      onContextMenu={e => {
-                        e.preventDefault()
-                        setCtx({ x: e.clientX, y: e.clientY - 8, appId })
-                      }}
+                      onContextMenu={e => { e.preventDefault(); setCtx({ x: e.clientX, y: e.clientY - 8, appId }) }}
                     >
                       <motion.button
                         onClick={() => {
@@ -224,8 +210,7 @@ export function Dock() {
                       <div
                         className="mt-1 text-center leading-none select-none truncate pointer-events-none"
                         style={{
-                          fontSize: 9,
-                          maxWidth: BASE,
+                          fontSize: 9, maxWidth: BASE,
                           color: isFocused ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.35)',
                           fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
                           transition: 'color 0.2s',
@@ -233,7 +218,6 @@ export function Dock() {
                       >
                         {meta.label}
                       </div>
-                      {/* Open/minimized indicator dot */}
                       <div className="flex gap-0.5 mt-0.5 items-center justify-center" style={{ height: 5 }}>
                         {isOpen && !isMinimized && (
                           <div className="rounded-full transition-all duration-300" style={{
@@ -244,8 +228,7 @@ export function Dock() {
                         )}
                         {isMinimized && (
                           <div className="rounded-full transition-all duration-300" style={{
-                            width: 3, height: 3,
-                            background: 'rgba(255,255,255,0.3)',
+                            width: 3, height: 3, background: 'rgba(255,255,255,0.3)',
                           }} />
                         )}
                       </div>
@@ -255,13 +238,10 @@ export function Dock() {
               })}
             </Reorder.Group>
 
-            {/* Separator + External X11 windows */}
             {x11Windows.length > 0 && (
               <>
-                <div
-                  className="self-stretch"
-                  style={{ width: 1, background: 'rgba(255,255,255,0.12)', margin: '6px 4px' }}
-                />
+                <div className="self-stretch"
+                  style={{ width: 1, background: 'rgba(255,255,255,0.12)', margin: '6px 4px' }} />
                 {x11Windows.map(xwin => {
                   const meta = getX11Meta(xwin.title)
                   return (
@@ -302,7 +282,6 @@ export function Dock() {
             )}
           </div>
 
-          {/* Drag hint */}
           <motion.div
             className="mt-1.5 text-center pointer-events-none"
             initial={{ opacity: 0 }}
@@ -318,7 +297,6 @@ export function Dock() {
   )
 }
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
 function TermIcon()    { return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> }
 function EditorIcon()  { return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> }
 function LockIcon()    { return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> }

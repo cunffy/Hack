@@ -21,7 +21,7 @@ function createWindow(): void {
     frame: false,
     titleBarStyle: 'hidden',
     backgroundColor: '#070b11',
-    skipTaskbar: true,     // Don't show in any system taskbar — WE are the taskbar
+    skipTaskbar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -34,26 +34,20 @@ function createWindow(): void {
   mainWindow.on('ready-to-show', () => {
     mainWindow!.show()
     mainWindow!.maximize()
-    // Re-maximize if something else pushes us out of fullscreen
     mainWindow!.on('restore', () => mainWindow?.maximize())
 
-    // ── Block WM-level shortcuts that would expose the underlying desktop ──
-    // Super+D  = "show desktop" in most WMs — we swallow it
     globalShortcut.register('Super+D', () => {})
-    // Super+Tab = WM window switcher — Cryogram's own task switcher handles this
     globalShortcut.register('Super+Tab', () => {})
-    // Super+L = OS lock — redirect to Cryogram's lock screen
     globalShortcut.register('Super+L', () => {
       mainWindow?.webContents.send('screen:lock')
     })
-    // Ctrl+Alt+T = terminal shortcut some WMs bind — open Cryogram terminal instead
     globalShortcut.register('CommandOrControl+Alt+T', () => {
       mainWindow?.webContents.send('open:app', 'terminal')
     })
 
     // ── Volume keys ────────────────────────────────────────────────────────
-    // Track last known level so we can show optimistic updates immediately
-    // instead of defaulting to 50 when pactl is slow to respond.
+    // Track last known level for optimistic HUD updates — never default to 50
+    // when pactl is slow or the sink isn't resolved yet.
     let _vol = -1
 
     const readVolAndSend = () => {
@@ -92,8 +86,7 @@ function createWindow(): void {
     // ── Brightness keys ────────────────────────────────────────────────────
     // BrightnessUp/Down are not valid Electron accelerator names on Linux.
     // Brightness is handled by ACPI (configured by cryogram-update) at OS level.
-    // We only send the HUD update here if ACPI notifies us via a custom IPC path.
-    // For now the brightness slider in System Settings works via setBrightness IPC.
+    // The brightness slider in System Settings works via setBrightness IPC.
 
     // ── Alt+Tab window switcher ────────────────────────────────────────────
     globalShortcut.register('Alt+Tab', () => {
@@ -123,7 +116,6 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // Window control IPC
   ipcMain.on('window:minimize', () => mainWindow?.minimize())
   ipcMain.on('window:maximize', () => {
     if (mainWindow?.isMaximized()) mainWindow.unmaximize()
@@ -131,7 +123,6 @@ app.whenReady().then(() => {
   })
   ipcMain.on('window:close', () => mainWindow?.close())
 
-  // Register all feature IPC handlers
   registerTerminalHandlers()
   registerPasswordTesterHandlers()
   registerLeakerHandlers()
@@ -142,7 +133,6 @@ app.whenReady().then(() => {
 
   createWindow()
 
-  // Lock screen on system resume (lid open / wake from sleep) and OS lock-screen
   powerMonitor.on('resume',      () => mainWindow?.webContents.send('screen:lock'))
   powerMonitor.on('lock-screen', () => mainWindow?.webContents.send('screen:lock'))
 
