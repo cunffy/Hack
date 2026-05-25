@@ -258,7 +258,7 @@ export function registerSystemHandlers(): void {
   })
 
   ipcMain.handle('system:setWallpaper', async (_, path: string) => {
-    const safe = path.replace(/'/g, "'\\''")
+    const safe = path.replace(/'/g, "'\\''") 
     await sh(`feh --bg-scale '${safe}' 2>/dev/null`)
     return true
   })

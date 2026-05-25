@@ -69,7 +69,6 @@ export default function App() {
     const handler = (e: KeyboardEvent) => {
       if (e.altKey && e.key === 'Tab') {
         e.preventDefault()
-        ;(window.cryogram as any).onAppSwitcher?.  // no-op, IPC handles it
         window.dispatchEvent(new CustomEvent('cryogram:switcher', { detail: e.shiftKey ? 'prev' : 'next' }))
       }
     }
