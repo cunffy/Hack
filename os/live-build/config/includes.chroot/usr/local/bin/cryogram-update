@@ -149,28 +149,21 @@ else
   fi
 fi
 
-# ── Restart Cryogram OS ───────────────────────────────────────────────────────
-step "Restarting Cryogram OS"
+# ── Reboot ────────────────────────────────────────────────────────────────────
+step "Rebooting"
 
 echo ""
-ok "Update complete — Cryogram OS will restart in 5 seconds."
-warn "This window will close as the session restarts. That is normal."
-echo ""
+echo -e "${CYAN}${BOLD}"
+echo "  ╔════════════════════════════════════════════╗"
+echo "  ║   Cryogram OS update complete.             ║"
+echo "  ║   Your computer will restart shortly.      ║"
+echo "  ╚════════════════════════════════════════════╝"
+echo -e "${NC}"
 
-for i in 5 4 3 2 1; do
-  echo -ne "  Restarting in ${BOLD}${i}${NC}...\r"
+for i in 10 9 8 7 6 5 4 3 2 1; do
+  echo -ne "  Rebooting in ${BOLD}${CYAN}${i}${NC}...\r"
   sleep 1
 done
 echo ""
 
-# Restart the display manager session — this is the right way to restart a UI session.
-# LightDM kills the current X session (closing all apps), then autologins and relaunches
-# the cryogram-session script, which starts Cryogram fresh. Exactly like a real OS.
-#
-# This is far more reliable than killing/relaunching Electron manually because:
-#  - Display server, WM, and Electron all restart from a clean slate
-#  - No DISPLAY/DBUS env var guessing needed
-#  - Matches how macOS and Windows handle shell updates
-# Session ends here — systemctl kills the X session immediately.
-# The lines below this will never execute. Cryogram relaunches via autologin.
-systemctl restart display-manager
+systemctl reboot
