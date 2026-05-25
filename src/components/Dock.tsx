@@ -45,9 +45,9 @@ export function Dock() {
   }, [])
 
   return (
-    <div className="absolute bottom-4 left-0 right-0 flex justify-center pointer-events-none z-50">
+    <div className="absolute bottom-3 left-0 right-0 flex justify-center pointer-events-none z-50">
       <div className="relative flex flex-col items-center">
-        {/* Tooltip */}
+        {/* Tooltip — shows full label on hover */}
         <AnimatePresence>
           {hovered && (
             <motion.div
@@ -58,14 +58,12 @@ export function Dock() {
               transition={{ duration: 0.12 }}
               className="absolute pointer-events-none text-xs px-3 py-1.5 rounded-lg whitespace-nowrap"
               style={{
-                bottom: '100%',
-                marginBottom: 10,
-                background: 'rgba(8,12,18,0.96)',
+                bottom: 'calc(100% + 4px)',
+                background: 'rgba(8,12,18,0.97)',
                 border: '1px solid rgba(255,255,255,0.1)',
                 color: '#e2e8f0',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
-                letterSpacing: '0.01em',
               }}
             >
               {APPS.find(a => a.id === hovered)?.label}
@@ -140,13 +138,29 @@ export function Dock() {
                   <div style={{ color: app.color }}>{app.icon}</div>
                 </motion.button>
 
-                {/* Open dot indicator */}
+                {/* App label — always visible */}
                 <div
-                  className="absolute rounded-full transition-all duration-300"
+                  className="mt-1.5 text-center pointer-events-none leading-none select-none"
                   style={{
-                    bottom: -7,
-                    width: isFocused ? 5 : isOpen ? 3 : 0,
-                    height: isFocused ? 5 : isOpen ? 3 : 0,
+                    fontSize: 9,
+                    color: isFocused ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.35)',
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+                    transition: 'color 0.2s',
+                    maxWidth: BASE,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {app.label}
+                </div>
+
+                {/* Open indicator dot */}
+                <div
+                  className="rounded-full transition-all duration-300 mt-1"
+                  style={{
+                    width: isFocused ? 4 : isOpen ? 3 : 0,
+                    height: isFocused ? 4 : isOpen ? 3 : 0,
                     background: app.color,
                     boxShadow: isOpen ? `0 0 5px ${app.color}` : 'none',
                     opacity: isOpen ? 1 : 0,
