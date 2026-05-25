@@ -68,9 +68,13 @@ export function Desktop() {
     <div
       className="absolute inset-0 select-none"
       style={{
-        backgroundImage: wallpaper ? `url('${wallpaper.replace(/'/g, "\\'")}')` : undefined,
+        backgroundImage: wallpaper
+          ? `url('${(wallpaper.startsWith('file://') ? wallpaper : `file://${wallpaper}`).replace(/'/g, "\\'")}')`
+          : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        imageRendering: 'auto',
       }}
       onContextMenu={handleBgCtx}
     >

@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-B4BRFaqN.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-Cw-1D7g7.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -16200,6 +16200,7 @@ function Dock() {
                   if (!meta) return null;
                   const win = windows.find((w2) => w2.appId === appId);
                   const isOpen = !!win;
+                  const isMinimized = !!win?.minimized;
                   const isFocused = win?.focused && !win.minimized;
                   const scale2 = getScale(idx);
                   const size = BASE * scale2;
@@ -16275,19 +16276,19 @@ function Dock() {
                                 children: meta.label
                               }
                             ),
-                            /* @__PURE__ */ jsxRuntimeExports.jsx(
-                              "div",
-                              {
-                                className: "rounded-full mt-0.5 transition-all duration-300",
-                                style: {
-                                  width: isFocused ? 4 : isOpen ? 3 : 0,
-                                  height: isFocused ? 4 : isOpen ? 3 : 0,
-                                  background: meta.color,
-                                  boxShadow: isOpen ? `0 0 5px ${meta.color}` : "none",
-                                  opacity: isOpen ? 1 : 0
-                                }
-                              }
-                            )
+                            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-0.5 mt-0.5 items-center justify-center", style: { height: 5 }, children: [
+                              isOpen && !isMinimized && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-full transition-all duration-300", style: {
+                                width: isFocused ? 5 : 3,
+                                height: isFocused ? 5 : 3,
+                                background: meta.color,
+                                boxShadow: isFocused ? `0 0 6px ${meta.color}` : "none"
+                              } }),
+                              isMinimized && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "rounded-full transition-all duration-300", style: {
+                                width: 3,
+                                height: 3,
+                                background: "rgba(255,255,255,0.3)"
+                              } })
+                            ] })
                           ]
                         }
                       )
@@ -16476,9 +16477,11 @@ function Desktop() {
     {
       className: "absolute inset-0 select-none",
       style: {
-        backgroundImage: wallpaper ? `url('${wallpaper.replace(/'/g, "\\'")}')` : void 0,
+        backgroundImage: wallpaper ? `url('${(wallpaper.startsWith("file://") ? wallpaper : `file://${wallpaper}`).replace(/'/g, "\\'")}')` : void 0,
         backgroundSize: "cover",
-        backgroundPosition: "center"
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        imageRendering: "auto"
       },
       onContextMenu: handleBgCtx,
       children: [
@@ -16965,14 +16968,14 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-B4BRFaqN.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-B_rE8G3g.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-hrbC-FnB.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-Cf7KAU74.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-DGGtyl1f.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-B95WVUsD.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-DcO5wIfF.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-B5Ov65pC.js"), true ? [] : void 0, import.meta.url));
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-Cw-1D7g7.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-DR5rDyZZ.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-C6OzKrJA.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-DY1OZBQ-.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-BQEao6NV.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-BVA6BOHz.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-CBiCFF12.js"), true ? [] : void 0, import.meta.url));
+const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-63Y3bz2z.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -17601,14 +17604,14 @@ function WifiPanel({ wifi, onWifiChange }) {
     setConnecting(net.ssid);
     setError("");
     try {
-      const ok2 = await window.cryogram.system.connectNetwork(net.ssid, pw || void 0);
-      if (ok2) {
+      const result = await window.cryogram.system.connectNetwork(net.ssid, pw || void 0);
+      if (result?.success) {
         setSelected(null);
         setPassword("");
         const updated = await window.cryogram.system.getWifiStatus();
         onWifiChange(updated);
       } else {
-        setError("Connection failed — check your password");
+        setError(result?.message || "Connection failed — check your password");
       }
     } catch {
       setError("Connection error");
@@ -17871,244 +17874,6 @@ const APP_COLORS = {
   launcher: "#34d399",
   system: "#818cf8"
 };
-function Clock() {
-  const [now2, setNow] = reactExports.useState(/* @__PURE__ */ new Date());
-  const [showDate, setShowDate] = reactExports.useState(false);
-  reactExports.useEffect(() => {
-    const id2 = setInterval(() => setNow(/* @__PURE__ */ new Date()), 1e3);
-    return () => clearInterval(id2);
-  }, []);
-  const time2 = now2.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  const date = now2.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative", onMouseEnter: () => setShowDate(true), onMouseLeave: () => setShowDate(false), children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "button",
-      {
-        className: "flex items-center justify-center px-3 h-8 rounded-lg hover:bg-white/5 transition-colors select-none",
-        style: { color: "#c9d1d9", fontFamily: "monospace", fontSize: 12, letterSpacing: 1 },
-        children: time2
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: showDate && /* @__PURE__ */ jsxRuntimeExports.jsx(
-      motion.div,
-      {
-        initial: { opacity: 0, y: 4, scale: 0.95 },
-        animate: { opacity: 1, y: 0, scale: 1 },
-        exit: { opacity: 0, y: 4, scale: 0.95 },
-        transition: { duration: 0.12 },
-        style: {
-          position: "absolute",
-          bottom: "100%",
-          right: 0,
-          marginBottom: 8,
-          background: "rgba(13,20,33,0.98)",
-          border: "1px solid rgba(0,212,255,0.2)",
-          borderRadius: 8,
-          padding: "6px 14px",
-          whiteSpace: "nowrap",
-          color: "#00d4ff",
-          fontFamily: "monospace",
-          fontSize: 11,
-          letterSpacing: 1,
-          zIndex: 9999,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.6)"
-        },
-        children: date
-      }
-    ) })
-  ] });
-}
-function VolumeTray() {
-  const [open, setOpen] = reactExports.useState(false);
-  const [vol, setVol] = reactExports.useState(50);
-  const [muted, setMuted] = reactExports.useState(false);
-  const ref = reactExports.useRef(null);
-  reactExports.useEffect(() => {
-    const api = window.cryogram;
-    if (!api) return;
-    api.system?.getVolume?.().then((v2) => {
-      setVol(v2.level);
-      setMuted(v2.muted);
-    }).catch(() => {
-    });
-    const cleanup = api.onHudVolume?.((v2) => {
-      setVol(v2.level);
-      setMuted(v2.muted);
-    });
-    return cleanup;
-  }, []);
-  reactExports.useEffect(() => {
-    if (!open) return;
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-  const setVolume = (level) => {
-    setVol(level);
-    window.cryogram?.system?.setVolume(level);
-  };
-  const toggleMute = () => {
-    setMuted((m2) => !m2);
-    window.cryogram?.system?.toggleMute();
-  };
-  const icon = muted || vol === 0 ? "🔇" : vol < 40 ? "🔈" : vol < 70 ? "🔉" : "🔊";
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative", ref, children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "button",
-      {
-        onClick: () => setOpen((p2) => !p2),
-        onContextMenu: (e) => {
-          e.preventDefault();
-          toggleMute();
-        },
-        className: "flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/5 transition-colors select-none",
-        title: "Volume (right-click to mute)",
-        style: { fontSize: 14, color: muted ? "#ef4444" : "#8b949e" },
-        children: icon
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: open && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      motion.div,
-      {
-        initial: { opacity: 0, y: 4, scale: 0.95 },
-        animate: { opacity: 1, y: 0, scale: 1 },
-        exit: { opacity: 0, y: 4, scale: 0.95 },
-        transition: { duration: 0.12 },
-        style: {
-          position: "absolute",
-          bottom: "100%",
-          right: 0,
-          marginBottom: 8,
-          background: "rgba(13,20,33,0.98)",
-          border: "1px solid rgba(0,212,255,0.2)",
-          borderRadius: 12,
-          padding: "14px 12px",
-          zIndex: 9999,
-          boxShadow: "0 4px 32px rgba(0,0,0,0.6)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 8
-        },
-        children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 20 }, children: icon }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "input",
-            {
-              type: "range",
-              min: 0,
-              max: 100,
-              value: vol,
-              onChange: (e) => setVolume(Number(e.target.value)),
-              style: { writingMode: "vertical-lr", direction: "rtl", height: 80, accentColor: "#00d4ff" }
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { fontSize: 10, color: "#8b949e", fontFamily: "monospace" }, children: [
-            vol,
-            "%"
-          ] })
-        ]
-      }
-    ) })
-  ] });
-}
-function WifiTray() {
-  const [ssid, setSsid] = reactExports.useState(null);
-  const refresh = reactExports.useCallback(async () => {
-    try {
-      const s = await window.cryogram?.system?.getWifiStatus();
-      setSsid(s?.ssid ?? null);
-    } catch {
-      setSsid(null);
-    }
-  }, []);
-  reactExports.useEffect(() => {
-    refresh();
-    const id2 = setInterval(refresh, 15e3);
-    return () => clearInterval(id2);
-  }, [refresh]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "button",
-    {
-      className: "flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/5 transition-colors select-none",
-      title: ssid ? `WiFi: ${ssid}` : "Not connected — click to open Settings",
-      onClick: () => useWindowStore.getState().openApp("settings"),
-      style: { fontSize: 14, color: ssid ? "#00d4ff" : "#3d4a55" },
-      children: ssid ? "📶" : "📵"
-    }
-  );
-}
-function WinContextMenu({ x: x2, win, onClose }) {
-  const { minimizeWindow, restoreWindow, toggleMaximize, closeWindow } = useWindowStore();
-  const ref = reactExports.useRef(null);
-  reactExports.useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) onClose();
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [onClose]);
-  const items = [
-    win.minimized ? { label: "Restore", action: () => restoreWindow(win.id) } : { label: "Minimize", action: () => minimizeWindow(win.id) },
-    { label: win.maximized ? "Unmaximize" : "Maximize", action: () => toggleMaximize(win.id) },
-    null,
-    { label: "Close", action: () => closeWindow(win.id), danger: true }
-  ];
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    motion.div,
-    {
-      ref,
-      initial: { opacity: 0, scale: 0.93, y: 6 },
-      animate: { opacity: 1, scale: 1, y: 0 },
-      exit: { opacity: 0, scale: 0.93, y: 6 },
-      transition: { duration: 0.1 },
-      onContextMenu: (e) => e.preventDefault(),
-      style: {
-        position: "fixed",
-        left: x2,
-        bottom: 44,
-        background: "rgba(13,20,33,0.99)",
-        border: "1px solid rgba(0,212,255,0.2)",
-        borderRadius: 10,
-        padding: 4,
-        zIndex: 99999,
-        minWidth: 148,
-        boxShadow: "0 8px 32px rgba(0,0,0,0.7)"
-      },
-      children: items.map(
-        (item, i) => item === null ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { height: 1, background: "rgba(0,212,255,0.1)", margin: "3px 8px" } }, i) : /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "button",
-          {
-            onClick: () => {
-              item.action();
-              onClose();
-            },
-            style: {
-              display: "block",
-              width: "100%",
-              textAlign: "left",
-              padding: "7px 12px",
-              borderRadius: 6,
-              border: "none",
-              background: "none",
-              cursor: "pointer",
-              fontSize: 12,
-              fontFamily: "monospace",
-              color: item.danger ? "#ff4466" : "#c9d1d9",
-              transition: "background 0.1s"
-            },
-            onMouseEnter: (e) => e.currentTarget.style.background = item.danger ? "rgba(255,68,102,0.15)" : "rgba(0,212,255,0.08)",
-            onMouseLeave: (e) => e.currentTarget.style.background = "none",
-            children: item.label
-          },
-          item.label
-        )
-      )
-    }
-  );
-}
 function SystemHUD() {
   const [hud, setHud] = reactExports.useState(null);
   const timer = reactExports.useRef();
@@ -18180,15 +17945,21 @@ function AppSwitcher() {
   const allWins = windows;
   reactExports.useEffect(() => {
     const api = window.cryogram;
-    const cleanup = api?.onAppSwitcher?.((dir) => {
+    const handle = (dir) => {
       setOpen(true);
       setIdx((prev) => {
         const len = allWins.length;
         if (len === 0) return 0;
         return dir === "next" ? (prev + 1) % len : (prev - 1 + len) % len;
       });
-    });
-    return cleanup;
+    };
+    const cleanup = api?.onAppSwitcher?.(handle);
+    const domHandler = (e) => handle(e.detail);
+    window.addEventListener("cryogram:switcher", domHandler);
+    return () => {
+      cleanup?.();
+      window.removeEventListener("cryogram:switcher", domHandler);
+    };
   }, [allWins.length]);
   reactExports.useEffect(() => {
     if (!open) return;
@@ -18303,262 +18074,6 @@ function AppSwitcher() {
     },
     "switcher"
   ) });
-}
-function Taskbar() {
-  const { windows, focusWindow, restoreWindow, minimizeWindow } = useWindowStore();
-  const openApp = useWindowStore((s) => s.openApp);
-  const { taskbar: pinnedApps, unpinTaskbar } = usePinnedStore();
-  const [x11Wins, setX11Wins] = reactExports.useState([]);
-  const [ctxMenu, setCtxMenu] = reactExports.useState(null);
-  const [pinnedCtx, setPinnedCtx] = reactExports.useState(null);
-  reactExports.useEffect(() => {
-    const poll = async () => {
-      try {
-        const wins = await window.cryogram?.wm?.getWindows();
-        if (Array.isArray(wins)) {
-          setX11Wins(wins.filter(
-            (w2) => w2.title && !w2.title.toLowerCase().includes("cryogram") && !w2.title.toLowerCase().includes("electron")
-          ));
-        }
-      } catch {
-      }
-    };
-    poll();
-    const id2 = setInterval(poll, 3e3);
-    return () => clearInterval(id2);
-  }, []);
-  const cleanTitle = (raw) => {
-    const parts = raw.split(" - ");
-    return parts.length > 1 ? parts[parts.length - 1].trim() : raw.trim();
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      "div",
-      {
-        className: "flex items-center h-10 px-2 gap-1.5 shrink-0 relative select-none",
-        style: {
-          background: "rgba(7,11,17,0.96)",
-          borderTop: "1px solid rgba(0,212,255,0.09)",
-          backdropFilter: "blur(28px)"
-        },
-        children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              className: "absolute inset-x-0 top-0 h-px pointer-events-none",
-              style: { background: "linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.22) 50%, transparent 100%)" }
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "button",
-            {
-              onClick: () => openApp("launcher"),
-              className: "flex items-center justify-center w-8 h-8 rounded-lg shrink-0 transition-all hover:scale-105 active:scale-95",
-              title: "Launcher",
-              style: { background: "rgba(0,212,255,0.07)", border: "1px solid rgba(0,212,255,0.18)" },
-              children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                motion.span,
-                {
-                  animate: { opacity: [1, 0.45, 1] },
-                  transition: { duration: 3.2, repeat: Infinity, ease: "easeInOut" },
-                  style: { fontSize: 15, filter: "drop-shadow(0 0 5px rgba(0,212,255,0.85))" },
-                  children: "⬡"
-                }
-              )
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-5 shrink-0 mx-0.5", style: { background: "rgba(0,212,255,0.1)" } }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { initial: false, children: pinnedApps.map((app) => {
-            const running = x11Wins.find((w2) => w2.title.toLowerCase().includes(app.name.toLowerCase()));
-            return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              motion.button,
-              {
-                initial: { opacity: 0, scale: 0.78 },
-                animate: { opacity: 1, scale: 1 },
-                exit: { opacity: 0, scale: 0.78 },
-                transition: { type: "spring", stiffness: 440, damping: 30 },
-                title: app.name,
-                onClick: () => {
-                  if (running) window.cryogram?.wm?.focusWindow(running.id);
-                  else window.cryogram?.launcher?.launch(app);
-                },
-                onContextMenu: (e) => {
-                  e.preventDefault();
-                  setPinnedCtx({ x: e.clientX, id: app.id });
-                },
-                className: "flex items-center justify-center w-8 h-8 rounded-lg shrink-0 transition-all",
-                style: {
-                  background: running ? "rgba(0,212,255,0.12)" : "rgba(13,20,33,0.6)",
-                  border: running ? "1px solid rgba(0,212,255,0.3)" : "1px solid rgba(26,40,64,0.45)",
-                  position: "relative"
-                },
-                children: [
-                  app.icon ? /* @__PURE__ */ jsxRuntimeExports.jsx(
-                    "img",
-                    {
-                      src: app.icon,
-                      alt: "",
-                      style: { width: 18, height: 18, objectFit: "contain" },
-                      onError: (e) => {
-                        e.target.style.display = "none";
-                      }
-                    }
-                  ) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 14 }, children: "🌐" }),
-                  running && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
-                    position: "absolute",
-                    bottom: 1,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: 4,
-                    height: 4,
-                    borderRadius: "50%",
-                    background: "#00d4ff"
-                  } })
-                ]
-              },
-              app.id
-            );
-          }) }),
-          pinnedApps.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-5 shrink-0 mx-0.5", style: { background: "rgba(0,212,255,0.1)" } }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1 flex-1 min-w-0 overflow-x-auto", style: { scrollbarWidth: "none" }, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { initial: false, children: windows.map((win) => {
-              const accent = APP_COLORS[win.appId] ?? "#00d4ff";
-              const icon = APP_ICONS[win.appId] ?? "🪟";
-              const isActive = win.focused && !win.minimized;
-              return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                motion.button,
-                {
-                  initial: { opacity: 0, scale: 0.78, x: -10 },
-                  animate: { opacity: 1, scale: 1, x: 0 },
-                  exit: { opacity: 0, scale: 0.78, x: -10 },
-                  transition: { type: "spring", stiffness: 440, damping: 30 },
-                  onClick: () => {
-                    if (win.minimized) restoreWindow(win.id);
-                    else if (win.focused) minimizeWindow(win.id);
-                    else focusWindow(win.id);
-                  },
-                  onContextMenu: (e) => {
-                    e.preventDefault();
-                    setCtxMenu({ x: e.clientX, winId: win.id });
-                  },
-                  className: "relative flex items-center gap-1.5 px-2 h-7 rounded-lg text-xs shrink-0 transition-all",
-                  style: {
-                    background: isActive ? `${accent}11` : "rgba(13,20,33,0.65)",
-                    border: isActive ? `1px solid ${accent}32` : "1px solid rgba(26,40,64,0.5)",
-                    color: isActive ? accent : win.minimized ? "#2e3a46" : "#8b949e",
-                    maxWidth: 156,
-                    boxShadow: isActive ? `0 0 12px ${accent}12` : "none"
-                  },
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 12, opacity: win.minimized ? 0.3 : 1 }, children: icon }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", style: { fontFamily: "monospace", letterSpacing: 0.2 }, children: win.title }),
-                    isActive && /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      motion.div,
-                      {
-                        className: "absolute bottom-0.5 left-3 right-3 h-0.5 rounded-full",
-                        style: { background: `linear-gradient(90deg, transparent, ${accent}, transparent)` },
-                        layoutId: `pill-${win.id}`
-                      }
-                    )
-                  ]
-                },
-                win.id
-              );
-            }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { initial: false, children: x11Wins.map((xw) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              motion.button,
-              {
-                initial: { opacity: 0, scale: 0.78, x: -10 },
-                animate: { opacity: 1, scale: 1, x: 0 },
-                exit: { opacity: 0, scale: 0.78, x: -10 },
-                transition: { type: "spring", stiffness: 440, damping: 30 },
-                onClick: () => window.cryogram?.wm?.focusWindow(xw.id),
-                className: "flex items-center gap-1.5 px-2 h-7 rounded-lg text-xs shrink-0",
-                style: {
-                  background: "rgba(13,20,33,0.65)",
-                  border: "1px solid rgba(26,40,64,0.5)",
-                  color: "#8b949e",
-                  maxWidth: 156
-                },
-                children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 12 }, children: "🌐" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", style: { fontFamily: "monospace", letterSpacing: 0.2 }, children: cleanTitle(xw.title) })
-                ]
-              },
-              xw.id
-            )) }),
-            windows.length === 0 && x11Wins.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 11, color: "#2e3a46", fontFamily: "monospace", paddingLeft: 4, fontStyle: "italic" }, children: "— no open windows —" })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-0.5 shrink-0", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(WifiTray, {}),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(VolumeTray, {}),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-4 mx-1", style: { background: "rgba(0,212,255,0.1)" } }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, {})
-          ] })
-        ]
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: ctxMenu && (() => {
-      const win = windows.find((w2) => w2.id === ctxMenu.winId);
-      if (!win) return null;
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(WinContextMenu, { x: ctxMenu.x, win, onClose: () => setCtxMenu(null) }, "ctx");
-    })() }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: pinnedCtx && (() => {
-      const app = pinnedApps.find((a) => a.id === pinnedCtx.id);
-      if (!app) return null;
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        motion.div,
-        {
-          initial: { opacity: 0, scale: 0.93, y: 6 },
-          animate: { opacity: 1, scale: 1, y: 0 },
-          exit: { opacity: 0, scale: 0.93, y: 6 },
-          transition: { duration: 0.1 },
-          style: {
-            position: "fixed",
-            left: pinnedCtx.x,
-            bottom: 44,
-            background: "rgba(13,20,33,0.99)",
-            border: "1px solid rgba(0,212,255,0.2)",
-            borderRadius: 10,
-            padding: 4,
-            zIndex: 99999,
-            minWidth: 160,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.7)"
-          },
-          onContextMenu: (e) => e.preventDefault(),
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-3 py-1.5 text-xs font-semibold", style: { color: "#00d4ff", fontFamily: "monospace", borderBottom: "1px solid rgba(0,212,255,0.1)", marginBottom: 2 }, children: app.name }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "button",
-              {
-                onClick: () => {
-                  unpinTaskbar(app.id);
-                  setPinnedCtx(null);
-                },
-                style: {
-                  display: "block",
-                  width: "100%",
-                  textAlign: "left",
-                  padding: "7px 12px",
-                  borderRadius: 6,
-                  border: "none",
-                  background: "none",
-                  cursor: "pointer",
-                  fontSize: 12,
-                  fontFamily: "monospace",
-                  color: "#ff4466"
-                },
-                onMouseEnter: (e) => e.currentTarget.style.background = "rgba(255,68,102,0.12)",
-                onMouseLeave: (e) => e.currentTarget.style.background = "none",
-                children: "Unpin from Taskbar"
-              }
-            )
-          ]
-        },
-        "pinctx"
-      );
-    })() })
-  ] });
 }
 function AnimatedBackground() {
   const canvasRef = reactExports.useRef(null);
@@ -19160,6 +18675,16 @@ function App() {
     });
     return cleanup ?? void 0;
   }, [openApp]);
+  reactExports.useEffect(() => {
+    const handler = (e) => {
+      if (e.altKey && e.key === "Tab") {
+        e.preventDefault();
+        window.cryogram.onAppSwitcher?.window.dispatchEvent(new CustomEvent("cryogram:switcher", { detail: e.shiftKey ? "prev" : "next" }));
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: !booted && /* @__PURE__ */ jsxRuntimeExports.jsx(BootSplash, { onDone: handleBooted }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: booted && /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -19178,7 +18703,6 @@ function App() {
             /* @__PURE__ */ jsxRuntimeExports.jsx(WindowManager, {}),
             /* @__PURE__ */ jsxRuntimeExports.jsx(Dock, {})
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Taskbar, {}),
           /* @__PURE__ */ jsxRuntimeExports.jsx(NotificationToast, {}),
           /* @__PURE__ */ jsxRuntimeExports.jsx(SystemHUD, {}),
           /* @__PURE__ */ jsxRuntimeExports.jsx(AppSwitcher, {})

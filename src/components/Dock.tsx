@@ -155,8 +155,9 @@ export function Dock() {
                 const meta = APP_META[appId]
                 if (!meta) return null
                 const win = windows.find(w => w.appId === appId)
-                const isOpen    = !!win
-                const isFocused = win?.focused && !win.minimized
+                const isOpen      = !!win
+                const isMinimized = !!win?.minimized
+                const isFocused   = win?.focused && !win.minimized
                 const scale     = getScale(idx)
                 const size      = BASE * scale
 
@@ -213,16 +214,22 @@ export function Dock() {
                       >
                         {meta.label}
                       </div>
-                      <div
-                        className="rounded-full mt-0.5 transition-all duration-300"
-                        style={{
-                          width:  isFocused ? 4 : isOpen ? 3 : 0,
-                          height: isFocused ? 4 : isOpen ? 3 : 0,
-                          background: meta.color,
-                          boxShadow: isOpen ? `0 0 5px ${meta.color}` : 'none',
-                          opacity: isOpen ? 1 : 0,
-                        }}
-                      />
+                      {/* Open/minimized indicator dot */}
+                      <div className="flex gap-0.5 mt-0.5 items-center justify-center" style={{ height: 5 }}>
+                        {isOpen && !isMinimized && (
+                          <div className="rounded-full transition-all duration-300" style={{
+                            width: isFocused ? 5 : 3, height: isFocused ? 5 : 3,
+                            background: meta.color,
+                            boxShadow: isFocused ? `0 0 6px ${meta.color}` : 'none',
+                          }} />
+                        )}
+                        {isMinimized && (
+                          <div className="rounded-full transition-all duration-300" style={{
+                            width: 3, height: 3,
+                            background: 'rgba(255,255,255,0.3)',
+                          }} />
+                        )}
+                      </div>
                     </div>
                   </Reorder.Item>
                 )

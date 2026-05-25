@@ -318,7 +318,7 @@ export function AppSwitcher() {
 
   useEffect(() => {
     const api = (window as any).cryogram
-    const cleanup = api?.onAppSwitcher?.((dir: 'next' | 'prev') => {
+    const handle = (dir: 'next' | 'prev') => {
       setOpen(true)
       setIdx(prev => {
         const len = allWins.length
@@ -327,8 +327,13 @@ export function AppSwitcher() {
           ? (prev + 1) % len
           : (prev - 1 + len) % len
       })
-    })
-    return cleanup
+    }
+    // IPC path (when globalShortcut fires)
+    const cleanup = api?.onAppSwitcher?.(handle)
+    // Renderer path (when Alt+Tab is caught in App.tsx keydown listener)
+    const domHandler = (e: Event) => handle((e as CustomEvent).detail)
+    window.addEventListener('cryogram:switcher', domHandler)
+    return () => { cleanup?.(); window.removeEventListener('cryogram:switcher', domHandler) }
   }, [allWins.length])
 
   useEffect(() => {

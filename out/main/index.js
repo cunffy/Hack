@@ -520,12 +520,12 @@ function registerSystemHandlers() {
     }).sort((a, b) => b.signal - a.signal);
   });
   electron.ipcMain.handle("system:getWifiStatus", async () => {
-    const out = await sh("nmcli -t -f NAME,TYPE,STATE con show --active 2>/dev/null");
-    const wifi = out.split("\n").find((l) => l.includes(":wifi:activated"));
-    if (!wifi) return { connected: false, ssid: "", signal: 0 };
-    const ssid = wifi.split(":")[0];
-    const sigOut = await sh(`nmcli -t -f IN-USE,SIGNAL dev wifi list 2>/dev/null | grep '^\\*' | head -1`);
-    const signal = parseInt(sigOut.split(":")[1]) || 0;
+    const out = await sh("nmcli -t -f IN-USE,SSID,SIGNAL dev wifi list 2>/dev/null");
+    const active = out.split("\n").find((l) => l.startsWith("*:"));
+    if (!active) return { connected: false, ssid: "", signal: 0 };
+    const parts = active.split(":");
+    const ssid = parts.slice(1, -1).join(":");
+    const signal = parseInt(parts[parts.length - 1]) || 0;
     return { connected: true, ssid, signal };
   });
   electron.ipcMain.handle("system:connectNetwork", async (_, ssid, password) => {

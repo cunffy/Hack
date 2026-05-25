@@ -5,7 +5,7 @@ import { WindowManager } from './components/WindowManager'
 import { Dock } from './components/Dock'
 import { TitleBar } from './components/TitleBar'
 import { NotificationToast } from './components/NotificationToast'
-import { Taskbar, SystemHUD, AppSwitcher } from './components/Taskbar'
+import { SystemHUD, AppSwitcher } from './components/Taskbar'
 import { AnimatedBackground } from './components/AnimatedBackground'
 import { BootSplash } from './components/BootSplash'
 import { LockScreen } from './components/LockScreen'
@@ -64,6 +64,19 @@ export default function App() {
     return cleanup ?? undefined
   }, [openApp])
 
+  // Alt+Tab — captured in renderer so Openbox doesn't swallow it
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.altKey && e.key === 'Tab') {
+        e.preventDefault()
+        ;(window.cryogram as any).onAppSwitcher?.  // no-op, IPC handles it
+        window.dispatchEvent(new CustomEvent('cryogram:switcher', { detail: e.shiftKey ? 'prev' : 'next' }))
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
   return (
     <>
       <AnimatePresence>
@@ -87,7 +100,6 @@ export default function App() {
               <WindowManager />
               <Dock />
             </div>
-            <Taskbar />
             <NotificationToast />
             <SystemHUD />
             <AppSwitcher />

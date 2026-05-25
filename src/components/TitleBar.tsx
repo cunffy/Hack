@@ -437,15 +437,14 @@ function WifiPanel({ wifi, onWifiChange }: { wifi: WifiStatus | null; onWifiChan
     setConnecting(net.ssid)
     setError('')
     try {
-      const ok = await window.cryogram.system.connectNetwork(net.ssid, pw || undefined)
-      if (ok) {
+      const result = await (window.cryogram.system as any).connectNetwork(net.ssid, pw || undefined)
+      if (result?.success) {
         setSelected(null)
         setPassword('')
-        // Immediately update the parent WiFi status so the icon/bar refreshes
         const updated = await window.cryogram.system.getWifiStatus()
         onWifiChange(updated)
       } else {
-        setError('Connection failed — check your password')
+        setError(result?.message || 'Connection failed — check your password')
       }
     } catch {
       setError('Connection error')
