@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-De5fIhYm.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-rPjlG451.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -16150,16 +16150,9 @@ function Dock() {
               }
             }
           },
-          {
-            label: "Add to Desktop",
-            action: () => addDesktopIcon(ctx.appId)
-          },
+          { label: "Add to Desktop", action: () => addDesktopIcon(ctx.appId) },
           { sep: true },
-          {
-            label: "Remove from Dock",
-            danger: true,
-            action: () => removeApp(ctx.appId)
-          }
+          { label: "Remove from Dock", danger: true, action: () => removeApp(ctx.appId) }
         ]
       }
     ) }),
@@ -16992,14 +16985,14 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-De5fIhYm.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-CiIDDa5p.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-Bovq8IW1.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-DE7vjDy_.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-Yhf1k1Qk.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-DMJZC7kE.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-ChQaMOVO.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-Bc2Xfe5a.js"), true ? [] : void 0, import.meta.url));
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-rPjlG451.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-fz58eLAq.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-mt_HB1Di.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-DEpn-JAa.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-Bu833MQy.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-0jgKx6Et.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-BYd4W0w2.js"), true ? [] : void 0, import.meta.url));
+const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-dm01UdX5.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -18493,7 +18486,10 @@ const useLockStore = create((set) => ({
   isLocked: false,
   pinRequired: false,
   lock: (pinRequired = true) => set({ isLocked: true, pinRequired }),
-  unlock: () => set({ isLocked: false, pinRequired: false })
+  unlock: () => {
+    window.cryogram?.notifyUnlock?.();
+    set({ isLocked: false, pinRequired: false });
+  }
 }));
 const MIN_DIGITS = 4;
 const MAX_DIGITS = 8;
@@ -18503,15 +18499,12 @@ function LockScreen() {
   const [error, setError] = reactExports.useState("");
   const [shaking, setShaking] = reactExports.useState(false);
   const [time2, setTime] = reactExports.useState(/* @__PURE__ */ new Date());
-  const pinRef = reactExports.useRef(pin);
-  pinRef.current = pin;
   reactExports.useEffect(() => {
     const id2 = setInterval(() => setTime(/* @__PURE__ */ new Date()), 1e3);
     return () => clearInterval(id2);
   }, []);
   const addDigit = reactExports.useCallback((d) => {
-    if (pinRef.current.length >= MAX_DIGITS) return;
-    setPin((p2) => p2 + d);
+    setPin((p2) => p2.length >= MAX_DIGITS ? p2 : p2 + d);
     setError("");
   }, []);
   const del = reactExports.useCallback(() => {
@@ -18524,27 +18517,26 @@ function LockScreen() {
     setPin("");
     setTimeout(() => setShaking(false), 550);
   }, []);
-  const submit = reactExports.useCallback(async () => {
-    if (!pinRequired) {
-      unlock();
-      return;
-    }
-    const current = pinRef.current;
-    if (current.length < MIN_DIGITS) {
-      shake(`Enter at least ${MIN_DIGITS} digits`);
-      return;
-    }
-    try {
-      const ok2 = await window.cryogram.system.verifyPin(current);
-      if (ok2) {
-        unlock();
-      } else {
-        shake("Incorrect PIN — try again");
+  reactExports.useEffect(() => {
+    if (!pinRequired || pin.length < MIN_DIGITS) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const ok2 = await window.cryogram.system.verifyPin(pin);
+        if (cancelled) return;
+        if (ok2) {
+          unlock();
+        } else if (pin.length >= MAX_DIGITS) {
+          shake("Incorrect PIN — try again");
+        }
+      } catch {
+        if (!cancelled && pin.length >= MAX_DIGITS) shake("Unable to verify PIN");
       }
-    } catch {
-      shake("Unable to verify PIN");
-    }
-  }, [pinRequired, unlock, shake]);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [pin, pinRequired, unlock, shake]);
   reactExports.useEffect(() => {
     const onKey = (e) => {
       e.stopPropagation();
@@ -18554,15 +18546,14 @@ function LockScreen() {
       }
       if (e.key >= "0" && e.key <= "9") addDigit(e.key);
       else if (e.key === "Backspace") del();
-      else if (e.key === "Enter") submit();
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
-  }, [pinRequired, unlock, addDigit, del, submit]);
+  }, [pinRequired, unlock, addDigit, del]);
   const h = time2.getHours().toString().padStart(2, "0");
   const m2 = time2.getMinutes().toString().padStart(2, "0");
   const ds = time2.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
-  const dotCount = Math.min(MAX_DIGITS, Math.max(MIN_DIGITS, pin.length + (pin.length < MAX_DIGITS ? 1 : 0)));
+  const dotCount = Math.max(MIN_DIGITS, pin.length);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     motion.div,
     {
@@ -18590,7 +18581,7 @@ function LockScreen() {
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-12 h-px mx-auto", style: { background: "var(--cryo-a20)" } })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-10 select-none", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-center mb-12 select-none", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(BlinkingClock, { h, m: m2, seconds: time2.getSeconds() }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: "rgba(255,255,255,0.38)", fontSize: 13, fontFamily: "-apple-system, sans-serif", marginTop: 6 }, children: ds })
         ] }),
@@ -18598,23 +18589,23 @@ function LockScreen() {
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             motion.div,
             {
-              className: "flex gap-3.5",
+              className: "flex gap-4",
               animate: shaking ? { x: [0, -10, 10, -10, 10, -5, 5, 0] } : {},
               transition: { duration: 0.5 },
               children: Array.from({ length: dotCount }).map((_, i) => {
                 const filled = i < pin.length;
-                const isErr = error && filled;
+                const isErr = !!(error && filled);
                 return /* @__PURE__ */ jsxRuntimeExports.jsx(
                   motion.div,
                   {
                     className: "rounded-full",
                     animate: {
-                      scale: filled ? 1.15 : 1,
+                      scale: filled ? 1.2 : 1,
                       background: isErr ? "#f87171" : filled ? "var(--cryo-accent)" : "rgba(255,255,255,0.18)",
-                      boxShadow: filled && !isErr ? `0 0 10px var(--cryo-a50)` : "none"
+                      boxShadow: filled && !isErr ? `0 0 12px var(--cryo-a50)` : "none"
                     },
-                    transition: { duration: 0.12 },
-                    style: { width: 11, height: 11 }
+                    transition: { duration: 0.1 },
+                    style: { width: 12, height: 12 }
                   },
                   i
                 );
@@ -18633,52 +18624,26 @@ function LockScreen() {
             },
             error
           ) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-3 gap-2.5", children: [
-            ["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => /* @__PURE__ */ jsxRuntimeExports.jsx(NumKey, { label: d, onClick: () => addDigit(d) }, d)),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", {}),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(NumKey, { label: "0", onClick: () => addDigit("0") }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(NumKey, { label: "⌫", onClick: del, dim: true })
-          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.22)", fontFamily: "-apple-system, sans-serif", marginTop: 4 }, children: "Type your PIN to unlock" })
+        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: "rgba(255,255,255,0.3)", fontSize: 13, fontFamily: "-apple-system, sans-serif" }, children: "Press any key or click to continue" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             motion.button,
             {
-              onClick: submit,
+              onClick: unlock,
               whileTap: { scale: 0.95 },
-              className: "mt-1 px-10 py-2 rounded-lg text-sm font-medium",
+              className: "px-10 py-2.5 rounded-xl text-sm font-medium",
               style: {
-                background: pin.length >= MIN_DIGITS ? "var(--cryo-a12)" : "rgba(255,255,255,0.05)",
-                border: `1px solid ${pin.length >= MIN_DIGITS ? "var(--cryo-a45)" : "rgba(255,255,255,0.07)"}`,
-                color: pin.length >= MIN_DIGITS ? "var(--cryo-accent)" : "rgba(255,255,255,0.25)",
-                fontFamily: "-apple-system, sans-serif",
-                cursor: pin.length >= MIN_DIGITS ? "pointer" : "default",
-                transition: "all 0.15s"
+                background: "var(--cryo-a08)",
+                border: "1px solid var(--cryo-a30)",
+                color: "var(--cryo-accent)",
+                fontFamily: "-apple-system, sans-serif"
               },
+              whileHover: { background: "var(--cryo-a18)" },
               children: "Unlock"
             }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.18)", fontFamily: "-apple-system, sans-serif", marginTop: -8 }, children: "Type digits or use keypad · Enter to confirm" })
-        ] }) : (
-          // No PIN required — just press any key / click
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-4", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: "rgba(255,255,255,0.3)", fontSize: 13, fontFamily: "-apple-system, sans-serif" }, children: "Press any key or click to continue" }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              motion.button,
-              {
-                onClick: unlock,
-                whileTap: { scale: 0.95 },
-                className: "px-10 py-2.5 rounded-xl text-sm font-medium",
-                style: {
-                  background: "var(--cryo-a08)",
-                  border: "1px solid var(--cryo-a30)",
-                  color: "var(--cryo-accent)",
-                  fontFamily: "-apple-system, sans-serif"
-                },
-                whileHover: { background: "var(--cryo-a18)" },
-                children: "Unlock"
-              }
-            )
-          ] })
-        )
+          )
+        ] })
       ]
     }
   );
@@ -18701,27 +18666,6 @@ function BlinkingClock({ h, m: m2, seconds }) {
         /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { opacity: seconds % 2 === 0 ? 1 : 0.25, transition: "opacity 0.4s" }, children: ":" }),
         m2
       ]
-    }
-  );
-}
-function NumKey({ label, onClick, dim }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    motion.button,
-    {
-      onClick,
-      whileTap: { scale: 0.86 },
-      className: "w-[68px] h-[68px] rounded-full flex items-center justify-center select-none",
-      style: {
-        background: "rgba(255,255,255,0.07)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        color: dim ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.9)",
-        fontSize: label === "⌫" ? 20 : 24,
-        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
-        fontWeight: 300,
-        cursor: "pointer"
-      },
-      whileHover: { background: "rgba(255,255,255,0.13)" },
-      children: label
     }
   );
 }

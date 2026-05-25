@@ -7,12 +7,10 @@ const MAX_DIGITS = 8
 
 export function LockScreen() {
   const { unlock, pinRequired } = useLockStore()
-  const [pin, setPin]       = useState('')
-  const [error, setError]   = useState('')
+  const [pin, setPin]         = useState('')
+  const [error, setError]     = useState('')
   const [shaking, setShaking] = useState(false)
-  const [time, setTime]     = useState(new Date())
-  const pinRef = useRef(pin)
-  pinRef.current = pin
+  const [time, setTime]       = useState(new Date())
 
   // Live clock
   useEffect(() => {
@@ -21,8 +19,7 @@ export function LockScreen() {
   }, [])
 
   const addDigit = useCallback((d: string) => {
-    if (pinRef.current.length >= MAX_DIGITS) return
-    setPin(p => p + d)
+    setPin(p => p.length >= MAX_DIGITS ? p : p + d)
     setError('')
   }, [])
 
@@ -38,41 +35,46 @@ export function LockScreen() {
     setTimeout(() => setShaking(false), 550)
   }, [])
 
-  const submit = useCallback(async () => {
-    if (!pinRequired) { unlock(); return }
-    const current = pinRef.current
-    if (current.length < MIN_DIGITS) { shake(`Enter at least ${MIN_DIGITS} digits`); return }
-    try {
-      const ok: boolean = await (window.cryogram as any).system.verifyPin(current)
-      if (ok) {
-        unlock()
-      } else {
-        shake('Incorrect PIN — try again')
+  // Auto-submit: try verifyPin after each digit once MIN_DIGITS reached.
+  // On success → unlock immediately. On failure below MAX_DIGITS → silently
+  // accept more digits. At MAX_DIGITS with failure → shake.
+  useEffect(() => {
+    if (!pinRequired || pin.length < MIN_DIGITS) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const ok: boolean = await (window.cryogram as any).system.verifyPin(pin)
+        if (cancelled) return
+        if (ok) {
+          unlock()
+        } else if (pin.length >= MAX_DIGITS) {
+          shake('Incorrect PIN — try again')
+        }
+      } catch {
+        if (!cancelled && pin.length >= MAX_DIGITS) shake('Unable to verify PIN')
       }
-    } catch {
-      shake('Unable to verify PIN')
-    }
-  }, [pinRequired, unlock, shake])
+    })()
+    return () => { cancelled = true }
+  }, [pin, pinRequired, unlock, shake])
 
-  // Keyboard handler — swallowed here so nothing bleeds through
+  // Keyboard handler — swallowed here so nothing bleeds through to apps below
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       e.stopPropagation()
       if (!pinRequired) { if (e.key === 'Enter' || e.key === ' ') unlock(); return }
       if (e.key >= '0' && e.key <= '9') addDigit(e.key)
       else if (e.key === 'Backspace') del()
-      else if (e.key === 'Enter') submit()
     }
     window.addEventListener('keydown', onKey, true)
     return () => window.removeEventListener('keydown', onKey, true)
-  }, [pinRequired, unlock, addDigit, del, submit])
+  }, [pinRequired, unlock, addDigit, del])
 
   const h  = time.getHours().toString().padStart(2, '0')
   const m  = time.getMinutes().toString().padStart(2, '0')
   const ds = time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 
-  // Number of dot indicators — always show max(4, typed) up to 8
-  const dotCount = Math.min(MAX_DIGITS, Math.max(MIN_DIGITS, pin.length + (pin.length < MAX_DIGITS ? 1 : 0)))
+  // Show at least MIN_DIGITS dots; expand as user types beyond that
+  const dotCount = Math.max(MIN_DIGITS, pin.length)
 
   return (
     <motion.div
@@ -100,7 +102,7 @@ export function LockScreen() {
       </div>
 
       {/* Clock */}
-      <div className="text-center mb-10 select-none">
+      <div className="text-center mb-12 select-none">
         <BlinkingClock h={h} m={m} seconds={time.getSeconds()} />
         <div style={{ color: 'rgba(255,255,255,0.38)', fontSize: 13, fontFamily: '-apple-system, sans-serif', marginTop: 6 }}>
           {ds}
@@ -112,24 +114,28 @@ export function LockScreen() {
         <div className="flex flex-col items-center gap-5">
           {/* PIN dots */}
           <motion.div
-            className="flex gap-3.5"
+            className="flex gap-4"
             animate={shaking ? { x: [0, -10, 10, -10, 10, -5, 5, 0] } : {}}
             transition={{ duration: 0.5 }}
           >
             {Array.from({ length: dotCount }).map((_, i) => {
               const filled = i < pin.length
-              const isErr  = error && filled
+              const isErr  = !!(error && filled)
               return (
                 <motion.div
                   key={i}
                   className="rounded-full"
                   animate={{
-                    scale: filled ? 1.15 : 1,
-                    background: isErr ? '#f87171' : filled ? 'var(--cryo-accent)' : 'rgba(255,255,255,0.18)',
-                    boxShadow: filled && !isErr ? `0 0 10px var(--cryo-a50)` : 'none',
+                    scale: filled ? 1.2 : 1,
+                    background: isErr
+                      ? '#f87171'
+                      : filled
+                        ? 'var(--cryo-accent)'
+                        : 'rgba(255,255,255,0.18)',
+                    boxShadow: filled && !isErr ? `0 0 12px var(--cryo-a50)` : 'none',
                   }}
-                  transition={{ duration: 0.12 }}
-                  style={{ width: 11, height: 11 }}
+                  transition={{ duration: 0.1 }}
+                  style={{ width: 12, height: 12 }}
                 />
               )
             })}
@@ -151,39 +157,11 @@ export function LockScreen() {
             )}
           </AnimatePresence>
 
-          {/* Numpad */}
-          <div className="grid grid-cols-3 gap-2.5">
-            {['1','2','3','4','5','6','7','8','9'].map(d => (
-              <NumKey key={d} label={d} onClick={() => addDigit(d)} />
-            ))}
-            <div />
-            <NumKey label="0" onClick={() => addDigit('0')} />
-            <NumKey label="⌫" onClick={del} dim />
-          </div>
-
-          {/* Unlock */}
-          <motion.button
-            onClick={submit}
-            whileTap={{ scale: 0.95 }}
-            className="mt-1 px-10 py-2 rounded-lg text-sm font-medium"
-            style={{
-              background: pin.length >= MIN_DIGITS ? 'var(--cryo-a12)' : 'rgba(255,255,255,0.05)',
-              border: `1px solid ${pin.length >= MIN_DIGITS ? 'var(--cryo-a45)' : 'rgba(255,255,255,0.07)'}`,
-              color: pin.length >= MIN_DIGITS ? 'var(--cryo-accent)' : 'rgba(255,255,255,0.25)',
-              fontFamily: '-apple-system, sans-serif',
-              cursor: pin.length >= MIN_DIGITS ? 'pointer' : 'default',
-              transition: 'all 0.15s',
-            }}
-          >
-            Unlock
-          </motion.button>
-
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.18)', fontFamily: '-apple-system, sans-serif', marginTop: -8 }}>
-            Type digits or use keypad · Enter to confirm
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.22)', fontFamily: '-apple-system, sans-serif', marginTop: 4 }}>
+            Type your PIN to unlock
           </div>
         </div>
       ) : (
-        // No PIN required — just press any key / click
         <div className="flex flex-col items-center gap-4">
           <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, fontFamily: '-apple-system, sans-serif' }}>
             Press any key or click to continue
@@ -226,28 +204,5 @@ function BlinkingClock({ h, m, seconds }: { h: string; m: string; seconds: numbe
       <span style={{ opacity: seconds % 2 === 0 ? 1 : 0.25, transition: 'opacity 0.4s' }}>:</span>
       {m}
     </div>
-  )
-}
-
-// ── Number key button ─────────────────────────────────────────────────────────
-function NumKey({ label, onClick, dim }: { label: string; onClick: () => void; dim?: boolean }) {
-  return (
-    <motion.button
-      onClick={onClick}
-      whileTap={{ scale: 0.86 }}
-      className="w-[68px] h-[68px] rounded-full flex items-center justify-center select-none"
-      style={{
-        background: 'rgba(255,255,255,0.07)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        color: dim ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.9)',
-        fontSize: label === '⌫' ? 20 : 24,
-        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
-        fontWeight: 300,
-        cursor: 'pointer',
-      }}
-      whileHover={{ background: 'rgba(255,255,255,0.13)' }}
-    >
-      {label}
-    </motion.button>
   )
 }

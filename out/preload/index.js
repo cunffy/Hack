@@ -108,6 +108,8 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
     focusWindow: (id) => electron.ipcRenderer.invoke("wm:focusWindow", id),
     closeWindow: (id) => electron.ipcRenderer.invoke("wm:closeWindow", id)
   },
+  // Tell main process the lock screen was dismissed so it clears alwaysOnTop
+  notifyUnlock: () => electron.ipcRenderer.send("screen:unlock"),
   // Lock screen events from main (system resume, manual lock)
   onLock: (cb) => {
     const listener = () => cb();

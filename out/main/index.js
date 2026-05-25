@@ -864,6 +864,13 @@ function registerLauncherHandlers() {
   });
 }
 let mainWindow = null;
+function lockScreen() {
+  if (!mainWindow) return;
+  mainWindow.setAlwaysOnTop(true, "screen-saver");
+  mainWindow.focus();
+  mainWindow.moveTop();
+  mainWindow.webContents.send("screen:lock");
+}
 function createWindow() {
   mainWindow = new electron.BrowserWindow({
     width: 1440,
@@ -874,7 +881,6 @@ function createWindow() {
     titleBarStyle: "hidden",
     backgroundColor: "#070b11",
     skipTaskbar: true,
-    // Don't show in any system taskbar — WE are the taskbar
     webPreferences: {
       preload: path.join(__dirname, "../preload/index.js"),
       sandbox: false,
@@ -892,7 +898,7 @@ function createWindow() {
     electron.globalShortcut.register("Super+Tab", () => {
     });
     electron.globalShortcut.register("Super+L", () => {
-      mainWindow?.webContents.send("screen:lock");
+      lockScreen();
     });
     electron.globalShortcut.register("CommandOrControl+Alt+T", () => {
       mainWindow?.webContents.send("open:app", "terminal");
@@ -956,6 +962,9 @@ electron.app.whenReady().then(() => {
     else mainWindow?.maximize();
   });
   electron.ipcMain.on("window:close", () => mainWindow?.close());
+  electron.ipcMain.on("screen:unlock", () => {
+    mainWindow?.setAlwaysOnTop(false);
+  });
   registerTerminalHandlers();
   registerPasswordTesterHandlers();
   registerLeakerHandlers();
@@ -964,8 +973,8 @@ electron.app.whenReady().then(() => {
   registerSystemHandlers();
   registerLauncherHandlers();
   createWindow();
-  electron.powerMonitor.on("resume", () => mainWindow?.webContents.send("screen:lock"));
-  electron.powerMonitor.on("lock-screen", () => mainWindow?.webContents.send("screen:lock"));
+  electron.powerMonitor.on("resume", () => lockScreen());
+  electron.powerMonitor.on("lock-screen", () => lockScreen());
   electron.app.on("activate", () => {
     if (electron.BrowserWindow.getAllWindows().length === 0) createWindow();
   });

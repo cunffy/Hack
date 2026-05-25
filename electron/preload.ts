@@ -118,6 +118,9 @@ contextBridge.exposeInMainWorld('cryogram', {
     closeWindow: (id: string)   => ipcRenderer.invoke('wm:closeWindow', id),
   },
 
+  // Tell main process the lock screen was dismissed so it clears alwaysOnTop
+  notifyUnlock: () => ipcRenderer.send('screen:unlock'),
+
   // Lock screen events from main (system resume, manual lock)
   onLock: (cb: () => void) => {
     const listener = () => cb()

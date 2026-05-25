@@ -652,6 +652,9 @@ video {
 .mb-10 {
   margin-bottom: 2.5rem;
 }
+.mb-12 {
+  margin-bottom: 3rem;
+}
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -793,9 +796,6 @@ video {
 .h-8 {
   height: 2rem;
 }
-.h-\[68px\] {
-  height: 68px;
-}
 .h-\[700px\] {
   height: 700px;
 }
@@ -876,9 +876,6 @@ video {
 }
 .w-80 {
   width: 20rem;
-}
-.w-\[68px\] {
-  width: 68px;
 }
 .w-\[700px\] {
   width: 700px;
@@ -1016,9 +1013,6 @@ video {
 }
 .gap-3 {
   gap: 0.75rem;
-}
-.gap-3\.5 {
-  gap: 0.875rem;
 }
 .gap-4 {
   gap: 1rem;

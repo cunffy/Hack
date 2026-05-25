@@ -12,6 +12,16 @@ import { registerLauncherHandlers, killLaunchedApps } from './ipc/launcher'
 
 let mainWindow: BrowserWindow | null = null
 
+function lockScreen(): void {
+  if (!mainWindow) return
+  // Put Electron above every X11 window (Brave, terminals, etc.) so apps
+  // cannot be seen or interacted with while the lock screen is active.
+  mainWindow.setAlwaysOnTop(true, 'screen-saver')
+  mainWindow.focus()
+  mainWindow.moveTop()
+  mainWindow.webContents.send('screen:lock')
+}
+
 function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 1440,
@@ -39,7 +49,7 @@ function createWindow(): void {
     globalShortcut.register('Super+D', () => {})
     globalShortcut.register('Super+Tab', () => {})
     globalShortcut.register('Super+L', () => {
-      mainWindow?.webContents.send('screen:lock')
+      lockScreen()
     })
     globalShortcut.register('CommandOrControl+Alt+T', () => {
       mainWindow?.webContents.send('open:app', 'terminal')
@@ -123,6 +133,12 @@ app.whenReady().then(() => {
   })
   ipcMain.on('window:close', () => mainWindow?.close())
 
+  // Raise Electron above all X11 windows when locked so apps like Brave
+  // cannot be seen or clicked through the lock screen.
+  ipcMain.on('screen:unlock', () => {
+    mainWindow?.setAlwaysOnTop(false)
+  })
+
   registerTerminalHandlers()
   registerPasswordTesterHandlers()
   registerLeakerHandlers()
@@ -133,8 +149,8 @@ app.whenReady().then(() => {
 
   createWindow()
 
-  powerMonitor.on('resume',      () => mainWindow?.webContents.send('screen:lock'))
-  powerMonitor.on('lock-screen', () => mainWindow?.webContents.send('screen:lock'))
+  powerMonitor.on('resume',      () => lockScreen())
+  powerMonitor.on('lock-screen', () => lockScreen())
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

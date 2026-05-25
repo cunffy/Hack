@@ -11,5 +11,8 @@ export const useLockStore = create<LockStore>((set) => ({
   isLocked: false,
   pinRequired: false,
   lock: (pinRequired = true) => set({ isLocked: true, pinRequired }),
-  unlock: () => set({ isLocked: false, pinRequired: false }),
+  unlock: () => {
+    ;(window as any).cryogram?.notifyUnlock?.()
+    set({ isLocked: false, pinRequired: false })
+  },
 }))
