@@ -62,20 +62,20 @@ function createWindow(): void {
         })
       })
     }
-    globalShortcut.register('AudioVolumeUp', () => {
+    globalShortcut.register('VolumeUp', () => {
       execFile('pactl', ['set-sink-volume', '@DEFAULT_SINK@', '+5%'])
       setTimeout(sendVolHud, 60)
     })
-    globalShortcut.register('AudioVolumeDown', () => {
+    globalShortcut.register('VolumeDown', () => {
       execFile('pactl', ['set-sink-volume', '@DEFAULT_SINK@', '-5%'])
       setTimeout(sendVolHud, 60)
     })
-    globalShortcut.register('AudioVolumeMute', () => {
+    globalShortcut.register('VolumeMute', () => {
       execFile('pactl', ['set-sink-mute', '@DEFAULT_SINK@', 'toggle'])
       setTimeout(sendVolHud, 60)
     })
 
-    // ── Brightness keys ────────────────────────────────────────────────────
+    // ── Brightness keys (wrapped in try/catch — not supported on all platforms)
     const sendBrightHud = () => {
       execFile('brightnessctl', ['g'], (_, cur) => {
         execFile('brightnessctl', ['m'], (__, max) => {
@@ -86,14 +86,16 @@ function createWindow(): void {
         })
       })
     }
-    globalShortcut.register('BrightnessUp', () => {
-      execFile('brightnessctl', ['set', '5%+'])
-      setTimeout(sendBrightHud, 80)
-    })
-    globalShortcut.register('BrightnessDown', () => {
-      execFile('brightnessctl', ['set', '5%-'])
-      setTimeout(sendBrightHud, 80)
-    })
+    try {
+      globalShortcut.register('BrightnessUp', () => {
+        execFile('brightnessctl', ['set', '5%+'])
+        setTimeout(sendBrightHud, 80)
+      })
+      globalShortcut.register('BrightnessDown', () => {
+        execFile('brightnessctl', ['set', '5%-'])
+        setTimeout(sendBrightHud, 80)
+      })
+    } catch { /* brightness keys not supported on this platform */ }
 
     // ── Alt+Tab window switcher ────────────────────────────────────────────
     globalShortcut.register('Alt+Tab', () => {
