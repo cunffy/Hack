@@ -25,6 +25,27 @@ const APP_COLORS: Record<string, string> = {
   system:            '#818cf8',
 }
 
+// ── X11 app metadata (icon + color + display name from window title) ────────
+function getX11Meta(title: string): { icon: string; color: string; name: string } {
+  const t = title.toLowerCase()
+  // For "Page Title - Brave", extract "Brave" (last segment)
+  const last = title.split(' - ').pop()?.trim() ?? title
+  const firstName = last.split(' ')[0]
+  if (t.includes('brave'))    return { icon: '🦁', color: '#fb923c', name: 'Brave' }
+  if (t.includes('chromium')) return { icon: '🌐', color: '#4ade80', name: 'Chromium' }
+  if (t.includes('chrome'))   return { icon: '🌐', color: '#4ade80', name: 'Chrome' }
+  if (t.includes('firefox'))  return { icon: '🦊', color: '#f97316', name: 'Firefox' }
+  if (t.includes('visual studio code') || t.includes('vscode')) return { icon: '💻', color: '#60a5fa', name: 'VS Code' }
+  if (t.includes('thunar') || t.includes('nautilus'))           return { icon: '📁', color: '#f59e0b', name: 'Files' }
+  if (t.includes('vlc') || t.includes(' mpv'))                  return { icon: '▶',  color: '#f43f5e', name: 'Media' }
+  if (t.includes('discord'))  return { icon: '💬', color: '#818cf8', name: 'Discord' }
+  if (t.includes('slack'))    return { icon: '💬', color: '#4ade80', name: 'Slack' }
+  if (t.includes('spotify'))  return { icon: '🎵', color: '#4ade80', name: 'Spotify' }
+  if (t.includes('gimp'))     return { icon: '🎨', color: '#e879f9', name: 'GIMP' }
+  const name = firstName.length > 11 ? firstName.slice(0, 10) + '…' : firstName
+  return { icon: '⬡', color: '#64748b', name: name || 'App' }
+}
+
 // ── Clock ──────────────────────────────────────────────────────────────────
 function Clock() {
   const [now, setNow] = useState(new Date())
@@ -314,44 +335,67 @@ export function AppSwitcher() {
   const { windows, focusWindow, restoreWindow } = useWindowStore()
   const [open, setOpen] = useState(false)
   const [idx, setIdx] = useState(0)
-  const allWins = windows
+  const [x11Wins, setX11Wins] = useState<Array<{ id: string; title: string }>>([])
+
+  // Poll external X11 windows so Alt+Tab shows Brave etc.
+  useEffect(() => {
+    const poll = async () => {
+      try {
+        const all = await (window as any).cryogram?.wm?.getWindows() ?? []
+        setX11Wins(all.filter((w: any) =>
+          w.desktop >= 0 &&
+          !w.title.toLowerCase().includes('cryogram') &&
+          w.title.trim() !== '' && w.title !== 'Desktop'
+        ))
+      } catch {}
+    }
+    poll()
+    const id = setInterval(poll, 2000)
+    return () => clearInterval(id)
+  }, [])
+
+  const totalCount = windows.length + x11Wins.length
 
   useEffect(() => {
     const api = (window as any).cryogram
     const handle = (dir: 'next' | 'prev') => {
       setOpen(true)
       setIdx(prev => {
-        const len = allWins.length
-        if (len === 0) return 0
+        if (totalCount === 0) return 0
         return dir === 'next'
-          ? (prev + 1) % len
-          : (prev - 1 + len) % len
+          ? (prev + 1) % totalCount
+          : (prev - 1 + totalCount) % totalCount
       })
     }
-    // IPC path (when globalShortcut fires)
     const cleanup = api?.onAppSwitcher?.(handle)
-    // Renderer path (when Alt+Tab is caught in App.tsx keydown listener)
     const domHandler = (e: Event) => handle((e as CustomEvent).detail)
     window.addEventListener('cryogram:switcher', domHandler)
     return () => { cleanup?.(); window.removeEventListener('cryogram:switcher', domHandler) }
-  }, [allWins.length])
+  }, [totalCount])
+
+  const activate = (i: number) => {
+    if (i < windows.length) {
+      const win = windows[i]
+      if (win.minimized) restoreWindow(win.id)
+      else focusWindow(win.id)
+    } else {
+      const xwin = x11Wins[i - windows.length]
+      if (xwin) (window as any).cryogram?.wm?.focusWindow(xwin.id)
+    }
+    setOpen(false)
+  }
 
   useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { setOpen(false); return }
       if (e.key === 'Enter' || (e.key !== 'Tab' && !e.altKey)) {
-        const win = allWins[idx]
-        if (win) {
-          if (win.minimized) restoreWindow(win.id)
-          else focusWindow(win.id)
-        }
-        setOpen(false)
+        activate(idx)
       }
     }
     window.addEventListener('keyup', handler)
     return () => window.removeEventListener('keyup', handler)
-  }, [open, idx, allWins, focusWindow, restoreWindow])
+  }, [open, idx, windows, x11Wins])
 
   return (
     <AnimatePresence>
@@ -382,38 +426,66 @@ export function AppSwitcher() {
             }}
             onClick={e => e.stopPropagation()}
           >
-            {allWins.length === 0 ? (
+            {totalCount === 0 ? (
               <p style={{ color: '#4e5d6e', fontFamily: 'monospace', fontSize: 13, padding: '8px 16px' }}>
                 No open windows
               </p>
-            ) : allWins.map((win, i) => {
-              const sel = i === idx
-              const accent = APP_COLORS[win.appId] ?? '#00d4ff'
-              const icon = APP_ICONS[win.appId] ?? '🪟'
-              return (
-                <button
-                  key={win.id}
-                  onClick={() => { focusWindow(win.id); setOpen(false) }}
-                  style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                    padding: '14px 18px', borderRadius: 12,
-                    border: sel ? `1px solid ${accent}55` : '1px solid rgba(26,40,64,0.5)',
-                    background: sel ? `${accent}14` : 'rgba(13,20,33,0.6)',
-                    cursor: 'pointer', minWidth: 90, transition: 'all 0.12s',
-                    boxShadow: sel ? `0 0 20px ${accent}1a` : 'none',
-                    opacity: win.minimized ? 0.55 : 1,
-                  }}
-                >
-                  <span style={{ fontSize: 30 }}>{icon}</span>
-                  <span style={{ fontSize: 11, color: sel ? accent : '#8b949e', fontFamily: 'monospace', maxWidth: 90, textAlign: 'center' }}>
-                    {win.title}
-                  </span>
-                  {win.minimized && (
-                    <span style={{ fontSize: 9, color: '#4e5d6e', fontFamily: 'monospace' }}>minimized</span>
-                  )}
-                </button>
-              )
-            })}
+            ) : (
+              <>
+                {windows.map((win, i) => {
+                  const sel = i === idx
+                  const accent = APP_COLORS[win.appId] ?? '#00d4ff'
+                  const icon = APP_ICONS[win.appId] ?? '🪟'
+                  return (
+                    <button
+                      key={win.id}
+                      onClick={() => activate(i)}
+                      style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                        padding: '14px 18px', borderRadius: 12,
+                        border: sel ? `1px solid ${accent}55` : '1px solid rgba(26,40,64,0.5)',
+                        background: sel ? `${accent}14` : 'rgba(13,20,33,0.6)',
+                        cursor: 'pointer', minWidth: 90, transition: 'all 0.12s',
+                        boxShadow: sel ? `0 0 20px ${accent}1a` : 'none',
+                        opacity: win.minimized ? 0.55 : 1,
+                      }}
+                    >
+                      <span style={{ fontSize: 30 }}>{icon}</span>
+                      <span style={{ fontSize: 11, color: sel ? accent : '#8b949e', fontFamily: 'monospace', maxWidth: 90, textAlign: 'center' }}>
+                        {win.title}
+                      </span>
+                      {win.minimized && (
+                        <span style={{ fontSize: 9, color: '#4e5d6e', fontFamily: 'monospace' }}>minimized</span>
+                      )}
+                    </button>
+                  )
+                })}
+                {x11Wins.map((xwin, j) => {
+                  const i = windows.length + j
+                  const sel = i === idx
+                  const meta = getX11Meta(xwin.title)
+                  return (
+                    <button
+                      key={xwin.id}
+                      onClick={() => activate(i)}
+                      style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                        padding: '14px 18px', borderRadius: 12,
+                        border: sel ? `1px solid ${meta.color}55` : '1px solid rgba(26,40,64,0.5)',
+                        background: sel ? `${meta.color}14` : 'rgba(13,20,33,0.6)',
+                        cursor: 'pointer', minWidth: 90, transition: 'all 0.12s',
+                        boxShadow: sel ? `0 0 20px ${meta.color}1a` : 'none',
+                      }}
+                    >
+                      <span style={{ fontSize: 30 }}>{meta.icon}</span>
+                      <span style={{ fontSize: 11, color: sel ? meta.color : '#8b949e', fontFamily: 'monospace', maxWidth: 90, textAlign: 'center' }}>
+                        {meta.name}
+                      </span>
+                    </button>
+                  )
+                })}
+              </>
+            )}
           </motion.div>
           <div style={{
             position: 'absolute', bottom: 60, left: '50%', transform: 'translateX(-50%)',

@@ -153,6 +153,26 @@ else
   fi
 fi
 
+# ── Brightness keys via ACPI ──────────────────────────────────────────────────
+step "Brightness keys"
+
+if command -v brightnessctl &>/dev/null && command -v acpid &>/dev/null; then
+  mkdir -p /etc/acpi/events
+  cat > /etc/acpi/events/cryogram-brightness-up << 'ACPIEOF'
+event=video/brightnessup.*
+action=brightnessctl set 5%+
+ACPIEOF
+  cat > /etc/acpi/events/cryogram-brightness-down << 'ACPIEOF'
+event=video/brightnessdown.*
+action=brightnessctl set 5%-
+ACPIEOF
+  # Add cryogram user to video group so brightnessctl works without root
+  usermod -aG video cryogram 2>/dev/null || true
+  systemctl restart acpid 2>/dev/null && ok "Brightness keys active via ACPI" || warn "acpid restart failed (non-fatal)"
+else
+  warn "brightnessctl or acpid not found — brightness keys will be software-only"
+fi
+
 # ── Reboot ────────────────────────────────────────────────────────────────────
 step "Rebooting"
 
@@ -170,4 +190,6 @@ for i in 10 9 8 7 6 5 4 3 2 1; do
 done
 echo ""
 
-systemctl reboot
+# Flush disk writes then force immediate reboot
+sync
+/sbin/shutdown -r now || systemctl reboot --no-block

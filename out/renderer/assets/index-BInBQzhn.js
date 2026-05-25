@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-Cw-1D7g7.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-DlkqJ9Kl.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -16062,6 +16062,24 @@ function ContextMenu({ x: x2, y: y2, items, onClose }) {
 const BASE = 48;
 const MAX_SCALE = 1.52;
 const MAG_RADIUS = 88;
+function getX11Meta$1(title) {
+  const t2 = title.toLowerCase();
+  const last = title.split(" - ").pop()?.trim() ?? title;
+  const firstName = last.split(" ")[0];
+  if (t2.includes("brave")) return { icon: "🦁", color: "#fb923c", name: "Brave" };
+  if (t2.includes("chromium")) return { icon: "🌐", color: "#4ade80", name: "Chromium" };
+  if (t2.includes("chrome")) return { icon: "🌐", color: "#4ade80", name: "Chrome" };
+  if (t2.includes("firefox")) return { icon: "🦊", color: "#f97316", name: "Firefox" };
+  if (t2.includes("visual studio code") || t2.includes("vscode")) return { icon: "💻", color: "#60a5fa", name: "VS Code" };
+  if (t2.includes("thunar") || t2.includes("nautilus")) return { icon: "📁", color: "#f59e0b", name: "Files" };
+  if (t2.includes("vlc") || t2.includes(" mpv")) return { icon: "▶", color: "#f43f5e", name: "Media" };
+  if (t2.includes("discord")) return { icon: "💬", color: "#818cf8", name: "Discord" };
+  if (t2.includes("slack")) return { icon: "💬", color: "#4ade80", name: "Slack" };
+  if (t2.includes("spotify")) return { icon: "🎵", color: "#4ade80", name: "Spotify" };
+  if (t2.includes("gimp")) return { icon: "🎨", color: "#e879f9", name: "GIMP" };
+  const name = firstName.length > 11 ? firstName.slice(0, 10) + "…" : firstName;
+  return { icon: "⬡", color: "#64748b", name: name || "App" };
+}
 const APP_META = {
   terminal: { label: "Terminal", color: "#00ff88", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(TermIcon, {}) },
   editor: { label: "Code Editor", color: "#00d4ff", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(EditorIcon, {}) },
@@ -16306,58 +16324,64 @@ function Dock() {
                   style: { width: 1, background: "rgba(255,255,255,0.12)", margin: "6px 4px" }
                 }
               ),
-              x11Windows.map((xwin) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                "div",
-                {
-                  className: "flex flex-col items-center cursor-default",
-                  style: { width: BASE },
-                  onMouseEnter: () => setHovered(xwin.title),
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                      motion.button,
-                      {
-                        onClick: async () => {
-                          try {
-                            await window.cryogram.wm?.focusWindow(xwin.id);
-                          } catch {
-                          }
-                        },
-                        animate: { width: BASE, height: BASE },
-                        className: "relative rounded-2xl flex items-center justify-center overflow-hidden",
-                        style: { background: "rgba(148,163,184,0.1)", border: "1px solid rgba(148,163,184,0.15)" },
-                        whileHover: { scale: 1.08 },
-                        whileTap: { scale: 0.88 },
-                        children: [
-                          /* @__PURE__ */ jsxRuntimeExports.jsx(
-                            "div",
-                            {
-                              className: "absolute inset-0 pointer-events-none",
-                              style: { background: "linear-gradient(145deg, rgba(255,255,255,0.06) 0%, transparent 55%)" }
+              x11Windows.map((xwin) => {
+                const meta = getX11Meta$1(xwin.title);
+                return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "div",
+                  {
+                    className: "flex flex-col items-center cursor-default",
+                    style: { width: BASE },
+                    onMouseEnter: () => setHovered(meta.name),
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                        motion.button,
+                        {
+                          onClick: async () => {
+                            try {
+                              await window.cryogram.wm?.focusWindow(xwin.id);
+                            } catch {
                             }
-                          ),
-                          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: "#94a3b8", fontWeight: 600 }, children: xwin.title.slice(0, 2).toUpperCase() })
-                        ]
-                      }
-                    ),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      "div",
-                      {
-                        className: "mt-1 text-center leading-none select-none pointer-events-none truncate",
-                        style: { fontSize: 9, maxWidth: BASE, color: "rgba(148,163,184,0.5)", fontFamily: "-apple-system, sans-serif" },
-                        children: xwin.title.length > 10 ? xwin.title.slice(0, 9) + "…" : xwin.title
-                      }
-                    ),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      "div",
-                      {
-                        className: "rounded-full mt-0.5",
-                        style: { width: 3, height: 3, background: "#94a3b8", opacity: 0.6 }
-                      }
-                    )
-                  ]
-                },
-                xwin.id
-              ))
+                          },
+                          animate: { width: BASE, height: BASE },
+                          className: "relative rounded-2xl flex items-center justify-center overflow-hidden",
+                          style: {
+                            background: `radial-gradient(ellipse at 38% 28%, ${meta.color}18, rgba(10,15,24,0.92) 70%)`,
+                            border: `1px solid ${meta.color}28`
+                          },
+                          whileHover: { scale: 1.08 },
+                          whileTap: { scale: 0.88 },
+                          children: [
+                            /* @__PURE__ */ jsxRuntimeExports.jsx(
+                              "div",
+                              {
+                                className: "absolute inset-0 pointer-events-none",
+                                style: { background: "linear-gradient(145deg, rgba(255,255,255,0.08) 0%, transparent 55%)" }
+                              }
+                            ),
+                            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 22 }, children: meta.icon })
+                          ]
+                        }
+                      ),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(
+                        "div",
+                        {
+                          className: "mt-1 text-center leading-none select-none pointer-events-none truncate",
+                          style: { fontSize: 9, maxWidth: BASE, color: `${meta.color}bb`, fontFamily: "-apple-system, sans-serif" },
+                          children: meta.name
+                        }
+                      ),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(
+                        "div",
+                        {
+                          className: "rounded-full mt-0.5",
+                          style: { width: 3, height: 3, background: meta.color, opacity: 0.75 }
+                        }
+                      )
+                    ]
+                  },
+                  xwin.id
+                );
+              })
             ] })
           ]
         }
@@ -16968,14 +16992,14 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-Cw-1D7g7.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-DR5rDyZZ.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-C6OzKrJA.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-DY1OZBQ-.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-BQEao6NV.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-BVA6BOHz.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-CBiCFF12.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-63Y3bz2z.js"), true ? [] : void 0, import.meta.url));
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-DlkqJ9Kl.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-BX7ZhRUT.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-DMKHkySg.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-D2oD2vyF.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-BSSp2U1T.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-hr5MYMD9.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-DwwvOaiQ.js"), true ? [] : void 0, import.meta.url));
+const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-x4kvPTxs.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -17874,6 +17898,24 @@ const APP_COLORS = {
   launcher: "#34d399",
   system: "#818cf8"
 };
+function getX11Meta(title) {
+  const t2 = title.toLowerCase();
+  const last = title.split(" - ").pop()?.trim() ?? title;
+  const firstName = last.split(" ")[0];
+  if (t2.includes("brave")) return { icon: "🦁", color: "#fb923c", name: "Brave" };
+  if (t2.includes("chromium")) return { icon: "🌐", color: "#4ade80", name: "Chromium" };
+  if (t2.includes("chrome")) return { icon: "🌐", color: "#4ade80", name: "Chrome" };
+  if (t2.includes("firefox")) return { icon: "🦊", color: "#f97316", name: "Firefox" };
+  if (t2.includes("visual studio code") || t2.includes("vscode")) return { icon: "💻", color: "#60a5fa", name: "VS Code" };
+  if (t2.includes("thunar") || t2.includes("nautilus")) return { icon: "📁", color: "#f59e0b", name: "Files" };
+  if (t2.includes("vlc") || t2.includes(" mpv")) return { icon: "▶", color: "#f43f5e", name: "Media" };
+  if (t2.includes("discord")) return { icon: "💬", color: "#818cf8", name: "Discord" };
+  if (t2.includes("slack")) return { icon: "💬", color: "#4ade80", name: "Slack" };
+  if (t2.includes("spotify")) return { icon: "🎵", color: "#4ade80", name: "Spotify" };
+  if (t2.includes("gimp")) return { icon: "🎨", color: "#e879f9", name: "GIMP" };
+  const name = firstName.length > 11 ? firstName.slice(0, 10) + "…" : firstName;
+  return { icon: "⬡", color: "#64748b", name: name || "App" };
+}
 function SystemHUD() {
   const [hud, setHud] = reactExports.useState(null);
   const timer = reactExports.useRef();
@@ -17942,15 +17984,29 @@ function AppSwitcher() {
   const { windows, focusWindow, restoreWindow } = useWindowStore();
   const [open, setOpen] = reactExports.useState(false);
   const [idx, setIdx] = reactExports.useState(0);
-  const allWins = windows;
+  const [x11Wins, setX11Wins] = reactExports.useState([]);
+  reactExports.useEffect(() => {
+    const poll = async () => {
+      try {
+        const all = await window.cryogram?.wm?.getWindows() ?? [];
+        setX11Wins(all.filter(
+          (w2) => w2.desktop >= 0 && !w2.title.toLowerCase().includes("cryogram") && w2.title.trim() !== "" && w2.title !== "Desktop"
+        ));
+      } catch {
+      }
+    };
+    poll();
+    const id2 = setInterval(poll, 2e3);
+    return () => clearInterval(id2);
+  }, []);
+  const totalCount = windows.length + x11Wins.length;
   reactExports.useEffect(() => {
     const api = window.cryogram;
     const handle = (dir) => {
       setOpen(true);
       setIdx((prev) => {
-        const len = allWins.length;
-        if (len === 0) return 0;
-        return dir === "next" ? (prev + 1) % len : (prev - 1 + len) % len;
+        if (totalCount === 0) return 0;
+        return dir === "next" ? (prev + 1) % totalCount : (prev - 1 + totalCount) % totalCount;
       });
     };
     const cleanup = api?.onAppSwitcher?.(handle);
@@ -17960,7 +18016,18 @@ function AppSwitcher() {
       cleanup?.();
       window.removeEventListener("cryogram:switcher", domHandler);
     };
-  }, [allWins.length]);
+  }, [totalCount]);
+  const activate = (i) => {
+    if (i < windows.length) {
+      const win = windows[i];
+      if (win.minimized) restoreWindow(win.id);
+      else focusWindow(win.id);
+    } else {
+      const xwin = x11Wins[i - windows.length];
+      if (xwin) window.cryogram?.wm?.focusWindow(xwin.id);
+    }
+    setOpen(false);
+  };
   reactExports.useEffect(() => {
     if (!open) return;
     const handler = (e) => {
@@ -17969,17 +18036,12 @@ function AppSwitcher() {
         return;
       }
       if (e.key === "Enter" || e.key !== "Tab" && !e.altKey) {
-        const win = allWins[idx];
-        if (win) {
-          if (win.minimized) restoreWindow(win.id);
-          else focusWindow(win.id);
-        }
-        setOpen(false);
+        activate(idx);
       }
     };
     window.addEventListener("keyup", handler);
     return () => window.removeEventListener("keyup", handler);
-  }, [open, idx, allWins, focusWindow, restoreWindow]);
+  }, [open, idx, windows, x11Wins]);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: open && /* @__PURE__ */ jsxRuntimeExports.jsxs(
     motion.div,
     {
@@ -18019,41 +18081,70 @@ function AppSwitcher() {
               boxShadow: "0 12px 48px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,212,255,0.06)"
             },
             onClick: (e) => e.stopPropagation(),
-            children: allWins.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { style: { color: "#4e5d6e", fontFamily: "monospace", fontSize: 13, padding: "8px 16px" }, children: "No open windows" }) : allWins.map((win, i) => {
-              const sel = i === idx;
-              const accent = APP_COLORS[win.appId] ?? "#00d4ff";
-              const icon = APP_ICONS[win.appId] ?? "🪟";
-              return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                "button",
-                {
-                  onClick: () => {
-                    focusWindow(win.id);
-                    setOpen(false);
+            children: totalCount === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { style: { color: "#4e5d6e", fontFamily: "monospace", fontSize: 13, padding: "8px 16px" }, children: "No open windows" }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              windows.map((win, i) => {
+                const sel = i === idx;
+                const accent = APP_COLORS[win.appId] ?? "#00d4ff";
+                const icon = APP_ICONS[win.appId] ?? "🪟";
+                return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    onClick: () => activate(i),
+                    style: {
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "14px 18px",
+                      borderRadius: 12,
+                      border: sel ? `1px solid ${accent}55` : "1px solid rgba(26,40,64,0.5)",
+                      background: sel ? `${accent}14` : "rgba(13,20,33,0.6)",
+                      cursor: "pointer",
+                      minWidth: 90,
+                      transition: "all 0.12s",
+                      boxShadow: sel ? `0 0 20px ${accent}1a` : "none",
+                      opacity: win.minimized ? 0.55 : 1
+                    },
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 30 }, children: icon }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 11, color: sel ? accent : "#8b949e", fontFamily: "monospace", maxWidth: 90, textAlign: "center" }, children: win.title }),
+                      win.minimized && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 9, color: "#4e5d6e", fontFamily: "monospace" }, children: "minimized" })
+                    ]
                   },
-                  style: {
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "14px 18px",
-                    borderRadius: 12,
-                    border: sel ? `1px solid ${accent}55` : "1px solid rgba(26,40,64,0.5)",
-                    background: sel ? `${accent}14` : "rgba(13,20,33,0.6)",
-                    cursor: "pointer",
-                    minWidth: 90,
-                    transition: "all 0.12s",
-                    boxShadow: sel ? `0 0 20px ${accent}1a` : "none",
-                    opacity: win.minimized ? 0.55 : 1
+                  win.id
+                );
+              }),
+              x11Wins.map((xwin, j) => {
+                const i = windows.length + j;
+                const sel = i === idx;
+                const meta = getX11Meta(xwin.title);
+                return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    onClick: () => activate(i),
+                    style: {
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "14px 18px",
+                      borderRadius: 12,
+                      border: sel ? `1px solid ${meta.color}55` : "1px solid rgba(26,40,64,0.5)",
+                      background: sel ? `${meta.color}14` : "rgba(13,20,33,0.6)",
+                      cursor: "pointer",
+                      minWidth: 90,
+                      transition: "all 0.12s",
+                      boxShadow: sel ? `0 0 20px ${meta.color}1a` : "none"
+                    },
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 30 }, children: meta.icon }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 11, color: sel ? meta.color : "#8b949e", fontFamily: "monospace", maxWidth: 90, textAlign: "center" }, children: meta.name })
+                    ]
                   },
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 30 }, children: icon }),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 11, color: sel ? accent : "#8b949e", fontFamily: "monospace", maxWidth: 90, textAlign: "center" }, children: win.title }),
-                    win.minimized && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 9, color: "#4e5d6e", fontFamily: "monospace" }, children: "minimized" })
-                  ]
-                },
-                win.id
-              );
-            })
+                  xwin.id
+                );
+              })
+            ] })
           }
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {

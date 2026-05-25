@@ -9,6 +9,25 @@ const BASE = 48
 const MAX_SCALE = 1.52
 const MAG_RADIUS = 88
 
+function getX11Meta(title: string): { icon: string; color: string; name: string } {
+  const t = title.toLowerCase()
+  const last = title.split(' - ').pop()?.trim() ?? title
+  const firstName = last.split(' ')[0]
+  if (t.includes('brave'))    return { icon: '🦁', color: '#fb923c', name: 'Brave' }
+  if (t.includes('chromium')) return { icon: '🌐', color: '#4ade80', name: 'Chromium' }
+  if (t.includes('chrome'))   return { icon: '🌐', color: '#4ade80', name: 'Chrome' }
+  if (t.includes('firefox'))  return { icon: '🦊', color: '#f97316', name: 'Firefox' }
+  if (t.includes('visual studio code') || t.includes('vscode')) return { icon: '💻', color: '#60a5fa', name: 'VS Code' }
+  if (t.includes('thunar') || t.includes('nautilus'))           return { icon: '📁', color: '#f59e0b', name: 'Files' }
+  if (t.includes('vlc') || t.includes(' mpv'))                  return { icon: '▶',  color: '#f43f5e', name: 'Media' }
+  if (t.includes('discord'))  return { icon: '💬', color: '#818cf8', name: 'Discord' }
+  if (t.includes('slack'))    return { icon: '💬', color: '#4ade80', name: 'Slack' }
+  if (t.includes('spotify'))  return { icon: '🎵', color: '#4ade80', name: 'Spotify' }
+  if (t.includes('gimp'))     return { icon: '🎨', color: '#e879f9', name: 'GIMP' }
+  const name = firstName.length > 11 ? firstName.slice(0, 10) + '…' : firstName
+  return { icon: '⬡', color: '#64748b', name: name || 'App' }
+}
+
 export const APP_META: Record<AppId, { label: string; color: string; icon: React.ReactNode }> = {
   terminal:          { label: 'Terminal',        color: '#00ff88', icon: <TermIcon /> },
   editor:            { label: 'Code Editor',     color: '#00d4ff', icon: <EditorIcon /> },
@@ -243,38 +262,42 @@ export function Dock() {
                   className="self-stretch"
                   style={{ width: 1, background: 'rgba(255,255,255,0.12)', margin: '6px 4px' }}
                 />
-                {x11Windows.map(xwin => (
-                  <div
-                    key={xwin.id}
-                    className="flex flex-col items-center cursor-default"
-                    style={{ width: BASE }}
-                    onMouseEnter={() => setHovered(xwin.title)}
-                  >
-                    <motion.button
-                      onClick={async () => {
-                        try { await (window.cryogram as any).wm?.focusWindow(xwin.id) } catch {}
-                      }}
-                      animate={{ width: BASE, height: BASE }}
-                      className="relative rounded-2xl flex items-center justify-center overflow-hidden"
-                      style={{ background: 'rgba(148,163,184,0.1)', border: '1px solid rgba(148,163,184,0.15)' }}
-                      whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.88 }}
-                    >
-                      <div className="absolute inset-0 pointer-events-none"
-                        style={{ background: 'linear-gradient(145deg, rgba(255,255,255,0.06) 0%, transparent 55%)' }} />
-                      <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>
-                        {xwin.title.slice(0, 2).toUpperCase()}
-                      </span>
-                    </motion.button>
+                {x11Windows.map(xwin => {
+                  const meta = getX11Meta(xwin.title)
+                  return (
                     <div
-                      className="mt-1 text-center leading-none select-none pointer-events-none truncate"
-                      style={{ fontSize: 9, maxWidth: BASE, color: 'rgba(148,163,184,0.5)', fontFamily: '-apple-system, sans-serif' }}
+                      key={xwin.id}
+                      className="flex flex-col items-center cursor-default"
+                      style={{ width: BASE }}
+                      onMouseEnter={() => setHovered(meta.name)}
                     >
-                      {xwin.title.length > 10 ? xwin.title.slice(0, 9) + '…' : xwin.title}
+                      <motion.button
+                        onClick={async () => {
+                          try { await (window.cryogram as any).wm?.focusWindow(xwin.id) } catch {}
+                        }}
+                        animate={{ width: BASE, height: BASE }}
+                        className="relative rounded-2xl flex items-center justify-center overflow-hidden"
+                        style={{
+                          background: `radial-gradient(ellipse at 38% 28%, ${meta.color}18, rgba(10,15,24,0.92) 70%)`,
+                          border: `1px solid ${meta.color}28`,
+                        }}
+                        whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.88 }}
+                      >
+                        <div className="absolute inset-0 pointer-events-none"
+                          style={{ background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, transparent 55%)' }} />
+                        <span style={{ fontSize: 22 }}>{meta.icon}</span>
+                      </motion.button>
+                      <div
+                        className="mt-1 text-center leading-none select-none pointer-events-none truncate"
+                        style={{ fontSize: 9, maxWidth: BASE, color: `${meta.color}bb`, fontFamily: '-apple-system, sans-serif' }}
+                      >
+                        {meta.name}
+                      </div>
+                      <div className="rounded-full mt-0.5"
+                        style={{ width: 3, height: 3, background: meta.color, opacity: 0.75 }} />
                     </div>
-                    <div className="rounded-full mt-0.5"
-                      style={{ width: 3, height: 3, background: '#94a3b8', opacity: 0.6 }} />
-                  </div>
-                ))}
+                  )
+                })}
               </>
             )}
           </div>

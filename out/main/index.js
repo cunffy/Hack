@@ -894,49 +894,37 @@ function createWindow() {
     electron.globalShortcut.register("CommandOrControl+Alt+T", () => {
       mainWindow?.webContents.send("open:app", "terminal");
     });
-    const sendVolHud = () => {
-      child_process.execFile("pactl", ["get-sink-volume", "@DEFAULT_SINK@"], (_, volOut) => {
-        const match = volOut?.match(/(\d+)%/);
-        const level = match ? Math.min(100, parseInt(match[1])) : 50;
-        child_process.execFile("pactl", ["get-sink-mute", "@DEFAULT_SINK@"], (__, muteOut) => {
-          const muted = muteOut?.includes("yes") ?? false;
-          mainWindow?.webContents.send("hud:volume", { level, muted });
+    let _vol = -1;
+    const readVolAndSend = () => {
+      child_process.exec("pactl get-sink-volume @DEFAULT_SINK@", (err, volOut) => {
+        if (err || !volOut) return;
+        const match = volOut.match(/(\d+)%/);
+        if (!match) return;
+        _vol = Math.min(100, parseInt(match[1]));
+        child_process.exec("pactl get-sink-mute @DEFAULT_SINK@", (_, muteOut) => {
+          mainWindow?.webContents.send("hud:volume", { level: _vol, muted: muteOut?.includes("yes") ?? false });
         });
       });
+    };
+    const sendVolOptimistic = (delta) => {
+      if (_vol >= 0) {
+        _vol = Math.max(0, Math.min(100, _vol + delta));
+        mainWindow?.webContents.send("hud:volume", { level: _vol, muted: false });
+      }
+      setTimeout(readVolAndSend, 300);
     };
     electron.globalShortcut.register("VolumeUp", () => {
-      child_process.execFile("pactl", ["set-sink-volume", "@DEFAULT_SINK@", "+5%"]);
-      setTimeout(sendVolHud, 60);
+      child_process.exec("pactl set-sink-volume @DEFAULT_SINK@ +5%");
+      sendVolOptimistic(5);
     });
     electron.globalShortcut.register("VolumeDown", () => {
-      child_process.execFile("pactl", ["set-sink-volume", "@DEFAULT_SINK@", "-5%"]);
-      setTimeout(sendVolHud, 60);
+      child_process.exec("pactl set-sink-volume @DEFAULT_SINK@ -5%");
+      sendVolOptimistic(-5);
     });
     electron.globalShortcut.register("VolumeMute", () => {
-      child_process.execFile("pactl", ["set-sink-mute", "@DEFAULT_SINK@", "toggle"]);
-      setTimeout(sendVolHud, 60);
+      child_process.exec("pactl set-sink-mute @DEFAULT_SINK@ toggle");
+      setTimeout(readVolAndSend, 300);
     });
-    const sendBrightHud = () => {
-      child_process.execFile("brightnessctl", ["g"], (_, cur) => {
-        child_process.execFile("brightnessctl", ["m"], (__, max) => {
-          const curVal = parseInt(cur?.trim() ?? "0");
-          const maxVal = parseInt(max?.trim() ?? "1");
-          const level = maxVal > 0 ? Math.round(curVal / maxVal * 100) : 50;
-          mainWindow?.webContents.send("hud:brightness", { level });
-        });
-      });
-    };
-    try {
-      electron.globalShortcut.register("BrightnessUp", () => {
-        child_process.execFile("brightnessctl", ["set", "5%+"]);
-        setTimeout(sendBrightHud, 80);
-      });
-      electron.globalShortcut.register("BrightnessDown", () => {
-        child_process.execFile("brightnessctl", ["set", "5%-"]);
-        setTimeout(sendBrightHud, 80);
-      });
-    } catch {
-    }
     electron.globalShortcut.register("Alt+Tab", () => {
       mainWindow?.webContents.send("app:switcher", "next");
     });

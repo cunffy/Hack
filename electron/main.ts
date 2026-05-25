@@ -1,6 +1,6 @@
 import { app, BrowserWindow, shell, ipcMain, powerMonitor, globalShortcut } from 'electron'
 import { join } from 'path'
-import { execFile } from 'child_process'
+import { exec, execFile } from 'child_process'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerTerminalHandlers } from './ipc/terminal'
 import { registerPasswordTesterHandlers } from './ipc/password-tester'
@@ -52,50 +52,48 @@ function createWindow(): void {
     })
 
     // ── Volume keys ────────────────────────────────────────────────────────
-    const sendVolHud = () => {
-      execFile('pactl', ['get-sink-volume', '@DEFAULT_SINK@'], (_, volOut) => {
-        const match = volOut?.match(/(\d+)%/)
-        const level = match ? Math.min(100, parseInt(match[1])) : 50
-        execFile('pactl', ['get-sink-mute', '@DEFAULT_SINK@'], (__, muteOut) => {
-          const muted = muteOut?.includes('yes') ?? false
-          mainWindow?.webContents.send('hud:volume', { level, muted })
+    // Track last known level so we can show optimistic updates immediately
+    // instead of defaulting to 50 when pactl is slow to respond.
+    let _vol = -1
+
+    const readVolAndSend = () => {
+      exec('pactl get-sink-volume @DEFAULT_SINK@', (err, volOut) => {
+        if (err || !volOut) return
+        const match = volOut.match(/(\d+)%/)
+        if (!match) return
+        _vol = Math.min(100, parseInt(match[1]))
+        exec('pactl get-sink-mute @DEFAULT_SINK@', (_, muteOut) => {
+          mainWindow?.webContents.send('hud:volume', { level: _vol, muted: muteOut?.includes('yes') ?? false })
         })
       })
     }
+
+    const sendVolOptimistic = (delta: number) => {
+      if (_vol >= 0) {
+        _vol = Math.max(0, Math.min(100, _vol + delta))
+        mainWindow?.webContents.send('hud:volume', { level: _vol, muted: false })
+      }
+      setTimeout(readVolAndSend, 300)
+    }
+
     globalShortcut.register('VolumeUp', () => {
-      execFile('pactl', ['set-sink-volume', '@DEFAULT_SINK@', '+5%'])
-      setTimeout(sendVolHud, 60)
+      exec('pactl set-sink-volume @DEFAULT_SINK@ +5%')
+      sendVolOptimistic(5)
     })
     globalShortcut.register('VolumeDown', () => {
-      execFile('pactl', ['set-sink-volume', '@DEFAULT_SINK@', '-5%'])
-      setTimeout(sendVolHud, 60)
+      exec('pactl set-sink-volume @DEFAULT_SINK@ -5%')
+      sendVolOptimistic(-5)
     })
     globalShortcut.register('VolumeMute', () => {
-      execFile('pactl', ['set-sink-mute', '@DEFAULT_SINK@', 'toggle'])
-      setTimeout(sendVolHud, 60)
+      exec('pactl set-sink-mute @DEFAULT_SINK@ toggle')
+      setTimeout(readVolAndSend, 300)
     })
 
-    // ── Brightness keys (wrapped in try/catch — not supported on all platforms)
-    const sendBrightHud = () => {
-      execFile('brightnessctl', ['g'], (_, cur) => {
-        execFile('brightnessctl', ['m'], (__, max) => {
-          const curVal = parseInt(cur?.trim() ?? '0')
-          const maxVal = parseInt(max?.trim() ?? '1')
-          const level = maxVal > 0 ? Math.round((curVal / maxVal) * 100) : 50
-          mainWindow?.webContents.send('hud:brightness', { level })
-        })
-      })
-    }
-    try {
-      globalShortcut.register('BrightnessUp', () => {
-        execFile('brightnessctl', ['set', '5%+'])
-        setTimeout(sendBrightHud, 80)
-      })
-      globalShortcut.register('BrightnessDown', () => {
-        execFile('brightnessctl', ['set', '5%-'])
-        setTimeout(sendBrightHud, 80)
-      })
-    } catch { /* brightness keys not supported on this platform */ }
+    // ── Brightness keys ────────────────────────────────────────────────────
+    // BrightnessUp/Down are not valid Electron accelerator names on Linux.
+    // Brightness is handled by ACPI (configured by cryogram-update) at OS level.
+    // We only send the HUD update here if ACPI notifies us via a custom IPC path.
+    // For now the brightness slider in System Settings works via setBrightness IPC.
 
     // ── Alt+Tab window switcher ────────────────────────────────────────────
     globalShortcut.register('Alt+Tab', () => {
