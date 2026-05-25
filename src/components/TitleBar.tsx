@@ -210,26 +210,18 @@ export function TitleBar() {
 
   return (
     <div
-      className="flex items-center h-7 px-2 shrink-0 select-none relative"
+      className="flex items-center h-9 px-2 shrink-0 select-none relative"
       style={{
-        background: 'rgba(6,9,15,0.75)',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
-        backdropFilter: 'blur(40px) saturate(2)',
-        WebkitBackdropFilter: 'blur(40px) saturate(2)',
+        background: 'rgba(8, 12, 20, 0.88)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        backdropFilter: 'blur(48px) saturate(1.9)',
+        WebkitBackdropFilter: 'blur(48px) saturate(1.9)',
         WebkitAppRegion: 'drag',
         zIndex: 100,
       } as React.CSSProperties}
     >
-      {/* Top accent line */}
-      <div
-        className="absolute inset-x-0 top-0 h-px pointer-events-none"
-        style={{ background: 'linear-gradient(90deg, transparent, var(--cryo-a45) 35%, var(--cryo-a20) 65%, transparent)' }}
-      />
-
-      {/* Left: Cryogram menu */}
+      {/* Left: Cryogram menu + divider + focused app name */}
       <CryogramMenu />
-
-      {/* Active app name — shows when a window is focused */}
       <AnimatePresence>
         {focusedWindow && (
           <motion.div
@@ -241,26 +233,30 @@ export function TitleBar() {
             className="flex items-center gap-1.5 ml-1"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
           >
-            <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>›</span>
-            <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.01em' }}>
+            <div className="w-px h-3.5 mx-0.5" style={{ background: 'rgba(255,255,255,0.12)' }} />
+            <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.45)', letterSpacing: '0.01em' }}>
               {focusedWindow.title}
             </span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Right: status icons + clock */}
+      {/* Center: time + date */}
+      <div className="absolute left-1/2 -translate-x-1/2 flex items-baseline gap-1.5">
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.88)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em' }}>{time}</span>
+        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{date}</span>
+      </div>
+
+      {/* Right: status icons */}
       <div
         className="ml-auto flex items-center gap-0.5"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
         <StatusIcons />
-        <div className="w-px h-3.5 mx-1" style={{ background: 'rgba(255,255,255,0.1)' }} />
-        <div className="flex items-center gap-1.5 px-2 text-xs" style={{ color: 'rgba(255,255,255,0.55)', letterSpacing: '0.01em' }}>
-          <span>{date}</span>
-          <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>{time}</span>
-        </div>
       </div>
+
+      {/* Bottom accent line */}
+      <div className="absolute inset-x-0 bottom-0 h-px pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, var(--cryo-a20) 30%, var(--cryo-a35) 50%, var(--cryo-a20) 70%, transparent)' }} />
     </div>
   )
 }

@@ -96,16 +96,22 @@ export default function App() {
             {/* Full-screen background layer — animated grid OR wallpaper image */}
             {!wallpaper && <AnimatedBackground />}
             {wallpaper && (
-              <div
-                className="absolute inset-0"
-                style={{
-                  backgroundImage: `url("${encodeURI(wallpaper.startsWith('file://') ? wallpaper : 'file://' + wallpaper)}")`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                }}
+              <img
+                src={wallpaper.startsWith('file://') ? wallpaper : `file://${wallpaper}`}
+                alt=""
+                className="absolute inset-0 w-full h-full pointer-events-none"
+                style={{ objectFit: 'cover', objectPosition: 'center' }}
+                draggable={false}
               />
             )}
+            {/* Vignette depth overlay */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: 'radial-gradient(ellipse at 50% 0%, transparent 40%, rgba(0,0,0,0.45) 100%)',
+                zIndex: 1,
+              }}
+            />
             <TitleBar />
             {/* Desktop area: windows float here, dock overlaid at bottom */}
             <div className="flex-1 relative overflow-hidden">

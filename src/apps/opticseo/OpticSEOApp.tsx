@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const TARGET_URL = 'https://app.opticseoservices.com'
+const TARGET_URL = 'https://opticseoservices.com'
 const USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
 
 interface Creds { email: string; password: string; autoLogin: boolean }
@@ -275,6 +275,7 @@ export default function OpticSEOApp() {
           src={url}
           partition="persist:opticseo"
           useragent={USER_AGENT}
+          allowpopups
           style={{ width: '100%', height: '100%', display: 'flex' }}
         />
       </div>

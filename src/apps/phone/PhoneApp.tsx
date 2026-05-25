@@ -112,7 +112,7 @@ export default function PhoneApp() {
   const [wifiStep, setWifiStep]     = useState<'idle' | 'enabling' | 'connecting' | 'done'>('idle')
   const [wifiIp, setWifiIp]         = useState('')
   const [wifiInputIp, setWifiInputIp] = useState('')
-  const [noAdb, setNoAdb]           = useState(false)
+  const [noAdb, setNoAdb]           = useState<boolean | null>(null)
 
   const showToast = useCallback((msg: string, ok = true) => {
     setToast({ msg, ok })
@@ -269,8 +269,17 @@ export default function PhoneApp() {
           </button>
         </div>
 
+        {/* Checking state */}
+        {noAdb === null && devices.length === 0 && (
+          <Card>
+            <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '12px 0' }}>
+              Checking for connected devices…
+            </p>
+          </Card>
+        )}
+
         {/* No ADB warning */}
-        {noAdb && (
+        {noAdb === true && (
           <Card style={{ borderColor: 'rgba(251,191,36,0.3)', background: 'rgba(251,191,36,0.05)' }}>
             <p style={{ margin: 0, fontSize: 12, color: '#fbbf24' }}>
               ADB not found. Install Android Debug Bridge:
@@ -282,7 +291,7 @@ export default function PhoneApp() {
         )}
 
         {/* Device list */}
-        {!noAdb && devices.length === 0 && (
+        {noAdb === false && devices.length === 0 && (
           <Card>
             <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '12px 0' }}>
               No devices detected. Connect your phone via USB or set up wireless ADB below.
@@ -446,7 +455,7 @@ export default function PhoneApp() {
         )}
 
         {/* ADB install instructions */}
-        {!noAdb && devices.length === 0 && (
+        {noAdb === false && devices.length === 0 && (
           <Card style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
             <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Setup Guide</p>
             <ol style={{ margin: 0, paddingLeft: 16, fontSize: 11, color: 'rgba(255,255,255,0.45)', lineHeight: 1.8 }}>

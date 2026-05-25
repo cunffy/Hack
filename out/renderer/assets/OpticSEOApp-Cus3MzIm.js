@@ -1,5 +1,5 @@
-import { r as reactExports, j as jsxRuntimeExports, m as motion, A as AnimatePresence } from "./index-DCNe8ATZ.js";
-const TARGET_URL = "https://app.opticseoservices.com";
+import { r as reactExports, j as jsxRuntimeExports, m as motion, A as AnimatePresence } from "./index-XtxnP-XJ.js";
+const TARGET_URL = "https://opticseoservices.com";
 const USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 function ToolbarBtn({ title, onClick, children }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -284,6 +284,7 @@ function OpticSEOApp() {
         src: url,
         partition: "persist:opticseo",
         useragent: USER_AGENT,
+        allowpopups: true,
         style: { width: "100%", height: "100%", display: "flex" }
       }
     ) })

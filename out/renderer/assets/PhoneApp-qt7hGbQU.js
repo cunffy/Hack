@@ -1,4 +1,4 @@
-import { r as reactExports, j as jsxRuntimeExports, A as AnimatePresence, m as motion } from "./index-DCNe8ATZ.js";
+import { r as reactExports, j as jsxRuntimeExports, A as AnimatePresence, m as motion } from "./index-XtxnP-XJ.js";
 const phone = () => window.cryogram?.phone;
 function fmt(bytes) {
   const gb = bytes / 1073741824;
@@ -76,7 +76,7 @@ function PhoneApp() {
   const [wifiStep, setWifiStep] = reactExports.useState("idle");
   const [wifiIp, setWifiIp] = reactExports.useState("");
   const [wifiInputIp, setWifiInputIp] = reactExports.useState("");
-  const [noAdb, setNoAdb] = reactExports.useState(false);
+  const [noAdb, setNoAdb] = reactExports.useState(null);
   const showToast = reactExports.useCallback((msg, ok = true) => {
     setToast({ msg, ok });
     setTimeout(() => setToast(null), 3200);
@@ -246,11 +246,12 @@ function PhoneApp() {
               }
             )
           ] }),
-          noAdb && /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { style: { borderColor: "rgba(251,191,36,0.3)", background: "rgba(251,191,36,0.05)" }, children: [
+          noAdb === null && devices.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(Card, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { style: { margin: 0, fontSize: 12, color: "rgba(255,255,255,0.4)", textAlign: "center", padding: "12px 0" }, children: "Checking for connected devices…" }) }),
+          noAdb === true && /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { style: { borderColor: "rgba(251,191,36,0.3)", background: "rgba(251,191,36,0.05)" }, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("p", { style: { margin: 0, fontSize: 12, color: "#fbbf24" }, children: "ADB not found. Install Android Debug Bridge:" }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("code", { style: { fontSize: 11, color: "rgba(255,255,255,0.5)", display: "block", marginTop: 6 }, children: "sudo apt install adb" })
           ] }),
-          !noAdb && devices.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { children: [
+          noAdb === false && devices.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("p", { style: { margin: 0, fontSize: 12, color: "rgba(255,255,255,0.4)", textAlign: "center", padding: "12px 0" }, children: "No devices detected. Connect your phone via USB or set up wireless ADB below." }),
             /* @__PURE__ */ jsxRuntimeExports.jsx("p", { style: { margin: "8px 0 0", fontSize: 11, color: "rgba(255,255,255,0.3)", textAlign: "center" }, children: "Enable USB Debugging in Developer Options on your device." })
           ] }),
@@ -446,7 +447,7 @@ function PhoneApp() {
               wifiStep === "done" && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { style: { margin: 0, fontSize: 11, color: "#10b981" }, children: "Connected wirelessly!" })
             ] })
           ] }),
-          !noAdb && devices.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { style: { borderColor: "rgba(255,255,255,0.06)" }, children: [
+          noAdb === false && devices.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { style: { borderColor: "rgba(255,255,255,0.06)" }, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("p", { style: { margin: "0 0 8px", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.05em" }, children: "Setup Guide" }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("ol", { style: { margin: 0, paddingLeft: 16, fontSize: 11, color: "rgba(255,255,255,0.45)", lineHeight: 1.8 }, children: [
               /* @__PURE__ */ jsxRuntimeExports.jsxs("li", { children: [

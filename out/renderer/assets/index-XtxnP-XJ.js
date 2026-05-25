@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-BDUa-VMt.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-DDhx-bWi.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -16290,11 +16290,11 @@ function Dock() {
             paddingRight: 14,
             paddingTop: 8,
             paddingBottom: 8,
-            background: "rgba(10,15,24,0.72)",
+            background: "rgba(12,16,26,0.80)",
             backdropFilter: "blur(40px) saturate(1.8)",
             WebkitBackdropFilter: "blur(40px) saturate(1.8)",
             border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 20,
+            borderRadius: 22,
             boxShadow: "0 8px 40px rgba(0,0,0,0.65), 0 1px 0 rgba(255,255,255,0.06) inset",
             gap: 10
           },
@@ -16359,9 +16359,9 @@ function Dock() {
                                 transition: { type: "spring", stiffness: 500, damping: 32, mass: 0.6 },
                                 className: "relative rounded-2xl flex items-center justify-center overflow-hidden",
                                 style: {
-                                  background: `radial-gradient(ellipse at 38% 28%, ${meta.color}20, rgba(10,15,24,0.92) 70%)`,
+                                  background: `radial-gradient(ellipse at 38% 28%, ${meta.color}25, rgba(10,15,24,0.92) 70%)`,
                                   border: isFocused ? `1px solid ${meta.color}50` : "1px solid rgba(255,255,255,0.07)",
-                                  boxShadow: isFocused ? `0 0 24px ${meta.color}25, 0 4px 18px rgba(0,0,0,0.5)` : "0 4px 14px rgba(0,0,0,0.4)"
+                                  boxShadow: isFocused ? `0 0 24px ${meta.color}25, 0 4px 18px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.08) inset` : "0 6px 20px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset"
                                 },
                                 whileTap: !dragging ? { scale: 0.88, transition: { duration: 0.07 } } : void 0,
                                 children: [
@@ -17303,16 +17303,16 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-BDUa-VMt.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-BV_EY-f9.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-CsgVm9Rd.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-DlvEATnI.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-DXR4Iccm.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-BiAIpW3Q.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-D8tfcl4p.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-DLtih8rq.js"), true ? [] : void 0, import.meta.url));
-const OpticSEOApp = reactExports.lazy(() => __vitePreload(() => import("./OpticSEOApp-B1z3Kms4.js"), true ? [] : void 0, import.meta.url));
-const PhoneApp = reactExports.lazy(() => __vitePreload(() => import("./PhoneApp-C3GfQrvA.js"), true ? [] : void 0, import.meta.url));
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-DDhx-bWi.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-C-CoQ33V.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-Bdy8ThiZ.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-KBTHkpuj.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-DYWNBTdz.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-FSLwHw9p.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-DyXHVh5V.js"), true ? [] : void 0, import.meta.url));
+const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-Cj90-BW7.js"), true ? [] : void 0, import.meta.url));
+const OpticSEOApp = reactExports.lazy(() => __vitePreload(() => import("./OpticSEOApp-Cus3MzIm.js"), true ? [] : void 0, import.meta.url));
+const PhoneApp = reactExports.lazy(() => __vitePreload(() => import("./PhoneApp-qt7hGbQU.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -17834,23 +17834,16 @@ function TitleBar() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
     {
-      className: "flex items-center h-7 px-2 shrink-0 select-none relative",
+      className: "flex items-center h-9 px-2 shrink-0 select-none relative",
       style: {
-        background: "rgba(6,9,15,0.75)",
-        borderBottom: "1px solid rgba(255,255,255,0.08)",
-        backdropFilter: "blur(40px) saturate(2)",
-        WebkitBackdropFilter: "blur(40px) saturate(2)",
+        background: "rgba(8, 12, 20, 0.88)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        backdropFilter: "blur(48px) saturate(1.9)",
+        WebkitBackdropFilter: "blur(48px) saturate(1.9)",
         WebkitAppRegion: "drag",
         zIndex: 100
       },
       children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "div",
-          {
-            className: "absolute inset-x-0 top-0 h-px pointer-events-none",
-            style: { background: "linear-gradient(90deg, transparent, var(--cryo-a45) 35%, var(--cryo-a20) 65%, transparent)" }
-          }
-        ),
         /* @__PURE__ */ jsxRuntimeExports.jsx(CryogramMenu, {}),
         /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: focusedWindow && /* @__PURE__ */ jsxRuntimeExports.jsxs(
           motion.div,
@@ -17862,27 +17855,25 @@ function TitleBar() {
             className: "flex items-center gap-1.5 ml-1",
             style: { WebkitAppRegion: "no-drag" },
             children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { color: "rgba(255,255,255,0.2)", fontSize: 11 }, children: "›" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-medium", style: { color: "rgba(255,255,255,0.5)", letterSpacing: "0.01em" }, children: focusedWindow.title })
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-3.5 mx-0.5", style: { background: "rgba(255,255,255,0.12)" } }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-medium", style: { color: "rgba(255,255,255,0.45)", letterSpacing: "0.01em" }, children: focusedWindow.title })
             ]
           },
           focusedWindow.id
         ) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute left-1/2 -translate-x-1/2 flex items-baseline gap-1.5", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.88)", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em" }, children: time2 }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: "rgba(255,255,255,0.35)" }, children: date })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
           "div",
           {
             className: "ml-auto flex items-center gap-0.5",
             style: { WebkitAppRegion: "no-drag" },
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(StatusIcons, {}),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-3.5 mx-1", style: { background: "rgba(255,255,255,0.1)" } }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1.5 px-2 text-xs", style: { color: "rgba(255,255,255,0.55)", letterSpacing: "0.01em" }, children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: date }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { color: "rgba(255,255,255,0.75)", fontWeight: 500 }, children: time2 })
-              ] })
-            ]
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(StatusIcons, {})
           }
-        )
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-x-0 bottom-0 h-px pointer-events-none", style: { background: "linear-gradient(90deg, transparent, var(--cryo-a20) 30%, var(--cryo-a35) 50%, var(--cryo-a20) 70%, transparent)" } })
       ]
     }
   );
@@ -19236,14 +19227,22 @@ function App() {
         children: [
           !wallpaper && /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatedBackground, {}),
           wallpaper && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "img",
+            {
+              src: wallpaper.startsWith("file://") ? wallpaper : `file://${wallpaper}`,
+              alt: "",
+              className: "absolute inset-0 w-full h-full pointer-events-none",
+              style: { objectFit: "cover", objectPosition: "center" },
+              draggable: false
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
             "div",
             {
-              className: "absolute inset-0",
+              className: "absolute inset-0 pointer-events-none",
               style: {
-                backgroundImage: `url("${encodeURI(wallpaper.startsWith("file://") ? wallpaper : "file://" + wallpaper)}")`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat"
+                background: "radial-gradient(ellipse at 50% 0%, transparent 40%, rgba(0,0,0,0.45) 100%)",
+                zIndex: 1
               }
             }
           ),

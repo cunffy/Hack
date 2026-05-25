@@ -143,11 +143,11 @@ export function Dock() {
             className="flex items-end pointer-events-auto"
             style={{
               paddingLeft: 14, paddingRight: 14, paddingTop: 8, paddingBottom: 8,
-              background: 'rgba(10,15,24,0.72)',
+              background: 'rgba(12,16,26,0.80)',
               backdropFilter: 'blur(40px) saturate(1.8)',
               WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
               border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 20,
+              borderRadius: 22,
               boxShadow: '0 8px 40px rgba(0,0,0,0.65), 0 1px 0 rgba(255,255,255,0.06) inset',
               gap: 10,
             }}
@@ -196,11 +196,11 @@ export function Dock() {
                         transition={{ type: 'spring', stiffness: 500, damping: 32, mass: 0.6 }}
                         className="relative rounded-2xl flex items-center justify-center overflow-hidden"
                         style={{
-                          background: `radial-gradient(ellipse at 38% 28%, ${meta.color}20, rgba(10,15,24,0.92) 70%)`,
+                          background: `radial-gradient(ellipse at 38% 28%, ${meta.color}25, rgba(10,15,24,0.92) 70%)`,
                           border: isFocused ? `1px solid ${meta.color}50` : '1px solid rgba(255,255,255,0.07)',
                           boxShadow: isFocused
-                            ? `0 0 24px ${meta.color}25, 0 4px 18px rgba(0,0,0,0.5)`
-                            : '0 4px 14px rgba(0,0,0,0.4)',
+                            ? `0 0 24px ${meta.color}25, 0 4px 18px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.08) inset`
+                            : '0 6px 20px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset',
                         }}
                         whileTap={!dragging ? { scale: 0.88, transition: { duration: 0.07 } } : undefined}
                       >
