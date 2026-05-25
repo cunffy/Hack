@@ -531,9 +531,25 @@ function registerSystemHandlers() {
   electron.ipcMain.handle("system:connectNetwork", async (_, ssid, password) => {
     const dev = await sh("nmcli -t -f DEVICE,TYPE dev 2>/dev/null | grep ':wifi' | head -1 | cut -d: -f1");
     const ifarg = dev ? `ifname "${dev}"` : "";
-    const cmd = password ? `nmcli dev wifi connect "${ssid}" password "${password}" ${ifarg} 2>&1` : `nmcli dev wifi connect "${ssid}" ${ifarg} 2>&1`;
-    const out = await sh(cmd);
-    return out.toLowerCase().includes("successfully") || out.toLowerCase().includes("activated");
+    const escapedSsid = ssid.replace(/"/g, '\\"');
+    const escapedPwd = password?.replace(/"/g, '\\"') ?? "";
+    const cmd = password ? `nmcli dev wifi connect "${escapedSsid}" password "${escapedPwd}" ${ifarg} 2>&1` : `nmcli dev wifi connect "${escapedSsid}" ${ifarg} 2>&1`;
+    try {
+      const { stdout } = await execAsync(cmd);
+      const out = stdout.trim();
+      const success = out.toLowerCase().includes("successfully") || out.toLowerCase().includes("activated");
+      return { success, message: success ? "" : out || "Connection failed" };
+    } catch (err) {
+      const msg = (err.stdout ?? err.message ?? "Connection failed").trim();
+      const lower = msg.toLowerCase();
+      if (lower.includes("secrets") || lower.includes("password") || lower.includes("802-11") || lower.includes("wrong"))
+        return { success: false, message: "Wrong password — please try again" };
+      if (lower.includes("timeout"))
+        return { success: false, message: "Connection timed out — check password and try again" };
+      if (lower.includes("not found") || lower.includes("no network"))
+        return { success: false, message: "Network not found — try scanning again" };
+      return { success: false, message: msg || "Connection failed" };
+    }
   });
   electron.ipcMain.handle("system:disconnectNetwork", async () => {
     await sh("nmcli dev disconnect $(nmcli -t -f DEVICE,TYPE dev | grep wifi | cut -d: -f1 | head -1) 2>/dev/null");

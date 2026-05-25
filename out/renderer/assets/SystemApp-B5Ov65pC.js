@@ -1,4 +1,4 @@
-import { r as reactExports, j as jsxRuntimeExports, A as AnimatePresence, m as motion } from "./index-58owCol8.js";
+import { r as reactExports, j as jsxRuntimeExports, A as AnimatePresence, m as motion } from "./index-CX0Bch90.js";
 const TABS = [
   { id: "network", label: "Network", icon: "📶" },
   { id: "bluetooth", label: "Bluetooth", icon: "🔵" },
@@ -59,6 +59,7 @@ function NetworkPanel() {
   const [pwdFor, setPwdFor] = reactExports.useState(null);
   const [pwd, setPwd] = reactExports.useState("");
   const [scanning, setScanning] = reactExports.useState(false);
+  const [connectError, setConnectError] = reactExports.useState(null);
   const load = reactExports.useCallback(async () => {
     const [nets, s] = await Promise.all([
       window.cryogram.system.getNetworks(),
@@ -72,8 +73,15 @@ function NetworkPanel() {
   }, [load]);
   const connect = async (ssid, password) => {
     setConnecting(ssid);
+    setConnectError(null);
+    const result = await window.cryogram.system.connectNetwork(ssid, password);
+    if (result?.success === false) {
+      setConnectError(result.message || "Connection failed");
+      setConnecting(null);
+      return;
+    }
     setPwdFor(null);
-    await window.cryogram.system.connectNetwork(ssid, password);
+    setPwd("");
     await load();
     setConnecting(null);
   };
@@ -161,28 +169,38 @@ function NetworkPanel() {
                   autoFocus: true,
                   type: "password",
                   value: pwd,
-                  onChange: (e) => setPwd(e.target.value),
-                  onKeyDown: (e) => {
-                    if (e.key === "Enter") {
-                      connect(pwdFor, pwd);
-                      setPwd("");
-                    }
-                    if (e.key === "Escape") setPwdFor(null);
+                  onChange: (e) => {
+                    setPwd(e.target.value);
+                    setConnectError(null);
                   },
-                  className: "w-full text-xs py-2 px-3 rounded-lg mb-3",
-                  style: { background: "rgba(8,12,18,0.6)", border: "1px solid rgba(26,40,64,0.6)", color: "#c9d1d9" },
+                  onKeyDown: (e) => {
+                    if (e.key === "Enter") connect(pwdFor, pwd);
+                    if (e.key === "Escape") {
+                      setPwdFor(null);
+                      setPwd("");
+                      setConnectError(null);
+                    }
+                  },
+                  className: "w-full text-xs py-2 px-3 rounded-lg mb-2",
+                  style: {
+                    background: "rgba(8,12,18,0.6)",
+                    border: connectError ? "1px solid rgba(255,68,102,0.6)" : "1px solid rgba(26,40,64,0.6)",
+                    color: "#c9d1d9"
+                  },
                   placeholder: "Password"
                 }
               ),
+              connectError && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs mb-3", style: { color: "#ff4466" }, children: [
+                "⚠ ",
+                connectError
+              ] }),
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2 justify-end", children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsx(SettingBtn, { onClick: () => {
                   setPwdFor(null);
                   setPwd("");
+                  setConnectError(null);
                 }, children: "Cancel" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(SettingBtn, { primary: true, onClick: () => {
-                  connect(pwdFor, pwd);
-                  setPwd("");
-                }, children: "Connect" })
+                /* @__PURE__ */ jsxRuntimeExports.jsx(SettingBtn, { primary: true, onClick: () => connect(pwdFor, pwd), disabled: connecting === pwdFor, children: connecting === pwdFor ? "Connecting…" : "Connect" })
               ] })
             ]
           }

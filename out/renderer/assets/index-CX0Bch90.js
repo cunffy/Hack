@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-Dt3sLgAr.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-B4BRFaqN.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -15950,6 +15950,23 @@ const useDesktopStore = create()(
     { name: "cryogram-desktop" }
   )
 );
+const usePinnedStore = create()(
+  persist(
+    (set) => ({
+      taskbar: [],
+      desktop: [],
+      pinToTaskbar: (app) => set((s) => ({
+        taskbar: s.taskbar.find((a) => a.id === app.id) ? s.taskbar : [...s.taskbar, app]
+      })),
+      unpinTaskbar: (id2) => set((s) => ({ taskbar: s.taskbar.filter((a) => a.id !== id2) })),
+      pinToDesktop: (app) => set((s) => ({
+        desktop: s.desktop.find((a) => a.id === app.id) ? s.desktop : [...s.desktop, app]
+      })),
+      unpinDesktop: (id2) => set((s) => ({ desktop: s.desktop.filter((a) => a.id !== id2) }))
+    }),
+    { name: "cryogram-pinned-apps" }
+  )
+);
 const DEFAULT_DOCK = [
   "terminal",
   "editor",
@@ -16410,6 +16427,7 @@ function Desktop() {
   const hasWindows = useWindowStore((s) => s.windows.some((w2) => !w2.minimized));
   const { windows, openApp, focusWindow, restoreWindow } = useWindowStore();
   const { icons, wallpaper, removeIcon, moveIcon, addIcon, setWallpaper } = useDesktopStore();
+  const { desktop: pinnedDesktop, unpinDesktop } = usePinnedStore();
   const [ctx, setCtx] = reactExports.useState(null);
   const [appPicker, setAppPicker] = reactExports.useState(false);
   const handleBgCtx = reactExports.useCallback((e) => {
@@ -16549,6 +16567,15 @@ function Desktop() {
             icon.id
           );
         }),
+        pinnedDesktop.map((app, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          ExternalDesktopIcon,
+          {
+            app,
+            offsetIndex: icons.length + i,
+            onRemove: () => unpinDesktop(app.id)
+          },
+          app.id
+        )),
         /* @__PURE__ */ jsxRuntimeExports.jsxs(
           motion.div,
           {
@@ -16657,6 +16684,89 @@ function DesktopIconItem({ icon, meta, isOpen, onContextMenu, onMove, onOpen }) 
       ]
     }
   );
+}
+function ExternalDesktopIcon({ app, offsetIndex, onRemove }) {
+  const col = offsetIndex % 4;
+  const row = Math.floor(offsetIndex / 4);
+  const defaultX = 24 + col * 104;
+  const defaultY = 36 + row * 110;
+  const [pos, setPos] = reactExports.useState({ x: defaultX, y: defaultY });
+  const mx = useMotionValue(pos.x);
+  const my = useMotionValue(pos.y);
+  const [ctx, setCtx] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      motion.div,
+      {
+        "data-desktop-icon": true,
+        drag: true,
+        dragMomentum: false,
+        style: { position: "absolute", top: 0, left: 0, x: mx, y: my, width: 72, touchAction: "none", zIndex: 10 },
+        onDragEnd: () => setPos({ x: Math.max(0, Math.round(mx.get())), y: Math.max(28, Math.round(my.get())) }),
+        className: "flex flex-col items-center cursor-default",
+        onContextMenu: (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setCtx(true);
+        },
+        onDoubleClick: () => window.cryogram?.launcher?.launch(app),
+        whileTap: { scale: 0.9 },
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "w-14 h-14 rounded-2xl flex items-center justify-center",
+              style: {
+                background: "radial-gradient(ellipse at 38% 28%, rgba(0,212,255,0.18), rgba(8,12,20,0.88) 70%)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
+                backdropFilter: "blur(12px)"
+              },
+              children: app.icon ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "img",
+                {
+                  src: app.icon,
+                  alt: "",
+                  style: { width: 36, height: 36, objectFit: "contain" },
+                  onError: (e) => {
+                    e.target.style.display = "none";
+                  }
+                }
+              ) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 28 }, children: "🌐" })
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-1 text-center px-1 leading-tight", style: {
+            fontSize: 11,
+            color: "rgba(255,255,255,0.88)",
+            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+            textShadow: "0 1px 5px rgba(0,0,0,0.95), 0 0 12px rgba(0,0,0,0.7)",
+            maxWidth: 72,
+            wordBreak: "break-word",
+            lineHeight: 1.2
+          }, children: app.name })
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: ctx && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ContextMenu,
+      {
+        x: pos.x + 36,
+        y: pos.y + 40,
+        onClose: () => setCtx(false),
+        items: [
+          { label: `Open ${app.name}`, action: () => {
+            window.cryogram?.launcher?.launch(app);
+            setCtx(false);
+          } },
+          { sep: true },
+          { label: "Remove from Desktop", danger: true, action: () => {
+            onRemove();
+            setCtx(false);
+          } }
+        ]
+      }
+    ) })
+  ] });
 }
 function AppPickerOverlay({ onClose, onPick }) {
   const allAppIds = Object.keys(APP_META);
@@ -16855,14 +16965,14 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-Dt3sLgAr.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-CbQ-8QXT.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-YSt0M_Tm.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-pUIl4Oox.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-Bqfs8oZg.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-Cdq1elBR.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-DMdJKJOC.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-DJGpObDI.js"), true ? [] : void 0, import.meta.url));
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-B4BRFaqN.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-B_rE8G3g.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-hrbC-FnB.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-Cf7KAU74.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-DGGtyl1f.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-B95WVUsD.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-DcO5wIfF.js"), true ? [] : void 0, import.meta.url));
+const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-B5Ov65pC.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -18197,8 +18307,10 @@ function AppSwitcher() {
 function Taskbar() {
   const { windows, focusWindow, restoreWindow, minimizeWindow } = useWindowStore();
   const openApp = useWindowStore((s) => s.openApp);
+  const { taskbar: pinnedApps, unpinTaskbar } = usePinnedStore();
   const [x11Wins, setX11Wins] = reactExports.useState([]);
   const [ctxMenu, setCtxMenu] = reactExports.useState(null);
+  const [pinnedCtx, setPinnedCtx] = reactExports.useState(null);
   reactExports.useEffect(() => {
     const poll = async () => {
       try {
@@ -18256,6 +18368,58 @@ function Taskbar() {
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-5 shrink-0 mx-0.5", style: { background: "rgba(0,212,255,0.1)" } }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { initial: false, children: pinnedApps.map((app) => {
+            const running = x11Wins.find((w2) => w2.title.toLowerCase().includes(app.name.toLowerCase()));
+            return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              motion.button,
+              {
+                initial: { opacity: 0, scale: 0.78 },
+                animate: { opacity: 1, scale: 1 },
+                exit: { opacity: 0, scale: 0.78 },
+                transition: { type: "spring", stiffness: 440, damping: 30 },
+                title: app.name,
+                onClick: () => {
+                  if (running) window.cryogram?.wm?.focusWindow(running.id);
+                  else window.cryogram?.launcher?.launch(app);
+                },
+                onContextMenu: (e) => {
+                  e.preventDefault();
+                  setPinnedCtx({ x: e.clientX, id: app.id });
+                },
+                className: "flex items-center justify-center w-8 h-8 rounded-lg shrink-0 transition-all",
+                style: {
+                  background: running ? "rgba(0,212,255,0.12)" : "rgba(13,20,33,0.6)",
+                  border: running ? "1px solid rgba(0,212,255,0.3)" : "1px solid rgba(26,40,64,0.45)",
+                  position: "relative"
+                },
+                children: [
+                  app.icon ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "img",
+                    {
+                      src: app.icon,
+                      alt: "",
+                      style: { width: 18, height: 18, objectFit: "contain" },
+                      onError: (e) => {
+                        e.target.style.display = "none";
+                      }
+                    }
+                  ) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 14 }, children: "🌐" }),
+                  running && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+                    position: "absolute",
+                    bottom: 1,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: 4,
+                    height: 4,
+                    borderRadius: "50%",
+                    background: "#00d4ff"
+                  } })
+                ]
+              },
+              app.id
+            );
+          }) }),
+          pinnedApps.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-5 shrink-0 mx-0.5", style: { background: "rgba(0,212,255,0.1)" } }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1 flex-1 min-w-0 overflow-x-auto", style: { scrollbarWidth: "none" }, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { initial: false, children: windows.map((win) => {
               const accent = APP_COLORS[win.appId] ?? "#00d4ff";
@@ -18338,6 +18502,61 @@ function Taskbar() {
       const win = windows.find((w2) => w2.id === ctxMenu.winId);
       if (!win) return null;
       return /* @__PURE__ */ jsxRuntimeExports.jsx(WinContextMenu, { x: ctxMenu.x, win, onClose: () => setCtxMenu(null) }, "ctx");
+    })() }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: pinnedCtx && (() => {
+      const app = pinnedApps.find((a) => a.id === pinnedCtx.id);
+      if (!app) return null;
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        motion.div,
+        {
+          initial: { opacity: 0, scale: 0.93, y: 6 },
+          animate: { opacity: 1, scale: 1, y: 0 },
+          exit: { opacity: 0, scale: 0.93, y: 6 },
+          transition: { duration: 0.1 },
+          style: {
+            position: "fixed",
+            left: pinnedCtx.x,
+            bottom: 44,
+            background: "rgba(13,20,33,0.99)",
+            border: "1px solid rgba(0,212,255,0.2)",
+            borderRadius: 10,
+            padding: 4,
+            zIndex: 99999,
+            minWidth: 160,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.7)"
+          },
+          onContextMenu: (e) => e.preventDefault(),
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-3 py-1.5 text-xs font-semibold", style: { color: "#00d4ff", fontFamily: "monospace", borderBottom: "1px solid rgba(0,212,255,0.1)", marginBottom: 2 }, children: app.name }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                onClick: () => {
+                  unpinTaskbar(app.id);
+                  setPinnedCtx(null);
+                },
+                style: {
+                  display: "block",
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "7px 12px",
+                  borderRadius: 6,
+                  border: "none",
+                  background: "none",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontFamily: "monospace",
+                  color: "#ff4466"
+                },
+                onMouseEnter: (e) => e.currentTarget.style.background = "rgba(255,68,102,0.12)",
+                onMouseLeave: (e) => e.currentTarget.style.background = "none",
+                children: "Unpin from Taskbar"
+              }
+            )
+          ]
+        },
+        "pinctx"
+      );
     })() })
   ] });
 }
@@ -19284,5 +19503,6 @@ export {
   We$1 as W,
   jsxRuntimeExports as j,
   motion as m,
-  reactExports as r
+  reactExports as r,
+  usePinnedStore as u
 };
