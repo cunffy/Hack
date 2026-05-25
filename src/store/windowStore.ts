@@ -48,10 +48,13 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   nextZ: 10,
 
   openApp(appId) {
-    // For launcher, only allow one instance
-    if (appId === 'launcher') {
-      const existing = get().windows.find(w => w.appId === 'launcher')
-      if (existing) { get().focusWindow(existing.id); return }
+    // Restore/focus existing window — never open a second instance of the same app.
+    // This matches macOS/Windows behaviour: clicking the dock/taskbar icon brings
+    // the window back rather than spawning a duplicate.
+    const existing = get().windows.find(w => w.appId === appId)
+    if (existing) {
+      get().restoreWindow(existing.id)
+      return
     }
 
     const meta = APP_META[appId]

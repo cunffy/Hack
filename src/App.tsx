@@ -5,6 +5,7 @@ import { WindowManager } from './components/WindowManager'
 import { Dock } from './components/Dock'
 import { TitleBar } from './components/TitleBar'
 import { NotificationToast } from './components/NotificationToast'
+import { Taskbar, SystemHUD, AppSwitcher } from './components/Taskbar'
 import { AnimatedBackground } from './components/AnimatedBackground'
 import { BootSplash } from './components/BootSplash'
 import { LockScreen } from './components/LockScreen'
@@ -86,7 +87,10 @@ export default function App() {
               <WindowManager />
               <Dock />
             </div>
+            <Taskbar />
             <NotificationToast />
+            <SystemHUD />
+            <AppSwitcher />
           </motion.div>
         )}
       </AnimatePresence>

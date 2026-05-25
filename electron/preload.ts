@@ -138,6 +138,27 @@ contextBridge.exposeInMainWorld('cryogram', {
     ipcRenderer.on('notification', listener)
     return () => ipcRenderer.removeListener('notification', listener)
   },
+
+  // Volume HUD — fired by keyboard media keys
+  onHudVolume: (cb: (v: { level: number; muted: boolean }) => void) => {
+    const listener = (_: unknown, v: unknown) => cb(v as { level: number; muted: boolean })
+    ipcRenderer.on('hud:volume', listener)
+    return () => ipcRenderer.removeListener('hud:volume', listener)
+  },
+
+  // Brightness HUD — fired by keyboard brightness keys
+  onHudBrightness: (cb: (v: { level: number }) => void) => {
+    const listener = (_: unknown, v: unknown) => cb(v as { level: number })
+    ipcRenderer.on('hud:brightness', listener)
+    return () => ipcRenderer.removeListener('hud:brightness', listener)
+  },
+
+  // Alt+Tab app switcher direction
+  onAppSwitcher: (cb: (dir: 'next' | 'prev') => void) => {
+    const listener = (_: unknown, dir: unknown) => cb(dir as 'next' | 'prev')
+    ipcRenderer.on('app:switcher', listener)
+    return () => ipcRenderer.removeListener('app:switcher', listener)
+  },
 })
 
 export type CryogramAPI = typeof import('./preload')

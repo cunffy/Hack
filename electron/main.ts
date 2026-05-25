@@ -1,5 +1,6 @@
 import { app, BrowserWindow, shell, ipcMain, powerMonitor, globalShortcut } from 'electron'
 import { join } from 'path'
+import { execFile } from 'child_process'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerTerminalHandlers } from './ipc/terminal'
 import { registerPasswordTesterHandlers } from './ipc/password-tester'
@@ -48,6 +49,58 @@ function createWindow(): void {
     // Ctrl+Alt+T = terminal shortcut some WMs bind — open Cryogram terminal instead
     globalShortcut.register('CommandOrControl+Alt+T', () => {
       mainWindow?.webContents.send('open:app', 'terminal')
+    })
+
+    // ── Volume keys ────────────────────────────────────────────────────────
+    const sendVolHud = () => {
+      execFile('pactl', ['get-sink-volume', '@DEFAULT_SINK@'], (_, volOut) => {
+        const match = volOut?.match(/(\d+)%/)
+        const level = match ? Math.min(100, parseInt(match[1])) : 50
+        execFile('pactl', ['get-sink-mute', '@DEFAULT_SINK@'], (__, muteOut) => {
+          const muted = muteOut?.includes('yes') ?? false
+          mainWindow?.webContents.send('hud:volume', { level, muted })
+        })
+      })
+    }
+    globalShortcut.register('AudioVolumeUp', () => {
+      execFile('pactl', ['set-sink-volume', '@DEFAULT_SINK@', '+5%'])
+      setTimeout(sendVolHud, 60)
+    })
+    globalShortcut.register('AudioVolumeDown', () => {
+      execFile('pactl', ['set-sink-volume', '@DEFAULT_SINK@', '-5%'])
+      setTimeout(sendVolHud, 60)
+    })
+    globalShortcut.register('AudioVolumeMute', () => {
+      execFile('pactl', ['set-sink-mute', '@DEFAULT_SINK@', 'toggle'])
+      setTimeout(sendVolHud, 60)
+    })
+
+    // ── Brightness keys ────────────────────────────────────────────────────
+    const sendBrightHud = () => {
+      execFile('brightnessctl', ['g'], (_, cur) => {
+        execFile('brightnessctl', ['m'], (__, max) => {
+          const curVal = parseInt(cur?.trim() ?? '0')
+          const maxVal = parseInt(max?.trim() ?? '1')
+          const level = maxVal > 0 ? Math.round((curVal / maxVal) * 100) : 50
+          mainWindow?.webContents.send('hud:brightness', { level })
+        })
+      })
+    }
+    globalShortcut.register('BrightnessUp', () => {
+      execFile('brightnessctl', ['set', '5%+'])
+      setTimeout(sendBrightHud, 80)
+    })
+    globalShortcut.register('BrightnessDown', () => {
+      execFile('brightnessctl', ['set', '5%-'])
+      setTimeout(sendBrightHud, 80)
+    })
+
+    // ── Alt+Tab window switcher ────────────────────────────────────────────
+    globalShortcut.register('Alt+Tab', () => {
+      mainWindow?.webContents.send('app:switcher', 'next')
+    })
+    globalShortcut.register('Alt+Shift+Tab', () => {
+      mainWindow?.webContents.send('app:switcher', 'prev')
     })
   })
 
