@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-w33kt2-K.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-CLt7fYC8.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -17303,16 +17303,16 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-w33kt2-K.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-Bq4_Sp1b.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-B-i1Blb4.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-Bsa2AHq3.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-CbxCLxLa.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-D8G6l1eu.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-h6oP8Gzl.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-C3UmUNiw.js"), true ? [] : void 0, import.meta.url));
-const OpticSEOApp = reactExports.lazy(() => __vitePreload(() => import("./OpticSEOApp-CM8qFCXA.js"), true ? [] : void 0, import.meta.url));
-const PhoneApp = reactExports.lazy(() => __vitePreload(() => import("./PhoneApp-CqIrl3Md.js"), true ? [] : void 0, import.meta.url));
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-CLt7fYC8.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-BRCj8U5C.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-_UpbvG4R.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-CFlTVjiE.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-k0hBlbmH.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-B_TpXiLC.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-CtxMfHmn.js"), true ? [] : void 0, import.meta.url));
+const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-BW1vMLuU.js"), true ? [] : void 0, import.meta.url));
+const OpticSEOApp = reactExports.lazy(() => __vitePreload(() => import("./OpticSEOApp-BFSgxghp.js"), true ? [] : void 0, import.meta.url));
+const PhoneApp = reactExports.lazy(() => __vitePreload(() => import("./PhoneApp-DzZ9C6QJ.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -17766,7 +17766,7 @@ function CryogramMenu() {
           },
           children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "13", height: "13", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z" }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: "var(--cryo-accent)" }, children: "CRYOGRAM" })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: "var(--cryo-accent)" }, children: "CG OS" })
           ]
         }
       ),
