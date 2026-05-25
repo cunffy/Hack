@@ -430,6 +430,7 @@ Terminal=false
 Type=Application
 Categories=Security;Network;System;
 StartupWMClass=cryogram
+NoDisplay=true
 DESKTOP
 
 echo "[cryogram] Setup complete at $INSTALL_DIR ($(du -sh $INSTALL_DIR | cut -f1))"
