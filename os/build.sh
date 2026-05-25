@@ -340,6 +340,9 @@ cat > "$HOOKS_DIR/0400-calamares.hook.chroot" << 'HOOKEOF'
 set +e
 
 echo "[calamares] Installing Calamares..."
+# squashfs-tools provides unsquashfs, which Calamares uses to unpack the live
+# filesystem during installation. Without it unpackfs fails immediately.
+DEBIAN_FRONTEND=noninteractive apt-get install -y squashfs-tools 2>/dev/null || true
 
 # Install calamares only — NOT calamares-settings-debian, which ships its own
 # settings.conf that conflicts with ours staged in includes.chroot.
