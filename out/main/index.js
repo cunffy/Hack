@@ -1,10 +1,10 @@
 "use strict";
 const electron = require("electron");
 const path = require("path");
+const child_process = require("child_process");
 const utils = require("@electron-toolkit/utils");
 const pty = require("node-pty");
 const os = require("os");
-const child_process = require("child_process");
 const axios = require("axios");
 const Database = require("better-sqlite3");
 const Store = require("electron-store");
@@ -529,8 +529,10 @@ function registerSystemHandlers() {
     return { connected: true, ssid, signal };
   });
   electron.ipcMain.handle("system:connectNetwork", async (_, ssid, password) => {
-    const cmd = password ? `nmcli dev wifi connect "${ssid}" password "${password}"` : `nmcli dev wifi connect "${ssid}"`;
-    const out = await sh(`${cmd} 2>&1`);
+    const dev = await sh("nmcli -t -f DEVICE,TYPE dev 2>/dev/null | grep ':wifi' | head -1 | cut -d: -f1");
+    const ifarg = dev ? `ifname "${dev}"` : "";
+    const cmd = password ? `nmcli dev wifi connect "${ssid}" password "${password}" ${ifarg} 2>&1` : `nmcli dev wifi connect "${ssid}" ${ifarg} 2>&1`;
+    const out = await sh(cmd);
     return out.toLowerCase().includes("successfully") || out.toLowerCase().includes("activated");
   });
   electron.ipcMain.handle("system:disconnectNetwork", async () => {
@@ -636,13 +638,76 @@ function registerSystemHandlers() {
     }
   });
   electron.ipcMain.handle("system:shutdown", async () => {
-    await sh("systemctl poweroff");
+    await sh("sudo systemctl poweroff");
   });
   electron.ipcMain.handle("system:reboot", async () => {
-    await sh("systemctl reboot");
+    await sh("sudo systemctl reboot");
   });
   electron.ipcMain.handle("system:lock", async () => {
-    await sh("i3lock -c 080c12 -e &");
+    electron.BrowserWindow.getAllWindows()[0]?.webContents.send("screen:lock");
+    return true;
+  });
+  electron.ipcMain.handle("system:verifyPin", async (_, pin) => {
+    const hash = store.get("pin.hash");
+    if (!hash) return true;
+    return crypto.createHash("sha256").update(String(pin)).digest("hex") === hash;
+  });
+  electron.ipcMain.handle("system:setPin", async (_, newPin, currentPin) => {
+    const existing = store.get("pin.hash");
+    if (existing && currentPin !== void 0) {
+      const chk = crypto.createHash("sha256").update(String(currentPin)).digest("hex");
+      if (chk !== existing) return { success: false, error: "Incorrect current PIN" };
+    }
+    if (!/^[0-9]{4,8}$/.test(newPin)) return { success: false, error: "PIN must be 4–8 digits" };
+    store.set("pin.hash", crypto.createHash("sha256").update(newPin).digest("hex"));
+    store.set("pin.enabled", true);
+    return { success: true };
+  });
+  electron.ipcMain.handle("system:removePin", async (_, currentPin) => {
+    const existing = store.get("pin.hash");
+    if (existing) {
+      const chk = crypto.createHash("sha256").update(String(currentPin)).digest("hex");
+      if (chk !== existing) return { success: false, error: "Incorrect PIN" };
+    }
+    store.delete("pin.hash");
+    store.set("pin.enabled", false);
+    return { success: true };
+  });
+  electron.ipcMain.handle("system:setPinEnabled", async (_, enabled) => {
+    store.set("pin.enabled", enabled);
+    return true;
+  });
+  electron.ipcMain.handle("system:pickWallpaper", async (event) => {
+    const win = electron.BrowserWindow.fromWebContents(event.sender);
+    const result = await electron.dialog.showOpenDialog(win, {
+      title: "Choose Wallpaper",
+      filters: [{ name: "Images", extensions: ["jpg", "jpeg", "png", "webp", "gif", "bmp", "tiff"] }],
+      properties: ["openFile"]
+    });
+    if (result.canceled || result.filePaths.length === 0) return null;
+    return result.filePaths[0];
+  });
+  electron.ipcMain.handle("system:setWallpaper", async (_, path2) => {
+    const safe = path2.replace(/'/g, "'\\''");
+    await sh(`feh --bg-scale '${safe}' 2>/dev/null`);
+    return true;
+  });
+  electron.ipcMain.handle("wm:getWindows", async () => {
+    const out = await sh("wmctrl -l 2>/dev/null");
+    if (!out) return [];
+    return out.split("\n").filter(Boolean).map((line) => {
+      const match = line.match(/^(0x\w+)\s+(-?\d+)\s+(\S+)\s+(.+)$/);
+      if (!match) return null;
+      return { id: match[1], desktop: parseInt(match[2]), title: match[4] };
+    }).filter(Boolean);
+  });
+  electron.ipcMain.handle("wm:focusWindow", async (_, id) => {
+    await sh(`wmctrl -ia ${id} 2>/dev/null`);
+    return true;
+  });
+  electron.ipcMain.handle("wm:closeWindow", async (_, id) => {
+    await sh(`wmctrl -ic ${id} 2>/dev/null`);
+    return true;
   });
 }
 const APP_DIRS = [
@@ -665,6 +730,38 @@ const CATEGORY_MAP = {
   Video: "Media",
   Office: "Office"
 };
+async function resolveIconPath(name) {
+  if (!name) return "";
+  if (name.startsWith("/")) {
+    try {
+      await promises.access(name);
+      return `file://${name}`;
+    } catch {
+      return "";
+    }
+  }
+  const candidates = [
+    `/usr/share/icons/hicolor/256x256/apps/${name}.png`,
+    `/usr/share/icons/hicolor/128x128/apps/${name}.png`,
+    `/usr/share/icons/hicolor/64x64/apps/${name}.png`,
+    `/usr/share/icons/hicolor/48x48/apps/${name}.png`,
+    `/usr/share/icons/hicolor/scalable/apps/${name}.svg`,
+    `/usr/share/pixmaps/${name}.png`,
+    `/usr/share/pixmaps/${name}.svg`,
+    `/usr/share/pixmaps/${name}.xpm`,
+    `/usr/share/icons/hicolor/32x32/apps/${name}.png`,
+    `/usr/share/icons/Adwaita/256x256/apps/${name}.png`,
+    `/usr/share/icons/Adwaita/48x48/apps/${name}.png`
+  ];
+  for (const p of candidates) {
+    try {
+      await promises.access(p);
+      return `file://${p}`;
+    } catch {
+    }
+  }
+  return "";
+}
 async function parseDesktopFile(filePath) {
   try {
     const content = await promises.readFile(filePath, "utf8");
@@ -686,7 +783,7 @@ async function parseDesktopFile(filePath) {
     return {
       name,
       exec: exec.replace(/%[uUfFdDnNickvm]/g, "").trim(),
-      icon: get("Icon"),
+      icon: await resolveIconPath(get("Icon")),
       comment: get("Comment") || get("GenericName"),
       categories: rawCats,
       category,
@@ -696,6 +793,16 @@ async function parseDesktopFile(filePath) {
   } catch {
     return null;
   }
+}
+const launchedPids = /* @__PURE__ */ new Set();
+function killLaunchedApps() {
+  for (const pid of launchedPids) {
+    try {
+      process.kill(pid, "SIGTERM");
+    } catch {
+    }
+  }
+  launchedPids.clear();
 }
 function registerLauncherHandlers() {
   electron.ipcMain.handle("launcher:getApps", async () => {
@@ -726,6 +833,10 @@ function registerLauncherHandlers() {
         stdio: "ignore",
         env: { ...process.env }
       });
+      if (proc.pid) {
+        launchedPids.add(proc.pid);
+        proc.on("exit", () => launchedPids.delete(proc.pid));
+      }
       proc.unref();
       return true;
     } catch {
@@ -742,7 +853,9 @@ function createWindow() {
     minHeight: 700,
     frame: false,
     titleBarStyle: "hidden",
-    backgroundColor: "#080c12",
+    backgroundColor: "#070b11",
+    skipTaskbar: true,
+    // Don't show in any system taskbar — WE are the taskbar
     webPreferences: {
       preload: path.join(__dirname, "../preload/index.js"),
       sandbox: false,
@@ -753,6 +866,64 @@ function createWindow() {
   });
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
+    mainWindow.maximize();
+    mainWindow.on("restore", () => mainWindow?.maximize());
+    electron.globalShortcut.register("Super+D", () => {
+    });
+    electron.globalShortcut.register("Super+Tab", () => {
+    });
+    electron.globalShortcut.register("Super+L", () => {
+      mainWindow?.webContents.send("screen:lock");
+    });
+    electron.globalShortcut.register("CommandOrControl+Alt+T", () => {
+      mainWindow?.webContents.send("open:app", "terminal");
+    });
+    const sendVolHud = () => {
+      child_process.execFile("pactl", ["get-sink-volume", "@DEFAULT_SINK@"], (_, volOut) => {
+        const match = volOut?.match(/(\d+)%/);
+        const level = match ? Math.min(100, parseInt(match[1])) : 50;
+        child_process.execFile("pactl", ["get-sink-mute", "@DEFAULT_SINK@"], (__, muteOut) => {
+          const muted = muteOut?.includes("yes") ?? false;
+          mainWindow?.webContents.send("hud:volume", { level, muted });
+        });
+      });
+    };
+    electron.globalShortcut.register("AudioVolumeUp", () => {
+      child_process.execFile("pactl", ["set-sink-volume", "@DEFAULT_SINK@", "+5%"]);
+      setTimeout(sendVolHud, 60);
+    });
+    electron.globalShortcut.register("AudioVolumeDown", () => {
+      child_process.execFile("pactl", ["set-sink-volume", "@DEFAULT_SINK@", "-5%"]);
+      setTimeout(sendVolHud, 60);
+    });
+    electron.globalShortcut.register("AudioVolumeMute", () => {
+      child_process.execFile("pactl", ["set-sink-mute", "@DEFAULT_SINK@", "toggle"]);
+      setTimeout(sendVolHud, 60);
+    });
+    const sendBrightHud = () => {
+      child_process.execFile("brightnessctl", ["g"], (_, cur) => {
+        child_process.execFile("brightnessctl", ["m"], (__, max) => {
+          const curVal = parseInt(cur?.trim() ?? "0");
+          const maxVal = parseInt(max?.trim() ?? "1");
+          const level = maxVal > 0 ? Math.round(curVal / maxVal * 100) : 50;
+          mainWindow?.webContents.send("hud:brightness", { level });
+        });
+      });
+    };
+    electron.globalShortcut.register("BrightnessUp", () => {
+      child_process.execFile("brightnessctl", ["set", "5%+"]);
+      setTimeout(sendBrightHud, 80);
+    });
+    electron.globalShortcut.register("BrightnessDown", () => {
+      child_process.execFile("brightnessctl", ["set", "5%-"]);
+      setTimeout(sendBrightHud, 80);
+    });
+    electron.globalShortcut.register("Alt+Tab", () => {
+      mainWindow?.webContents.send("app:switcher", "next");
+    });
+    electron.globalShortcut.register("Alt+Shift+Tab", () => {
+      mainWindow?.webContents.send("app:switcher", "prev");
+    });
   });
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     electron.shell.openExternal(url);
@@ -783,9 +954,15 @@ electron.app.whenReady().then(() => {
   registerSystemHandlers();
   registerLauncherHandlers();
   createWindow();
+  electron.powerMonitor.on("resume", () => mainWindow?.webContents.send("screen:lock"));
+  electron.powerMonitor.on("lock-screen", () => mainWindow?.webContents.send("screen:lock"));
   electron.app.on("activate", () => {
     if (electron.BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+});
+electron.app.on("before-quit", () => {
+  electron.globalShortcut.unregisterAll();
+  killLaunchedApps();
 });
 electron.app.on("window-all-closed", () => {
   if (process.platform !== "darwin") electron.app.quit();
