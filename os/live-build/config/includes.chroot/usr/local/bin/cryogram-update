@@ -83,9 +83,10 @@ step "Fetching latest code  ($REPO_URL  [$BRANCH])"
 
 if [ -d "$SRC_DIR/.git" ]; then
   info "Updating existing clone in $SRC_DIR"
-  git -C "$SRC_DIR" fetch origin
-  git -C "$SRC_DIR" checkout "$BRANCH" 2>/dev/null || true
-  git -C "$SRC_DIR" reset --hard "origin/$BRANCH"
+  # Explicitly fetch the target branch — generic 'fetch origin' misses branches
+  # in shallow clones or when the tracking ref hasn't been set up yet.
+  git -C "$SRC_DIR" fetch origin "$BRANCH"
+  git -C "$SRC_DIR" checkout -B "$BRANCH" FETCH_HEAD
   COMMIT=$(git -C "$SRC_DIR" log -1 --format='%h  %s')
   ok "At commit: $COMMIT"
 else
@@ -134,7 +135,6 @@ if command -v brave-browser &>/dev/null; then
   ok "Brave already installed ($(brave-browser --version 2>/dev/null | head -1 || echo 'version unknown'))"
 else
   info "Installing Brave Browser..."
-  # Ensure keyrings directory exists before writing to it
   mkdir -p /usr/share/keyrings
   if curl -fsSL https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
       | gpg --dearmor -o /usr/share/keyrings/brave-browser-archive-keyring.gpg 2>/dev/null; then
