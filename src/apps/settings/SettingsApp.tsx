@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useThemeStore, THEME_PRESETS } from '../../store/themeStore'
+import { TutorialSlides } from '../../components/TutorialSlides'
 
 type Tab =
   | 'appearance'
@@ -13,6 +14,7 @@ type Tab =
   | 'apikeys'
   | 'update'
   | 'about'
+  | 'guide'
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'appearance', label: 'Appearance', icon: '🎨' },
@@ -25,6 +27,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'apikeys',    label: 'API Keys',   icon: '🔑' },
   { id: 'update',     label: 'Update',     icon: '🔄' },
   { id: 'about',      label: 'About',      icon: 'ℹ️' },
+  { id: 'guide',      label: 'Guide',      icon: '📖' },
 ]
 
 export default function SettingsApp({ initialTab }: { initialTab?: string }) {
@@ -85,6 +88,11 @@ export default function SettingsApp({ initialTab }: { initialTab?: string }) {
             {tab === 'apikeys'    && <ApiKeysPanel />}
             {tab === 'update'     && <UpdatePanel />}
             {tab === 'about'      && <AboutPanel />}
+            {tab === 'guide'      && (
+              <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <TutorialSlides inline />
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>

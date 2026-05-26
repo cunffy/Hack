@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { TutorialSlides } from './TutorialSlides'
 
 // ── Hex grid background (same pattern as UpdateScreen) ────────────────────────
 
@@ -639,7 +640,7 @@ export function SetupWizard({ onComplete }: { onComplete: () => void }) {
   const [prevStep,     setPrevStep]     = useState(0)
   const [selectedTheme, setTheme]       = useState<ThemeId>('cyber')
 
-  const TOTAL_STEPS = 3
+  const TOTAL_STEPS = 4
   const direction   = step >= prevStep ? 1 : -1
 
   const goTo = (next: number) => {
@@ -772,8 +773,19 @@ export function SetupWizard({ onComplete }: { onComplete: () => void }) {
                 {step === 2 && (
                   <StepApiKeys
                     accentColor={accentColor}
-                    onComplete={onComplete}
+                    onComplete={() => goTo(3)}
                   />
+                )}
+                {step === 3 && (
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16, textAlign: 'center' }}>
+                      Quick Tour
+                    </div>
+                    <TutorialSlides
+                      onDone={onComplete}
+                      doneLabel="Start using CryoGram OS →"
+                    />
+                  </div>
                 )}
               </motion.div>
             </AnimatePresence>
@@ -781,7 +793,7 @@ export function SetupWizard({ onComplete }: { onComplete: () => void }) {
         </motion.div>
 
         {/* Global skip link */}
-        {step < 2 && (
+        {step < 3 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
