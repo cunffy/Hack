@@ -89,17 +89,88 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
     getInfo: () => electron.ipcRenderer.invoke("system:getInfo"),
     shutdown: () => electron.ipcRenderer.invoke("system:shutdown"),
     reboot: () => electron.ipcRenderer.invoke("system:reboot"),
-    lock: () => electron.ipcRenderer.invoke("system:lock")
+    lock: () => electron.ipcRenderer.invoke("system:lock"),
+    pickWallpaper: () => electron.ipcRenderer.invoke("system:pickWallpaper"),
+    setWallpaper: (path) => electron.ipcRenderer.invoke("system:setWallpaper", path),
+    verifyPin: (pin) => electron.ipcRenderer.invoke("system:verifyPin", pin),
+    setPin: (pin, cur) => electron.ipcRenderer.invoke("system:setPin", pin, cur),
+    removePin: (cur) => electron.ipcRenderer.invoke("system:removePin", cur),
+    setPinEnabled: (on) => electron.ipcRenderer.invoke("system:setPinEnabled", on)
   },
   // App launcher
   launcher: {
     getApps: () => electron.ipcRenderer.invoke("launcher:getApps"),
     launch: (app) => electron.ipcRenderer.invoke("launcher:launch", app)
   },
+  // X11 window manager (wmctrl) — tracks ALL open apps including external ones
+  wm: {
+    getWindows: () => electron.ipcRenderer.invoke("wm:getWindows"),
+    focusWindow: (id) => electron.ipcRenderer.invoke("wm:focusWindow", id),
+    closeWindow: (id) => electron.ipcRenderer.invoke("wm:closeWindow", id)
+  },
+  // Phone companion (ADB + scrcpy)
+  phone: {
+    getDevices: () => electron.ipcRenderer.invoke("phone:getDevices"),
+    getInfo: (serial) => electron.ipcRenderer.invoke("phone:getInfo", serial),
+    getBattery: (serial) => electron.ipcRenderer.invoke("phone:getBattery", serial),
+    getStorage: (serial) => electron.ipcRenderer.invoke("phone:getStorage", serial),
+    checkScrcpy: () => electron.ipcRenderer.invoke("phone:checkScrcpy"),
+    installScrcpy: () => electron.ipcRenderer.invoke("phone:installScrcpy"),
+    startMirror: (serial) => electron.ipcRenderer.invoke("phone:startMirror", serial),
+    stopMirror: () => electron.ipcRenderer.invoke("phone:stopMirror"),
+    isMirroring: () => electron.ipcRenderer.invoke("phone:isMirroring"),
+    enableWireless: (serial, port) => electron.ipcRenderer.invoke("phone:enableWireless", serial, port),
+    connectWifi: (ip, port) => electron.ipcRenderer.invoke("phone:connectWifi", ip, port),
+    disconnect: (address) => electron.ipcRenderer.invoke("phone:disconnect", address),
+    getDeviceIp: (serial) => electron.ipcRenderer.invoke("phone:getDeviceIp", serial),
+    screenshot: (serial) => electron.ipcRenderer.invoke("phone:screenshot", serial)
+  },
+  // Update checker + runner
+  updater: {
+    check: () => electron.ipcRenderer.invoke("updater:check"),
+    run: () => electron.ipcRenderer.invoke("updater:run"),
+    onProgress: (cb) => {
+      const listener = (_, line) => cb(line);
+      electron.ipcRenderer.on("updater:progress", listener);
+      return () => electron.ipcRenderer.removeListener("updater:progress", listener);
+    }
+  },
+  // Tell main process the lock screen was dismissed so it clears alwaysOnTop
+  notifyUnlock: () => electron.ipcRenderer.send("screen:unlock"),
+  // Lock screen events from main (system resume, manual lock)
+  onLock: (cb) => {
+    const listener = () => cb();
+    electron.ipcRenderer.on("screen:lock", listener);
+    return () => electron.ipcRenderer.removeListener("screen:lock", listener);
+  },
+  // Global shortcut → open a named app (e.g. Ctrl+Alt+T → terminal)
+  onOpenApp: (cb) => {
+    const listener = (_, appId) => cb(appId);
+    electron.ipcRenderer.on("open:app", listener);
+    return () => electron.ipcRenderer.removeListener("open:app", listener);
+  },
   // Notifications from main
   onNotification: (cb) => {
     const listener = (_, n) => cb(n);
     electron.ipcRenderer.on("notification", listener);
     return () => electron.ipcRenderer.removeListener("notification", listener);
+  },
+  // Volume HUD — fired by keyboard media keys
+  onHudVolume: (cb) => {
+    const listener = (_, v) => cb(v);
+    electron.ipcRenderer.on("hud:volume", listener);
+    return () => electron.ipcRenderer.removeListener("hud:volume", listener);
+  },
+  // Brightness HUD — fired by keyboard brightness keys
+  onHudBrightness: (cb) => {
+    const listener = (_, v) => cb(v);
+    electron.ipcRenderer.on("hud:brightness", listener);
+    return () => electron.ipcRenderer.removeListener("hud:brightness", listener);
+  },
+  // Alt+Tab app switcher direction
+  onAppSwitcher: (cb) => {
+    const listener = (_, dir) => cb(dir);
+    electron.ipcRenderer.on("app:switcher", listener);
+    return () => electron.ipcRenderer.removeListener("app:switcher", listener);
   }
 });

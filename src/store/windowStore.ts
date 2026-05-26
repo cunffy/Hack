@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system'
+export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot' | 'calculator' | 'crypto-tools' | 'api-tester' | 'cert-inspector' | 'docker' | 'git' | 'database' | 'markdown' | 'trash' | 'shodan' | 'osint' | 'cve' | 'ai-assistant' | 'wordlists' | 'json-explorer' | 'totp' | 'regex' | 'encoding-chain' | 'packet-sniffer' | 'backup' | 'password-health' | 'pomodoro' | 'audit-log' | 'code-scanner' | 'wallpaper'
 
 export interface AppWindow {
   id: string
@@ -35,10 +35,48 @@ const APP_META: Record<AppId, { title: string; width: number; height: number }> 
   editor:           { title: 'Code Editor',         width: 900, height: 600 },
   'password-tester':{ title: 'Password Tester',     width: 820, height: 620 },
   leaker:           { title: 'Leaker — Breach Monitor', width: 860, height: 560 },
-  settings:         { title: 'Settings',            width: 600, height: 480 },
+  settings:         { title: 'Settings',            width: 760, height: 560 },
   files:            { title: 'Files',               width: 860, height: 580 },
-  launcher:         { title: 'App Launcher',        width: 760, height: 560 },
-  system:           { title: 'System',              width: 680, height: 520 },
+  launcher:         { title: 'App Launcher',        width: 760,  height: 560 },
+  system:           { title: 'Settings',            width: 760,  height: 560 },
+  opticseo:         { title: 'OpticSEO Pro',        width: 1280, height: 820 },
+  phone:            { title: 'Phone',               width: 780,  height: 600 },
+  scanner:          { title: 'Network Scanner',     width: 900,  height: 620 },
+  vpn:              { title: 'VPN Manager',         width: 720,  height: 560 },
+  notes:            { title: 'Notes',               width: 820,  height: 580 },
+  mail:             { title: 'Gmail',               width: 1100, height: 780 },
+  passwords:        { title: 'Password Manager',    width: 860,  height: 600 },
+  'ssh-keys':       { title: 'SSH Key Manager',     width: 820,  height: 600 },
+  firewall:         { title: 'Firewall',            width: 780,  height: 580 },
+  'task-manager':   { title: 'Task Manager',        width: 900,  height: 600 },
+  logs:             { title: 'Log Viewer',          width: 960,  height: 640 },
+  netmon:           { title: 'Network Monitor',     width: 900,  height: 600 },
+  screenshot:       { title: 'Screenshot',          width: 900,  height: 640 },
+  calculator:       { title: 'Calculator',          width: 560,  height: 520 },
+  'crypto-tools':   { title: 'Crypto Tools',        width: 720,  height: 580 },
+  'api-tester':     { title: 'API Tester',          width: 1100, height: 720 },
+  'cert-inspector': { title: 'Cert Inspector',      width: 780,  height: 580 },
+  docker:           { title: 'Docker',              width: 960,  height: 640 },
+  git:              { title: 'Git Client',          width: 980,  height: 640 },
+  database:         { title: 'SQLite Browser',      width: 960,  height: 640 },
+  markdown:         { title: 'Markdown Editor',     width: 1000, height: 680 },
+  trash:            { title: 'Trash',               width: 820,  height: 560 },
+  shodan:           { title: 'Shodan Explorer',      width: 1100, height: 720 },
+  osint:            { title: 'OSINT Dashboard',      width: 1060, height: 700 },
+  cve:              { title: 'CVE Database',         width: 1060, height: 700 },
+  'ai-assistant':   { title: 'AI Assistant',         width: 820,  height: 640 },
+  wordlists:        { title: 'Wordlist Manager',     width: 900,  height: 600 },
+  'json-explorer':  { title: 'JSON / YAML Explorer', width: 1060, height: 680 },
+  totp:             { title: '2FA / TOTP Manager',   width: 760,  height: 540 },
+  regex:            { title: 'Regex Tester',         width: 900,  height: 640 },
+  'encoding-chain': { title: 'Encoding Chain',       width: 980,  height: 640 },
+  'packet-sniffer': { title: 'Packet Sniffer',       width: 1100, height: 680 },
+  backup:           { title: 'System Backup',        width: 820,  height: 580 },
+  'password-health':{ title: 'Password Health',      width: 760,  height: 580 },
+  pomodoro:         { title: 'Pomodoro Timer',       width: 560,  height: 700 },
+  'audit-log':      { title: 'Audit Log',            width: 980,  height: 640 },
+  'code-scanner':   { title: 'Code Scanner',         width: 1060, height: 700 },
+  wallpaper:        { title: 'Wallpaper',            width: 820,  height: 580 },
 }
 
 let instanceCounter = 0
@@ -48,10 +86,13 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   nextZ: 10,
 
   openApp(appId) {
-    // For launcher, only allow one instance
-    if (appId === 'launcher') {
-      const existing = get().windows.find(w => w.appId === 'launcher')
-      if (existing) { get().focusWindow(existing.id); return }
+    // Restore/focus existing window — never open a second instance of the same app.
+    // This matches macOS/Windows behaviour: clicking the dock/taskbar icon brings
+    // the window back rather than spawning a duplicate.
+    const existing = get().windows.find(w => w.appId === appId)
+    if (existing) {
+      get().restoreWindow(existing.id)
+      return
     }
 
     const meta = APP_META[appId]
@@ -121,9 +162,9 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
 
   toggleMaximize(id) {
     const z = get().nextZ
-    // Content area: full width, full height minus menubar (28px) and dock clearance (88px)
+    // Content area: full width, height minus TitleBar (28px) and Dock clearance (88px)
     const W = typeof window !== 'undefined' ? window.innerWidth : 1440
-    const H = typeof window !== 'undefined' ? window.innerHeight - 28 : 872
+    const H = typeof window !== 'undefined' ? window.innerHeight - 28 - 88 : 784
     set((s) => ({
       nextZ: s.nextZ + 1,
       windows: s.windows.map((w) => {

@@ -94,8 +94,10 @@ contextBridge.exposeInMainWorld('cryogram', {
     bluetoothDisconnect:  (address: string)             => ipcRenderer.invoke('system:bluetoothDisconnect', address),
     bluetoothScan:        ()                            => ipcRenderer.invoke('system:bluetoothScan'),
     getInfo:              ()                            => ipcRenderer.invoke('system:getInfo'),
+    syncTime:             ()                              => ipcRenderer.invoke('system:syncTime'),
     shutdown:             ()                              => ipcRenderer.invoke('system:shutdown'),
     reboot:               ()                              => ipcRenderer.invoke('system:reboot'),
+    sleep:                ()                              => ipcRenderer.invoke('system:sleep'),
     lock:                 ()                              => ipcRenderer.invoke('system:lock'),
     pickWallpaper:        ()                              => ipcRenderer.invoke('system:pickWallpaper'),
     setWallpaper:         (path: string)                  => ipcRenderer.invoke('system:setWallpaper', path),
@@ -113,10 +115,197 @@ contextBridge.exposeInMainWorld('cryogram', {
 
   // X11 window manager (wmctrl) — tracks ALL open apps including external ones
   wm: {
-    getWindows:  ()             => ipcRenderer.invoke('wm:getWindows'),
-    focusWindow: (id: string)   => ipcRenderer.invoke('wm:focusWindow', id),
-    closeWindow: (id: string)   => ipcRenderer.invoke('wm:closeWindow', id),
+    getWindows:         ()           => ipcRenderer.invoke('wm:getWindows'),
+    focusWindow:        (id: string) => ipcRenderer.invoke('wm:focusWindow', id),
+    closeWindow:        (id: string) => ipcRenderer.invoke('wm:closeWindow', id),
+    hideShell:          ()           => ipcRenderer.invoke('wm:hideShell'),
+    getCurrentWorkspace:()           => ipcRenderer.invoke('wm:getCurrentWorkspace'),
+    switchWorkspace:    (n: number)  => ipcRenderer.invoke('wm:switchWorkspace', n),
+    getWorkspaceCount:  ()           => ipcRenderer.invoke('wm:getWorkspaceCount'),
   },
+
+  // Phone companion (ADB + scrcpy)
+  phone: {
+    getDevices:     ()                               => ipcRenderer.invoke('phone:getDevices'),
+    getInfo:        (serial: string)                 => ipcRenderer.invoke('phone:getInfo', serial),
+    getBattery:     (serial: string)                 => ipcRenderer.invoke('phone:getBattery', serial),
+    getStorage:     (serial: string)                 => ipcRenderer.invoke('phone:getStorage', serial),
+    checkScrcpy:    ()                               => ipcRenderer.invoke('phone:checkScrcpy'),
+    installScrcpy:  ()                               => ipcRenderer.invoke('phone:installScrcpy'),
+    startMirror:    (serial: string)                 => ipcRenderer.invoke('phone:startMirror', serial),
+    stopMirror:     ()                               => ipcRenderer.invoke('phone:stopMirror'),
+    isMirroring:    ()                               => ipcRenderer.invoke('phone:isMirroring'),
+    enableWireless: (serial: string, port?: number)  => ipcRenderer.invoke('phone:enableWireless', serial, port),
+    connectWifi:    (ip: string, port?: number)      => ipcRenderer.invoke('phone:connectWifi', ip, port),
+    disconnect:     (address: string)                => ipcRenderer.invoke('phone:disconnect', address),
+    getDeviceIp:    (serial: string)                 => ipcRenderer.invoke('phone:getDeviceIp', serial),
+    screenshot:     (serial: string)                 => ipcRenderer.invoke('phone:screenshot', serial),
+  },
+
+  // Network scanner
+  scanner: {
+    check:      ()                                             => ipcRenderer.invoke('scanner:check'),
+    run:        (target: string, type: string, ports?: string) => ipcRenderer.invoke('scanner:run', target, type, ports),
+    cancel:     ()                                             => ipcRenderer.send('scanner:cancel'),
+    onProgress: (cb: (line: string) => void) => {
+      const listener = (_: unknown, line: string) => cb(line)
+      ipcRenderer.on('scanner:progress', listener)
+      return () => ipcRenderer.removeListener('scanner:progress', listener)
+    },
+  },
+
+  // VPN manager
+  vpn: {
+    getStatus:  ()                => ipcRenderer.invoke('vpn:getStatus'),
+    connect:    (profile: unknown)=> ipcRenderer.invoke('vpn:connect', profile),
+    disconnect: ()                => ipcRenderer.invoke('vpn:disconnect'),
+  },
+
+  // Password manager (encrypted vault)
+  passwords: {
+    getAll:    ()                              => ipcRenderer.invoke('passwords:getAll'),
+    add:       (entry: unknown)                => ipcRenderer.invoke('passwords:add', entry),
+    update:    (id: string, patch: unknown)    => ipcRenderer.invoke('passwords:update', id, patch),
+    delete:    (id: string)                    => ipcRenderer.invoke('passwords:delete', id),
+    generate:  (opts: unknown)                 => ipcRenderer.invoke('passwords:generate', opts),
+  },
+
+  // SSH key manager
+  ssh: {
+    listKeys:      ()                           => ipcRenderer.invoke('ssh:listKeys'),
+    generateKey:   (opts: unknown)              => ipcRenderer.invoke('ssh:generateKey', opts),
+    deleteKey:     (name: string)               => ipcRenderer.invoke('ssh:deleteKey', name),
+    getPublicKey:  (name: string)               => ipcRenderer.invoke('ssh:getPublicKey', name),
+    listHosts:     ()                           => ipcRenderer.invoke('ssh:listHosts'),
+    saveConfig:    (content: string)            => ipcRenderer.invoke('ssh:saveConfig', content),
+  },
+
+  // Firewall manager (UFW)
+  firewall: {
+    status:     ()                              => ipcRenderer.invoke('firewall:status'),
+    enable:     ()                              => ipcRenderer.invoke('firewall:enable'),
+    disable:    ()                              => ipcRenderer.invoke('firewall:disable'),
+    addRule:    (rule: unknown)                 => ipcRenderer.invoke('firewall:addRule', rule),
+    deleteRule: (num: number)                   => ipcRenderer.invoke('firewall:deleteRule', num),
+    reset:      ()                              => ipcRenderer.invoke('firewall:reset'),
+  },
+
+  // Process / task manager
+  processes: {
+    list:           ()                          => ipcRenderer.invoke('processes:list'),
+    kill:           (pid: number, sig?: string) => ipcRenderer.invoke('processes:kill', pid, sig),
+    getSystemStats: ()                          => ipcRenderer.invoke('processes:getSystemStats'),
+  },
+
+  // Log viewer (journalctl)
+  logs: {
+    getUnits:   ()              => ipcRenderer.invoke('logs:getUnits'),
+    query:      (opts: unknown) => ipcRenderer.invoke('logs:query', opts),
+    stream:     (opts: unknown) => ipcRenderer.invoke('logs:stream', opts),
+    stopStream: ()              => ipcRenderer.invoke('logs:stopStream'),
+    onLine: (cb: (line: string) => void) => {
+      const listener = (_: unknown, line: string) => cb(line)
+      ipcRenderer.on('logs:line', listener)
+      return () => ipcRenderer.removeListener('logs:line', listener)
+    },
+  },
+
+  // Network monitor
+  netmon: {
+    getInterfaces:  () => ipcRenderer.invoke('netmon:getInterfaces'),
+    getConnections: () => ipcRenderer.invoke('netmon:getConnections'),
+    startStream:    () => ipcRenderer.invoke('netmon:startStream'),
+    stopStream:     () => ipcRenderer.invoke('netmon:stopStream'),
+    onStats: (cb: (stats: unknown) => void) => {
+      const listener = (_: unknown, stats: unknown) => cb(stats)
+      ipcRenderer.on('netmon:stats', listener)
+      return () => ipcRenderer.removeListener('netmon:stats', listener)
+    },
+  },
+
+  // Screenshot
+  screenshot: {
+    capture:          ()                         => ipcRenderer.invoke('screenshot:capture'),
+    save:             (dataUrl: string, name?: string) => ipcRenderer.invoke('screenshot:save', dataUrl, name),
+    copyToClipboard:  (dataUrl: string)          => ipcRenderer.invoke('screenshot:copyToClipboard', dataUrl),
+  },
+
+  // Update checker + runner
+  updater: {
+    check:      () => ipcRenderer.invoke('updater:check'),
+    run:        (password?: string) => ipcRenderer.invoke('updater:run', password),
+    onProgress: (cb: (line: string) => void) => {
+      const listener = (_: unknown, line: string) => cb(line)
+      ipcRenderer.on('updater:progress', listener)
+      return () => ipcRenderer.removeListener('updater:progress', listener)
+    },
+  },
+
+  // TLS cert inspector
+  cert: {
+    inspect:  (host: string, port?: number) => ipcRenderer.invoke('cert:inspect', host, port),
+    parsePem: (pem: string)                 => ipcRenderer.invoke('cert:parsePem', pem),
+  },
+
+  // Docker
+  docker: {
+    listContainers: ()                          => ipcRenderer.invoke('docker:listContainers'),
+    listImages:     ()                          => ipcRenderer.invoke('docker:listImages'),
+    startContainer: (id: string)                => ipcRenderer.invoke('docker:startContainer', id),
+    stopContainer:  (id: string)                => ipcRenderer.invoke('docker:stopContainer', id),
+    restartContainer:(id: string)               => ipcRenderer.invoke('docker:restartContainer', id),
+    removeContainer: (id: string)               => ipcRenderer.invoke('docker:removeContainer', id),
+    getStats:       ()                          => ipcRenderer.invoke('docker:getStats'),
+    pullImage:      (name: string)              => ipcRenderer.invoke('docker:pullImage', name),
+    removeImage:    (id: string)                => ipcRenderer.invoke('docker:removeImage', id),
+    getLogs:        (id: string, lines?: number)=> ipcRenderer.invoke('docker:getLogs', id, lines),
+    onPullLine: (cb: (line: string) => void) => {
+      const listener = (_: unknown, line: string) => cb(line)
+      ipcRenderer.on('docker:pullLine', listener)
+      return () => ipcRenderer.removeListener('docker:pullLine', listener)
+    },
+  },
+
+  // Git
+  git: {
+    isRepo:      (repoPath: string)                        => ipcRenderer.invoke('git:isRepo', repoPath),
+    status:      (repoPath: string)                        => ipcRenderer.invoke('git:status', repoPath),
+    log:         (repoPath: string, limit?: number)        => ipcRenderer.invoke('git:log', repoPath, limit),
+    diff:        (repoPath: string, file?: string, staged?: boolean) => ipcRenderer.invoke('git:diff', repoPath, file, staged),
+    getBranches: (repoPath: string)                        => ipcRenderer.invoke('git:getBranches', repoPath),
+    checkout:    (repoPath: string, branch: string)        => ipcRenderer.invoke('git:checkout', repoPath, branch),
+    stage:       (repoPath: string, files: string[])       => ipcRenderer.invoke('git:stage', repoPath, files),
+    unstage:     (repoPath: string, files: string[])       => ipcRenderer.invoke('git:unstage', repoPath, files),
+    commit:      (repoPath: string, message: string)       => ipcRenderer.invoke('git:commit', repoPath, message),
+    push:        (repoPath: string)                        => ipcRenderer.invoke('git:push', repoPath),
+    pull:        (repoPath: string)                        => ipcRenderer.invoke('git:pull', repoPath),
+    stash:       (repoPath: string)                        => ipcRenderer.invoke('git:stash', repoPath),
+    stashPop:    (repoPath: string)                        => ipcRenderer.invoke('git:stashPop', repoPath),
+    init:        (repoPath: string)                        => ipcRenderer.invoke('git:init', repoPath),
+  },
+
+  // SQLite browser
+  db: {
+    open:             (filePath: string)                            => ipcRenderer.invoke('db:open', filePath),
+    close:            (sessionId: string)                           => ipcRenderer.invoke('db:close', sessionId),
+    listTables:       (sessionId: string)                           => ipcRenderer.invoke('db:listTables', sessionId),
+    getSchema:        (sessionId: string, table: string)            => ipcRenderer.invoke('db:getSchema', sessionId, table),
+    getTableRowCount: (sessionId: string, table: string)            => ipcRenderer.invoke('db:getTableRowCount', sessionId, table),
+    query:            (sessionId: string, sql: string, page?: number, pageSize?: number) => ipcRenderer.invoke('db:query', sessionId, sql, page, pageSize),
+  },
+
+  // Trash
+  trash: {
+    list:            ()            => ipcRenderer.invoke('trash:list'),
+    moveToTrash:     (path: string)=> ipcRenderer.invoke('trash:moveToTrash', path),
+    restore:         (name: string)=> ipcRenderer.invoke('trash:restore', name),
+    deletePermanent: (name: string)=> ipcRenderer.invoke('trash:deletePermanent', name),
+    empty:           ()            => ipcRenderer.invoke('trash:empty'),
+    getSize:         ()            => ipcRenderer.invoke('trash:getSize'),
+  },
+
+  // Tell main process the lock screen was dismissed so it clears alwaysOnTop
+  notifyUnlock: () => ipcRenderer.send('screen:unlock'),
 
   // Lock screen events from main (system resume, manual lock)
   onLock: (cb: () => void) => {
@@ -137,6 +326,135 @@ contextBridge.exposeInMainWorld('cryogram', {
     const listener = (_: unknown, n: unknown) => cb(n as { title: string; body: string })
     ipcRenderer.on('notification', listener)
     return () => ipcRenderer.removeListener('notification', listener)
+  },
+
+  // Volume HUD — fired by keyboard media keys
+  onHudVolume: (cb: (v: { level: number; muted: boolean }) => void) => {
+    const listener = (_: unknown, v: unknown) => cb(v as { level: number; muted: boolean })
+    ipcRenderer.on('hud:volume', listener)
+    return () => ipcRenderer.removeListener('hud:volume', listener)
+  },
+
+  // Brightness HUD — fired by keyboard brightness keys
+  onHudBrightness: (cb: (v: { level: number }) => void) => {
+    const listener = (_: unknown, v: unknown) => cb(v as { level: number })
+    ipcRenderer.on('hud:brightness', listener)
+    return () => ipcRenderer.removeListener('hud:brightness', listener)
+  },
+
+  // Alt+Tab app switcher direction
+  onAppSwitcher: (cb: (dir: 'next' | 'prev') => void) => {
+    const listener = (_: unknown, dir: unknown) => cb(dir as 'next' | 'prev')
+    ipcRenderer.on('app:switcher', listener)
+    return () => ipcRenderer.removeListener('app:switcher', listener)
+  },
+
+  // Ctrl+Space spotlight shortcut from main
+  onSpotlight: (cb: () => void) => {
+    const listener = () => cb()
+    ipcRenderer.on('open:spotlight', listener)
+    return () => ipcRenderer.removeListener('open:spotlight', listener)
+  },
+
+  // Super+1/2/3/4 workspace switch from main
+  onWorkspaceChanged: (cb: (n: number) => void) => {
+    const listener = (_: unknown, n: unknown) => cb(n as number)
+    ipcRenderer.on('workspace:changed', listener)
+    return () => ipcRenderer.removeListener('workspace:changed', listener)
+  },
+
+  // Shodan
+  shodan: {
+    search:   (query: string, page?: number) => ipcRenderer.invoke('shodan:search', query, page),
+    host:     (ip: string)                   => ipcRenderer.invoke('shodan:host', ip),
+    count:    (query: string)                => ipcRenderer.invoke('shodan:count', query),
+    exploits: (query: string)               => ipcRenderer.invoke('shodan:exploits', query),
+  },
+
+  // OSINT
+  osint: {
+    lookup: (tool: string, query: string) => ipcRenderer.invoke('osint:lookup', tool, query),
+  },
+
+  // CVE Database
+  cve: {
+    search: (query: string) => ipcRenderer.invoke('cve:search', query),
+    recent: (count?: number) => ipcRenderer.invoke('cve:recent', count),
+  },
+
+  // AI Assistant
+  ai: {
+    chat: (messages: { role: string; content: string }[]) => ipcRenderer.invoke('ai:chat', messages),
+  },
+
+  // Packet Sniffer
+  packetSniffer: {
+    start: (iface: string, filter: string, cb: (pkt: unknown) => void) => {
+      const listener = (_: unknown, pkt: unknown) => cb(pkt)
+      ipcRenderer.on('packetSniffer:packet', listener)
+      ipcRenderer.invoke('packetSniffer:start', iface, filter)
+      return () => ipcRenderer.removeListener('packetSniffer:packet', listener)
+    },
+    stop: () => ipcRenderer.invoke('packetSniffer:stop'),
+  },
+
+  // System Backup
+  backup: {
+    list:    ()          => ipcRenderer.invoke('backup:list'),
+    create:  ()          => ipcRenderer.invoke('backup:create'),
+    restore: (id: string)=> ipcRenderer.invoke('backup:restore', id),
+    delete:  (id: string)=> ipcRenderer.invoke('backup:delete', id),
+    onProgress: (cb: (msg: string, pct: number) => void) => {
+      const listener = (_: unknown, msg: unknown, pct: unknown) => cb(msg as string, pct as number)
+      ipcRenderer.on('backup:progress', listener)
+      return () => ipcRenderer.removeListener('backup:progress', listener)
+    },
+  },
+
+  // Audit Log
+  auditLog: {
+    list:   ()                  => ipcRenderer.invoke('auditLog:list'),
+    append: (entry: unknown)    => ipcRenderer.invoke('auditLog:append', entry),
+    clear:  ()                  => ipcRenderer.invoke('auditLog:clear'),
+  },
+
+  // Code Scanner
+  codeScanner: {
+    browse: ()                                          => ipcRenderer.invoke('codeScanner:browse'),
+    scan:   (path: string, scanner: string)             => ipcRenderer.invoke('codeScanner:scan', path, scanner),
+    onProgress: (cb: (pct: number) => void) => {
+      const listener = (_: unknown, pct: unknown) => cb(pct as number)
+      ipcRenderer.on('codeScanner:progress', listener)
+      return () => ipcRenderer.removeListener('codeScanner:progress', listener)
+    },
+  },
+
+  // TOTP / 2FA
+  totp: {
+    list:     ()                    => ipcRenderer.invoke('totp:list'),
+    generate: (secret: string)      => ipcRenderer.invoke('totp:generate', secret),
+    add:      (account: unknown)    => ipcRenderer.invoke('totp:add', account),
+    remove:   (id: string)          => ipcRenderer.invoke('totp:remove', id),
+  },
+
+  // Wordlists
+  wordlists: {
+    list:     ()                    => ipcRenderer.invoke('wordlists:list'),
+    preview:  (path: string, n?: number) => ipcRenderer.invoke('wordlists:preview', path, n),
+    import:   ()                    => ipcRenderer.invoke('wordlists:import'),
+    delete:   (path: string)        => ipcRenderer.invoke('wordlists:delete', path),
+    generate: (opts: unknown)       => ipcRenderer.invoke('wordlists:generate', opts),
+  },
+
+  // Password Health
+  passwordHealth: {
+    checkHIBP: (password: string) => ipcRenderer.invoke('passwordHealth:checkHIBP', password),
+  },
+
+  // Wallpaper
+  wallpaper: {
+    listCustom: ()           => ipcRenderer.invoke('wallpaper:listCustom'),
+    browse:     ()           => ipcRenderer.invoke('wallpaper:browse'),
   },
 })
 

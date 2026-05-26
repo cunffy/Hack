@@ -1,6 +1,6 @@
 #!/bin/bash
 # cryogram-update — pull latest Cryogram app code and redeploy in-place.
-# No ISO rebuild needed for UI/feature changes.
+# No ISO rebuild needed for UI/feature/theme changes.
 # Usage: sudo cryogram-update
 
 set -euo pipefail
@@ -14,7 +14,7 @@ info() { echo -e "${CYAN}[INFO]${NC} $1"; }
 warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 step() { echo -e "\n${BOLD}${CYAN}── $1 ──${NC}"; }
 
-# ── Root check ────────────────────────────────────────────────────────────────
+# ── Root check ────────────────────────────────────────────────────────────────────────────
 if [[ $EUID -ne 0 ]]; then
   echo -e "${RED}Run as root:${NC} sudo cryogram-update"
   exit 1
@@ -26,45 +26,49 @@ echo -e "${CYAN}${BOLD}║      Cryogram OS — App Updater          ║${NC}"
 echo -e "${CYAN}${BOLD}╚══════════════════════════════════════════╝${NC}"
 echo ""
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# ── Config ────────────────────────────────────────────────────────────────────────────
 CONF_FILE="/etc/cryogram/update.conf"
 SRC_DIR="/opt/cryogram-src"
 APP_DIR="/opt/cryogram"
 
 mkdir -p /etc/cryogram
 
-# Load saved config
 if [ -f "$CONF_FILE" ]; then
   # shellcheck source=/dev/null
   source "$CONF_FILE"
 fi
 
-# First-run: ask for repo URL
 if [ -z "${REPO_URL:-}" ]; then
-  echo "First-time setup. Enter the git URL of the Cryogram source repo."
-  echo "  Example: https://github.com/yourname/Hack"
+  echo "First-time setup — enter your Cryogram git repository details."
   echo ""
-  read -rp "  Git repo URL: " REPO_URL
+  read -rp "  Git repo URL  (e.g. https://github.com/yourname/Hack): " REPO_URL
   if [ -z "$REPO_URL" ]; then
     fail "No URL provided. Aborting."
   fi
+  read -rp "  Branch name   [press Enter for 'main']: " INPUT_BRANCH
+  BRANCH="${INPUT_BRANCH:-main}"
   {
     echo "# Cryogram update configuration"
     echo "REPO_URL=\"$REPO_URL\""
-    echo "BRANCH=\"main\""
+    echo "BRANCH=\"$BRANCH\""
   } > "$CONF_FILE"
-  ok "Config saved to $CONF_FILE"
+  ok "Config saved to $CONF_FILE  (branch: $BRANCH)"
+  echo ""
+  info "To change branch later:  sudo nano $CONF_FILE"
+  echo ""
 fi
 
 BRANCH="${BRANCH:-main}"
 
-# ── Dependency check ──────────────────────────────────────────────────────────
+# ── Dependency check ────────────────────────────────────────────────────────────────
 step "Checking dependencies"
 
 missing=()
-command -v git  &>/dev/null || missing+=(git)
-command -v node &>/dev/null || missing+=(nodejs)
-command -v npm  &>/dev/null || missing+=(npm)
+command -v git     &>/dev/null || missing+=(git)
+command -v node    &>/dev/null || missing+=(nodejs)
+command -v npm     &>/dev/null || missing+=(npm)
+command -v python3 &>/dev/null || missing+=(python3)
+command -v rsync   &>/dev/null || missing+=(rsync)
 
 if [ ${#missing[@]} -gt 0 ]; then
   info "Installing: ${missing[*]}"
@@ -72,16 +76,15 @@ if [ ${#missing[@]} -gt 0 ]; then
   apt-get install -y -qq "${missing[@]}"
 fi
 
-ok "git $(git --version | awk '{print $3}')  ·  node $(node -v)  ·  npm $(npm -v)"
+ok "git $(git --version | awk '{print $3}')  ·  node $(node -v)  ·  npm $(npm -v)  ·  python3 $(python3 --version | awk '{print $2}')"
 
-# ── Fetch latest code ─────────────────────────────────────────────────────────
+# ── Fetch latest code ─────────────────────────────────────────────────────────────────
 step "Fetching latest code  ($REPO_URL  [$BRANCH])"
 
 if [ -d "$SRC_DIR/.git" ]; then
   info "Updating existing clone in $SRC_DIR"
-  git -C "$SRC_DIR" fetch origin
-  git -C "$SRC_DIR" checkout "$BRANCH" 2>/dev/null || true
-  git -C "$SRC_DIR" reset --hard "origin/$BRANCH"
+  git -C "$SRC_DIR" fetch origin "$BRANCH"
+  git -C "$SRC_DIR" checkout -B "$BRANCH" FETCH_HEAD
   COMMIT=$(git -C "$SRC_DIR" log -1 --format='%h  %s')
   ok "At commit: $COMMIT"
 else
@@ -90,36 +93,60 @@ else
   ok "Cloned."
 fi
 
-# ── Install build dependencies ────────────────────────────────────────────────
+# ── Install build dependencies ───────────────────────────────────────────────────────────────
 step "Installing build dependencies  (first run downloads ~300 MB)"
 
 cd "$SRC_DIR"
 npm install --loglevel=warn
-ok "Dependencies ready"
+ok "npm dependencies ready"
 
-# ── Build ─────────────────────────────────────────────────────────────────────
+# ── Python requirements ───────────────────────────────────────────────────────
+if [ -f "$SRC_DIR/scripts/requirements.txt" ]; then
+  step "Installing Python requirements"
+  pip3 install -r "$SRC_DIR/scripts/requirements.txt" --quiet --break-system-packages 2>/dev/null \
+    || pip3 install -r "$SRC_DIR/scripts/requirements.txt" --quiet 2>/dev/null \
+    || warn "pip3 install failed — Python features may be limited"
+  ok "Python requirements installed"
+fi
+
+# ── Build ────────────────────────────────────────────────────────────────────────────
 step "Building  (takes ~1-2 minutes)"
 
 npm run build
-ok "Build complete  ($(du -sh out | cut -f1))"
+ok "Build complete  ($(du -sh out 2>/dev/null | cut -f1 || echo '?'))"
 
-# ── Deploy ────────────────────────────────────────────────────────────────────
+# ── Deploy ────────────────────────────────────────────────────────────────────────────
 step "Deploying to $APP_DIR"
+
+# Ensure target directories exist
+mkdir -p "$APP_DIR/out" "$APP_DIR/node_modules"
 
 # Renderer, preload, and main process
 rsync -a --delete "$SRC_DIR/out/"         "$APP_DIR/out/"
 cp               "$SRC_DIR/package.json"  "$APP_DIR/package.json"
 
 # Python security scripts
-[ -d "$SRC_DIR/scripts" ] && rsync -a --delete "$SRC_DIR/scripts/" "$APP_DIR/scripts/"
+if [ -d "$SRC_DIR/scripts" ]; then
+  rsync -a --delete "$SRC_DIR/scripts/" "$APP_DIR/scripts/"
+  info "Scripts synced"
+fi
 
-# Native addons — only sync if newer (node-pty, better-sqlite3)
-for dep in node-pty better-sqlite3; do
-  if [ -d "$SRC_DIR/node_modules/$dep" ]; then
-    rsync -a --delete "$SRC_DIR/node_modules/$dep" "$APP_DIR/node_modules/"
-    info "Synced native addon: $dep"
+# Native addons — detect automatically by scanning for compiled .node files.
+SYNCED_ADDONS=()
+while IFS= read -r nodefile; do
+  module=$(echo "$nodefile" | sed "s|$SRC_DIR/node_modules/||" | cut -d'/' -f1)
+  [[ "$module" == electron ]] && continue
+  [[ "$module" == .* ]] && continue
+  if [ -d "$SRC_DIR/node_modules/$module" ] && [[ ! " ${SYNCED_ADDONS[*]} " =~ " $module " ]]; then
+    rsync -a --delete "$SRC_DIR/node_modules/$module" "$APP_DIR/node_modules/"
+    SYNCED_ADDONS+=("$module")
+    info "Synced native addon: $module"
   fi
-done
+done < <(find "$SRC_DIR/node_modules" -name "*.node" -not -path "*/electron/*" 2>/dev/null)
+
+if [ ${#SYNCED_ADDONS[@]} -eq 0 ]; then
+  info "No native addons detected"
+fi
 
 ok "Deployed"
 
@@ -130,7 +157,6 @@ if command -v brave-browser &>/dev/null; then
   ok "Brave already installed ($(brave-browser --version 2>/dev/null | head -1 || echo 'version unknown'))"
 else
   info "Installing Brave Browser..."
-  # Ensure keyrings directory exists before writing to it
   mkdir -p /usr/share/keyrings
   if curl -fsSL https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg \
       | gpg --dearmor -o /usr/share/keyrings/brave-browser-archive-keyring.gpg 2>/dev/null; then
@@ -149,28 +175,42 @@ else
   fi
 fi
 
-# ── Restart Cryogram OS ───────────────────────────────────────────────────────
-step "Restarting Cryogram OS"
+# ── Brightness keys via ACPI ────────────────────────────────────────────────────────
+step "Brightness keys"
+
+if command -v brightnessctl &>/dev/null && command -v acpid &>/dev/null; then
+  mkdir -p /etc/acpi/events
+  cat > /etc/acpi/events/cryogram-brightness-up << 'ACPIEOF'
+event=video/brightnessup.*
+action=brightnessctl set 5%+
+ACPIEOF
+  cat > /etc/acpi/events/cryogram-brightness-down << 'ACPIEOF'
+event=video/brightnessdown.*
+action=brightnessctl set 5%-
+ACPIEOF
+  usermod -aG video cryogram 2>/dev/null || true
+  systemctl restart acpid 2>/dev/null && ok "Brightness keys active via ACPI" || warn "acpid restart failed (non-fatal)"
+else
+  warn "brightnessctl or acpid not found — brightness keys will be software-only"
+  info "To fix:  sudo apt install brightnessctl acpid"
+fi
+
+# ── Reboot ────────────────────────────────────────────────────────────────────────────
+step "Rebooting"
 
 echo ""
-ok "Update complete — Cryogram OS will restart in 5 seconds."
-warn "This window will close as the session restarts. That is normal."
-echo ""
+echo -e "${CYAN}${BOLD}"
+echo "  ╬══════════════════════════════════════════╣"
+echo "  ║   Cryogram OS update complete.             ║"
+echo "  ║   Your computer will restart shortly.      ║"
+echo "  ╚══════════════════════════════════════════╝"
+echo -e "${NC}"
 
-for i in 5 4 3 2 1; do
-  echo -ne "  Restarting in ${BOLD}${i}${NC}...\r"
+for i in 10 9 8 7 6 5 4 3 2 1; do
+  echo -ne "  Rebooting in ${BOLD}${CYAN}${i}${NC}...\r"
   sleep 1
 done
 echo ""
 
-# Restart the display manager session — this is the right way to restart a UI session.
-# LightDM kills the current X session (closing all apps), then autologins and relaunches
-# the cryogram-session script, which starts Cryogram fresh. Exactly like a real OS.
-#
-# This is far more reliable than killing/relaunching Electron manually because:
-#  - Display server, WM, and Electron all restart from a clean slate
-#  - No DISPLAY/DBUS env var guessing needed
-#  - Matches how macOS and Windows handle shell updates
-# Session ends here — systemctl kills the X session immediately.
-# The lines below this will never execute. Cryogram relaunches via autologin.
-systemctl restart display-manager
+sync
+/sbin/shutdown -r now || systemctl reboot --no-block

@@ -1,0 +1,511 @@
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+
+type Phase = 'auth' | 'starting' | 'updating' | 'countdown' | 'rebooting'
+
+interface Props {
+  onCancel?: () => void
+}
+
+// Animated hexagon grid background
+function HexGrid() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const resize = () => {
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    const SIZE = 32
+    const W = SIZE * 2
+    const H = Math.sqrt(3) * SIZE
+    let frame = 0
+
+    const hexPath = (cx: number, cy: number, r: number) => {
+      ctx.beginPath()
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i - Math.PI / 6
+        const x = cx + r * Math.cos(angle)
+        const y = cy + r * Math.sin(angle)
+        if (i === 0) ctx.moveTo(x, y)
+        else ctx.lineTo(x, y)
+      }
+      ctx.closePath()
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      frame++
+      const cols = Math.ceil(canvas.width / W) + 2
+      const rows = Math.ceil(canvas.height / H) + 2
+
+      for (let row = -1; row < rows; row++) {
+        for (let col = -1; col < cols; col++) {
+          const cx = col * W + (row % 2 === 0 ? 0 : W / 2)
+          const cy = row * H
+          const pulse = Math.sin(frame * 0.018 + col * 0.4 + row * 0.3) * 0.5 + 0.5
+          const alpha = pulse * 0.12 + 0.02
+          ctx.strokeStyle = `rgba(0, 212, 255, ${alpha})`
+          ctx.lineWidth = 0.8
+          hexPath(cx, cy, SIZE - 2)
+          ctx.stroke()
+        }
+      }
+      requestAnimationFrame(animate)
+    }
+    const animId = requestAnimationFrame(animate)
+    return () => {
+      cancelAnimationFrame(animId)
+      window.removeEventListener('resize', resize)
+    }
+  }, [])
+
+  return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, opacity: 0.6 }} />
+}
+
+// Circular spinning ring
+function SpinRing({ size, color, speed = 2, gap = 0.25 }: { size: number; color: string; speed?: number; gap?: number }) {
+  return (
+    <motion.div
+      style={{ width: size, height: size, borderRadius: '50%', position: 'absolute' }}
+      animate={{ rotate: 360 }}
+      transition={{ duration: speed, repeat: Infinity, ease: 'linear' }}
+    >
+      <div style={{
+        width: '100%', height: '100%', borderRadius: '50%',
+        border: `2px solid transparent`,
+        borderTopColor: color,
+        borderRightColor: gap < 0.5 ? color : 'transparent',
+        boxShadow: `0 0 12px ${color}60`,
+      }} />
+    </motion.div>
+  )
+}
+
+// Clean log line - strips ANSI escape codes
+function stripAnsi(s: string) {
+  // eslint-disable-next-line no-control-regex
+  return s.replace(/\x1B\[[0-9;]*[mGKH]/g, '').replace(/\r/g, '')
+}
+
+export function UpdateScreen({ onCancel }: Props) {
+  const [phase, setPhase]         = useState<Phase>('auth')
+  const [log, setLog]             = useState<string[]>([])
+  const [countdown, setCount]     = useState(10)
+  const [error, setError]         = useState<string | null>(null)
+  const [needsSudoSetup, setNeedsSudoSetup] = useState(false)
+  const [password, setPassword]   = useState('')
+  const [wrongPassword, setWrongPassword] = useState(false)
+  const logRef = useRef<HTMLDivElement>(null)
+  const countdownRef = useRef<NodeJS.Timeout | null>(null)
+
+  const appendLog = useCallback((raw: string) => {
+    const lines = stripAnsi(raw).split('\n').filter(l => l.trim())
+    setLog(prev => [...prev, ...lines].slice(-120))
+
+    // Detect script entering reboot countdown
+    if (raw.includes('Rebooting in') || raw.includes('Rebooting')) {
+      setPhase('countdown')
+    }
+  }, [])
+
+  // Auto-scroll log
+  useEffect(() => {
+    const el = logRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [log])
+
+  // Countdown timer - starts when phase = 'countdown'
+  useEffect(() => {
+    if (phase !== 'countdown') return
+    setCount(10)
+    countdownRef.current = setInterval(() => {
+      setCount(n => {
+        if (n <= 1) {
+          clearInterval(countdownRef.current!)
+          setPhase('rebooting')
+          return 0
+        }
+        return n - 1
+      })
+    }, 1000)
+    return () => { if (countdownRef.current) clearInterval(countdownRef.current) }
+  }, [phase])
+
+  // Check if we're running as root — if so skip auth phase
+  useEffect(() => {
+    const api = (window as any).cryogram?.updater
+    if (!api) return
+    // Try running without password first (works if root)
+    // We detect root by attempting a no-password run; if it errors with
+    // wrong-password we know we need auth. Start in auth phase to be safe.
+  }, [])
+
+  const runUpdate = useCallback(async (pw?: string) => {
+    setPhase('starting')
+    setError(null)
+    setNeedsSudoSetup(false)
+    setWrongPassword(false)
+
+    await new Promise(r => setTimeout(r, 800))
+    setPhase('updating')
+
+    try {
+      const api = (window as any).cryogram?.updater
+      if (!api) { setError('Updater API not available — run from the live OS.'); return }
+
+      const unsub = api.onProgress((line: string) => appendLog(line))
+      try {
+        await api.run(pw)
+        if (phase !== 'countdown' && phase !== 'rebooting') setPhase('countdown')
+      } finally {
+        unsub()
+      }
+    } catch (err: any) {
+      const msg = String(err?.message ?? err)
+      if (msg.includes('code null') || msg.includes('killed')) {
+        setPhase('rebooting')
+      } else if (msg === 'wrong-password' || msg.includes('wrong-password')) {
+        setPhase('auth')
+        setWrongPassword(true)
+      } else if (msg.includes('password is required') || msg.includes('sudo:')) {
+        setNeedsSudoSetup(true)
+        setPhase('auth')
+      } else {
+        setError(msg)
+      }
+    }
+  }, [phase, appendLog])
+
+  const phaseLabel: Record<Phase, string> = {
+    auth:      'Install Update',
+    starting:  'Preparing update…',
+    updating:  'Installing update…',
+    countdown: 'Update complete',
+    rebooting: 'Rebooting…',
+  }
+
+  const phaseColor: Record<Phase, string> = {
+    auth:      'var(--cryo-accent)',
+    starting:  'var(--cryo-accent)',
+    updating:  'var(--cryo-accent)',
+    countdown: '#00ff88',
+    rebooting: '#a855f7',
+  }
+
+  const color = error ? '#ef4444' : phaseColor[phase]
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4 }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 200000,
+        background: 'rgba(4,7,14,0.98)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+        overflow: 'hidden',
+      }}
+    >
+      <HexGrid />
+
+      {/* Radial glow */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: `radial-gradient(ellipse 60% 50% at 50% 50%, ${color}08, transparent 70%)`,
+        transition: 'background 1s',
+      }} />
+
+      {/* Main content */}
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 32, width: '100%', maxWidth: 680, padding: '0 24px' }}>
+
+        {/* Logo + spinner cluster */}
+        <div style={{ position: 'relative', width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {phase !== 'auth' && <SpinRing size={120} color={color} speed={3} gap={0.3} />}
+          {phase !== 'auth' && <SpinRing size={96}  color={`${color}80`} speed={2.1} gap={0.5} />}
+          {phase !== 'auth' && <SpinRing size={74}  color={`${color}40`} speed={1.5} gap={0.7} />}
+
+          {/* Center icon */}
+          <motion.div
+            animate={{ scale: [1, 1.06, 1] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+            style={{
+              position: 'absolute', width: 50, height: 50, borderRadius: 16,
+              background: `${color}15`,
+              border: `1.5px solid ${color}40`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: `0 0 24px ${color}40`,
+            }}
+          >
+            <AnimatePresence mode="wait">
+              {phase === 'countdown' || phase === 'rebooting' ? (
+                <motion.div key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 24 }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </motion.div>
+              ) : (
+                <motion.div key="arrow" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </div>
+
+        {/* Phase label */}
+        <div style={{ textAlign: 'center' }}>
+          <motion.div
+            key={phase}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ fontSize: 22, fontWeight: 700, color: 'rgba(255,255,255,0.92)', letterSpacing: '-0.02em' }}
+          >
+            {needsSudoSetup ? 'One-Time Setup Required' : error ? 'Update Failed' : phaseLabel[phase]}
+          </motion.div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', marginTop: 5 }}>
+            {needsSudoSetup
+              ? 'Run the command below once in a terminal, then try again'
+              : error
+              ? 'Check log below for details'
+              : phase === 'countdown' || phase === 'rebooting'
+              ? 'Your laptop will fully restart'
+              : 'Downloading code changes only — not a new OS'}
+          </div>
+        </div>
+
+        {/* Auth panel — password prompt */}
+        <AnimatePresence>
+          {phase === 'auth' && !needsSudoSetup && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              style={{ width: '100%', maxWidth: 380 }}
+            >
+              <div style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 16,
+                padding: '20px 22px',
+              }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 12 }}>
+                  Enter your account password to install the update
+                </div>
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  autoFocus
+                  onChange={e => { setPassword(e.target.value); setWrongPassword(false) }}
+                  onKeyDown={e => { if (e.key === 'Enter' && password) runUpdate(password) }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    background: 'rgba(0,0,0,0.4)',
+                    border: `1px solid ${wrongPassword ? '#ef4444' : 'rgba(255,255,255,0.12)'}`,
+                    color: '#fff',
+                    fontSize: 14,
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    fontFamily: 'inherit',
+                  }}
+                />
+                {wrongPassword && (
+                  <div style={{ fontSize: 11, color: '#f87171', marginTop: 6 }}>
+                    Incorrect password — try again
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+                  {onCancel && (
+                    <button
+                      onClick={onCancel}
+                      style={{
+                        flex: 1, padding: '9px 0', borderRadius: 10, fontSize: 13, fontWeight: 500,
+                        background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                        color: 'rgba(255,255,255,0.6)', cursor: 'pointer',
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button
+                    onClick={() => password && runUpdate(password)}
+                    disabled={!password}
+                    style={{
+                      flex: 2, padding: '9px 0', borderRadius: 10, fontSize: 13, fontWeight: 700,
+                      background: password ? 'linear-gradient(135deg, var(--cryo-accent), #7c3aed)' : 'rgba(255,255,255,0.05)',
+                      border: 'none',
+                      color: password ? '#fff' : 'rgba(255,255,255,0.25)',
+                      cursor: password ? 'pointer' : 'default',
+                      boxShadow: password ? '0 0 20px var(--cryo-a30)' : 'none',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    Install Update & Reboot
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Countdown */}
+        <AnimatePresence>
+          {(phase === 'countdown' || phase === 'rebooting') && !error && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 24 }}
+              style={{ textAlign: 'center' }}
+            >
+              <motion.div
+                key={countdown}
+                initial={{ opacity: 0, scale: 0.4, y: -12 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 1.2, y: 8 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 26 }}
+                style={{
+                  fontSize: 80, fontWeight: 900, lineHeight: 1,
+                  color: color,
+                  textShadow: `0 0 40px ${color}80, 0 0 80px ${color}40`,
+                  letterSpacing: '-0.05em',
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                {phase === 'rebooting' ? '↺' : countdown}
+              </motion.div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
+                {phase === 'rebooting' ? 'Restarting system…' : `Rebooting in ${countdown} second${countdown !== 1 ? 's' : ''}…`}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Log output */}
+        {(phase === 'updating' || error) && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ width: '100%' }}
+          >
+            <div
+              ref={logRef}
+              style={{
+                height: 200,
+                overflowY: 'auto',
+                background: 'rgba(0,0,0,0.55)',
+                border: `1px solid ${error ? 'rgba(239,68,68,0.25)' : 'rgba(0,212,255,0.12)'}`,
+                borderRadius: 12,
+                padding: '10px 14px',
+                fontFamily: '"JetBrains Mono", "Fira Code", monospace',
+                fontSize: 11,
+                lineHeight: 1.65,
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(255,255,255,0.12) transparent',
+              }}
+            >
+              {log.length === 0 ? (
+                <div style={{ color: 'rgba(255,255,255,0.25)' }}>Starting update process…</div>
+              ) : (
+                log.map((line, i) => (
+                  <div key={i} style={{
+                    color: line.includes('FAIL') || line.includes('error') || line.includes('Error')
+                      ? '#f87171'
+                      : line.includes('OK') || line.includes('ok') || line.includes('✓')
+                      ? '#4ade80'
+                      : line.includes('──') || line.includes('WARN')
+                      ? '#fbbf24'
+                      : 'rgba(255,255,255,0.62)',
+                  }}>
+                    {line}
+                  </div>
+                ))
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Sudo setup panel */}
+        {needsSudoSetup && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ width: '100%' }}
+          >
+            <div style={{
+              background: 'rgba(251,191,36,0.07)',
+              border: '1px solid rgba(251,191,36,0.25)',
+              borderRadius: 12,
+              padding: '16px 18px',
+            }}>
+              <div style={{ fontSize: 11, color: 'rgba(251,191,36,0.8)', marginBottom: 10, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                Open a terminal and run this command once:
+              </div>
+              <div style={{
+                background: 'rgba(0,0,0,0.5)',
+                borderRadius: 8,
+                padding: '10px 14px',
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: 11,
+                color: '#00d4ff',
+                wordBreak: 'break-all',
+                lineHeight: 1.7,
+                userSelect: 'text',
+              }}>
+                echo "$(whoami) ALL=(ALL) NOPASSWD: /usr/local/bin/cryogram-update" | sudo tee /etc/sudoers.d/cryogram && sudo chmod 440 /etc/sudoers.d/cryogram
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 10 }}>
+                After running it, click Update Now again — no password will be needed from that point on.
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Error cancel */}
+        {(error || needsSudoSetup) && onCancel && (
+          <button
+            onClick={onCancel}
+            style={{
+              padding: '8px 24px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+              background: needsSudoSetup ? 'rgba(251,191,36,0.1)' : 'rgba(239,68,68,0.15)',
+              border: `1px solid ${needsSudoSetup ? 'rgba(251,191,36,0.3)' : 'rgba(239,68,68,0.35)'}`,
+              color: needsSudoSetup ? '#fbbf24' : '#f87171',
+              cursor: 'pointer',
+            }}
+          >
+            Close
+          </button>
+        )}
+      </div>
+
+      {/* CRYOGRAM OS watermark */}
+      <div style={{
+        position: 'absolute', bottom: 28,
+        fontSize: 10, letterSpacing: '0.3em', fontWeight: 700,
+        color: 'rgba(255,255,255,0.12)',
+        fontFamily: '"JetBrains Mono", monospace',
+        textTransform: 'uppercase',
+      }}>
+        CRYOGRAM OS
+      </div>
+    </motion.div>
+  )
+}

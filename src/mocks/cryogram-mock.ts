@@ -268,8 +268,16 @@ export function installMockCryogram(): void {
         ramUsed: 4.2 * 1024 * 1024 * 1024,
         uptime: '3h 42m',
       }),
+      syncTime: async () => ({ success: true }),
+      pickWallpaper: async () => null,
+      setWallpaper: async () => true,
+      verifyPin: async () => true,
+      setPin: async () => ({ success: true }),
+      removePin: async () => ({ success: true }),
+      setPinEnabled: async () => true,
       shutdown: async () => { alert('[mock] Shutdown called') },
       reboot: async () => { alert('[mock] Reboot called') },
+      sleep: async () => { alert('[mock] Sleep called') },
       lock: async () => { alert('[mock] Lock screen called') },
     },
 
@@ -290,6 +298,314 @@ export function installMockCryogram(): void {
       ],
       launch: async (app) => { alert(`[mock] Launching: ${app.name}`); return true },
     },
+
+    wm: {
+      getWindows: async () => [],
+      focusWindow: async () => true,
+      closeWindow: async () => true,
+      hideShell: async () => true,
+      getCurrentWorkspace: async () => 0,
+      switchWorkspace: async () => true,
+      getWorkspaceCount: async () => 4,
+    },
+    passwords: {
+      getAll: async () => [],
+      add: async (e: any) => ({ ...e, id: 'mock', createdAt: '', updatedAt: '' }),
+      update: async () => true,
+      delete: async () => true,
+      generate: async () => 'MockPass123!',
+    },
+    ssh: {
+      listKeys: async () => [],
+      generateKey: async () => ({ success: false }),
+      deleteKey: async () => false,
+      getPublicKey: async () => '',
+      listHosts: async () => [],
+      saveConfig: async () => true,
+    },
+    firewall: {
+      status: async () => ({ active: false, defaultIn: 'deny', defaultOut: 'allow', rules: [] }),
+      enable: async () => ({ success: false }),
+      disable: async () => ({ success: false }),
+      addRule: async () => ({ success: false }),
+      deleteRule: async () => ({ success: false }),
+      reset: async () => ({ success: false }),
+    },
+    processes: {
+      list: async () => [],
+      kill: async () => ({ success: false }),
+      getSystemStats: async () => ({ cpuPct: 0, memTotal: 0, memUsed: 0, memPct: 0 }),
+    },
+    logs: {
+      getUnits: async () => ['all'],
+      query: async () => ({ lines: [] }),
+      stream: async () => {},
+      stopStream: async () => {},
+      onLine: (cb: any) => { void cb; return () => {} },
+    },
+    netmon: {
+      getInterfaces: async () => [],
+      getConnections: async () => [],
+      startStream: async () => {},
+      stopStream: async () => {},
+      onStats: (cb: any) => { void cb; return () => {} },
+    },
+    screenshot: {
+      capture: async () => ({ dataUrl: '', width: 0, height: 0 }),
+      save: async () => ({ path: '' }),
+      copyToClipboard: async () => false,
+    },
+
+    phone: {
+      getDevices: async () => [],
+      getInfo: async () => ({ model: 'Mock Phone', android: '14', serial: 'mock' }),
+      getBattery: async () => ({ level: 80, status: 'charging' }),
+      getStorage: async () => ({ total: 128, used: 40, free: 88 }),
+      checkScrcpy: async () => false,
+      installScrcpy: async () => false,
+      startMirror: async () => false,
+      stopMirror: async () => false,
+      isMirroring: async () => false,
+      enableWireless: async () => '',
+      connectWifi: async () => false,
+      disconnect: async () => false,
+      getDeviceIp: async () => '',
+      screenshot: async () => '',
+    },
+
+    scanner: {
+      check: async () => ({ available: false }),
+      run: async () => {},
+      cancel: () => {},
+      onProgress: (cb) => {
+        void cb
+        return () => {}
+      },
+    },
+
+    vpn: {
+      getStatus: async () => ({ connected: false }),
+      connect: async () => ({ success: false, error: '[mock] VPN not available' }),
+      disconnect: async () => ({ success: false }),
+    },
+
+    updater: {
+      check: async () => ({ hasUpdate: false }),
+      run: async () => ({ success: false }),
+      onProgress: (cb) => { void cb; return () => {} },
+    },
+
+    cert: {
+      inspect: async () => ({
+        subject: { CN: 'example.com', O: 'Example Org', C: 'US' },
+        issuer: { CN: "Let's Encrypt R3", O: "Let's Encrypt" },
+        validFrom: new Date(Date.now() - 30 * 86400000).toISOString(),
+        validTo: new Date(Date.now() + 60 * 86400000).toISOString(),
+        daysRemaining: 60,
+        sans: ['example.com', 'www.example.com'],
+        publicKey: { algorithm: 'RSA', bits: 2048 },
+        fingerprints: { sha256: 'AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99' },
+        serialNumber: '0123456789ABCDEF',
+        signatureAlgorithm: 'sha256WithRSAEncryption',
+        isCA: false,
+      }),
+      parsePem: async () => ({
+        subject: { CN: 'Parsed Cert' },
+        issuer: { CN: 'Root CA' },
+        validFrom: new Date().toISOString(),
+        validTo: new Date(Date.now() + 365 * 86400000).toISOString(),
+        daysRemaining: 365,
+        sans: [],
+        publicKey: { algorithm: 'EC', curve: 'P-256' },
+        fingerprints: { sha256: '00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF' },
+        serialNumber: 'FEDCBA9876543210',
+        signatureAlgorithm: 'ecdsa-with-SHA256',
+        isCA: false,
+      }),
+    },
+    docker: {
+      listContainers: async () => [
+        { ID: 'abc123', Names: '/mock-nginx', Image: 'nginx:latest', Status: 'Up 2 hours', State: 'running', Ports: '0.0.0.0:80->80/tcp', Created: '' },
+        { ID: 'def456', Names: '/mock-postgres', Image: 'postgres:15', Status: 'Exited (0) 1 hour ago', State: 'exited', Ports: '', Created: '' },
+      ],
+      listImages: async () => [
+        { ID: 'img1', Repository: 'nginx', Tag: 'latest', Size: '142MB', CreatedAt: '2024-01-01' },
+        { ID: 'img2', Repository: 'postgres', Tag: '15', Size: '379MB', CreatedAt: '2024-01-01' },
+      ],
+      startContainer: async () => true,
+      stopContainer: async () => true,
+      restartContainer: async () => true,
+      removeContainer: async () => true,
+      getStats: async () => [
+        { ID: 'abc123', Name: 'mock-nginx', CPUPerc: '0.5%', MemUsage: '12MiB / 8GiB', MemPerc: '0.14%', NetIO: '1kB / 2kB', BlockIO: '0B / 0B' },
+      ],
+      pullImage: async () => true,
+      removeImage: async () => true,
+      getLogs: async () => '[mock] Container log output\n[mock] Line 2\n[mock] Line 3',
+      onPullLine: (cb: any) => { void cb; return () => {} },
+    },
+    git: {
+      isRepo: async () => false,
+      status: async () => ({ branch: 'main', files: [], ahead: 0, behind: 0 }),
+      log: async () => [],
+      diff: async () => '',
+      getBranches: async () => [],
+      checkout: async () => true,
+      stage: async () => true,
+      unstage: async () => true,
+      commit: async () => true,
+      push: async () => '',
+      pull: async () => '',
+      stash: async () => true,
+      stashPop: async () => true,
+      init: async () => true,
+    },
+    db: {
+      open: async () => ({ error: '[mock] SQLite not available in browser' }),
+      close: async () => true,
+      listTables: async () => [],
+      getSchema: async () => [],
+      getTableRowCount: async () => 0,
+      query: async () => ({ rows: [], columns: [], total: 0, error: null }),
+    },
+    trash: {
+      list: async () => [
+        { name: 'old-file.txt', originalPath: '/home/user/old-file.txt', deletionDate: new Date().toISOString().slice(0, 19), size: 1024 },
+        { name: 'backup.zip', originalPath: '/home/user/backup.zip', deletionDate: new Date(Date.now() - 86400000).toISOString().slice(0, 19), size: 1024 * 1024 * 5 },
+      ],
+      moveToTrash: async () => true,
+      restore: async () => true,
+      deletePermanent: async () => true,
+      empty: async () => true,
+      getSize: async () => ({ count: 2, bytes: 1024 + 1024 * 1024 * 5 }),
+    },
+    shodan: {
+      search: async (query: string) => ({
+        matches: [
+          { ip_str: '1.2.3.4', hostnames: ['example.com'], ports: [80, 443, 22], org: 'Acme Corp', isp: 'Acme ISP', country_code: 'US', country_name: 'United States', os: 'Linux', timestamp: new Date().toISOString() },
+          { ip_str: '5.6.7.8', hostnames: [], ports: [3389, 8080], org: 'Test Org', isp: 'Test ISP', country_code: 'DE', country_name: 'Germany', os: null, timestamp: new Date().toISOString() },
+        ],
+        total: 2,
+        query,
+      }),
+      host: async (ip: string) => ({ ip_str: ip, ports: [80, 443], org: 'Mock Org', country_name: 'United States', os: 'Linux', hostnames: ['mock.example.com'], timestamp: new Date().toISOString() }),
+      count: async () => ({ total: 42 }),
+      exploits: async () => ({ matches: [], total: 0 }),
+    },
+    osint: {
+      lookup: async (tool: string, query: string) => {
+        await sleep(800)
+        if (tool === 'IP Lookup') return { ip: query, city: 'San Francisco', region: 'California', country: 'United States', org: 'AS13335 Cloudflare', timezone: 'America/Los_Angeles', latitude: 37.7749, longitude: -122.4194 }
+        if (tool === 'WHOIS') return { domain: query, status: 'clientTransferProhibited', registered: '2010-03-15', expiry: '2025-03-15', registrar: 'GoDaddy' }
+        if (tool === 'DNS Records') return { A: '1.2.3.4', MX: 'mail.example.com', NS: 'ns1.example.com, ns2.example.com', TXT: 'v=spf1 include:example.com ~all' }
+        return { result: `[mock] ${tool} lookup for ${query}` }
+      },
+    },
+    cve: {
+      search: async () => {
+        await sleep(600)
+        return [
+          { id: 'CVE-2024-1234', description: 'A critical SQL injection vulnerability in ExampleCMS allows remote attackers to execute arbitrary SQL commands via the search parameter.', severity: 'CRITICAL', score: 9.8, published: '2024-01-15', references: ['https://nvd.nist.gov/vuln/detail/CVE-2024-1234'] },
+          { id: 'CVE-2024-5678', description: 'Cross-site scripting (XSS) vulnerability in the admin dashboard of TestApp version 2.x.', severity: 'HIGH', score: 7.4, published: '2024-02-20', references: [] },
+        ]
+      },
+      recent: async () => {
+        await sleep(400)
+        return [
+          { id: 'CVE-2024-9999', description: 'Remote code execution vulnerability in popular open-source library.', severity: 'CRITICAL', score: 10.0, published: new Date().toISOString().slice(0, 10), references: [] },
+          { id: 'CVE-2024-8888', description: 'Memory corruption vulnerability in kernel component.', severity: 'HIGH', score: 7.8, published: new Date().toISOString().slice(0, 10), references: [] },
+        ]
+      },
+    },
+    ai: {
+      chat: async (messages: { role: string; content: string }[]) => {
+        await sleep(1200)
+        const last = messages[messages.length - 1]?.content || ''
+        return `[Mock AI Response] You asked: "${last.slice(0, 100)}". In a real session, Claude would provide expert cybersecurity analysis here. Configure your Anthropic API key in Settings → API Keys to enable real AI responses.`
+      },
+    },
+    packetSniffer: {
+      start: async (_iface: string, _filter: string, cb: (pkt: PacketEntry) => void) => {
+        let id = 0
+        const protos = ['TCP', 'UDP', 'ICMP', 'HTTP', 'DNS', 'ARP']
+        const interval = setInterval(() => {
+          cb({ id: ++id, time: (id * 0.042).toFixed(6), src: `192.168.1.${Math.floor(Math.random()*254)+1}`, dst: `10.0.0.${Math.floor(Math.random()*254)+1}`, proto: protos[Math.floor(Math.random()*protos.length)], len: Math.floor(Math.random()*1400)+64, info: 'Mock packet data' })
+        }, 300)
+        return () => clearInterval(interval)
+      },
+      stop: async () => {},
+    },
+    backup: {
+      list: async () => [
+        { id: '1709000000000', name: 'Backup 2024-02-27 10:00', size: '2.1MB', created: '2024-02-27 10:00', status: 'complete', items: 142 },
+      ],
+      create: async () => ({ id: Date.now().toString(), name: `Backup ${new Date().toLocaleString()}`, size: '2.3MB', created: new Date().toISOString().slice(0,16).replace('T',' '), status: 'complete', items: 148 }),
+      restore: async () => true,
+      delete: async () => true,
+      onProgress: (_cb: (msg: string, pct: number) => void) => () => {},
+    },
+    auditLog: {
+      list: async () => [
+        { id: '1', ts: new Date().toISOString().replace('T',' ').slice(0,19), type: 'security', category: 'Auth', message: 'Login successful', details: 'User logged in from 127.0.0.1' },
+        { id: '2', ts: new Date(Date.now()-60000).toISOString().replace('T',' ').slice(0,19), type: 'info', category: 'App', message: 'Terminal opened' },
+        { id: '3', ts: new Date(Date.now()-120000).toISOString().replace('T',' ').slice(0,19), type: 'warning', category: 'Network', message: 'Outbound connection to unknown host', details: 'Destination: 198.51.100.42:443' },
+        { id: '4', ts: new Date(Date.now()-180000).toISOString().replace('T',' ').slice(0,19), type: 'success', category: 'System', message: 'Backup completed successfully' },
+      ],
+      append: async (entry: Omit<AuditLogEntry, 'id' | 'ts'>) => ({ id: Date.now().toString(), ts: new Date().toISOString().replace('T',' ').slice(0,19), ...entry }),
+      clear: async () => true,
+    },
+    codeScanner: {
+      browse: async () => '/home/user/projects/myapp',
+      scan: async () => {
+        await sleep(2000)
+        return {
+          findings: [
+            { id: '1', severity: 'HIGH', rule: 'XSS_RISK', file: 'src/utils/render.js', line: 42, code: "element.innerHTML = userInput", message: 'innerHTML assignment with user data can cause XSS', fix: 'Use textContent or sanitize with DOMPurify' },
+            { id: '2', severity: 'CRITICAL', rule: 'HARDCODED_CREDENTIAL', file: 'config/db.js', line: 8, code: 'const password = "admin123"', message: 'Hardcoded password detected', fix: 'Use environment variables' },
+            { id: '3', severity: 'MEDIUM', rule: 'WEAK_HASH', file: 'src/auth.js', line: 15, code: 'const hash = md5(password)', message: 'MD5 is cryptographically broken', fix: 'Use bcrypt or argon2' },
+          ],
+          scanned: 23, duration: 1842, scanner: 'Pattern-based',
+        }
+      },
+      onProgress: (_cb: (pct: number) => void) => () => {},
+    },
+    totp: {
+      list: async () => [
+        { id: 'totp-1', name: 'GitHub', issuer: 'GitHub Inc.', secret: 'JBSWY3DPEHPK3PXP' },
+        { id: 'totp-2', name: 'Google', issuer: 'Google LLC', secret: 'JBSWY3DPEHPK3PXP' },
+      ],
+      generate: async (_secret: string) => ({ code: String(Math.floor(Math.random()*1000000)).padStart(6,'0'), timeLeft: 30 - (Math.floor(Date.now()/1000) % 30) }),
+      add: async (account: Omit<TOTPAccount, 'id'>) => ({ id: `totp-${Date.now()}`, ...account }),
+      remove: async () => true,
+    },
+    wordlists: {
+      list: async () => [
+        { name: 'rockyou-top1000.txt', path: '/mock/rockyou-top1000.txt', lineCount: 1000, sizeKB: 8 },
+        { name: 'common-passwords.txt', path: '/mock/common-passwords.txt', lineCount: 500, sizeKB: 4 },
+      ],
+      preview: async () => ['password', '123456', 'admin', 'letmein', 'qwerty', 'monkey', 'dragon', 'master', 'hello', 'sunshine'],
+      import: async () => null,
+      delete: async () => true,
+      generate: async () => 'generated.txt',
+    },
+    passwordHealth: {
+      checkHIBP: async (_pw: string) => {
+        await sleep(800)
+        return { breached: false, count: 0 }
+      },
+    },
+    wallpaper: {
+      listCustom: async () => [],
+      browse: async () => null,
+    },
+    notifyUnlock: () => {},
+    onLock: (cb) => { void cb; return () => {} },
+    onOpenApp: (cb) => { void cb; return () => {} },
+    onHudVolume: (cb) => { void cb; return () => {} },
+    onHudBrightness: (cb) => { void cb; return () => {} },
+    onAppSwitcher: (cb) => { void cb; return () => {} },
+    onSpotlight: (cb) => { void cb; return () => {} },
+    onWorkspaceChanged: (cb) => { void cb; return () => {} },
 
     onNotification: (cb) => {
       notifListeners.push(cb)

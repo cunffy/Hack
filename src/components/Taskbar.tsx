@@ -1,5 +1,18 @@
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWindowStore } from '../store/windowStore'
+import { usePinnedStore } from '../store/pinnedStore'
+
+const APP_ICONS: Record<string, string> = {
+  terminal:          '⌨',
+  editor:            '📝',
+  'password-tester': '🔐',
+  leaker:            '🔍',
+  settings:          '⚙',
+  files:             '📁',
+  launcher:          '🚀',
+  system:            '🖥',
+}
 
 const APP_COLORS: Record<string, string> = {
   terminal:          '#00ff88',
@@ -12,96 +25,729 @@ const APP_COLORS: Record<string, string> = {
   system:            '#818cf8',
 }
 
-export function Taskbar() {
-  const { windows, focusWindow, restoreWindow, minimizeWindow } = useWindowStore()
+// ── X11 app metadata (icon + color + display name from window title) ────────
+function getX11Meta(title: string): { icon: string; color: string; name: string } {
+  const t = title.toLowerCase()
+  // For "Page Title - Brave", extract "Brave" (last segment)
+  const last = title.split(' - ').pop()?.trim() ?? title
+  const firstName = last.split(' ')[0]
+  if (t.includes('brave'))    return { icon: '🦁', color: '#fb923c', name: 'Brave' }
+  if (t.includes('chromium')) return { icon: '🌐', color: '#4ade80', name: 'Chromium' }
+  if (t.includes('chrome'))   return { icon: '🌐', color: '#4ade80', name: 'Chrome' }
+  if (t.includes('firefox'))  return { icon: '🦊', color: '#f97316', name: 'Firefox' }
+  if (t.includes('visual studio code') || t.includes('vscode')) return { icon: '💻', color: '#60a5fa', name: 'VS Code' }
+  if (t.includes('thunar') || t.includes('nautilus'))           return { icon: '📁', color: '#f59e0b', name: 'Files' }
+  if (t.includes('vlc') || t.includes(' mpv'))                  return { icon: '▶',  color: '#f43f5e', name: 'Media' }
+  if (t.includes('discord'))  return { icon: '💬', color: '#818cf8', name: 'Discord' }
+  if (t.includes('slack'))    return { icon: '💬', color: '#4ade80', name: 'Slack' }
+  if (t.includes('spotify'))  return { icon: '🎵', color: '#4ade80', name: 'Spotify' }
+  if (t.includes('gimp'))     return { icon: '🎨', color: '#e879f9', name: 'GIMP' }
+  const name = firstName.length > 11 ? firstName.slice(0, 10) + '…' : firstName
+  return { icon: '⬡', color: '#64748b', name: name || 'App' }
+}
+
+// ── Clock ──────────────────────────────────────────────────────────────────
+function Clock() {
+  const [now, setNow] = useState(new Date())
+  const [showDate, setShowDate] = useState(false)
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const date = now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })
 
   return (
-    <div
-      className="flex items-center h-10 px-3 gap-2 shrink-0 relative select-none"
+    <div className="relative" onMouseEnter={() => setShowDate(true)} onMouseLeave={() => setShowDate(false)}>
+      <button
+        className="flex items-center justify-center px-3 h-8 rounded-lg hover:bg-white/5 transition-colors select-none"
+        style={{ color: '#c9d1d9', fontFamily: 'monospace', fontSize: 12, letterSpacing: 1 }}
+      >
+        {time}
+      </button>
+      <AnimatePresence>
+        {showDate && (
+          <motion.div
+            initial={{ opacity: 0, y: 4, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.95 }}
+            transition={{ duration: 0.12 }}
+            style={{
+              position: 'absolute', bottom: '100%', right: 0, marginBottom: 8,
+              background: 'rgba(13,20,33,0.98)', border: '1px solid var(--cryo-a20)',
+              borderRadius: 8, padding: '6px 14px', whiteSpace: 'nowrap',
+              color: 'var(--cryo-accent)', fontFamily: 'monospace', fontSize: 11, letterSpacing: 1,
+              zIndex: 9999, boxShadow: '0 4px 24px rgba(0,0,0,0.6)',
+            }}
+          >
+            {date}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// ── Volume Tray ─────────────────────────────────────────────────────────────
+function VolumeTray() {
+  const [open, setOpen] = useState(false)
+  const [vol, setVol] = useState(50)
+  const [muted, setMuted] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const api = (window as any).cryogram
+    if (!api) return
+    api.system?.getVolume?.().then((v: { level: number; muted: boolean }) => {
+      setVol(v.level); setMuted(v.muted)
+    }).catch(() => {})
+    const cleanup = api.onHudVolume?.((v: { level: number; muted: boolean }) => {
+      setVol(v.level); setMuted(v.muted)
+    })
+    return cleanup
+  }, [])
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  const setVolume = (level: number) => {
+    setVol(level)
+    ;(window as any).cryogram?.system?.setVolume(level)
+  }
+
+  const toggleMute = () => {
+    setMuted(m => !m)
+    ;(window as any).cryogram?.system?.toggleMute()
+  }
+
+  const icon = muted || vol === 0 ? '🔇' : vol < 40 ? '🔈' : vol < 70 ? '🔉' : '🔊'
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(p => !p)}
+        onContextMenu={e => { e.preventDefault(); toggleMute() }}
+        className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/5 transition-colors select-none"
+        title="Volume (right-click to mute)"
+        style={{ fontSize: 14, color: muted ? '#ef4444' : '#8b949e' }}
+      >
+        {icon}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: 4, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.95 }}
+            transition={{ duration: 0.12 }}
+            style={{
+              position: 'absolute', bottom: '100%', right: 0, marginBottom: 8,
+              background: 'rgba(13,20,33,0.98)', border: '1px solid rgba(0,212,255,0.2)',
+              borderRadius: 12, padding: '14px 12px', zIndex: 9999,
+              boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+            }}
+          >
+            <span style={{ fontSize: 20 }}>{icon}</span>
+            <input
+              type="range" min={0} max={100} value={vol}
+              onChange={e => setVolume(Number(e.target.value))}
+              style={{ writingMode: 'vertical-lr', direction: 'rtl', height: 80, accentColor: 'var(--cryo-accent)' }}
+            />
+            <span style={{ fontSize: 10, color: '#8b949e', fontFamily: 'monospace' }}>{vol}%</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// ── WiFi Tray ───────────────────────────────────────────────────────────────
+function WifiTray() {
+  const [ssid, setSsid] = useState<string | null>(null)
+
+  const refresh = useCallback(async () => {
+    try {
+      const s = await (window as any).cryogram?.system?.getWifiStatus()
+      setSsid(s?.ssid ?? null)
+    } catch { setSsid(null) }
+  }, [])
+
+  useEffect(() => {
+    refresh()
+    const id = setInterval(refresh, 15000)
+    return () => clearInterval(id)
+  }, [refresh])
+
+  return (
+    <button
+      className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-white/5 transition-colors select-none"
+      title={ssid ? `WiFi: ${ssid}` : 'Not connected — click to open Settings'}
+      onClick={() => useWindowStore.getState().openApp('settings')}
+      style={{ fontSize: 14, color: ssid ? 'var(--cryo-accent)' : '#3d4a55' }}
+    >
+      {ssid ? '📶' : '📵'}
+    </button>
+  )
+}
+
+// ── Right-click context menu ────────────────────────────────────────────────
+interface CtxMenuProps {
+  x: number
+  win: { id: string; minimized: boolean; maximized: boolean }
+  onClose: () => void
+}
+
+function WinContextMenu({ x, win, onClose }: CtxMenuProps) {
+  const { minimizeWindow, restoreWindow, toggleMaximize, closeWindow } = useWindowStore()
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose()
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [onClose])
+
+  type Item = { label: string; action: () => void; danger?: boolean } | null
+  const items: Item[] = [
+    win.minimized
+      ? { label: 'Restore', action: () => restoreWindow(win.id) }
+      : { label: 'Minimize', action: () => minimizeWindow(win.id) },
+    { label: win.maximized ? 'Unmaximize' : 'Maximize', action: () => toggleMaximize(win.id) },
+    null,
+    { label: 'Close', action: () => closeWindow(win.id), danger: true },
+  ]
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, scale: 0.93, y: 6 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.93, y: 6 }}
+      transition={{ duration: 0.1 }}
+      onContextMenu={e => e.preventDefault()}
       style={{
-        background: 'rgba(8,12,18,0.93)',
-        borderTop: '1px solid rgba(26,40,64,0.7)',
-        backdropFilter: 'blur(20px)',
+        position: 'fixed', left: x, bottom: 44,
+        background: 'rgba(13,20,33,0.99)', border: '1px solid rgba(0,212,255,0.2)',
+        borderRadius: 10, padding: 4, zIndex: 99999, minWidth: 148,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
       }}
     >
-      {/* Top gradient edge */}
-      <div
-        className="absolute inset-x-0 top-0 h-px pointer-events-none"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.18) 50%, transparent)' }}
-      />
+      {items.map((item, i) =>
+        item === null ? (
+          <div key={i} style={{ height: 1, background: 'rgba(0,212,255,0.1)', margin: '3px 8px' }} />
+        ) : (
+          <button
+            key={item.label}
+            onClick={() => { item.action(); onClose() }}
+            style={{
+              display: 'block', width: '100%', textAlign: 'left',
+              padding: '7px 12px', borderRadius: 6, border: 'none', background: 'none',
+              cursor: 'pointer', fontSize: 12, fontFamily: 'monospace',
+              color: item.danger ? '#ff4466' : '#c9d1d9', transition: 'background 0.1s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = item.danger ? 'rgba(255,68,102,0.15)' : 'rgba(0,212,255,0.08)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+          >
+            {item.label}
+          </button>
+        )
+      )}
+    </motion.div>
+  )
+}
 
-      {/* Logo mark */}
-      <div
-        className="flex items-center justify-center w-7 h-7 rounded-lg shrink-0"
-        style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.18)' }}
-        title="Cryogram"
+// ── System HUD overlay (volume / brightness feedback) ──────────────────────
+export function SystemHUD() {
+  const [hud, setHud] = useState<{ type: 'volume' | 'brightness'; value: number; muted?: boolean } | null>(null)
+  const timer = useRef<ReturnType<typeof setTimeout>>()
+
+  const show = useCallback((next: typeof hud) => {
+    setHud(next)
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => setHud(null), 2200)
+  }, [])
+
+  useEffect(() => {
+    const api = (window as any).cryogram
+    const c1 = api?.onHudVolume?.((v: { level: number; muted: boolean }) =>
+      show({ type: 'volume', value: v.level, muted: v.muted }))
+    const c2 = api?.onHudBrightness?.((v: { level: number }) =>
+      show({ type: 'brightness', value: v.level }))
+    return () => { c1?.(); c2?.() }
+  }, [show])
+
+  if (!hud) return null
+
+  const icon = hud.type === 'brightness' ? '☀' : hud.muted ? '🔇' : hud.value < 40 ? '🔈' : '🔊'
+  const label = hud.type === 'brightness' ? 'Brightness' : 'Volume'
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        key="hud"
+        initial={{ opacity: 0, y: -12, scale: 0.94 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: -12, scale: 0.94 }}
+        transition={{ duration: 0.18 }}
+        style={{
+          position: 'fixed', top: 38, left: '50%', transform: 'translateX(-50%)',
+          background: 'rgba(13,20,33,0.96)', border: '1px solid var(--cryo-a25)',
+          borderRadius: 14, padding: '10px 18px',
+          display: 'flex', alignItems: 'center', gap: 12,
+          zIndex: 99999, boxShadow: '0 8px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(0,212,255,0.08)',
+          backdropFilter: 'blur(20px)', minWidth: 210, pointerEvents: 'none',
+        }}
       >
+        <span style={{ fontSize: 22 }}>{icon}</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 10, color: '#8b949e', fontFamily: 'monospace', marginBottom: 5, letterSpacing: 1 }}>
+            {label.toUpperCase()}
+          </div>
+          <div style={{ background: 'rgba(0,212,255,0.1)', borderRadius: 4, height: 5, overflow: 'hidden' }}>
+            <motion.div
+              style={{ height: '100%', background: 'linear-gradient(90deg, var(--cryo-accent), var(--cryo-accent2))', borderRadius: 4 }}
+              animate={{ width: `${hud.muted ? 0 : hud.value}%` }}
+              transition={{ type: 'spring', stiffness: 280, damping: 22 }}
+            />
+          </div>
+        </div>
+        <span style={{ fontSize: 13, color: 'var(--cryo-accent)', fontFamily: 'monospace', width: 34, textAlign: 'right' }}>
+          {hud.muted ? 'M' : `${hud.value}%`}
+        </span>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
+
+// ── Alt+Tab App Switcher overlay ────────────────────────────────────────────
+export function AppSwitcher() {
+  const { windows, focusWindow, restoreWindow } = useWindowStore()
+  const [open, setOpen] = useState(false)
+  const [idx, setIdx] = useState(0)
+  const [x11Wins, setX11Wins] = useState<Array<{ id: string; title: string }>>([])
+
+  // Poll external X11 windows so Alt+Tab shows Brave etc.
+  useEffect(() => {
+    const poll = async () => {
+      try {
+        const all = await (window as any).cryogram?.wm?.getWindows() ?? []
+        setX11Wins(all.filter((w: any) =>
+          w.desktop >= 0 &&
+          !w.title.toLowerCase().includes('cryogram') &&
+          w.title.trim() !== '' && w.title !== 'Desktop'
+        ))
+      } catch {}
+    }
+    poll()
+    const id = setInterval(poll, 2000)
+    return () => clearInterval(id)
+  }, [])
+
+  const totalCount = windows.length + x11Wins.length
+
+  useEffect(() => {
+    const api = (window as any).cryogram
+    const handle = (dir: 'next' | 'prev') => {
+      setOpen(true)
+      setIdx(prev => {
+        if (totalCount === 0) return 0
+        return dir === 'next'
+          ? (prev + 1) % totalCount
+          : (prev - 1 + totalCount) % totalCount
+      })
+    }
+    const cleanup = api?.onAppSwitcher?.(handle)
+    const domHandler = (e: Event) => handle((e as CustomEvent).detail)
+    window.addEventListener('cryogram:switcher', domHandler)
+    return () => { cleanup?.(); window.removeEventListener('cryogram:switcher', domHandler) }
+  }, [totalCount])
+
+  const activate = (i: number) => {
+    if (i < windows.length) {
+      const win = windows[i]
+      if (win.minimized) restoreWindow(win.id)
+      else focusWindow(win.id)
+    } else {
+      const xwin = x11Wins[i - windows.length]
+      if (xwin) (window as any).cryogram?.wm?.focusWindow(xwin.id)
+    }
+    setOpen(false)
+  }
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setOpen(false); return }
+      if (e.key === 'Enter' || (e.key !== 'Tab' && !e.altKey)) {
+        activate(idx)
+      }
+    }
+    window.addEventListener('keyup', handler)
+    return () => window.removeEventListener('keyup', handler)
+  }, [open, idx, windows, x11Wins])
+
+  return (
+    <AnimatePresence>
+      {open && (
         <motion.div
-          animate={{ opacity: [1, 0.4, 1] }}
-          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-          className="text-cryo-accent text-sm"
-          style={{ filter: 'drop-shadow(0 0 4px rgba(0,212,255,0.9))' }}
+          key="switcher"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.12 }}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 99998,
+            background: 'rgba(7,11,17,0.72)', backdropFilter: 'blur(10px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+          onClick={() => setOpen(false)}
         >
-          ⬡
+          <motion.div
+            initial={{ scale: 0.94 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.94 }}
+            transition={{ duration: 0.15 }}
+            style={{
+              background: 'rgba(13,20,33,0.98)', border: '1px solid rgba(0,212,255,0.2)',
+              borderRadius: 18, padding: 20,
+              display: 'flex', gap: 12, maxWidth: '80vw', flexWrap: 'wrap', justifyContent: 'center',
+              boxShadow: '0 12px 48px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,212,255,0.06)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {totalCount === 0 ? (
+              <p style={{ color: '#4e5d6e', fontFamily: 'monospace', fontSize: 13, padding: '8px 16px' }}>
+                No open windows
+              </p>
+            ) : (
+              <>
+                {windows.map((win, i) => {
+                  const sel = i === idx
+                  const accent = APP_COLORS[win.appId] ?? '#00d4ff'
+                  const icon = APP_ICONS[win.appId] ?? '🪟'
+                  return (
+                    <button
+                      key={win.id}
+                      onClick={() => activate(i)}
+                      style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                        padding: '14px 18px', borderRadius: 12,
+                        border: sel ? `1px solid ${accent}55` : '1px solid rgba(26,40,64,0.5)',
+                        background: sel ? `${accent}14` : 'rgba(13,20,33,0.6)',
+                        cursor: 'pointer', minWidth: 90, transition: 'all 0.12s',
+                        boxShadow: sel ? `0 0 20px ${accent}1a` : 'none',
+                        opacity: win.minimized ? 0.55 : 1,
+                      }}
+                    >
+                      <span style={{ fontSize: 30 }}>{icon}</span>
+                      <span style={{ fontSize: 11, color: sel ? accent : '#8b949e', fontFamily: 'monospace', maxWidth: 90, textAlign: 'center' }}>
+                        {win.title}
+                      </span>
+                      {win.minimized && (
+                        <span style={{ fontSize: 9, color: '#4e5d6e', fontFamily: 'monospace' }}>minimized</span>
+                      )}
+                    </button>
+                  )
+                })}
+                {x11Wins.map((xwin, j) => {
+                  const i = windows.length + j
+                  const sel = i === idx
+                  const meta = getX11Meta(xwin.title)
+                  return (
+                    <button
+                      key={xwin.id}
+                      onClick={() => activate(i)}
+                      style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                        padding: '14px 18px', borderRadius: 12,
+                        border: sel ? `1px solid ${meta.color}55` : '1px solid rgba(26,40,64,0.5)',
+                        background: sel ? `${meta.color}14` : 'rgba(13,20,33,0.6)',
+                        cursor: 'pointer', minWidth: 90, transition: 'all 0.12s',
+                        boxShadow: sel ? `0 0 20px ${meta.color}1a` : 'none',
+                      }}
+                    >
+                      <span style={{ fontSize: 30 }}>{meta.icon}</span>
+                      <span style={{ fontSize: 11, color: sel ? meta.color : '#8b949e', fontFamily: 'monospace', maxWidth: 90, textAlign: 'center' }}>
+                        {meta.name}
+                      </span>
+                    </button>
+                  )
+                })}
+              </>
+            )}
+          </motion.div>
+          <div style={{
+            position: 'absolute', bottom: 60, left: '50%', transform: 'translateX(-50%)',
+            background: 'rgba(13,20,33,0.85)', border: '1px solid rgba(0,212,255,0.15)',
+            borderRadius: 8, padding: '5px 14px',
+            color: '#4e5d6e', fontSize: 11, fontFamily: 'monospace', letterSpacing: 1,
+          }}>
+            ALT+TAB to cycle  ·  ENTER or click to switch  ·  ESC to cancel
+          </div>
         </motion.div>
-      </div>
+      )}
+    </AnimatePresence>
+  )
+}
 
-      {/* Divider */}
-      <div className="w-px h-5 shrink-0" style={{ background: 'rgba(26,40,64,0.8)' }} />
+// ── Main Taskbar ────────────────────────────────────────────────────────────
+export function Taskbar() {
+  const { windows, focusWindow, restoreWindow, minimizeWindow } = useWindowStore()
+  const openApp = useWindowStore(s => s.openApp)
+  const { taskbar: pinnedApps, unpinTaskbar } = usePinnedStore()
+  const [x11Wins, setX11Wins] = useState<Array<{ id: string; title: string }>>([])
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; winId: string } | null>(null)
+  const [pinnedCtx, setPinnedCtx] = useState<{ x: number; id: string } | null>(null)
 
-      {/* Window buttons — scrollable row */}
-      <div className="flex items-center gap-1.5 flex-1 min-w-0 overflow-x-auto scrollbar-none">
+  // Poll X11 windows every 3s to show external apps like Brave
+  useEffect(() => {
+    const poll = async () => {
+      try {
+        const wins = await (window as any).cryogram?.wm?.getWindows()
+        if (Array.isArray(wins)) {
+          setX11Wins(wins.filter((w: any) =>
+            w.title &&
+            !w.title.toLowerCase().includes('cryogram') &&
+            !w.title.toLowerCase().includes('electron')
+          ))
+        }
+      } catch {}
+    }
+    poll()
+    const id = setInterval(poll, 3000)
+    return () => clearInterval(id)
+  }, [])
+
+  const cleanTitle = (raw: string) => {
+    const parts = raw.split(' - ')
+    return parts.length > 1 ? parts[parts.length - 1].trim() : raw.trim()
+  }
+
+  return (
+    <>
+      <div
+        className="flex items-center h-10 px-2 gap-1.5 shrink-0 relative select-none"
+        style={{
+          background: 'rgba(7,11,17,0.96)',
+          borderTop: '1px solid var(--cryo-a08)',
+          backdropFilter: 'blur(28px)',
+        }}
+      >
+        {/* Accent line */}
+        <div
+          className="absolute inset-x-0 top-0 h-px pointer-events-none"
+          style={{ background: 'linear-gradient(90deg, transparent 0%, var(--cryo-a20) 50%, transparent 100%)' }}
+        />
+
+        {/* Logo → opens launcher */}
+        <button
+          onClick={() => openApp('launcher')}
+          className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 transition-all hover:scale-105 active:scale-95"
+          title="Launcher"
+          style={{ background: 'var(--cryo-a05)', border: '1px solid var(--cryo-a18)' }}
+        >
+          <motion.span
+            animate={{ opacity: [1, 0.45, 1] }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ fontSize: 15, filter: 'drop-shadow(0 0 5px var(--cryo-a50))' }}
+          >
+            ⬡
+          </motion.span>
+        </button>
+
+        <div className="w-px h-5 shrink-0 mx-0.5" style={{ background: 'rgba(0,212,255,0.1)' }} />
+
+        {/* Pinned external apps (always visible, click to launch/focus) */}
         <AnimatePresence initial={false}>
-          {windows.map((win) => {
-            const accent = APP_COLORS[win.appId] ?? '#00d4ff'
-            const isActive = win.focused && !win.minimized
+          {pinnedApps.map(app => {
+            const running = x11Wins.find(w => w.title.toLowerCase().includes(app.name.toLowerCase()))
             return (
               <motion.button
-                key={win.id}
-                initial={{ opacity: 0, scale: 0.75, x: -12 }}
-                animate={{ opacity: 1, scale: 1, x: 0 }}
-                exit={{ opacity: 0, scale: 0.75, x: -12 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                key={app.id}
+                initial={{ opacity: 0, scale: 0.78 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.78 }}
+                transition={{ type: 'spring', stiffness: 440, damping: 30 }}
+                title={app.name}
                 onClick={() => {
-                  if (win.minimized) restoreWindow(win.id)
-                  else if (win.focused) minimizeWindow(win.id)
-                  else focusWindow(win.id)
+                  if (running) (window as any).cryogram?.wm?.focusWindow(running.id)
+                  else (window as any).cryogram?.launcher?.launch(app)
                 }}
-                className="relative flex items-center gap-1.5 px-2.5 h-7 rounded-lg text-xs shrink-0 transition-all"
+                onContextMenu={e => { e.preventDefault(); setPinnedCtx({ x: e.clientX, id: app.id }) }}
+                className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0 transition-all"
                 style={{
-                  background: isActive ? `${accent}14` : 'rgba(13,20,33,0.5)',
-                  border: isActive ? `1px solid ${accent}40` : '1px solid rgba(26,40,64,0.55)',
-                  color: isActive ? accent : win.minimized ? 'rgba(78,93,110,0.55)' : '#c9d1d9',
-                  maxWidth: 160,
-                  boxShadow: isActive ? `0 0 12px ${accent}18` : 'none',
+                  background: running ? 'rgba(0,212,255,0.12)' : 'rgba(13,20,33,0.6)',
+                  border: running ? '1px solid rgba(0,212,255,0.3)' : '1px solid rgba(26,40,64,0.45)',
+                  position: 'relative',
                 }}
               >
-                <span
-                  className="w-1.5 h-1.5 rounded-full shrink-0 transition-all"
-                  style={{
-                    background: isActive ? accent : win.minimized ? 'rgba(78,93,110,0.3)' : 'rgba(78,93,110,0.5)',
-                    boxShadow: isActive ? `0 0 6px ${accent}` : 'none',
-                  }}
-                />
-                <span className="truncate">{win.title}</span>
-
-                {isActive && (
-                  <motion.div
-                    layoutId="taskbar-active"
-                    className="absolute bottom-0 left-2 right-2 h-px rounded-full"
-                    style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                  />
+                {app.icon ? (
+                  <img src={app.icon} alt="" style={{ width: 18, height: 18, objectFit: 'contain' }}
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                ) : (
+                  <span style={{ fontSize: 14 }}>🌐</span>
+                )}
+                {running && (
+                  <div style={{
+                    position: 'absolute', bottom: 1, left: '50%', transform: 'translateX(-50%)',
+                    width: 4, height: 4, borderRadius: '50%', background: '#00d4ff',
+                  }} />
                 )}
               </motion.button>
             )
           })}
         </AnimatePresence>
 
-        {windows.length === 0 && (
-          <span className="text-xs text-cryo-muted/40 pl-1 italic">No open apps</span>
+        {pinnedApps.length > 0 && (
+          <div className="w-px h-5 shrink-0 mx-0.5" style={{ background: 'rgba(0,212,255,0.1)' }} />
         )}
+
+        {/* Window buttons */}
+        <div className="flex items-center gap-1 flex-1 min-w-0 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          <AnimatePresence initial={false}>
+            {windows.map(win => {
+              const accent = APP_COLORS[win.appId] ?? '#00d4ff'
+              const icon = APP_ICONS[win.appId] ?? '🪟'
+              const isActive = win.focused && !win.minimized
+              return (
+                <motion.button
+                  key={win.id}
+                  initial={{ opacity: 0, scale: 0.78, x: -10 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.78, x: -10 }}
+                  transition={{ type: 'spring', stiffness: 440, damping: 30 }}
+                  onClick={() => {
+                    if (win.minimized) restoreWindow(win.id)
+                    else if (win.focused) minimizeWindow(win.id)
+                    else focusWindow(win.id)
+                  }}
+                  onContextMenu={e => { e.preventDefault(); setCtxMenu({ x: e.clientX, winId: win.id }) }}
+                  className="relative flex items-center gap-1.5 px-2 h-7 rounded-lg text-xs shrink-0 transition-all"
+                  style={{
+                    background: isActive ? `${accent}11` : 'rgba(13,20,33,0.65)',
+                    border: isActive ? `1px solid ${accent}32` : '1px solid rgba(26,40,64,0.5)',
+                    color: isActive ? accent : win.minimized ? '#2e3a46' : '#8b949e',
+                    maxWidth: 156, boxShadow: isActive ? `0 0 12px ${accent}12` : 'none',
+                  }}
+                >
+                  <span style={{ fontSize: 12, opacity: win.minimized ? 0.3 : 1 }}>{icon}</span>
+                  <span className="truncate" style={{ fontFamily: 'monospace', letterSpacing: 0.2 }}>{win.title}</span>
+                  {isActive && (
+                    <motion.div
+                      className="absolute bottom-0.5 left-3 right-3 h-0.5 rounded-full"
+                      style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
+                      layoutId={`pill-${win.id}`}
+                    />
+                  )}
+                </motion.button>
+              )
+            })}
+          </AnimatePresence>
+
+          {/* External X11 windows (Brave, etc.) — use getX11Meta for proper icons */}
+          <AnimatePresence initial={false}>
+            {x11Wins.map(xw => {
+              const meta = getX11Meta(xw.title)
+              return (
+                <motion.button
+                  key={xw.id}
+                  initial={{ opacity: 0, scale: 0.78, x: -10 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.78, x: -10 }}
+                  transition={{ type: 'spring', stiffness: 440, damping: 30 }}
+                  onClick={() => (window as any).cryogram?.wm?.focusWindow(xw.id)}
+                  className="flex items-center gap-1.5 px-2 h-7 rounded-lg text-xs shrink-0"
+                  style={{
+                    background: `${meta.color}10`,
+                    border: `1px solid ${meta.color}28`,
+                    color: meta.color,
+                    maxWidth: 156,
+                  }}
+                >
+                  <span style={{ fontSize: 12 }}>{meta.icon}</span>
+                  <span className="truncate" style={{ fontFamily: 'monospace', letterSpacing: 0.2 }}>
+                    {meta.name}
+                  </span>
+                </motion.button>
+              )
+            })}
+          </AnimatePresence>
+
+          {windows.length === 0 && x11Wins.length === 0 && (
+            <span style={{ fontSize: 11, color: '#2e3a46', fontFamily: 'monospace', paddingLeft: 4, fontStyle: 'italic' }}>
+              — no open windows —
+            </span>
+          )}
+        </div>
+
+        {/* System tray */}
+        <div className="flex items-center gap-0.5 shrink-0">
+          <WifiTray />
+          <VolumeTray />
+          <div className="w-px h-4 mx-1" style={{ background: 'rgba(0,212,255,0.1)' }} />
+          <Clock />
+        </div>
       </div>
-    </div>
+
+      {/* Window right-click context menu */}
+      <AnimatePresence>
+        {ctxMenu && (() => {
+          const win = windows.find(w => w.id === ctxMenu.winId)
+          if (!win) return null
+          return <WinContextMenu key="ctx" x={ctxMenu.x} win={win} onClose={() => setCtxMenu(null)} />
+        })()}
+      </AnimatePresence>
+
+      {/* Pinned app right-click context menu (unpin) */}
+      <AnimatePresence>
+        {pinnedCtx && (() => {
+          const app = pinnedApps.find(a => a.id === pinnedCtx.id)
+          if (!app) return null
+          return (
+            <motion.div
+              key="pinctx"
+              initial={{ opacity: 0, scale: 0.93, y: 6 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.93, y: 6 }}
+              transition={{ duration: 0.1 }}
+              style={{
+                position: 'fixed', left: pinnedCtx.x, bottom: 44,
+                background: 'rgba(13,20,33,0.99)', border: '1px solid rgba(0,212,255,0.2)',
+                borderRadius: 10, padding: 4, zIndex: 99999, minWidth: 160,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
+              }}
+              onContextMenu={e => e.preventDefault()}
+            >
+              <div className="px-3 py-1.5 text-xs font-semibold" style={{ color: '#00d4ff', fontFamily: 'monospace', borderBottom: '1px solid rgba(0,212,255,0.1)', marginBottom: 2 }}>
+                {app.name}
+              </div>
+              <button
+                onClick={() => { unpinTaskbar(app.id); setPinnedCtx(null) }}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  padding: '7px 12px', borderRadius: 6, border: 'none', background: 'none',
+                  cursor: 'pointer', fontSize: 12, fontFamily: 'monospace', color: '#ff4466',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,68,102,0.12)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+              >
+                Unpin from Taskbar
+              </button>
+            </motion.div>
+          )
+        })()}
+      </AnimatePresence>
+    </>
   )
 }

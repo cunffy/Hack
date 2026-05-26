@@ -1,16 +1,17 @@
 "use strict";
 const electron = require("electron");
 const path = require("path");
+const child_process = require("child_process");
 const utils = require("@electron-toolkit/utils");
 const pty = require("node-pty");
 const os = require("os");
-const child_process = require("child_process");
 const axios = require("axios");
 const Database = require("better-sqlite3");
 const Store = require("electron-store");
 const crypto = require("crypto");
 const promises = require("fs/promises");
 const util = require("util");
+const fs = require("fs");
 function _interopNamespaceDefault(e) {
   const n = Object.create(null, { [Symbol.toStringTag]: { value: "Module" } });
   if (e) {
@@ -174,7 +175,13 @@ const store = new Store({
     dehashedApiKey: "",
     workspace: "",
     ptDisclaimerAccepted: null,
-    theme: "dark"
+    "theme.preset": "cyber",
+    "theme.accent": "#00d4ff",
+    "theme.accent2": "#00ff88",
+    "theme.bg": "#070b11",
+    "opticseo.email": "",
+    "opticseo.password": "",
+    "opticseo.autoLogin": true
   }
 });
 function registerSettingsHandlers() {
@@ -498,12 +505,12 @@ function registerEditorHandlers() {
   });
 }
 const execAsync = util.promisify(child_process.exec);
-function sh(cmd) {
+function sh$1(cmd) {
   return execAsync(cmd).then((r) => r.stdout.trim()).catch(() => "");
 }
 function registerSystemHandlers() {
   electron.ipcMain.handle("system:getNetworks", async () => {
-    const out = await sh("nmcli -t -f SSID,SIGNAL,SECURITY,IN-USE dev wifi list 2>/dev/null");
+    const out = await sh$1("nmcli -t -f SSID,SIGNAL,SECURITY,IN-USE dev wifi list 2>/dev/null");
     const seen = /* @__PURE__ */ new Set();
     return out.split("\n").filter(Boolean).map((line) => {
       const parts = line.split(":");
@@ -520,31 +527,49 @@ function registerSystemHandlers() {
     }).sort((a, b) => b.signal - a.signal);
   });
   electron.ipcMain.handle("system:getWifiStatus", async () => {
-    const out = await sh("nmcli -t -f NAME,TYPE,STATE con show --active 2>/dev/null");
-    const wifi = out.split("\n").find((l) => l.includes(":wifi:activated"));
-    if (!wifi) return { connected: false, ssid: "", signal: 0 };
-    const ssid = wifi.split(":")[0];
-    const sigOut = await sh(`nmcli -t -f IN-USE,SIGNAL dev wifi list 2>/dev/null | grep '^\\*' | head -1`);
-    const signal = parseInt(sigOut.split(":")[1]) || 0;
+    const out = await sh$1("nmcli -t -f IN-USE,SSID,SIGNAL dev wifi list 2>/dev/null");
+    const active = out.split("\n").find((l) => l.startsWith("*:"));
+    if (!active) return { connected: false, ssid: "", signal: 0 };
+    const parts = active.split(":");
+    const ssid = parts.slice(1, -1).join(":");
+    const signal = parseInt(parts[parts.length - 1]) || 0;
     return { connected: true, ssid, signal };
   });
   electron.ipcMain.handle("system:connectNetwork", async (_, ssid, password) => {
-    const cmd = password ? `nmcli dev wifi connect "${ssid}" password "${password}"` : `nmcli dev wifi connect "${ssid}"`;
-    const out = await sh(`${cmd} 2>&1`);
-    return out.toLowerCase().includes("successfully") || out.toLowerCase().includes("activated");
+    const dev = await sh$1("nmcli -t -f DEVICE,TYPE dev 2>/dev/null | grep ':wifi' | head -1 | cut -d: -f1");
+    const ifarg = dev ? `ifname "${dev}"` : "";
+    const escapedSsid = ssid.replace(/"/g, '\\"');
+    const escapedPwd = password?.replace(/"/g, '\\"') ?? "";
+    const cmd = password ? `nmcli dev wifi connect "${escapedSsid}" password "${escapedPwd}" ${ifarg} 2>&1` : `nmcli dev wifi connect "${escapedSsid}" ${ifarg} 2>&1`;
+    try {
+      const { stdout } = await execAsync(cmd);
+      const out = stdout.trim();
+      const success = out.toLowerCase().includes("successfully") || out.toLowerCase().includes("activated");
+      return { success, message: success ? "" : out || "Connection failed" };
+    } catch (err) {
+      const msg = (err.stdout ?? err.message ?? "Connection failed").trim();
+      const lower = msg.toLowerCase();
+      if (lower.includes("secrets") || lower.includes("password") || lower.includes("802-11") || lower.includes("wrong"))
+        return { success: false, message: "Wrong password — please try again" };
+      if (lower.includes("timeout"))
+        return { success: false, message: "Connection timed out — check password and try again" };
+      if (lower.includes("not found") || lower.includes("no network"))
+        return { success: false, message: "Network not found — try scanning again" };
+      return { success: false, message: msg || "Connection failed" };
+    }
   });
   electron.ipcMain.handle("system:disconnectNetwork", async () => {
-    await sh("nmcli dev disconnect $(nmcli -t -f DEVICE,TYPE dev | grep wifi | cut -d: -f1 | head -1) 2>/dev/null");
+    await sh$1("nmcli dev disconnect $(nmcli -t -f DEVICE,TYPE dev | grep wifi | cut -d: -f1 | head -1) 2>/dev/null");
     return true;
   });
   electron.ipcMain.handle("system:rescanNetworks", async () => {
-    await sh("nmcli dev wifi rescan 2>/dev/null");
+    await sh$1("nmcli dev wifi rescan 2>/dev/null");
     return true;
   });
   electron.ipcMain.handle("system:getBattery", async () => {
     try {
       const base = "/sys/class/power_supply";
-      const entries = await sh(`ls ${base} 2>/dev/null`);
+      const entries = await sh$1(`ls ${base} 2>/dev/null`);
       const bat = entries.split("\n").find((b) => b.startsWith("BAT"));
       if (!bat) return null;
       const [capacity, status] = await Promise.all([
@@ -557,33 +582,33 @@ function registerSystemHandlers() {
     }
   });
   electron.ipcMain.handle("system:getVolume", async () => {
-    const vol = await sh("pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null");
-    const mute = await sh("pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null");
+    const vol = await sh$1("pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null");
+    const mute = await sh$1("pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null");
     const match = vol.match(/(\d+)%/);
     return { level: match ? parseInt(match[1]) : 100, muted: mute.includes("yes") };
   });
   electron.ipcMain.handle("system:setVolume", async (_, level) => {
-    await sh(`pactl set-sink-volume @DEFAULT_SINK@ ${Math.max(0, Math.min(150, level))}% 2>/dev/null`);
+    await sh$1(`pactl set-sink-volume @DEFAULT_SINK@ ${Math.max(0, Math.min(150, level))}% 2>/dev/null`);
     return true;
   });
   electron.ipcMain.handle("system:toggleMute", async () => {
-    await sh("pactl set-sink-mute @DEFAULT_SINK@ toggle 2>/dev/null");
+    await sh$1("pactl set-sink-mute @DEFAULT_SINK@ toggle 2>/dev/null");
     return true;
   });
   electron.ipcMain.handle("system:getBrightness", async () => {
-    const cur = await sh("brightnessctl get 2>/dev/null");
-    const max = await sh("brightnessctl max 2>/dev/null");
+    const cur = await sh$1("brightnessctl get 2>/dev/null");
+    const max = await sh$1("brightnessctl max 2>/dev/null");
     const c = parseInt(cur) || 100;
     const m = parseInt(max) || 100;
     return Math.round(c * 100 / m);
   });
   electron.ipcMain.handle("system:setBrightness", async (_, pct) => {
-    await sh(`brightnessctl set ${Math.max(5, Math.min(100, pct))}% 2>/dev/null`);
+    await sh$1(`brightnessctl set ${Math.max(5, Math.min(100, pct))}% 2>/dev/null`);
     return true;
   });
   electron.ipcMain.handle("system:getBluetoothDevices", async () => {
-    const out = await sh("bluetoothctl devices 2>/dev/null");
-    const connected = await sh("bluetoothctl info 2>/dev/null");
+    const out = await sh$1("bluetoothctl devices 2>/dev/null");
+    const connected = await sh$1("bluetoothctl info 2>/dev/null");
     return out.split("\n").filter(Boolean).map((line) => {
       const parts = line.replace("Device ", "").split(" ");
       const address = parts[0];
@@ -592,25 +617,25 @@ function registerSystemHandlers() {
     }).filter((d) => d.address);
   });
   electron.ipcMain.handle("system:bluetoothConnect", async (_, address) => {
-    const out = await sh(`bluetoothctl connect ${address} 2>&1`);
+    const out = await sh$1(`bluetoothctl connect ${address} 2>&1`);
     return out.toLowerCase().includes("successful");
   });
   electron.ipcMain.handle("system:bluetoothDisconnect", async (_, address) => {
-    await sh(`bluetoothctl disconnect ${address} 2>/dev/null`);
+    await sh$1(`bluetoothctl disconnect ${address} 2>/dev/null`);
     return true;
   });
   electron.ipcMain.handle("system:bluetoothScan", async () => {
-    sh("bluetoothctl scan on 2>/dev/null &");
+    sh$1("bluetoothctl scan on 2>/dev/null &");
     await new Promise((r) => setTimeout(r, 5e3));
-    await sh("bluetoothctl scan off 2>/dev/null");
+    await sh$1("bluetoothctl scan off 2>/dev/null");
     return true;
   });
   electron.ipcMain.handle("system:getInfo", async () => {
     try {
       const [hostname, kernel, uptime] = await Promise.all([
-        sh("hostname"),
-        sh("uname -r"),
-        sh("uptime -p")
+        sh$1("hostname"),
+        sh$1("uname -r"),
+        sh$1("uptime -p")
       ]);
       const cpuInfo = await promises.readFile("/proc/cpuinfo", "utf8").catch(() => "");
       const cpuLine = cpuInfo.split("\n").find((l) => l.startsWith("model name"));
@@ -636,13 +661,76 @@ function registerSystemHandlers() {
     }
   });
   electron.ipcMain.handle("system:shutdown", async () => {
-    await sh("systemctl poweroff");
+    await sh$1("sudo systemctl poweroff");
   });
   electron.ipcMain.handle("system:reboot", async () => {
-    await sh("systemctl reboot");
+    await sh$1("sudo systemctl reboot");
   });
   electron.ipcMain.handle("system:lock", async () => {
-    await sh("i3lock -c 080c12 -e &");
+    electron.BrowserWindow.getAllWindows()[0]?.webContents.send("screen:lock");
+    return true;
+  });
+  electron.ipcMain.handle("system:verifyPin", async (_, pin) => {
+    const hash = store.get("pin.hash");
+    if (!hash) return true;
+    return crypto.createHash("sha256").update(String(pin)).digest("hex") === hash;
+  });
+  electron.ipcMain.handle("system:setPin", async (_, newPin, currentPin) => {
+    const existing = store.get("pin.hash");
+    if (existing && currentPin !== void 0) {
+      const chk = crypto.createHash("sha256").update(String(currentPin)).digest("hex");
+      if (chk !== existing) return { success: false, error: "Incorrect current PIN" };
+    }
+    if (!/^[0-9]{4,8}$/.test(newPin)) return { success: false, error: "PIN must be 4–8 digits" };
+    store.set("pin.hash", crypto.createHash("sha256").update(newPin).digest("hex"));
+    store.set("pin.enabled", true);
+    return { success: true };
+  });
+  electron.ipcMain.handle("system:removePin", async (_, currentPin) => {
+    const existing = store.get("pin.hash");
+    if (existing) {
+      const chk = crypto.createHash("sha256").update(String(currentPin)).digest("hex");
+      if (chk !== existing) return { success: false, error: "Incorrect PIN" };
+    }
+    store.delete("pin.hash");
+    store.set("pin.enabled", false);
+    return { success: true };
+  });
+  electron.ipcMain.handle("system:setPinEnabled", async (_, enabled) => {
+    store.set("pin.enabled", enabled);
+    return true;
+  });
+  electron.ipcMain.handle("system:pickWallpaper", async (event) => {
+    const win = electron.BrowserWindow.fromWebContents(event.sender);
+    const result = await electron.dialog.showOpenDialog(win, {
+      title: "Choose Wallpaper",
+      filters: [{ name: "Images", extensions: ["jpg", "jpeg", "png", "webp", "gif", "bmp", "tiff"] }],
+      properties: ["openFile"]
+    });
+    if (result.canceled || result.filePaths.length === 0) return null;
+    return result.filePaths[0];
+  });
+  electron.ipcMain.handle("system:setWallpaper", async (_, path2) => {
+    const safe = path2.replace(/'/g, "'\\''");
+    await sh$1(`feh --bg-scale '${safe}' 2>/dev/null`);
+    return true;
+  });
+  electron.ipcMain.handle("wm:getWindows", async () => {
+    const out = await sh$1("wmctrl -l 2>/dev/null");
+    if (!out) return [];
+    return out.split("\n").filter(Boolean).map((line) => {
+      const match = line.match(/^(0x\w+)\s+(-?\d+)\s+(\S+)\s+(.+)$/);
+      if (!match) return null;
+      return { id: match[1], desktop: parseInt(match[2]), title: match[4] };
+    }).filter(Boolean);
+  });
+  electron.ipcMain.handle("wm:focusWindow", async (_, id) => {
+    await sh$1(`wmctrl -ia ${id} 2>/dev/null`);
+    return true;
+  });
+  electron.ipcMain.handle("wm:closeWindow", async (_, id) => {
+    await sh$1(`wmctrl -ic ${id} 2>/dev/null`);
+    return true;
   });
 }
 const APP_DIRS = [
@@ -665,6 +753,38 @@ const CATEGORY_MAP = {
   Video: "Media",
   Office: "Office"
 };
+async function resolveIconPath(name) {
+  if (!name) return "";
+  if (name.startsWith("/")) {
+    try {
+      await promises.access(name);
+      return `file://${name}`;
+    } catch {
+      return "";
+    }
+  }
+  const candidates = [
+    `/usr/share/icons/hicolor/256x256/apps/${name}.png`,
+    `/usr/share/icons/hicolor/128x128/apps/${name}.png`,
+    `/usr/share/icons/hicolor/64x64/apps/${name}.png`,
+    `/usr/share/icons/hicolor/48x48/apps/${name}.png`,
+    `/usr/share/icons/hicolor/scalable/apps/${name}.svg`,
+    `/usr/share/pixmaps/${name}.png`,
+    `/usr/share/pixmaps/${name}.svg`,
+    `/usr/share/pixmaps/${name}.xpm`,
+    `/usr/share/icons/hicolor/32x32/apps/${name}.png`,
+    `/usr/share/icons/Adwaita/256x256/apps/${name}.png`,
+    `/usr/share/icons/Adwaita/48x48/apps/${name}.png`
+  ];
+  for (const p of candidates) {
+    try {
+      await promises.access(p);
+      return `file://${p}`;
+    } catch {
+    }
+  }
+  return "";
+}
 async function parseDesktopFile(filePath) {
   try {
     const content = await promises.readFile(filePath, "utf8");
@@ -686,7 +806,7 @@ async function parseDesktopFile(filePath) {
     return {
       name,
       exec: exec.replace(/%[uUfFdDnNickvm]/g, "").trim(),
-      icon: get("Icon"),
+      icon: await resolveIconPath(get("Icon")),
       comment: get("Comment") || get("GenericName"),
       categories: rawCats,
       category,
@@ -696,6 +816,16 @@ async function parseDesktopFile(filePath) {
   } catch {
     return null;
   }
+}
+const launchedPids = /* @__PURE__ */ new Set();
+function killLaunchedApps() {
+  for (const pid of launchedPids) {
+    try {
+      process.kill(pid, "SIGTERM");
+    } catch {
+    }
+  }
+  launchedPids.clear();
 }
 function registerLauncherHandlers() {
   electron.ipcMain.handle("launcher:getApps", async () => {
@@ -726,6 +856,10 @@ function registerLauncherHandlers() {
         stdio: "ignore",
         env: { ...process.env }
       });
+      if (proc.pid) {
+        launchedPids.add(proc.pid);
+        proc.on("exit", () => launchedPids.delete(proc.pid));
+      }
       proc.unref();
       return true;
     } catch {
@@ -733,7 +867,280 @@ function registerLauncherHandlers() {
     }
   });
 }
+const sh = util.promisify(child_process.exec);
+let scrcpyProc = null;
+async function adb(serial, ...args) {
+  const { stdout } = await sh(`adb -s '${serial}' ${args.join(" ")} 2>/dev/null`);
+  return stdout.trim();
+}
+async function adbGlobal(...args) {
+  const { stdout } = await sh(`adb ${args.join(" ")} 2>/dev/null`);
+  return stdout.trim();
+}
+function registerPhoneHandlers() {
+  electron.ipcMain.handle("phone:getDevices", async () => {
+    try {
+      const out = await adbGlobal("devices", "-l");
+      const lines = out.split("\n").slice(1).filter((l) => l.trim() && !l.startsWith("*") && !l.startsWith("List"));
+      const devices = lines.map((line) => {
+        const serial = line.trim().split(/\s+/)[0];
+        const status = line.trim().split(/\s+/)[1];
+        const model = (line.match(/model:(\S+)/)?.[1] ?? "Unknown").replace(/_/g, " ");
+        const product = line.match(/product:(\S+)/)?.[1] ?? "";
+        const transport = line.match(/transport_id:(\d+)/)?.[1] ?? "";
+        const isWifi = serial.includes(":");
+        return { serial, status, model, product, transport, isWifi };
+      }).filter((d) => d.serial && d.status === "device");
+      return { ok: true, devices };
+    } catch (e) {
+      return { ok: false, error: e.message, devices: [] };
+    }
+  });
+  electron.ipcMain.handle("phone:getInfo", async (_, serial) => {
+    const prop = async (key) => {
+      try {
+        return await adb(serial, `shell getprop ${key}`);
+      } catch {
+        return "";
+      }
+    };
+    const [model, brand, android, sdk, cpuAbi, screenSize] = await Promise.all([
+      prop("ro.product.model"),
+      prop("ro.product.brand"),
+      prop("ro.build.version.release"),
+      prop("ro.build.version.sdk"),
+      prop("ro.product.cpu.abi"),
+      (async () => {
+        try {
+          const out = await adb(serial, "shell wm size");
+          return out.match(/Physical size: (\S+)/)?.[1] ?? "";
+        } catch {
+          return "";
+        }
+      })()
+    ]);
+    return { model, brand, android, sdk, cpuAbi, screenSize };
+  });
+  electron.ipcMain.handle("phone:getBattery", async (_, serial) => {
+    try {
+      const out = await adb(serial, "shell dumpsys battery");
+      const level = parseInt(out.match(/level: (\d+)/)?.[1] ?? "0");
+      const status = out.match(/status: (\d+)/)?.[1];
+      const voltage = parseInt(out.match(/voltage: (\d+)/)?.[1] ?? "0");
+      const temp = parseInt(out.match(/temperature: (\d+)/)?.[1] ?? "0");
+      const charging = status === "2" || status === "5";
+      const plugged = out.match(/plugged: (\d+)/)?.[1] !== "0";
+      return { level, charging, plugged, voltage: voltage / 1e3, temp: temp / 10 };
+    } catch {
+      return { level: 0, charging: false, plugged: false, voltage: 0, temp: 0 };
+    }
+  });
+  electron.ipcMain.handle("phone:getStorage", async (_, serial) => {
+    try {
+      const out = await adb(serial, "shell df /storage/emulated/0");
+      const row = out.trim().split("\n").pop()?.trim().split(/\s+/) ?? [];
+      const total = parseInt(row[1] ?? "0") * 1024;
+      const used = parseInt(row[2] ?? "0") * 1024;
+      const free = parseInt(row[3] ?? "0") * 1024;
+      return { total, used, free };
+    } catch {
+      return { total: 0, used: 0, free: 0 };
+    }
+  });
+  electron.ipcMain.handle("phone:checkScrcpy", async () => {
+    try {
+      const { stdout } = await sh("scrcpy --version 2>&1");
+      const version = stdout.match(/scrcpy\s+(\S+)/)?.[1] ?? "unknown";
+      return { installed: true, version };
+    } catch {
+      return { installed: false, version: null };
+    }
+  });
+  electron.ipcMain.handle("phone:installScrcpy", async () => {
+    try {
+      await sh("apt-get install -y scrcpy 2>&1 || snap install scrcpy 2>&1");
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+  electron.ipcMain.handle("phone:startMirror", async (_, serial) => {
+    if (scrcpyProc) {
+      scrcpyProc.kill();
+      scrcpyProc = null;
+    }
+    try {
+      scrcpyProc = child_process.spawn("scrcpy", [
+        "-s",
+        serial,
+        "--video-bit-rate",
+        "4M",
+        "--max-fps",
+        "60",
+        "--window-title",
+        "Phone — Cryogram",
+        "--shortcut-mod",
+        "lctrl,rctrl"
+      ], { detached: false });
+      scrcpyProc.on("exit", () => {
+        scrcpyProc = null;
+      });
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+  electron.ipcMain.handle("phone:stopMirror", async () => {
+    if (scrcpyProc) {
+      scrcpyProc.kill();
+      scrcpyProc = null;
+    }
+    return { ok: true };
+  });
+  electron.ipcMain.handle("phone:isMirroring", async () => ({ active: !!scrcpyProc }));
+  electron.ipcMain.handle("phone:enableWireless", async (_, serial, port = 5555) => {
+    try {
+      const result = await sh(`adb -s '${serial}' tcpip ${port} 2>&1`);
+      return { ok: true, message: result.stdout.trim() };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+  electron.ipcMain.handle("phone:connectWifi", async (_, ip, port = 5555) => {
+    try {
+      await new Promise((r) => setTimeout(r, 1200));
+      const { stdout } = await sh(`adb connect ${ip}:${port} 2>&1`);
+      const ok = stdout.toLowerCase().includes("connected");
+      return { ok, message: stdout.trim() };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+  electron.ipcMain.handle("phone:disconnect", async (_, address) => {
+    try {
+      const { stdout } = await sh(`adb disconnect '${address}' 2>&1`);
+      return { ok: true, message: stdout.trim() };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+  electron.ipcMain.handle("phone:getDeviceIp", async (_, serial) => {
+    try {
+      const out = await adb(serial, "shell ip route show");
+      const ip = out.match(/src\s+(\d+\.\d+\.\d+\.\d+)/)?.[1];
+      if (ip) return { ok: true, ip };
+      const wlan = await adb(serial, "shell ip addr show wlan0");
+      const wlanIp = wlan.match(/inet (\d+\.\d+\.\d+\.\d+)/)?.[1];
+      return { ok: !!wlanIp, ip: wlanIp ?? null };
+    } catch (e) {
+      return { ok: false, ip: null };
+    }
+  });
+  electron.ipcMain.handle("phone:screenshot", async (_, serial) => {
+    try {
+      const dest = path.join(os.homedir(), `Pictures/phone-screenshot-${Date.now()}.png`);
+      await sh(`adb -s '${serial}' exec-out screencap -p > '${dest}' 2>/dev/null`);
+      return { ok: true, path: dest };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+}
+const execFileP = util.promisify(child_process.execFile);
+const UPDATE_SCRIPT = "/usr/local/bin/cryogram-update";
+const SRC_CANDIDATES = ["/opt/cryogram-src", "/opt/cryogram"];
+function findSrcDir() {
+  for (const dir of SRC_CANDIDATES) {
+    if (fs.existsSync(`${dir}/.git`)) return dir;
+  }
+  return null;
+}
+function readConf() {
+  try {
+    const conf = fs.readFileSync("/etc/cryogram/update.conf", "utf8");
+    const repoUrl = conf.match(/REPO_URL="([^"]+)"/)?.[1] ?? "";
+    const branch = conf.match(/BRANCH="([^"]+)"/)?.[1] ?? "main";
+    return { repoUrl, branch };
+  } catch {
+    return { repoUrl: "", branch: "main" };
+  }
+}
+function isRoot() {
+  try {
+    return process.getuid?.() === 0;
+  } catch {
+    return false;
+  }
+}
+function registerUpdaterHandlers() {
+  electron.ipcMain.handle("updater:check", async () => {
+    const srcDir = findSrcDir();
+    if (!srcDir) {
+      return {
+        hasUpdate: false,
+        error: "no-source-dir",
+        message: "Source directory not found. Run sudo cryogram-update once from a terminal to set up automatic updates."
+      };
+    }
+    const { branch } = readConf();
+    try {
+      await execFileP("git", ["-C", srcDir, "fetch", "origin", "--quiet"], { timeout: 16e3 });
+    } catch (e) {
+      return {
+        hasUpdate: false,
+        error: "fetch-failed",
+        message: `Could not reach update server: ${e.message}`
+      };
+    }
+    try {
+      const { stdout: countOut } = await execFileP("git", ["-C", srcDir, "rev-list", `HEAD..origin/${branch}`, "--count"]);
+      const count = parseInt(countOut.trim(), 10) || 0;
+      if (count <= 0) return { hasUpdate: false };
+      const { stdout: logOut } = await execFileP("git", ["-C", srcDir, "log", `HEAD..origin/${branch}`, "--pretty=format:%s", "-8"]);
+      const changes = logOut.trim().split("\n").filter(Boolean);
+      return { hasUpdate: true, commitCount: count, changes };
+    } catch (e) {
+      return {
+        hasUpdate: false,
+        error: "compare-failed",
+        message: `Branch compare failed (branch: ${branch}): ${e.message}`
+      };
+    }
+  });
+  electron.ipcMain.handle("updater:run", (event) => {
+    return new Promise((resolve, reject) => {
+      if (!fs.existsSync(UPDATE_SCRIPT)) {
+        return reject(new Error("cryogram-update script not found. Run from the live OS."));
+      }
+      const cmd = isRoot() ? "bash" : "sudo";
+      const args = isRoot() ? [UPDATE_SCRIPT] : ["-n", UPDATE_SCRIPT];
+      const proc = child_process.spawn(cmd, args, {
+        env: { ...process.env, TERM: "xterm-color", FORCE_COLOR: "1" }
+      });
+      const send = (data) => {
+        try {
+          event.sender.send("updater:progress", data);
+        } catch {
+        }
+      };
+      proc.stdout.on("data", (d) => send(d.toString()));
+      proc.stderr.on("data", (d) => send(d.toString()));
+      proc.on("close", (code) => {
+        if (code === 0 || code === null) resolve({ success: true });
+        else reject(new Error(`Update exited with code ${code}`));
+      });
+      proc.on("error", (err) => reject(err));
+    });
+  });
+}
 let mainWindow = null;
+function lockScreen() {
+  if (!mainWindow) return;
+  mainWindow.setAlwaysOnTop(true, "screen-saver");
+  mainWindow.focus();
+  mainWindow.moveTop();
+  mainWindow.webContents.send("screen:lock");
+}
 function createWindow() {
   mainWindow = new electron.BrowserWindow({
     width: 1440,
@@ -742,17 +1149,68 @@ function createWindow() {
     minHeight: 700,
     frame: false,
     titleBarStyle: "hidden",
-    backgroundColor: "#080c12",
+    backgroundColor: "#070b11",
+    skipTaskbar: true,
     webPreferences: {
       preload: path.join(__dirname, "../preload/index.js"),
       sandbox: false,
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      webviewTag: true
     },
     icon: path.join(__dirname, "../../resources/icon.png")
   });
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
+    mainWindow.maximize();
+    mainWindow.on("restore", () => mainWindow?.maximize());
+    electron.globalShortcut.register("Super+D", () => {
+    });
+    electron.globalShortcut.register("Super+Tab", () => {
+    });
+    electron.globalShortcut.register("Super+L", () => {
+      lockScreen();
+    });
+    electron.globalShortcut.register("CommandOrControl+Alt+T", () => {
+      mainWindow?.webContents.send("open:app", "terminal");
+    });
+    let _vol = -1;
+    const readVolAndSend = () => {
+      child_process.exec("pactl get-sink-volume @DEFAULT_SINK@", (err, volOut) => {
+        if (err || !volOut) return;
+        const match = volOut.match(/(\d+)%/);
+        if (!match) return;
+        _vol = Math.min(100, parseInt(match[1]));
+        child_process.exec("pactl get-sink-mute @DEFAULT_SINK@", (_, muteOut) => {
+          mainWindow?.webContents.send("hud:volume", { level: _vol, muted: muteOut?.includes("yes") ?? false });
+        });
+      });
+    };
+    const sendVolOptimistic = (delta) => {
+      if (_vol >= 0) {
+        _vol = Math.max(0, Math.min(100, _vol + delta));
+        mainWindow?.webContents.send("hud:volume", { level: _vol, muted: false });
+      }
+      setTimeout(readVolAndSend, 300);
+    };
+    electron.globalShortcut.register("VolumeUp", () => {
+      child_process.exec("pactl set-sink-volume @DEFAULT_SINK@ +5%");
+      sendVolOptimistic(5);
+    });
+    electron.globalShortcut.register("VolumeDown", () => {
+      child_process.exec("pactl set-sink-volume @DEFAULT_SINK@ -5%");
+      sendVolOptimistic(-5);
+    });
+    electron.globalShortcut.register("VolumeMute", () => {
+      child_process.exec("pactl set-sink-mute @DEFAULT_SINK@ toggle");
+      setTimeout(readVolAndSend, 300);
+    });
+    electron.globalShortcut.register("Alt+Tab", () => {
+      mainWindow?.webContents.send("app:switcher", "next");
+    });
+    electron.globalShortcut.register("Alt+Shift+Tab", () => {
+      mainWindow?.webContents.send("app:switcher", "prev");
+    });
   });
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     electron.shell.openExternal(url);
@@ -775,6 +1233,9 @@ electron.app.whenReady().then(() => {
     else mainWindow?.maximize();
   });
   electron.ipcMain.on("window:close", () => mainWindow?.close());
+  electron.ipcMain.on("screen:unlock", () => {
+    mainWindow?.setAlwaysOnTop(false);
+  });
   registerTerminalHandlers();
   registerPasswordTesterHandlers();
   registerLeakerHandlers();
@@ -782,10 +1243,18 @@ electron.app.whenReady().then(() => {
   registerSettingsHandlers();
   registerSystemHandlers();
   registerLauncherHandlers();
+  registerPhoneHandlers();
+  registerUpdaterHandlers();
   createWindow();
+  electron.powerMonitor.on("resume", () => lockScreen());
+  electron.powerMonitor.on("lock-screen", () => lockScreen());
   electron.app.on("activate", () => {
     if (electron.BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+});
+electron.app.on("before-quit", () => {
+  electron.globalShortcut.unregisterAll();
+  killLaunchedApps();
 });
 electron.app.on("window-all-closed", () => {
   if (process.platform !== "darwin") electron.app.quit();

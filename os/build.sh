@@ -239,6 +239,10 @@ plymouth
 plymouth-themes
 libinput-tools
 python3-evdev
+squashfs-tools
+grub-efi-amd64
+grub-pc-bin
+grub-common
 PKGEOF
 
 cat > "$PKG_LISTS/gaming.list.chroot" << 'PKGEOF'
@@ -340,6 +344,9 @@ cat > "$HOOKS_DIR/0400-calamares.hook.chroot" << 'HOOKEOF'
 set +e
 
 echo "[calamares] Installing Calamares..."
+# squashfs-tools provides unsquashfs, which Calamares uses to unpack the live
+# filesystem during installation. Without it unpackfs fails immediately.
+DEBIAN_FRONTEND=noninteractive apt-get install -y squashfs-tools 2>/dev/null || true
 
 # Install calamares only — NOT calamares-settings-debian, which ships its own
 # settings.conf that conflicts with ours staged in includes.chroot.
@@ -541,11 +548,8 @@ sequence:
     - networkcfg
     - hwclock
     - services-systemd
-    - bootloader-config
     - grubcfg
     - bootloader
-    - packages
-    - luksbootkeyfile
     - plymouthcfg
     - initramfs
     - removeuser
@@ -566,6 +570,30 @@ exit 0
 HOOKEOF
 chmod +x "$HOOKS_DIR/0401-calamares-config.hook.chroot"
 echo "[build] Calamares config hook written."
+
+cat > "$HOOKS_DIR/0402-calamares-unpackfs.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set +e
+echo "[unpackfs] Writing unpackfs.conf for live squashfs..."
+mkdir -p /etc/calamares/modules
+
+# live-boot mounts the live medium at /run/live/medium (newer) or
+# /lib/live/mount/medium (older). Write both as fallback candidates so
+# the config works across live-boot versions.
+# Calamares uses the first source that exists at install time.
+cat > /etc/calamares/modules/unpackfs.conf << 'CONF'
+---
+unpack:
+  - source: /run/live/medium/live/filesystem.squashfs
+    sourcefs: squashfs
+    destination: ""
+CONF
+
+echo "[unpackfs] Done."
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0402-calamares-unpackfs.hook.chroot"
+echo "[build] unpackfs config hook written."
 
 # Fix skel timing: write a hook that copies /etc/skel to /home/cryogram
 # AFTER all other hooks have populated skel. The configure-system hook
@@ -912,16 +940,32 @@ cat > "$HOOKS_DIR/0560-grub-live.hook.binary" << 'HOOKEOF'
 set +e
 echo "[grub-live] Configuring Cryogram OS live boot GRUB..."
 
-# live-build assembles the binary tree in binary/ relative to $LB_DIR.
-# Patch all GRUB configs we can find (BIOS and EFI paths vary by live-build version).
 for GRUB_CFG in \
   "binary/boot/grub/grub.cfg" \
   "binary/EFI/boot/grub.cfg" \
   "binary/EFI/BOOT/grub.cfg"; do
   [ -f "$GRUB_CFG" ] || continue
 
-  # 5-second countdown — shows branded screen, then auto-boots
-  sed -i 's/set timeout=[0-9][0-9]*/set timeout=5/g' "$GRUB_CFG"
+  # Auto-select first entry: handle both timeout=-1 (wait forever) and numeric values
+  sed -i 's/set timeout=-1/set timeout=3/g; s/set timeout=[0-9][0-9]*/set timeout=3/g' "$GRUB_CFG"
+
+  # Ensure default=0 so the first entry (live boot) is pre-selected
+  if grep -q "set default=" "$GRUB_CFG"; then
+    sed -i 's/set default=.*/set default=0/' "$GRUB_CFG"
+  else
+    sed -i '1i set default=0' "$GRUB_CFG"
+  fi
+
+  # Add quiet splash to live kernel cmdline — enables Plymouth boot animation
+  # Only add if not already present to avoid duplication on re-runs
+  grep -q "quiet splash" "$GRUB_CFG" || \
+    sed -i '/linux.*boot=live/ s/$/ quiet splash/' "$GRUB_CFG"
+
+  # Rename generic Debian entry to Cryogram OS branding
+  sed -i 's/menuentry "Debian GNU\/Linux Live (amd64)"/menuentry "Boot Cryogram OS"/g' "$GRUB_CFG"
+  sed -i 's/menuentry "Debian GNU\/Linux Live ([^"]*)"/menuentry "Boot Cryogram OS (Live)"/g' "$GRUB_CFG"
+  # Catch any remaining generic labels that still reference Debian Live
+  sed -i 's/menuentry "Debian GNU\/Linux/menuentry "Cryogram OS/g' "$GRUB_CFG"
 
   # Apply Cryogram theme (files are staged in binary/boot/grub/themes/cryogram/)
   if ! grep -q "set theme" "$GRUB_CFG"; then

@@ -2,7 +2,7 @@ import { ipcMain, app } from 'electron'
 import axios from 'axios'
 import Database from 'better-sqlite3'
 import { join } from 'path'
-import { store } from './settings'
+import { getSettingsStore } from './settings'
 import { sendNotification } from './notify'
 
 let db: Database.Database
@@ -38,7 +38,7 @@ function getDb(): Database.Database {
 }
 
 async function checkHIBP(email: string, targetId: number): Promise<number> {
-  const key = store.get('hibpApiKey') as string
+  const key = getSettingsStore().get('hibpApiKey') as string
   if (!key) return 0
 
   try {
@@ -78,8 +78,8 @@ async function checkHIBP(email: string, targetId: number): Promise<number> {
 }
 
 async function checkDehashed(value: string, type: string, targetId: number): Promise<number> {
-  const email = store.get('dehashedEmail') as string
-  const key = store.get('dehashedApiKey') as string
+  const email = getSettingsStore().get('dehashedEmail') as string
+  const key = getSettingsStore().get('dehashedApiKey') as string
   if (!email || !key) return 0
 
   const queryMap: Record<string, string> = {

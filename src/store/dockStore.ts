@@ -3,8 +3,14 @@ import { persist } from 'zustand/middleware'
 import { AppId } from './windowStore'
 
 export const DEFAULT_DOCK: AppId[] = [
-  'terminal', 'editor', 'password-tester', 'leaker',
-  'files', 'launcher', 'settings', 'system',
+  'terminal', 'editor', 'mail', 'password-tester', 'leaker',
+  'files', 'passwords', 'scanner', 'firewall', 'vpn',
+  'task-manager', 'netmon', 'logs', 'launcher', 'settings',
+  'calculator', 'crypto-tools', 'api-tester', 'cert-inspector',
+  'docker', 'git', 'database', 'markdown', 'trash',
+  'shodan', 'osint', 'cve', 'ai-assistant', 'wordlists',
+  'json-explorer', 'totp', 'regex', 'encoding-chain', 'packet-sniffer',
+  'backup', 'password-health', 'pomodoro', 'audit-log', 'code-scanner', 'wallpaper',
 ]
 
 interface DockStore {
@@ -22,6 +28,16 @@ export const useDockStore = create<DockStore>()(
       addApp:   (id) => set(s => ({ order: s.order.includes(id) ? s.order : [...s.order, id] })),
       removeApp:(id) => set(s => ({ order: s.order.filter(a => a !== id) })),
     }),
-    { name: 'cryogram-dock-order' },
+    {
+      name: 'cryogram-dock-order',
+      merge: (persisted: any, current) => {
+        const stored: AppId[] = persisted?.order ?? current.order
+        const merged = [...stored]
+        for (const id of DEFAULT_DOCK) {
+          if (!merged.includes(id)) merged.push(id)
+        }
+        return { ...current, order: merged }
+      },
+    },
   ),
 )

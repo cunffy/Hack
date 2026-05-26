@@ -133,20 +133,40 @@ export function registerLauncherHandlers(): void {
 
   ipcMain.handle('launcher:launch', async (_, app: AppEntry) => {
     try {
-      const cmd = app.terminal
-        ? `xfce4-terminal -e "${app.exec}"`
-        : app.exec
-      const parts = cmd.split(' ')
-      const proc = spawn(parts[0], parts.slice(1), {
-        detached: true,
-        stdio: 'ignore',
-        env: { ...process.env },
-      })
-      if (proc.pid) {
+      // gtk-launch handles dbus activation, env setup, steam:// etc. correctly
+      const desktopId = app.desktopFile.split('/').pop()?.replace(/\.desktop$/, '') ?? ''
+      let proc: ReturnType<typeof spawn> | null = null
+
+      if (desktopId) {
+        // Preferred: use gtk-launch with the .desktop basename
+        proc = spawn('gtk-launch', [desktopId], {
+          detached: true,
+          stdio: 'ignore',
+          env: { ...process.env, DISPLAY: process.env['DISPLAY'] || ':0' },
+        })
+      } else if (app.terminal) {
+        // Fallback terminal: try common terminal emulators
+        const terms = ['x-terminal-emulator', 'xfce4-terminal', 'gnome-terminal', 'konsole', 'xterm']
+        const term = terms[0] // x-terminal-emulator is the Debian alternative
+        proc = spawn(term, ['-e', app.exec], {
+          detached: true,
+          stdio: 'ignore',
+          env: { ...process.env, DISPLAY: process.env['DISPLAY'] || ':0' },
+        })
+      } else {
+        const parts = app.exec.split(' ')
+        proc = spawn(parts[0], parts.slice(1), {
+          detached: true,
+          stdio: 'ignore',
+          env: { ...process.env, DISPLAY: process.env['DISPLAY'] || ':0' },
+        })
+      }
+
+      if (proc?.pid) {
         launchedPids.add(proc.pid)
         proc.on('exit', () => launchedPids.delete(proc.pid!))
       }
-      proc.unref()
+      proc?.unref()
       return true
     } catch {
       return false

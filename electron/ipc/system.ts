@@ -3,7 +3,7 @@ import { exec } from 'child_process'
 import { promisify } from 'util'
 import { readFile } from 'fs/promises'
 import { createHash } from 'crypto'
-import { store } from './settings'
+import { getSettingsStore } from './settings'
 
 const execAsync = promisify(exec)
 
@@ -34,25 +34,40 @@ export function registerSystemHandlers(): void {
   })
 
   ipcMain.handle('system:getWifiStatus', async () => {
-    const out = await sh('nmcli -t -f NAME,TYPE,STATE con show --active 2>/dev/null')
-    const wifi = out.split('\n').find(l => l.includes(':wifi:activated'))
-    if (!wifi) return { connected: false, ssid: '', signal: 0 }
-    const ssid = wifi.split(':')[0]
-    const sigOut = await sh(`nmcli -t -f IN-USE,SIGNAL dev wifi list 2>/dev/null | grep '^\\*' | head -1`)
-    const signal = parseInt(sigOut.split(':')[1]) || 0
+    // Use dev wifi which gives actual SSID (not connection profile name)
+    const out = await sh('nmcli -t -f IN-USE,SSID,SIGNAL dev wifi list 2>/dev/null')
+    const active = out.split('\n').find(l => l.startsWith('*:'))
+    if (!active) return { connected: false, ssid: '', signal: 0 }
+    const parts = active.split(':')
+    const ssid   = parts.slice(1, -1).join(':')  // handle SSIDs with colons
+    const signal = parseInt(parts[parts.length - 1]) || 0
     return { connected: true, ssid, signal }
   })
 
   ipcMain.handle('system:connectNetwork', async (_, ssid: string, password?: string) => {
-    // Always specify the wifi interface so nmcli doesn't fail silently,
-    // which would cause nm-applet to show its own auth dialog.
     const dev = await sh("nmcli -t -f DEVICE,TYPE dev 2>/dev/null | grep ':wifi' | head -1 | cut -d: -f1")
     const ifarg = dev ? `ifname "${dev}"` : ''
+    const escapedSsid = ssid.replace(/"/g, '\\"')
+    const escapedPwd  = password?.replace(/"/g, '\\"') ?? ''
     const cmd = password
-      ? `nmcli dev wifi connect "${ssid}" password "${password}" ${ifarg} 2>&1`
-      : `nmcli dev wifi connect "${ssid}" ${ifarg} 2>&1`
-    const out = await sh(cmd)
-    return out.toLowerCase().includes('successfully') || out.toLowerCase().includes('activated')
+      ? `nmcli dev wifi connect "${escapedSsid}" password "${escapedPwd}" ${ifarg} 2>&1`
+      : `nmcli dev wifi connect "${escapedSsid}" ${ifarg} 2>&1`
+    try {
+      const { stdout } = await execAsync(cmd)
+      const out = stdout.trim()
+      const success = out.toLowerCase().includes('successfully') || out.toLowerCase().includes('activated')
+      return { success, message: success ? '' : (out || 'Connection failed') }
+    } catch (err: any) {
+      const msg: string = (err.stdout ?? err.message ?? 'Connection failed').trim()
+      const lower = msg.toLowerCase()
+      if (lower.includes('secrets') || lower.includes('password') || lower.includes('802-11') || lower.includes('wrong'))
+        return { success: false, message: 'Wrong password — please try again' }
+      if (lower.includes('timeout'))
+        return { success: false, message: 'Connection timed out — check password and try again' }
+      if (lower.includes('not found') || lower.includes('no network'))
+        return { success: false, message: 'Network not found — try scanning again' }
+      return { success: false, message: msg || 'Connection failed' }
+    }
   })
 
   ipcMain.handle('system:disconnectNetwork', async () => {
@@ -182,10 +197,20 @@ export function registerSystemHandlers(): void {
 
   // ── Power actions ─────────────────────────────────────────────────────────
 
+  // Sync system clock with NTP — run after network connects so time is always accurate.
+  ipcMain.handle('system:syncTime', async () => {
+    try {
+      // Try chronyc first (most live OS distros), fall back to timedatectl
+      await sh('chronyc makestep 2>/dev/null || timedatectl set-ntp true')
+      return { success: true }
+    } catch { return { success: false } }
+  })
+
   // Use sudo so polkit allows power commands from the cryogram non-root user.
   // The sudoers rule in /etc/sudoers.d/cryogram-power grants NOPASSWD for these.
   ipcMain.handle('system:shutdown', async () => { await sh('sudo systemctl poweroff') })
   ipcMain.handle('system:reboot',   async () => { await sh('sudo systemctl reboot') })
+  ipcMain.handle('system:sleep',    async () => { await sh('sudo systemctl suspend') })
   ipcMain.handle('system:lock', async () => {
     // Tell renderer to show in-app lock screen
     BrowserWindow.getAllWindows()[0]?.webContents.send('screen:lock')
@@ -195,37 +220,37 @@ export function registerSystemHandlers(): void {
   // ── PIN management ────────────────────────────────────────────────────────
 
   ipcMain.handle('system:verifyPin', async (_, pin: string) => {
-    const hash = store.get('pin.hash') as string | undefined
+    const hash = getSettingsStore().get('pin.hash') as string | undefined
     if (!hash) return true
     return createHash('sha256').update(String(pin)).digest('hex') === hash
   })
 
   ipcMain.handle('system:setPin', async (_, newPin: string, currentPin?: string) => {
     // If a PIN already exists, verify current first
-    const existing = store.get('pin.hash') as string | undefined
+    const existing = getSettingsStore().get('pin.hash') as string | undefined
     if (existing && currentPin !== undefined) {
       const chk = createHash('sha256').update(String(currentPin)).digest('hex')
       if (chk !== existing) return { success: false, error: 'Incorrect current PIN' }
     }
     if (!/^[0-9]{4,8}$/.test(newPin)) return { success: false, error: 'PIN must be 4–8 digits' }
-    store.set('pin.hash', createHash('sha256').update(newPin).digest('hex'))
-    store.set('pin.enabled', true)
+    getSettingsStore().set('pin.hash', createHash('sha256').update(newPin).digest('hex'))
+    getSettingsStore().set('pin.enabled', true)
     return { success: true }
   })
 
   ipcMain.handle('system:removePin', async (_, currentPin: string) => {
-    const existing = store.get('pin.hash') as string | undefined
+    const existing = getSettingsStore().get('pin.hash') as string | undefined
     if (existing) {
       const chk = createHash('sha256').update(String(currentPin)).digest('hex')
       if (chk !== existing) return { success: false, error: 'Incorrect PIN' }
     }
-    store.delete('pin.hash' as any)
-    store.set('pin.enabled', false)
+    getSettingsStore().delete('pin.hash' as any)
+    getSettingsStore().set('pin.enabled', false)
     return { success: true }
   })
 
   ipcMain.handle('system:setPinEnabled', async (_, enabled: boolean) => {
-    store.set('pin.enabled', enabled)
+    getSettingsStore().set('pin.enabled', enabled)
     return true
   })
 
@@ -243,7 +268,7 @@ export function registerSystemHandlers(): void {
   })
 
   ipcMain.handle('system:setWallpaper', async (_, path: string) => {
-    const safe = path.replace(/'/g, "'\\''")
+    const safe = path.replace(/'/g, "'\\''") 
     await sh(`feh --bg-scale '${safe}' 2>/dev/null`)
     return true
   })
@@ -269,5 +294,21 @@ export function registerSystemHandlers(): void {
   ipcMain.handle('wm:closeWindow', async (_, id: string) => {
     await sh(`wmctrl -ic ${id} 2>/dev/null`)
     return true
+  })
+
+  ipcMain.handle('wm:getCurrentWorkspace', async () => {
+    const out = await sh('wmctrl -d 2>/dev/null')
+    const active = out.split('\n').find(l => l.includes('*'))
+    return active ? parseInt(active.split(/\s+/)[0]) : 0
+  })
+
+  ipcMain.handle('wm:switchWorkspace', async (_, n: number) => {
+    await sh(`wmctrl -s ${n} 2>/dev/null`)
+    return true
+  })
+
+  ipcMain.handle('wm:getWorkspaceCount', async () => {
+    const out = await sh('wmctrl -d 2>/dev/null')
+    return out.split('\n').filter(Boolean).length || 1
   })
 }

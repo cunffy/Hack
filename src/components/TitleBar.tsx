@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWindowStore } from '../store/windowStore'
+import { WorkspaceSwitcher } from './WorkspaceSwitcher'
+import { QuickSettings } from './QuickSettings'
+import { UserPanel } from './UserPanel'
 
 // ── Power confirmation modal ───────────────────────────────────────────────
 function PowerModal({ action, onCancel }: { action: 'restart' | 'shutdown'; onCancel: () => void }) {
@@ -10,7 +13,7 @@ function PowerModal({ action, onCancel }: { action: 'restart' | 'shutdown'; onCa
     ? 'The OS will restart. Any open terminals or running tools will be closed.'
     : 'The system will power off. Make sure your work is saved.'
   const confirmLabel = isRestart ? 'Restart' : 'Shut Down'
-  const confirmColor = isRestart ? '#00d4ff' : '#ef4444'
+  const confirmColor = isRestart ? 'var(--cryo-accent)' : '#ef4444'
 
   const confirm = () => {
     if (isRestart) window.cryogram.system.reboot()
@@ -49,7 +52,7 @@ function PowerModal({ action, onCancel }: { action: 'restart' | 'shutdown'; onCa
         {/* Icon */}
         <div className="flex justify-center mb-4">
           <div className="w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ background: isRestart ? 'rgba(0,212,255,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${confirmColor}30` }}>
+            style={{ background: isRestart ? 'var(--cryo-a08)' : 'rgba(239,68,68,0.1)', border: `1px solid ${confirmColor}30` }}>
             {isRestart ? (
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={confirmColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="1 4 1 10 7 10" />
@@ -110,7 +113,7 @@ function CryogramMenu() {
   const items = [
     { label: 'About Cryogram',       action: () => { openApp('settings'); setOpen(false) } },
     { sep: true },
-    { label: 'System Preferences',   action: () => { openApp('system'); setOpen(false) } },
+    { label: 'System Preferences',   action: () => { openApp('settings'); setOpen(false) } },
     { sep: true },
     { label: 'Lock Screen',          action: () => { !isMock && window.cryogram.system.lock(); setOpen(false) } },
     { label: 'Restart…',             action: () => { if (!isMock) { setPowerModal('restart'); setOpen(false) } } },
@@ -134,8 +137,8 @@ function CryogramMenu() {
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/>
           </svg>
-          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', color: '#00d4ff' }}>
-            CRYOGRAM
+          <span style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: '0.15em', color: 'var(--cryo-accent)' }}>
+            CRYO OS
           </span>
         </button>
 
@@ -164,7 +167,7 @@ function CryogramMenu() {
                       onClick={item.action}
                       className="w-full text-left px-4 py-1.5 text-sm transition-colors"
                       style={{ color: 'rgba(255,255,255,0.78)', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,212,255,0.15)'; e.currentTarget.style.color = '#fff' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'var(--cryo-a12)'; e.currentTarget.style.color = '#fff' }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.78)' }}
                     >
                       {item.label}
@@ -195,41 +198,56 @@ function CryogramMenu() {
 export function TitleBar() {
   const [time, setTime] = useState('')
   const [date, setDate] = useState('')
+  const [quickSettingsOpen, setQuickSettingsOpen] = useState(false)
+  const [userPanelOpen, setUserPanelOpen] = useState(false)
+  const [profileName, setProfileName] = useState('Operator')
   const focusedWindow = useWindowStore(s => s.windows.find(w => w.focused && !w.minimized))
+  const systemTzRef = useRef<string>('')
 
   useEffect(() => {
+    // Detect system timezone once at mount
+    systemTzRef.current = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+    // Sync time via IPC if available
+    window.cryogram.system?.syncTime?.()
+
     const tick = () => {
       const now = new Date()
-      setTime(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }))
-      setDate(now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }))
+      const tz = systemTzRef.current
+      setTime(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tz }))
+      setDate(now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: tz }))
     }
     tick()
     const id = setInterval(tick, 10000)
     return () => clearInterval(id)
   }, [])
 
+  // Refresh profile name when settings change
+  useEffect(() => {
+    const refresh = () => {
+      window.cryogram.settings.get('profile.name').then(v => {
+        if (v && typeof v === 'string') setProfileName(v)
+      }).catch(() => {})
+    }
+    refresh()
+    window.addEventListener('cryogram:profileUpdated', refresh)
+    return () => window.removeEventListener('cryogram:profileUpdated', refresh)
+  }, [])
+
   return (
     <div
-      className="flex items-center h-7 px-2 shrink-0 select-none relative"
+      className="flex items-center h-9 px-2 shrink-0 select-none relative"
       style={{
-        background: 'rgba(6,9,15,0.92)',
+        background: 'rgba(8, 12, 20, 0.88)',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
-        backdropFilter: 'blur(24px) saturate(1.8)',
-        WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
+        backdropFilter: 'blur(48px) saturate(1.9)',
+        WebkitBackdropFilter: 'blur(48px) saturate(1.9)',
         WebkitAppRegion: 'drag',
         zIndex: 100,
       } as React.CSSProperties}
     >
-      {/* Top accent line */}
-      <div
-        className="absolute inset-x-0 top-0 h-px pointer-events-none"
-        style={{ background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.45) 35%, rgba(187,136,255,0.25) 65%, transparent)' }}
-      />
-
-      {/* Left: Cryogram menu */}
+      {/* Left: Cryogram menu + divider + focused app name */}
       <CryogramMenu />
-
-      {/* Active app name — shows when a window is focused */}
       <AnimatePresence>
         {focusedWindow && (
           <motion.div
@@ -241,26 +259,94 @@ export function TitleBar() {
             className="flex items-center gap-1.5 ml-1"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
           >
-            <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>›</span>
-            <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.01em' }}>
+            <div className="w-px h-3.5 mx-0.5" style={{ background: 'rgba(255,255,255,0.12)' }} />
+            <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.45)', letterSpacing: '0.01em' }}>
               {focusedWindow.title}
             </span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Right: status icons + clock */}
+      {/* Center: workspace switcher + time + date */}
+      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+        <WorkspaceSwitcher />
+        <div className="w-px h-3" style={{ background: 'rgba(255,255,255,0.1)' }} />
+        <div className="flex items-baseline gap-1.5">
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.88)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em' }}>{time}</span>
+          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{date}</span>
+        </div>
+      </div>
+
+      {/* Right: notification bell + quick settings + status icons */}
       <div
         className="ml-auto flex items-center gap-0.5"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
+        {/* User panel button */}
+        <button
+          onClick={() => setUserPanelOpen(o => !o)}
+          title={profileName}
+          className="flex items-center gap-1.5 px-2 h-6 rounded-md transition-colors"
+          style={{ background: userPanelOpen ? 'rgba(255,255,255,0.12)' : 'transparent', color: userPanelOpen ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.65)' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.09)'; e.currentTarget.style.color = 'rgba(255,255,255,0.9)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = userPanelOpen ? 'rgba(255,255,255,0.12)' : 'transparent'; e.currentTarget.style.color = userPanelOpen ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.65)' }}
+        >
+          <div style={{
+            width: 18, height: 18, borderRadius: 6, flexShrink: 0,
+            background: 'linear-gradient(135deg, var(--cryo-accent) 0%, #bb88ff 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 9, fontWeight: 700, color: '#000',
+          }}>
+            {profileName.trim()[0]?.toUpperCase() || 'O'}
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 500, maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {profileName}
+          </span>
+        </button>
+
+        <div style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.1)', margin: '0 2px' }} />
+
+        {/* Notification history bell */}
+        <button
+          onClick={() => { (window as any).__cryogram_toggleNotifHistory?.() }}
+          title="Notification History"
+          className="flex items-center justify-center w-7 h-6 rounded-md transition-colors"
+          style={{ background: 'transparent', color: 'rgba(255,255,255,0.55)' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.09)'; e.currentTarget.style.color = 'rgba(255,255,255,0.9)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)' }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </button>
+
+        {/* Quick Settings trigger */}
+        <button
+          onClick={() => setQuickSettingsOpen(o => !o)}
+          title="Quick Settings"
+          className="flex items-center justify-center w-7 h-6 rounded-md transition-colors"
+          style={{ background: quickSettingsOpen ? 'rgba(255,255,255,0.12)' : 'transparent', color: quickSettingsOpen ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.55)' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.09)'; e.currentTarget.style.color = 'rgba(255,255,255,0.9)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = quickSettingsOpen ? 'rgba(255,255,255,0.12)' : 'transparent'; e.currentTarget.style.color = quickSettingsOpen ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.55)' }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M16.24 7.76a6 6 0 0 1 0 8.49M4.93 19.07a10 10 0 0 1 0-14.14M7.76 16.24a6 6 0 0 1 0-8.49"/>
+          </svg>
+        </button>
+
         <StatusIcons />
-        <div className="w-px h-3.5 mx-1" style={{ background: 'rgba(255,255,255,0.1)' }} />
-        <div className="flex items-center gap-1.5 px-2 text-xs" style={{ color: 'rgba(255,255,255,0.55)', letterSpacing: '0.01em' }}>
-          <span>{date}</span>
-          <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>{time}</span>
-        </div>
       </div>
+
+      {/* Quick Settings panel */}
+      <QuickSettings open={quickSettingsOpen} onClose={() => setQuickSettingsOpen(false)} />
+
+      {/* User panel */}
+      <UserPanel open={userPanelOpen} onClose={() => setUserPanelOpen(false)} />
+
+      {/* Bottom accent line */}
+      <div className="absolute inset-x-0 bottom-0 h-px pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, var(--cryo-a20) 30%, var(--cryo-a35) 50%, var(--cryo-a20) 70%, transparent)' }} />
     </div>
   )
 }
@@ -408,7 +494,7 @@ function BattIcon({ level, charging }: { level: number; charging: boolean }) {
 
 // ── Popover panels ─────────────────────────────────────────────────────────
 function PanelLabel({ children }: { children: React.ReactNode }) {
-  return <div className="text-xs font-semibold mb-3" style={{ color: '#00d4ff', letterSpacing: '0.06em', textTransform: 'uppercase', fontSize: 10 }}>{children}</div>
+  return <div className="text-xs font-semibold mb-3" style={{ color: 'var(--cryo-accent)', letterSpacing: '0.06em', textTransform: 'uppercase', fontSize: 10 }}>{children}</div>
 }
 
 type NetworkEntry = { ssid: string; signal: number; security: string; active: boolean }
@@ -437,15 +523,14 @@ function WifiPanel({ wifi, onWifiChange }: { wifi: WifiStatus | null; onWifiChan
     setConnecting(net.ssid)
     setError('')
     try {
-      const ok = await window.cryogram.system.connectNetwork(net.ssid, pw || undefined)
-      if (ok) {
+      const result = await (window.cryogram.system as any).connectNetwork(net.ssid, pw || undefined)
+      if (result?.success) {
         setSelected(null)
         setPassword('')
-        // Immediately update the parent WiFi status so the icon/bar refreshes
         const updated = await window.cryogram.system.getWifiStatus()
         onWifiChange(updated)
       } else {
-        setError('Connection failed — check your password')
+        setError(result?.message || 'Connection failed — check your password')
       }
     } catch {
       setError('Connection error')
@@ -480,21 +565,21 @@ function WifiPanel({ wifi, onWifiChange }: { wifi: WifiStatus | null; onWifiChan
               className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors"
               style={{
                 background: net.active
-                  ? 'rgba(0,212,255,0.12)'
+                  ? 'var(--cryo-a12)'
                   : selected?.ssid === net.ssid
                     ? 'rgba(255,255,255,0.08)'
                     : 'transparent',
-                border: net.active ? '1px solid rgba(0,212,255,0.2)' : '1px solid transparent',
+                border: net.active ? '1px solid var(--cryo-a20)' : '1px solid transparent',
               }}
               onMouseEnter={e => { if (!net.active) e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
               onMouseLeave={e => { if (!net.active) e.currentTarget.style.background = selected?.ssid === net.ssid ? 'rgba(255,255,255,0.08)' : 'transparent' }}
             >
               <SignalBars signal={net.signal} active={net.active} />
-              <span className="flex-1 text-xs truncate" style={{ color: net.active ? '#00d4ff' : 'rgba(255,255,255,0.75)' }}>
+              <span className="flex-1 text-xs truncate" style={{ color: net.active ? 'var(--cryo-accent)' : 'rgba(255,255,255,0.75)' }}>
                 {net.ssid}
               </span>
               {net.security && <LockTinyIcon />}
-              {net.active && <span className="text-xs" style={{ color: '#00d4ff' }}>✓</span>}
+              {net.active && <span className="text-xs" style={{ color: 'var(--cryo-accent)' }}>✓</span>}
             </button>
           ))
         )}
@@ -532,9 +617,9 @@ function WifiPanel({ wifi, onWifiChange }: { wifi: WifiStatus | null; onWifiChan
                 disabled={!!connecting}
                 className="w-full py-1.5 rounded-lg text-xs font-medium transition-colors"
                 style={{
-                  background: connecting ? 'rgba(0,212,255,0.1)' : 'rgba(0,212,255,0.18)',
-                  border: '1px solid rgba(0,212,255,0.25)',
-                  color: connecting ? 'rgba(0,212,255,0.5)' : '#00d4ff',
+                  background: connecting ? 'var(--cryo-a08)' : 'var(--cryo-a18)',
+                  border: '1px solid var(--cryo-a25)',
+                  color: connecting ? 'var(--cryo-a50)' : 'var(--cryo-accent)',
                 }}
               >
                 {connecting === selected.ssid ? 'Connecting…' : `Connect to ${selected.ssid}`}
@@ -548,7 +633,7 @@ function WifiPanel({ wifi, onWifiChange }: { wifi: WifiStatus | null; onWifiChan
 }
 
 function SignalBars({ signal, active }: { signal: number; active: boolean }) {
-  const color = active ? '#00d4ff' : 'rgba(255,255,255,0.6)'
+  const color = active ? 'var(--cryo-accent)' : 'rgba(255,255,255,0.6)'
   const dim   = 'rgba(255,255,255,0.18)'
   return (
     <svg width="14" height="12" viewBox="0 0 14 12" className="shrink-0">
