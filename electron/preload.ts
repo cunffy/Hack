@@ -502,9 +502,12 @@ contextBridge.exposeInMainWorld('cryogram', {
     checkDeps:   ()                                      => ipcRenderer.invoke('remoteDesktop:checkDeps'),
     installDeps: ()                                      => ipcRenderer.invoke('remoteDesktop:installDeps'),
     start:       (opts: { password?: string; viewOnly?: boolean; vncPort?: number }) => ipcRenderer.invoke('remoteDesktop:start', opts),
-    stop:        ()                                      => ipcRenderer.invoke('remoteDesktop:stop'),
-    status:      ()                                      => ipcRenderer.invoke('remoteDesktop:status'),
-    getIP:       ()                                      => ipcRenderer.invoke('remoteDesktop:getIP'),
+    stop:              ()                                      => ipcRenderer.invoke('remoteDesktop:stop'),
+    status:            ()                                      => ipcRenderer.invoke('remoteDesktop:status'),
+    getIP:             ()                                      => ipcRenderer.invoke('remoteDesktop:getIP'),
+    tailscaleStatus:   ()                                      => ipcRenderer.invoke('remoteDesktop:tailscaleStatus'),
+    installTailscale:  ()                                      => ipcRenderer.invoke('remoteDesktop:installTailscale'),
+    tailscaleUp:       ()                                      => ipcRenderer.invoke('remoteDesktop:tailscaleUp'),
     onLog: (cb: (msg: string) => void) => {
       const listener = (_: unknown, msg: string) => cb(msg)
       ipcRenderer.on('remoteDesktop:log', listener)

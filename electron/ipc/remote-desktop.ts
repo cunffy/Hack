@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow } from 'electron'
+import { ipcMain, BrowserWindow, shell } from 'electron'
 import { exec, spawn, ChildProcess } from 'child_process'
 import { promisify } from 'util'
 import { networkInterfaces } from 'os'
@@ -190,4 +190,64 @@ export function registerRemoteDesktopHandlers() {
   }))
 
   ipcMain.handle('remoteDesktop:getIP', async () => getLocalIP())
+
+  ipcMain.handle('remoteDesktop:tailscaleStatus', async () => {
+    try {
+      const { stdout } = await sh('tailscale status --json 2>/dev/null')
+      const data = JSON.parse(stdout)
+      const self = data?.Self
+      const ip: string = self?.TailscaleIPs?.[0] ?? ''
+      const hostname: string = self?.HostName ?? ''
+      const running = data?.BackendState === 'Running'
+      return { installed: true, running, ip, hostname }
+    } catch {
+      // tailscale not installed or daemon not running
+      try {
+        await sh('which tailscale')
+        return { installed: true, running: false, ip: '', hostname: '' }
+      } catch {
+        return { installed: false, running: false, ip: '', hostname: '' }
+      }
+    }
+  })
+
+  ipcMain.handle('remoteDesktop:installTailscale', async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const send = (msg: string) => win?.webContents.send('remoteDesktop:log', msg)
+    try {
+      send('Downloading Tailscale installer…')
+      await sh('curl -fsSL https://tailscale.com/install.sh | sh 2>&1')
+      send('Tailscale installed. Run "tailscale up" to authenticate.')
+      return { ok: true }
+    } catch (e: any) {
+      send(`Install failed: ${e.message}`)
+      return { ok: false, error: e.message }
+    }
+  })
+
+  ipcMain.handle('remoteDesktop:tailscaleUp', async (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    const send = (msg: string) => win?.webContents.send('remoteDesktop:log', msg)
+    send('Running: tailscale up…')
+    return new Promise((resolve) => {
+      const proc = spawn('tailscale', ['up', '--accept-routes'], { detached: false })
+      proc.stdout?.on('data', (d: Buffer) => {
+        const line = d.toString().trim()
+        send(line)
+        // Open auth URL automatically in browser
+        const urlMatch = line.match(/https:\/\/login\.tailscale\.com\/\S+/)
+        if (urlMatch) shell.openExternal(urlMatch[0])
+      })
+      proc.stderr?.on('data', (d: Buffer) => {
+        const line = d.toString().trim()
+        send(line)
+        const urlMatch = line.match(/https:\/\/login\.tailscale\.com\/\S+/)
+        if (urlMatch) shell.openExternal(urlMatch[0])
+      })
+      proc.on('close', (code) => {
+        send(code === 0 ? 'Tailscale connected.' : `tailscale up exited (code ${code})`)
+        resolve({ ok: code === 0 })
+      })
+    })
+  })
 }

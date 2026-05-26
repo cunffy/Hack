@@ -311,6 +311,9 @@ declare global {
       stop(): Promise<{ ok: boolean }>
       status(): Promise<{ running: boolean; vncAlive: boolean; wsAlive: boolean }>
       getIP(): Promise<string>
+      tailscaleStatus(): Promise<TailscaleStatus>
+      installTailscale(): Promise<{ ok: boolean; error?: string }>
+      tailscaleUp(): Promise<{ ok: boolean }>
       onLog(cb: (msg: string) => void): () => void
       onStopped(cb: () => void): () => void
     }
@@ -859,6 +862,13 @@ declare global {
     description: string
     pubDate: string
     read: boolean
+  }
+
+  interface TailscaleStatus {
+    installed: boolean
+    running: boolean
+    ip: string
+    hostname: string
   }
 }
 

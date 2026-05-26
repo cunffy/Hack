@@ -6,48 +6,38 @@ const api = () => (window as any).cryogram?.remoteDesktop
 interface Deps { x11vnc: boolean; websockify: boolean; novnc: boolean }
 interface Session { ip: string; url: string; vncPort: number; wsPort: number; httpPort: number }
 
-function QRCode({ value }: { value: string }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas || !value) return
-    // Simple URL display as large text — browser QR via canvas is complex without a lib
-    // Show a styled URL box that's easy to type on a phone
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    ctx.clearRect(0, 0, 180, 180)
-    ctx.fillStyle = '#0f172a'
-    ctx.fillRect(0, 0, 180, 180)
-    ctx.fillStyle = '#10b981'
-    ctx.font = 'bold 13px monospace'
-    ctx.textAlign = 'center'
-    // Wrap URL
-    const parts = value.replace('http://', '').split(':')
-    const ip   = parts[0] ?? ''
-    const port = parts[1] ?? ''
-    ctx.fillText('Open in Phone Browser:', 90, 30)
-    ctx.fillStyle = '#fff'
-    ctx.font = 'bold 16px monospace'
-    ctx.fillText(ip, 90, 80)
-    ctx.fillStyle = '#10b981'
-    ctx.font = 'bold 20px monospace'
-    ctx.fillText(`:${port}`, 90, 110)
-    ctx.fillStyle = 'rgba(255,255,255,0.3)'
-    ctx.font = '11px monospace'
-    ctx.fillText('(same Wi-Fi network)', 90, 150)
-  }, [value])
-  return <canvas ref={canvasRef} width={180} height={180} style={{ borderRadius: 12, border: '1px solid rgba(16,185,129,0.3)' }} />
+function UrlRow({ label, url, color = 'green' }: { label: string; url: string; color?: 'green' | 'purple' }) {
+  const [copied, setCopied] = useState(false)
+  function copy() {
+    navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+  const accent = color === 'purple' ? 'text-purple-300' : 'text-green-300'
+  return (
+    <div className="bg-gray-900 rounded-lg px-3 py-2 space-y-1">
+      <p className={`text-xs font-semibold uppercase tracking-wider ${color === 'purple' ? 'text-purple-400' : 'text-green-500'}`}>{label}</p>
+      <div className="flex items-center gap-2">
+        <span className={`text-sm font-bold flex-1 truncate ${accent}`}>{url}</span>
+        <button onClick={copy}
+          className={`text-xs px-2 py-0.5 rounded shrink-0 ${copied ? 'bg-green-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}>
+          {copied ? '✓' : 'Copy'}
+        </button>
+      </div>
+    </div>
+  )
 }
 
 export default function RemoteDesktopApp() {
-  const [deps, setDeps]           = useState<Deps | null>(null)
-  const [session, setSession]     = useState<Session | null>(null)
-  const [running, setRunning]     = useState(false)
-  const [loading, setLoading]     = useState<string | null>(null)
-  const [logs, setLogs]           = useState<string[]>([])
-  const [password, setPassword]   = useState('')
-  const [viewOnly, setViewOnly]   = useState(false)
-  const [copied, setCopied]       = useState(false)
+  const [deps, setDeps]             = useState<Deps | null>(null)
+  const [session, setSession]       = useState<Session | null>(null)
+  const [running, setRunning]       = useState(false)
+  const [loading, setLoading]       = useState<string | null>(null)
+  const [logs, setLogs]             = useState<string[]>([])
+  const [password, setPassword]     = useState('')
+  const [viewOnly, setViewOnly]     = useState(false)
+  const [tsStatus, setTsStatus]     = useState<TailscaleStatus | null>(null)
+  const [tsLoading, setTsLoading]   = useState<string | null>(null)
   const logRef = useRef<HTMLDivElement>(null)
 
   const addLog = useCallback((msg: string) => {
@@ -55,14 +45,20 @@ export default function RemoteDesktopApp() {
     setTimeout(() => logRef.current?.scrollTo(0, logRef.current.scrollHeight), 50)
   }, [])
 
+  const refreshTailscale = useCallback(async () => {
+    const s = await api()?.tailscaleStatus()
+    if (s) setTsStatus(s)
+  }, [])
+
   useEffect(() => {
     api()?.checkDeps().then(setDeps)
     api()?.status().then((s: any) => setRunning(s?.running ?? false))
+    refreshTailscale()
 
     const offLog     = api()?.onLog?.((msg: string) => addLog(msg))
     const offStopped = api()?.onStopped?.(() => { setRunning(false); setSession(null); addLog('Session ended.') })
     return () => { offLog?.(); offStopped?.() }
-  }, [addLog])
+  }, [addLog, refreshTailscale])
 
   async function installDeps() {
     setLoading('install')
@@ -107,14 +103,31 @@ export default function RemoteDesktopApp() {
     setLoading(null)
   }
 
-  function copyUrl() {
-    if (!session?.url) return
-    navigator.clipboard.writeText(session.url)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 1500)
+  async function installTailscale() {
+    setTsLoading('install')
+    addLog('Installing Tailscale…')
+    try {
+      const res = await api()?.installTailscale()
+      if (res?.ok) { addLog('Tailscale installed.'); await refreshTailscale() }
+      else addLog(`Failed: ${res?.error ?? 'unknown error'}`)
+    } catch (e: any) { addLog(`Error: ${e.message}`) }
+    setTsLoading(null)
+  }
+
+  async function connectTailscale() {
+    setTsLoading('up')
+    addLog('Connecting Tailscale (check browser for auth URL)…')
+    try {
+      await api()?.tailscaleUp()
+      await refreshTailscale()
+    } catch (e: any) { addLog(`Error: ${e.message}`) }
+    setTsLoading(null)
   }
 
   const missingDeps = deps && (!deps.x11vnc || !deps.websockify)
+  const tsUrl = running && session && tsStatus?.running && tsStatus.ip
+    ? `http://${tsStatus.ip}:${session.httpPort}`
+    : null
 
   return (
     <div className="h-full flex flex-col bg-gray-950 text-gray-100 font-mono">
@@ -123,6 +136,12 @@ export default function RemoteDesktopApp() {
         <div className={`w-2.5 h-2.5 rounded-full ${running ? 'bg-green-400 shadow-[0_0_6px_#4ade80]' : 'bg-gray-600'}`} />
         <span className="font-bold text-green-400">Remote Desktop</span>
         <span className="text-xs text-gray-500 ml-1">{running ? 'Session active' : 'Stopped'}</span>
+        {tsStatus?.running && (
+          <span className="ml-auto flex items-center gap-1.5 text-xs text-purple-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_5px_#a78bfa]" />
+            Tailscale connected
+          </span>
+        )}
       </div>
 
       <div className="flex-1 flex overflow-hidden">
@@ -149,6 +168,48 @@ export default function RemoteDesktopApp() {
                   className="w-full mt-2 text-xs px-3 py-1.5 bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-black font-semibold rounded">
                   {loading === 'install' ? 'Installing…' : 'Install Missing'}
                 </button>
+              )}
+            </div>
+          )}
+
+          {/* Tailscale section */}
+          {tsStatus !== null && (
+            <div className="bg-gray-900 rounded-lg border border-purple-900/40 p-3 space-y-2">
+              <p className="text-xs text-purple-400 uppercase tracking-wider mb-2">Tailscale (Remote Access)</p>
+              {!tsStatus.installed ? (
+                <>
+                  <p className="text-xs text-gray-400">Not installed. Install Tailscale to access this machine from anywhere — no VPN or port-forwarding needed.</p>
+                  <button onClick={installTailscale} disabled={tsLoading === 'install'}
+                    className="w-full text-xs px-3 py-1.5 bg-purple-700 hover:bg-purple-600 disabled:opacity-50 text-white font-semibold rounded">
+                    {tsLoading === 'install' ? 'Installing…' : 'Install Tailscale'}
+                  </button>
+                </>
+              ) : !tsStatus.running ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-yellow-400">✗</span>
+                    <span className="text-xs text-gray-300">Tailscale not connected</span>
+                  </div>
+                  <button onClick={connectTailscale} disabled={tsLoading === 'up'}
+                    className="w-full text-xs px-3 py-1.5 bg-purple-700 hover:bg-purple-600 disabled:opacity-50 text-white font-semibold rounded">
+                    {tsLoading === 'up' ? 'Connecting…' : 'Connect Tailscale'}
+                  </button>
+                  <p className="text-xs text-gray-500">A browser tab will open for authentication.</p>
+                </>
+              ) : (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-green-400">✓</span>
+                    <span className="text-xs text-gray-300">Connected</span>
+                    {tsStatus.hostname && <span className="text-xs text-gray-500 ml-auto">{tsStatus.hostname}</span>}
+                  </div>
+                  {tsStatus.ip && (
+                    <div className="text-xs text-purple-300 font-mono">{tsStatus.ip}</div>
+                  )}
+                  {running && tsUrl && (
+                    <p className="text-xs text-gray-400 pt-1">Use the Tailscale URL below to connect from any device on your Tailscale network.</p>
+                  )}
+                </div>
               )}
             </div>
           )}
@@ -187,28 +248,28 @@ export default function RemoteDesktopApp() {
           <AnimatePresence>
             {running && session && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                className="bg-green-950/30 border border-green-800/50 rounded-lg p-4 space-y-4">
+                className="bg-green-950/30 border border-green-800/50 rounded-lg p-4 space-y-3">
                 <p className="text-xs text-green-400 font-semibold uppercase tracking-wider">Connect from your phone</p>
 
-                {/* URL display */}
-                <div className="bg-gray-900 rounded-lg px-3 py-2 flex items-center gap-2">
-                  <span className="text-sm text-green-300 font-bold flex-1 truncate">{session.url}</span>
-                  <button onClick={copyUrl}
-                    className={`text-xs px-2 py-0.5 rounded ${copied ? 'bg-green-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}>
-                    {copied ? '✓' : 'Copy'}
-                  </button>
-                </div>
+                <UrlRow label="Local Network (same Wi-Fi)" url={session.url} color="green" />
 
-                {/* Visual URL card for phone */}
-                <QRCode value={session.url} />
+                {tsUrl && (
+                  <UrlRow label="Tailscale (anywhere)" url={tsUrl} color="purple" />
+                )}
 
                 {/* Instructions */}
                 <ol className="text-xs text-gray-400 space-y-1 list-decimal list-inside">
-                  <li>Make sure phone is on the <strong className="text-gray-300">same Wi-Fi network</strong></li>
-                  <li>Open the URL above in your phone browser</li>
+                  {tsUrl
+                    ? <>
+                        <li>Use the <strong className="text-purple-300">Tailscale URL</strong> to connect from <em>any</em> device on your Tailscale network</li>
+                        <li>Use the <strong className="text-green-300">Local URL</strong> when on the same Wi-Fi</li>
+                      </>
+                    : <li>Make sure phone is on the <strong className="text-gray-300">same Wi-Fi network</strong></li>
+                  }
+                  <li>Open the URL in your phone browser (Safari, Chrome, Firefox)</li>
                   <li>Tap <strong className="text-gray-300">Connect</strong> in the noVNC panel</li>
                   {password && <li>Enter the session password</li>}
-                  <li>You now have full control 🎉</li>
+                  <li>You now have full control</li>
                 </ol>
 
                 <div className="text-xs text-gray-600 pt-1 border-t border-gray-800">
@@ -238,18 +299,22 @@ export default function RemoteDesktopApp() {
           {!running && (
             <div className="border-t border-gray-800 p-4">
               <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">How it works</p>
-              <div className="grid grid-cols-3 gap-3 text-xs text-gray-500">
+              <div className="grid grid-cols-4 gap-3 text-xs text-gray-500">
                 <div className="bg-gray-900 rounded p-3">
                   <p className="text-gray-300 font-semibold mb-1">1. Start Session</p>
                   <p>x11vnc captures your screen. websockify opens a WebSocket tunnel.</p>
                 </div>
                 <div className="bg-gray-900 rounded p-3">
-                  <p className="text-gray-300 font-semibold mb-1">2. Open on Phone</p>
-                  <p>Type the URL in your phone's browser. Works on Safari, Chrome, Firefox.</p>
+                  <p className="text-gray-300 font-semibold mb-1">2. Same Network</p>
+                  <p>Open the Local URL in your phone's browser while on the same Wi-Fi.</p>
                 </div>
                 <div className="bg-gray-900 rounded p-3">
-                  <p className="text-gray-300 font-semibold mb-1">3. Full Control</p>
-                  <p>Touch = mouse click. Drag = mouse move. On-screen keyboard for typing.</p>
+                  <p className="text-gray-300 font-semibold mb-1 text-purple-300">3. Anywhere</p>
+                  <p>Connect Tailscale for remote access from any device, over any network.</p>
+                </div>
+                <div className="bg-gray-900 rounded p-3">
+                  <p className="text-gray-300 font-semibold mb-1">4. Full Control</p>
+                  <p>Touch = mouse click. Drag = move. On-screen keyboard for typing.</p>
                 </div>
               </div>
             </div>
