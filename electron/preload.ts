@@ -362,6 +362,100 @@ contextBridge.exposeInMainWorld('cryogram', {
     ipcRenderer.on('workspace:changed', listener)
     return () => ipcRenderer.removeListener('workspace:changed', listener)
   },
+
+  // Shodan
+  shodan: {
+    search:   (query: string, page?: number) => ipcRenderer.invoke('shodan:search', query, page),
+    host:     (ip: string)                   => ipcRenderer.invoke('shodan:host', ip),
+    count:    (query: string)                => ipcRenderer.invoke('shodan:count', query),
+    exploits: (query: string)               => ipcRenderer.invoke('shodan:exploits', query),
+  },
+
+  // OSINT
+  osint: {
+    lookup: (tool: string, query: string) => ipcRenderer.invoke('osint:lookup', tool, query),
+  },
+
+  // CVE Database
+  cve: {
+    search: (query: string) => ipcRenderer.invoke('cve:search', query),
+    recent: (count?: number) => ipcRenderer.invoke('cve:recent', count),
+  },
+
+  // AI Assistant
+  ai: {
+    chat: (messages: { role: string; content: string }[]) => ipcRenderer.invoke('ai:chat', messages),
+  },
+
+  // Packet Sniffer
+  packetSniffer: {
+    start: (iface: string, filter: string, cb: (pkt: unknown) => void) => {
+      const listener = (_: unknown, pkt: unknown) => cb(pkt)
+      ipcRenderer.on('packetSniffer:packet', listener)
+      ipcRenderer.invoke('packetSniffer:start', iface, filter)
+      return () => ipcRenderer.removeListener('packetSniffer:packet', listener)
+    },
+    stop: () => ipcRenderer.invoke('packetSniffer:stop'),
+  },
+
+  // System Backup
+  backup: {
+    list:    ()          => ipcRenderer.invoke('backup:list'),
+    create:  ()          => ipcRenderer.invoke('backup:create'),
+    restore: (id: string)=> ipcRenderer.invoke('backup:restore', id),
+    delete:  (id: string)=> ipcRenderer.invoke('backup:delete', id),
+    onProgress: (cb: (msg: string, pct: number) => void) => {
+      const listener = (_: unknown, msg: unknown, pct: unknown) => cb(msg as string, pct as number)
+      ipcRenderer.on('backup:progress', listener)
+      return () => ipcRenderer.removeListener('backup:progress', listener)
+    },
+  },
+
+  // Audit Log
+  auditLog: {
+    list:   ()                  => ipcRenderer.invoke('auditLog:list'),
+    append: (entry: unknown)    => ipcRenderer.invoke('auditLog:append', entry),
+    clear:  ()                  => ipcRenderer.invoke('auditLog:clear'),
+  },
+
+  // Code Scanner
+  codeScanner: {
+    browse: ()                                          => ipcRenderer.invoke('codeScanner:browse'),
+    scan:   (path: string, scanner: string)             => ipcRenderer.invoke('codeScanner:scan', path, scanner),
+    onProgress: (cb: (pct: number) => void) => {
+      const listener = (_: unknown, pct: unknown) => cb(pct as number)
+      ipcRenderer.on('codeScanner:progress', listener)
+      return () => ipcRenderer.removeListener('codeScanner:progress', listener)
+    },
+  },
+
+  // TOTP / 2FA
+  totp: {
+    list:     ()                    => ipcRenderer.invoke('totp:list'),
+    generate: (secret: string)      => ipcRenderer.invoke('totp:generate', secret),
+    add:      (account: unknown)    => ipcRenderer.invoke('totp:add', account),
+    remove:   (id: string)          => ipcRenderer.invoke('totp:remove', id),
+  },
+
+  // Wordlists
+  wordlists: {
+    list:     ()                    => ipcRenderer.invoke('wordlists:list'),
+    preview:  (path: string, n?: number) => ipcRenderer.invoke('wordlists:preview', path, n),
+    import:   ()                    => ipcRenderer.invoke('wordlists:import'),
+    delete:   (path: string)        => ipcRenderer.invoke('wordlists:delete', path),
+    generate: (opts: unknown)       => ipcRenderer.invoke('wordlists:generate', opts),
+  },
+
+  // Password Health
+  passwordHealth: {
+    checkHIBP: (password: string) => ipcRenderer.invoke('passwordHealth:checkHIBP', password),
+  },
+
+  // Wallpaper
+  wallpaper: {
+    listCustom: ()           => ipcRenderer.invoke('wallpaper:listCustom'),
+    browse:     ()           => ipcRenderer.invoke('wallpaper:browse'),
+  },
 })
 
 export type CryogramAPI = typeof import('./preload')

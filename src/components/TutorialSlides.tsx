@@ -67,16 +67,16 @@ const SLIDES: Slide[] = [
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, margin: 0 }}>
           CryoGram OS is a full-featured desktop environment designed for cybersecurity professionals.
           It runs as an Electron app on Linux and Windows, giving you a unified workspace for
-          penetration testing, breach monitoring, development, and system management.
+          penetration testing, OSINT, breach monitoring, development, and system management.
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
           {[
-            { icon: '🛡️', color: '#00d4ff', label: '25+ Built-in Apps' },
+            { icon: '🛡️', color: '#00d4ff', label: '40+ Built-in Apps' },
             { icon: '⚡', color: '#4ade80', label: 'Real PTY Terminal' },
             { icon: '🔒', color: '#facc15', label: 'Encrypted Vault' },
-            { icon: '🌿', color: '#f05033', label: 'Git Client' },
-            { icon: '🐳', color: '#2496ed', label: 'Docker Manager' },
-            { icon: '🗄️', color: '#a855f7', label: 'SQLite Browser' },
+            { icon: '🤖', color: '#a78bfa', label: 'AI Assistant' },
+            { icon: '🌐', color: '#ef4444', label: 'Shodan + OSINT' },
+            { icon: '🔍', color: '#f97316', label: 'CVE Database' },
           ].map(item => (
             <div key={item.label} style={{ textAlign: 'center', padding: '14px 8px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10 }}>
               <div style={{ fontSize: 22, marginBottom: 6 }}>{item.icon}</div>
@@ -100,7 +100,7 @@ const SLIDES: Slide[] = [
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[
             { icon: '📌', color: '#bb88ff', title: 'Titlebar', desc: 'Left: CryoGram menu. Centre: workspace switcher + clock. Right: notifications, quick settings gear, and your user avatar for weather, news & power controls.' },
-            { icon: '⬡', color: '#00d4ff', title: 'Dock', desc: 'Hover to magnify icons. Click to open or focus an app. Right-click for context menu. Drag to reorder. New apps appear automatically.' },
+            { icon: '⬡', color: '#00d4ff', title: 'Dock', desc: 'Hover to magnify icons. Click to open or focus an app. Right-click for context menu. Drag to reorder. All 40+ apps appear automatically.' },
             { icon: '🪟', color: '#4ade80', title: 'Windows', desc: 'Drag to any edge to snap (left/right half, or full-screen). Double-click titlebar to maximise. Middle-click or ✕ to close.' },
             { icon: '🔭', color: '#facc15', title: 'Mission Control', desc: 'Press Super+M (or ⊞+M) to see all open windows as tiles. Click any tile to jump to it.' },
           ].map(item => (
@@ -126,7 +126,7 @@ const SLIDES: Slide[] = [
     content: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ padding: '10px 14px', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 8, fontSize: 11, color: '#f87171', lineHeight: 1.5 }}>
-          <strong>Authorization Required</strong> — All network testing tools display a legal disclaimer that must be accepted before use. Only test systems you own or have written permission to test.
+          <strong>Authorization Required</strong> — All network testing tools display a legal disclaimer. Only test systems you own or have written permission to test.
         </div>
         <AppGrid apps={[
           { icon: '🔑', color: '#ffcc00', name: 'Password Tester', desc: 'Hash cracking (brute, dict, hybrid) + SSH/HTTP/FTP spraying' },
@@ -135,12 +135,35 @@ const SLIDES: Slide[] = [
           { icon: '🔥', color: '#ff4466', name: 'Firewall', desc: 'UFW rule manager — add, remove, enable/disable rules' },
           { icon: '🌐', color: '#a78bfa', name: 'VPN Manager', desc: 'OpenVPN & WireGuard connection profiles' },
           { icon: '🔒', color: '#4ade80', name: 'Cert Inspector', desc: 'Inspect TLS certificates by hostname or pasted PEM' },
+          { icon: '🛡️', color: '#ff4466', name: 'Code Scanner', desc: 'Scan projects for OWASP Top 10, hardcoded secrets, XSS, injection' },
+          { icon: '📡', color: '#22c55e', name: 'Packet Sniffer', desc: 'Live network capture via tshark/tcpdump with BPF filters' },
         ]} />
       </div>
     ),
   },
 
-  // ── 4. Developer Tools ───────────────────────────────────────────────────
+  // ── 4. Security Intelligence ──────────────────────────────────────────────
+  {
+    id: 'intel',
+    title: 'Security Intelligence',
+    subtitle: 'Shodan, OSINT, CVE database, and reconnaissance',
+    accent: '#ef4444',
+    content: (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <AppGrid apps={[
+          { icon: '🌐', color: '#ef4444', name: 'Shodan Explorer', desc: 'Search Shodan IoT/device database by query, view host details, saved searches' },
+          { icon: '🔍', color: '#fb923c', name: 'OSINT Dashboard', desc: 'IP lookup, WHOIS, DNS records, email lookup, domain recon — no key needed' },
+          { icon: '🛡️', color: '#f97316', name: 'CVE Database', desc: 'Search NVD vulnerability database — recent CVEs, severity, CVSS scores, references' },
+          { icon: '📋', color: '#4ade80', name: 'Wordlist Manager', desc: 'Manage, import, preview, and generate custom wordlists for password testing' },
+          { icon: '❤️', color: '#f472b6', name: 'Password Health', desc: 'Analyze password strength, check HIBP k-anonymity breach database' },
+          { icon: '🔐', color: '#00d4ff', name: '2FA / TOTP', desc: 'Manage TOTP accounts, generate codes, add via Base32 secret' },
+        ]} />
+        <Tip text="Shodan requires an API key — configure it in Settings → API Keys. OSINT tools use free public APIs." accent="#ef4444" />
+      </div>
+    ),
+  },
+
+  // ── 5. Developer Tools ───────────────────────────────────────────────────
   {
     id: 'developer',
     title: 'Developer Tools',
@@ -161,33 +184,49 @@ const SLIDES: Slide[] = [
     ),
   },
 
-  // ── 5. Productivity & Utilities ──────────────────────────────────────────
+  // ── 6. Analysis & Encoding Tools ────────────────────────────────────────
+  {
+    id: 'analysis',
+    title: 'Analysis & Encoding Tools',
+    subtitle: 'AI assistant, regex, encoding chains, and more',
+    accent: '#a78bfa',
+    content: (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <AppGrid apps={[
+          { icon: '🤖', color: '#a78bfa', name: 'AI Assistant', desc: 'Claude-powered security expert chat — vulnerability analysis, code review, tool guidance' },
+          { icon: '🔐', color: '#00d4ff', name: 'Crypto Tools', desc: 'Hash (MD5/SHA/SHA256), encode/decode, JWT decode, password entropy' },
+          { icon: '{}', color: '#fbbf24', name: 'JSON / YAML Explorer', desc: 'Parse, format, minify JSON; convert to YAML; interactive tree view' },
+          { icon: '.*', color: '#818cf8', name: 'Regex Tester', desc: 'Live regex match highlighting, group capture, replace mode, quick patterns' },
+          { icon: '🔄', color: '#34d399', name: 'Encoding Chain', desc: 'Build pipelines: Base64 → URL encode → Hex → ROT13 and more, chained' },
+        ]} />
+        <Tip text="AI Assistant requires an Anthropic API key in Settings → API Keys. All other tools work offline." accent="#a78bfa" />
+      </div>
+    ),
+  },
+
+  // ── 7. Productivity & Utilities ──────────────────────────────────────────
   {
     id: 'productivity',
     title: 'Productivity & Utilities',
-    subtitle: 'Notes, calculator, files, markdown, and more',
+    subtitle: 'Notes, pomodoro, backup, audit log, and more',
     accent: '#facc15',
     content: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <AppGrid apps={[
           { icon: '📝', color: '#fbbf24', name: 'Notes', desc: 'Quick notes with search — always available from the dock' },
           { icon: '🧮', color: '#facc15', name: 'Calculator', desc: 'Basic + scientific modes, keyboard support, calculation history' },
-          { icon: '🔐', color: '#00d4ff', name: 'Crypto Tools', desc: 'Hash (MD5/SHA), encode/decode, JWT decoder, password entropy' },
+          { icon: '🍅', color: '#ef4444', name: 'Pomodoro Timer', desc: '25-min focus sessions with task tracking and break reminders' },
+          { icon: '💾', color: '#4ade80', name: 'System Backup', desc: 'Create and restore backups of CryoGram config and settings' },
+          { icon: '📋', color: '#94a3b8', name: 'Audit Log', desc: 'Append-only activity log — track security events, app usage, auth' },
+          { icon: '🖼', color: '#818cf8', name: 'Wallpaper', desc: 'Set custom wallpapers or choose gradient themes' },
           { icon: '📄', color: '#818cf8', name: 'Markdown Editor', desc: 'Split-pane editor with live preview and format toolbar' },
           { icon: '📁', color: '#f59e0b', name: 'Files', desc: 'Full file manager with copy, move, rename, and external open' },
-          { icon: '🗑️', color: '#94a3b8', name: 'Trash', desc: 'Linux trash bin — restore files or permanently delete' },
-        ]} />
-        <AppGrid apps={[
-          { icon: '📸', color: '#34d399', name: 'Screenshot', desc: 'Capture screen, copy to clipboard or save to file' },
-          { icon: '📧', color: '#ea4335', name: 'Gmail', desc: 'Embedded Gmail web client in a native window' },
-          { icon: '🔑', color: '#ffcc00', name: 'Passwords', desc: 'Encrypted local password vault with generator' },
-          { icon: '🔐', color: '#00d4ff', name: 'SSH Keys', desc: 'Generate, manage, and copy SSH key pairs' },
         ]} />
       </div>
     ),
   },
 
-  // ── 6. System & Monitoring ───────────────────────────────────────────────
+  // ── 8. System & Monitoring ───────────────────────────────────────────────
   {
     id: 'system',
     title: 'System & Monitoring',
@@ -196,7 +235,7 @@ const SLIDES: Slide[] = [
     content: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <AppGrid apps={[
-          { icon: '⚙️', color: '#bb88ff', name: 'Settings', desc: '10 tabs: appearance, profile, network, Bluetooth, sound, display, security, API keys, updates, about' },
+          { icon: '⚙️', color: '#bb88ff', name: 'Settings', desc: '10 tabs: appearance, profile, network, Bluetooth, sound, display, security, API keys, updates, about + Guide' },
           { icon: '📊', color: '#818cf8', name: 'Task Manager', desc: 'Live CPU/memory per process, kill signal support' },
           { icon: '📋', color: '#a855f7', name: 'Log Viewer', desc: 'journalctl browser — filter by unit, priority, time range' },
           { icon: '📡', color: '#00d4ff', name: 'Network Monitor', desc: 'Interface stats, live bandwidth graph, active connections' },
@@ -220,7 +259,7 @@ const SLIDES: Slide[] = [
     ),
   },
 
-  // ── 7. Keyboard Shortcuts ─────────────────────────────────────────────────
+  // ── 9. Keyboard Shortcuts ─────────────────────────────────────────────────
   {
     id: 'shortcuts',
     title: 'Keyboard Shortcuts',

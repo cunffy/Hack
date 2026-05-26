@@ -479,6 +479,125 @@ export function installMockCryogram(): void {
       empty: async () => true,
       getSize: async () => ({ count: 2, bytes: 1024 + 1024 * 1024 * 5 }),
     },
+    shodan: {
+      search: async (query: string) => ({
+        matches: [
+          { ip_str: '1.2.3.4', hostnames: ['example.com'], ports: [80, 443, 22], org: 'Acme Corp', isp: 'Acme ISP', country_code: 'US', country_name: 'United States', os: 'Linux', timestamp: new Date().toISOString() },
+          { ip_str: '5.6.7.8', hostnames: [], ports: [3389, 8080], org: 'Test Org', isp: 'Test ISP', country_code: 'DE', country_name: 'Germany', os: null, timestamp: new Date().toISOString() },
+        ],
+        total: 2,
+        query,
+      }),
+      host: async (ip: string) => ({ ip_str: ip, ports: [80, 443], org: 'Mock Org', country_name: 'United States', os: 'Linux', hostnames: ['mock.example.com'], timestamp: new Date().toISOString() }),
+      count: async () => ({ total: 42 }),
+      exploits: async () => ({ matches: [], total: 0 }),
+    },
+    osint: {
+      lookup: async (tool: string, query: string) => {
+        await sleep(800)
+        if (tool === 'IP Lookup') return { ip: query, city: 'San Francisco', region: 'California', country: 'United States', org: 'AS13335 Cloudflare', timezone: 'America/Los_Angeles', latitude: 37.7749, longitude: -122.4194 }
+        if (tool === 'WHOIS') return { domain: query, status: 'clientTransferProhibited', registered: '2010-03-15', expiry: '2025-03-15', registrar: 'GoDaddy' }
+        if (tool === 'DNS Records') return { A: '1.2.3.4', MX: 'mail.example.com', NS: 'ns1.example.com, ns2.example.com', TXT: 'v=spf1 include:example.com ~all' }
+        return { result: `[mock] ${tool} lookup for ${query}` }
+      },
+    },
+    cve: {
+      search: async () => {
+        await sleep(600)
+        return [
+          { id: 'CVE-2024-1234', description: 'A critical SQL injection vulnerability in ExampleCMS allows remote attackers to execute arbitrary SQL commands via the search parameter.', severity: 'CRITICAL', score: 9.8, published: '2024-01-15', references: ['https://nvd.nist.gov/vuln/detail/CVE-2024-1234'] },
+          { id: 'CVE-2024-5678', description: 'Cross-site scripting (XSS) vulnerability in the admin dashboard of TestApp version 2.x.', severity: 'HIGH', score: 7.4, published: '2024-02-20', references: [] },
+        ]
+      },
+      recent: async () => {
+        await sleep(400)
+        return [
+          { id: 'CVE-2024-9999', description: 'Remote code execution vulnerability in popular open-source library.', severity: 'CRITICAL', score: 10.0, published: new Date().toISOString().slice(0, 10), references: [] },
+          { id: 'CVE-2024-8888', description: 'Memory corruption vulnerability in kernel component.', severity: 'HIGH', score: 7.8, published: new Date().toISOString().slice(0, 10), references: [] },
+        ]
+      },
+    },
+    ai: {
+      chat: async (messages: { role: string; content: string }[]) => {
+        await sleep(1200)
+        const last = messages[messages.length - 1]?.content || ''
+        return `[Mock AI Response] You asked: "${last.slice(0, 100)}". In a real session, Claude would provide expert cybersecurity analysis here. Configure your Anthropic API key in Settings → API Keys to enable real AI responses.`
+      },
+    },
+    packetSniffer: {
+      start: async (_iface: string, _filter: string, cb: (pkt: PacketEntry) => void) => {
+        let id = 0
+        const protos = ['TCP', 'UDP', 'ICMP', 'HTTP', 'DNS', 'ARP']
+        const interval = setInterval(() => {
+          cb({ id: ++id, time: (id * 0.042).toFixed(6), src: `192.168.1.${Math.floor(Math.random()*254)+1}`, dst: `10.0.0.${Math.floor(Math.random()*254)+1}`, proto: protos[Math.floor(Math.random()*protos.length)], len: Math.floor(Math.random()*1400)+64, info: 'Mock packet data' })
+        }, 300)
+        return () => clearInterval(interval)
+      },
+      stop: async () => {},
+    },
+    backup: {
+      list: async () => [
+        { id: '1709000000000', name: 'Backup 2024-02-27 10:00', size: '2.1MB', created: '2024-02-27 10:00', status: 'complete', items: 142 },
+      ],
+      create: async () => ({ id: Date.now().toString(), name: `Backup ${new Date().toLocaleString()}`, size: '2.3MB', created: new Date().toISOString().slice(0,16).replace('T',' '), status: 'complete', items: 148 }),
+      restore: async () => true,
+      delete: async () => true,
+      onProgress: (_cb: (msg: string, pct: number) => void) => () => {},
+    },
+    auditLog: {
+      list: async () => [
+        { id: '1', ts: new Date().toISOString().replace('T',' ').slice(0,19), type: 'security', category: 'Auth', message: 'Login successful', details: 'User logged in from 127.0.0.1' },
+        { id: '2', ts: new Date(Date.now()-60000).toISOString().replace('T',' ').slice(0,19), type: 'info', category: 'App', message: 'Terminal opened' },
+        { id: '3', ts: new Date(Date.now()-120000).toISOString().replace('T',' ').slice(0,19), type: 'warning', category: 'Network', message: 'Outbound connection to unknown host', details: 'Destination: 198.51.100.42:443' },
+        { id: '4', ts: new Date(Date.now()-180000).toISOString().replace('T',' ').slice(0,19), type: 'success', category: 'System', message: 'Backup completed successfully' },
+      ],
+      append: async (entry: Omit<AuditLogEntry, 'id' | 'ts'>) => ({ id: Date.now().toString(), ts: new Date().toISOString().replace('T',' ').slice(0,19), ...entry }),
+      clear: async () => true,
+    },
+    codeScanner: {
+      browse: async () => '/home/user/projects/myapp',
+      scan: async () => {
+        await sleep(2000)
+        return {
+          findings: [
+            { id: '1', severity: 'HIGH', rule: 'XSS_RISK', file: 'src/utils/render.js', line: 42, code: "element.innerHTML = userInput", message: 'innerHTML assignment with user data can cause XSS', fix: 'Use textContent or sanitize with DOMPurify' },
+            { id: '2', severity: 'CRITICAL', rule: 'HARDCODED_CREDENTIAL', file: 'config/db.js', line: 8, code: 'const password = "admin123"', message: 'Hardcoded password detected', fix: 'Use environment variables' },
+            { id: '3', severity: 'MEDIUM', rule: 'WEAK_HASH', file: 'src/auth.js', line: 15, code: 'const hash = md5(password)', message: 'MD5 is cryptographically broken', fix: 'Use bcrypt or argon2' },
+          ],
+          scanned: 23, duration: 1842, scanner: 'Pattern-based',
+        }
+      },
+      onProgress: (_cb: (pct: number) => void) => () => {},
+    },
+    totp: {
+      list: async () => [
+        { id: 'totp-1', name: 'GitHub', issuer: 'GitHub Inc.', secret: 'JBSWY3DPEHPK3PXP' },
+        { id: 'totp-2', name: 'Google', issuer: 'Google LLC', secret: 'JBSWY3DPEHPK3PXP' },
+      ],
+      generate: async (_secret: string) => ({ code: String(Math.floor(Math.random()*1000000)).padStart(6,'0'), timeLeft: 30 - (Math.floor(Date.now()/1000) % 30) }),
+      add: async (account: Omit<TOTPAccount, 'id'>) => ({ id: `totp-${Date.now()}`, ...account }),
+      remove: async () => true,
+    },
+    wordlists: {
+      list: async () => [
+        { name: 'rockyou-top1000.txt', path: '/mock/rockyou-top1000.txt', lineCount: 1000, sizeKB: 8 },
+        { name: 'common-passwords.txt', path: '/mock/common-passwords.txt', lineCount: 500, sizeKB: 4 },
+      ],
+      preview: async () => ['password', '123456', 'admin', 'letmein', 'qwerty', 'monkey', 'dragon', 'master', 'hello', 'sunshine'],
+      import: async () => null,
+      delete: async () => true,
+      generate: async () => 'generated.txt',
+    },
+    passwordHealth: {
+      checkHIBP: async (_pw: string) => {
+        await sleep(800)
+        return { breached: false, count: 0 }
+      },
+    },
+    wallpaper: {
+      listCustom: async () => [],
+      browse: async () => null,
+    },
     notifyUnlock: () => {},
     onLock: (cb) => { void cb; return () => {} },
     onOpenApp: (cb) => { void cb; return () => {} },

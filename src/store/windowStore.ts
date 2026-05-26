@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot' | 'calculator' | 'crypto-tools' | 'api-tester' | 'cert-inspector' | 'docker' | 'git' | 'database' | 'markdown' | 'trash'
+export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot' | 'calculator' | 'crypto-tools' | 'api-tester' | 'cert-inspector' | 'docker' | 'git' | 'database' | 'markdown' | 'trash' | 'shodan' | 'osint' | 'cve' | 'ai-assistant' | 'wordlists' | 'json-explorer' | 'totp' | 'regex' | 'encoding-chain' | 'packet-sniffer' | 'backup' | 'password-health' | 'pomodoro' | 'audit-log' | 'code-scanner' | 'wallpaper'
 
 export interface AppWindow {
   id: string
@@ -61,6 +61,22 @@ const APP_META: Record<AppId, { title: string; width: number; height: number }> 
   database:         { title: 'SQLite Browser',      width: 960,  height: 640 },
   markdown:         { title: 'Markdown Editor',     width: 1000, height: 680 },
   trash:            { title: 'Trash',               width: 820,  height: 560 },
+  shodan:           { title: 'Shodan Explorer',      width: 1100, height: 720 },
+  osint:            { title: 'OSINT Dashboard',      width: 1060, height: 700 },
+  cve:              { title: 'CVE Database',         width: 1060, height: 700 },
+  'ai-assistant':   { title: 'AI Assistant',         width: 820,  height: 640 },
+  wordlists:        { title: 'Wordlist Manager',     width: 900,  height: 600 },
+  'json-explorer':  { title: 'JSON / YAML Explorer', width: 1060, height: 680 },
+  totp:             { title: '2FA / TOTP Manager',   width: 760,  height: 540 },
+  regex:            { title: 'Regex Tester',         width: 900,  height: 640 },
+  'encoding-chain': { title: 'Encoding Chain',       width: 980,  height: 640 },
+  'packet-sniffer': { title: 'Packet Sniffer',       width: 1100, height: 680 },
+  backup:           { title: 'System Backup',        width: 820,  height: 580 },
+  'password-health':{ title: 'Password Health',      width: 760,  height: 580 },
+  pomodoro:         { title: 'Pomodoro Timer',       width: 560,  height: 700 },
+  'audit-log':      { title: 'Audit Log',            width: 980,  height: 640 },
+  'code-scanner':   { title: 'Code Scanner',         width: 1060, height: 700 },
+  wallpaper:        { title: 'Wallpaper',            width: 820,  height: 580 },
 }
 
 let instanceCounter = 0

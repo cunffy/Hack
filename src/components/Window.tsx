@@ -33,6 +33,22 @@ const GitApp             = lazy(() => import('../apps/git/GitApp'))
 const DatabaseApp        = lazy(() => import('../apps/database/DatabaseApp'))
 const MarkdownEditorApp  = lazy(() => import('../apps/markdown/MarkdownEditorApp'))
 const TrashApp           = lazy(() => import('../apps/trash/TrashApp'))
+const ShodanApp          = lazy(() => import('../apps/shodan/ShodanApp'))
+const OSINTApp           = lazy(() => import('../apps/osint/OSINTApp'))
+const CVEApp             = lazy(() => import('../apps/cve/CVEApp'))
+const AIAssistantApp     = lazy(() => import('../apps/ai-assistant/AIAssistantApp'))
+const WordlistsApp       = lazy(() => import('../apps/wordlists/WordlistsApp'))
+const JSONExplorerApp    = lazy(() => import('../apps/json-explorer/JSONExplorerApp'))
+const TOTPApp            = lazy(() => import('../apps/totp/TOTPApp'))
+const RegexApp           = lazy(() => import('../apps/regex/RegexApp'))
+const EncodingChainApp   = lazy(() => import('../apps/encoding-chain/EncodingChainApp'))
+const PacketSnifferApp   = lazy(() => import('../apps/packet-sniffer/PacketSnifferApp'))
+const BackupApp          = lazy(() => import('../apps/backup/BackupApp'))
+const PasswordHealthApp  = lazy(() => import('../apps/password-health/PasswordHealthApp'))
+const PomodoroApp        = lazy(() => import('../apps/pomodoro/PomodoroApp'))
+const AuditLogApp        = lazy(() => import('../apps/audit-log/AuditLogApp'))
+const CodeScannerApp     = lazy(() => import('../apps/code-scanner/CodeScannerApp'))
+const WallpaperApp       = lazy(() => import('../apps/wallpaper/WallpaperApp'))
 
 const APP_COLORS: Record<string, string> = {
   terminal:          '#00ff88',
@@ -65,6 +81,22 @@ const APP_COLORS: Record<string, string> = {
   database:          '#a855f7',
   markdown:          '#818cf8',
   trash:             '#94a3b8',
+  shodan:            '#ef4444',
+  osint:             '#fb923c',
+  cve:               '#f97316',
+  'ai-assistant':    '#a78bfa',
+  wordlists:         '#4ade80',
+  'json-explorer':   '#fbbf24',
+  totp:              '#00d4ff',
+  regex:             '#818cf8',
+  'encoding-chain':  '#34d399',
+  'packet-sniffer':  '#22c55e',
+  backup:            '#4ade80',
+  'password-health': '#f472b6',
+  pomodoro:          '#ef4444',
+  'audit-log':       '#94a3b8',
+  'code-scanner':    '#ff4466',
+  wallpaper:         '#818cf8',
 }
 
 function AppContent({ appId }: { appId: string }) {
@@ -111,6 +143,22 @@ function AppContent({ appId }: { appId: string }) {
       {appId === 'database'        && <DatabaseApp />}
       {appId === 'markdown'        && <MarkdownEditorApp />}
       {appId === 'trash'           && <TrashApp />}
+      {appId === 'shodan'          && <ShodanApp />}
+      {appId === 'osint'           && <OSINTApp />}
+      {appId === 'cve'             && <CVEApp />}
+      {appId === 'ai-assistant'    && <AIAssistantApp />}
+      {appId === 'wordlists'       && <WordlistsApp />}
+      {appId === 'json-explorer'   && <JSONExplorerApp />}
+      {appId === 'totp'            && <TOTPApp />}
+      {appId === 'regex'           && <RegexApp />}
+      {appId === 'encoding-chain'  && <EncodingChainApp />}
+      {appId === 'packet-sniffer'  && <PacketSnifferApp />}
+      {appId === 'backup'          && <BackupApp />}
+      {appId === 'password-health' && <PasswordHealthApp />}
+      {appId === 'pomodoro'        && <PomodoroApp />}
+      {appId === 'audit-log'       && <AuditLogApp />}
+      {appId === 'code-scanner'    && <CodeScannerApp />}
+      {appId === 'wallpaper'       && <WallpaperApp />}
     </Suspense>
     </AppCrashBoundary>
   )

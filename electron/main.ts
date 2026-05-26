@@ -47,6 +47,18 @@ import { registerDockerHandlers } from './ipc/docker'
 import { registerGitHandlers } from './ipc/git'
 import { registerDatabaseHandlers } from './ipc/database'
 import { registerTrashHandlers } from './ipc/trash'
+import { registerShodanHandlers } from './ipc/shodan'
+import { registerOSINTHandlers } from './ipc/osint'
+import { registerCVEHandlers } from './ipc/cve'
+import { registerAIHandlers } from './ipc/ai'
+import { registerPacketSnifferHandlers } from './ipc/packet-sniffer'
+import { registerBackupHandlers } from './ipc/backup'
+import { registerAuditLogHandlers } from './ipc/audit-log'
+import { registerCodeScannerHandlers } from './ipc/code-scanner'
+import { registerTOTPHandlers } from './ipc/totp'
+import { registerWordlistsHandlers } from './ipc/wordlists'
+import { registerPasswordHealthHandlers } from './ipc/password-health'
+import { registerWallpaperHandlers } from './ipc/wallpaper'
 
 let mainWindow: BrowserWindow | null = null
 let screenLocked = false  // tracked in main so shortcuts can check it
@@ -233,6 +245,18 @@ app.whenReady().then(() => {
   registerGitHandlers()
   registerDatabaseHandlers()
   registerTrashHandlers()
+  registerShodanHandlers()
+  registerOSINTHandlers()
+  registerCVEHandlers()
+  registerAIHandlers()
+  registerPacketSnifferHandlers()
+  registerBackupHandlers()
+  registerAuditLogHandlers()
+  registerCodeScannerHandlers()
+  registerTOTPHandlers()
+  registerWordlistsHandlers()
+  registerPasswordHealthHandlers()
+  registerWallpaperHandlers()
 
   createWindow()
   startNotificationBridge()

@@ -228,6 +228,63 @@ declare global {
       empty(): Promise<boolean>
       getSize(): Promise<{ count: number; bytes: number }>
     }
+    shodan: {
+      search(query: string, page?: number): Promise<{ matches: ShodanHost[]; total: number; query: string }>
+      host(ip: string): Promise<ShodanHost>
+      count(query: string): Promise<{ total: number }>
+      exploits(query: string): Promise<{ matches: unknown[]; total: number }>
+    }
+    osint: {
+      lookup(tool: string, query: string): Promise<Record<string, unknown>>
+    }
+    cve: {
+      search(query: string): Promise<CVEEntry[]>
+      recent(count?: number): Promise<CVEEntry[]>
+    }
+    ai: {
+      chat(messages: { role: string; content: string }[]): Promise<string>
+    }
+    packetSniffer: {
+      start(iface: string, filter: string, cb: (pkt: PacketEntry) => void): Promise<(() => void) | null>
+      stop(): Promise<void>
+    }
+    backup: {
+      list(): Promise<BackupMeta[]>
+      create(): Promise<BackupMeta>
+      restore(id: string): Promise<boolean>
+      delete(id: string): Promise<boolean>
+      onProgress(cb: (msg: string, pct: number) => void): () => void
+    }
+    auditLog: {
+      list(): Promise<AuditLogEntry[]>
+      append(entry: Omit<AuditLogEntry, 'id' | 'ts'>): Promise<AuditLogEntry>
+      clear(): Promise<boolean>
+    }
+    codeScanner: {
+      browse(): Promise<string | null>
+      scan(path: string, scanner: string): Promise<ScanResult>
+      onProgress(cb: (pct: number) => void): () => void
+    }
+    totp: {
+      list(): Promise<TOTPAccount[]>
+      generate(secret: string): Promise<{ code: string; timeLeft: number }>
+      add(account: Omit<TOTPAccount, 'id'>): Promise<TOTPAccount>
+      remove(id: string): Promise<boolean>
+    }
+    wordlists: {
+      list(): Promise<WordlistEntry2[]>
+      preview(path: string, n?: number): Promise<string[]>
+      import(): Promise<string | null>
+      delete(path: string): Promise<boolean>
+      generate(opts: WordlistGenOpts): Promise<string>
+    }
+    passwordHealth: {
+      checkHIBP(password: string): Promise<{ breached: boolean; count: number }>
+    }
+    wallpaper: {
+      listCustom(): Promise<{ id: string; name: string; path: string; type: string }[]>
+      browse(): Promise<string | null>
+    }
     notifyUnlock(): void
     onLock(cb: () => void): () => void
     onOpenApp(cb: (appId: string) => void): () => void
@@ -237,6 +294,97 @@ declare global {
     onAppSwitcher(cb: (dir: 'next' | 'prev') => void): () => void
     onSpotlight(cb: () => void): () => void
     onWorkspaceChanged(cb: (n: number) => void): () => void
+  }
+
+  interface ShodanHost {
+    ip_str: string
+    hostnames: string[]
+    ports: number[]
+    org?: string
+    isp?: string
+    country_code?: string
+    country_name?: string
+    os?: string | null
+    timestamp: string
+  }
+
+  interface CVEEntry {
+    id: string
+    description: string
+    severity: string
+    score: number
+    published: string
+    references: string[]
+  }
+
+  interface PacketEntry {
+    id: number
+    time: string
+    src: string
+    dst: string
+    proto: string
+    len: number
+    info: string
+  }
+
+  interface BackupMeta {
+    id: string
+    name: string
+    size: string
+    created: string
+    status: string
+    items: number
+  }
+
+  interface AuditLogEntry {
+    id: string
+    ts: string
+    type: 'security' | 'warning' | 'info' | 'success'
+    category: string
+    message: string
+    details?: string
+    user?: string
+  }
+
+  interface ScanResult {
+    findings: ScanFinding[]
+    scanned: number
+    duration: number
+    scanner: string
+  }
+
+  interface ScanFinding {
+    id: string
+    severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO'
+    rule: string
+    file: string
+    line: number
+    code: string
+    message: string
+    fix?: string
+  }
+
+  interface TOTPAccount {
+    id: string
+    name: string
+    issuer: string
+    secret: string
+  }
+
+  interface WordlistEntry2 {
+    name: string
+    path: string
+    lineCount: number
+    sizeKB: number
+  }
+
+  interface WordlistGenOpts {
+    minLen: number
+    maxLen: number
+    charsets: string[]
+    count: number
+    prefix: string
+    suffix: string
   }
 
   // ── New app types ────────────────────────────────────────────────────────────
