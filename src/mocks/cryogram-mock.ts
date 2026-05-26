@@ -598,6 +598,45 @@ export function installMockCryogram(): void {
       listCustom: async () => [],
       browse: async () => null,
     },
+
+    clipboardHistory: {
+      getAll: async () => [
+        { id: '1', text: 'Hello, world!', ts: Date.now() - 60000, pinned: true },
+        { id: '2', text: 'npm install && npm run dev', ts: Date.now() - 120000, pinned: false },
+        { id: '3', text: 'https://example.com/very-long-url?param=value', ts: Date.now() - 300000, pinned: false },
+      ] as ClipEntry[],
+      copy: async () => {},
+      pin: async (id: string) => [],
+      delete: async (id: string) => [],
+      clear: async () => [],
+      onChange: (cb) => { void cb; return () => {} },
+    },
+
+    colorPicker: {
+      getPalettes: async () => [
+        { id: 'p1', name: 'Brand Colors', colors: ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b'], createdAt: Date.now() },
+      ] as ColorPalette[],
+      savePalette: async (p) => ({ ...p, id: `pal-${Date.now()}`, createdAt: Date.now() }),
+      updatePalette: async () => [],
+      deletePalette: async () => [],
+    },
+
+    imageViewer: {
+      open: async () => null,
+      readFile: async () => null,
+      browseDir: async () => [],
+    },
+
+    rssReader: {
+      getFeeds: async () => [] as RSSFeed[],
+      getItems: async () => [] as RSSItem[],
+      addFeed: async (url: string) => ({ feed: { id: 'f1', url, title: url, description: '', lastFetched: Date.now() }, items: [] }),
+      removeFeed: async () => {},
+      refresh: async () => [] as RSSItem[],
+      markRead: async () => {},
+      markAllRead: async () => {},
+    },
+
     notifyUnlock: () => {},
     onLock: (cb) => { void cb; return () => {} },
     onOpenApp: (cb) => { void cb; return () => {} },

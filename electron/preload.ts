@@ -456,6 +456,46 @@ contextBridge.exposeInMainWorld('cryogram', {
     listCustom: ()           => ipcRenderer.invoke('wallpaper:listCustom'),
     browse:     ()           => ipcRenderer.invoke('wallpaper:browse'),
   },
+
+  // Clipboard History
+  clipboardHistory: {
+    getAll:  ()          => ipcRenderer.invoke('clipboard:getAll'),
+    copy:    (id: string)=> ipcRenderer.invoke('clipboard:copy', id),
+    pin:     (id: string)=> ipcRenderer.invoke('clipboard:pin', id),
+    delete:  (id: string)=> ipcRenderer.invoke('clipboard:delete', id),
+    clear:   ()          => ipcRenderer.invoke('clipboard:clear'),
+    onChange: (cb: (entry: unknown) => void) => {
+      const listener = (_: unknown, entry: unknown) => cb(entry)
+      ipcRenderer.on('clipboard:change', listener)
+      return () => ipcRenderer.removeListener('clipboard:change', listener)
+    },
+  },
+
+  // Color Picker
+  colorPicker: {
+    getPalettes:    ()                                    => ipcRenderer.invoke('colorPicker:getPalettes'),
+    savePalette:    (p: unknown)                          => ipcRenderer.invoke('colorPicker:savePalette', p),
+    updatePalette:  (id: string, patch: unknown)          => ipcRenderer.invoke('colorPicker:updatePalette', id, patch),
+    deletePalette:  (id: string)                          => ipcRenderer.invoke('colorPicker:deletePalette', id),
+  },
+
+  // Image Viewer
+  imageViewer: {
+    open:       ()                   => ipcRenderer.invoke('imageViewer:open'),
+    readFile:   (path: string)       => ipcRenderer.invoke('imageViewer:readFile', path),
+    browseDir:  (dir: string)        => ipcRenderer.invoke('imageViewer:browseDir', dir),
+  },
+
+  // RSS Reader
+  rssReader: {
+    getFeeds:    ()                  => ipcRenderer.invoke('rss:getFeeds'),
+    getItems:    (feedId?: string)   => ipcRenderer.invoke('rss:getItems', feedId),
+    addFeed:     (url: string)       => ipcRenderer.invoke('rss:addFeed', url),
+    removeFeed:  (id: string)        => ipcRenderer.invoke('rss:removeFeed', id),
+    refresh:     (id: string)        => ipcRenderer.invoke('rss:refresh', id),
+    markRead:    (itemId: string)    => ipcRenderer.invoke('rss:markRead', itemId),
+    markAllRead: (feedId: string)    => ipcRenderer.invoke('rss:markAllRead', feedId),
+  },
 })
 
 export type CryogramAPI = typeof import('./preload')

@@ -48,7 +48,13 @@ const PasswordHealthApp  = lazy(() => import('../apps/password-health/PasswordHe
 const PomodoroApp        = lazy(() => import('../apps/pomodoro/PomodoroApp'))
 const AuditLogApp        = lazy(() => import('../apps/audit-log/AuditLogApp'))
 const CodeScannerApp     = lazy(() => import('../apps/code-scanner/CodeScannerApp'))
-const WallpaperApp       = lazy(() => import('../apps/wallpaper/WallpaperApp'))
+const WallpaperApp        = lazy(() => import('../apps/wallpaper/WallpaperApp'))
+const ClipboardHistoryApp = lazy(() => import('../apps/clipboard-history/ClipboardHistoryApp'))
+const ColorPickerApp      = lazy(() => import('../apps/color-picker/ColorPickerApp'))
+const UnitConverterApp    = lazy(() => import('../apps/unit-converter/UnitConverterApp'))
+const WorldClockApp       = lazy(() => import('../apps/world-clock/WorldClockApp'))
+const ImageViewerApp      = lazy(() => import('../apps/image-viewer/ImageViewerApp'))
+const RSSReaderApp        = lazy(() => import('../apps/rss-reader/RSSReaderApp'))
 
 const APP_COLORS: Record<string, string> = {
   terminal:          '#00ff88',
@@ -96,7 +102,13 @@ const APP_COLORS: Record<string, string> = {
   pomodoro:          '#ef4444',
   'audit-log':       '#94a3b8',
   'code-scanner':    '#ff4466',
-  wallpaper:         '#818cf8',
+  wallpaper:           '#818cf8',
+  'clipboard-history': '#a78bfa',
+  'color-picker':      '#f472b6',
+  'unit-converter':    '#22d3ee',
+  'world-clock':       '#60a5fa',
+  'image-viewer':      '#34d399',
+  'rss-reader':        '#fb923c',
 }
 
 function AppContent({ appId }: { appId: string }) {
@@ -158,7 +170,13 @@ function AppContent({ appId }: { appId: string }) {
       {appId === 'pomodoro'        && <PomodoroApp />}
       {appId === 'audit-log'       && <AuditLogApp />}
       {appId === 'code-scanner'    && <CodeScannerApp />}
-      {appId === 'wallpaper'       && <WallpaperApp />}
+      {appId === 'wallpaper'           && <WallpaperApp />}
+      {appId === 'clipboard-history'   && <ClipboardHistoryApp />}
+      {appId === 'color-picker'        && <ColorPickerApp />}
+      {appId === 'unit-converter'      && <UnitConverterApp />}
+      {appId === 'world-clock'         && <WorldClockApp />}
+      {appId === 'image-viewer'        && <ImageViewerApp />}
+      {appId === 'rss-reader'          && <RSSReaderApp />}
     </Suspense>
     </AppCrashBoundary>
   )

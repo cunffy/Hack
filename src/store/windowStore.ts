@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot' | 'calculator' | 'crypto-tools' | 'api-tester' | 'cert-inspector' | 'docker' | 'git' | 'database' | 'markdown' | 'trash' | 'shodan' | 'osint' | 'cve' | 'ai-assistant' | 'wordlists' | 'json-explorer' | 'totp' | 'regex' | 'encoding-chain' | 'packet-sniffer' | 'backup' | 'password-health' | 'pomodoro' | 'audit-log' | 'code-scanner' | 'wallpaper'
+export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot' | 'calculator' | 'crypto-tools' | 'api-tester' | 'cert-inspector' | 'docker' | 'git' | 'database' | 'markdown' | 'trash' | 'shodan' | 'osint' | 'cve' | 'ai-assistant' | 'wordlists' | 'json-explorer' | 'totp' | 'regex' | 'encoding-chain' | 'packet-sniffer' | 'backup' | 'password-health' | 'pomodoro' | 'audit-log' | 'code-scanner' | 'wallpaper' | 'clipboard-history' | 'color-picker' | 'unit-converter' | 'world-clock' | 'image-viewer' | 'rss-reader'
 
 export interface AppWindow {
   id: string
@@ -76,7 +76,13 @@ const APP_META: Record<AppId, { title: string; width: number; height: number }> 
   pomodoro:         { title: 'Pomodoro Timer',       width: 560,  height: 700 },
   'audit-log':      { title: 'Audit Log',            width: 980,  height: 640 },
   'code-scanner':   { title: 'Code Scanner',         width: 1060, height: 700 },
-  wallpaper:        { title: 'Wallpaper',            width: 820,  height: 580 },
+  wallpaper:           { title: 'Wallpaper',           width: 820,  height: 580 },
+  'clipboard-history': { title: 'Clipboard History',   width: 720,  height: 580 },
+  'color-picker':      { title: 'Color Picker',        width: 680,  height: 560 },
+  'unit-converter':    { title: 'Unit Converter',      width: 680,  height: 520 },
+  'world-clock':       { title: 'World Clock',         width: 780,  height: 520 },
+  'image-viewer':      { title: 'Image Viewer',        width: 960,  height: 700 },
+  'rss-reader':        { title: 'RSS Reader',          width: 1000, height: 680 },
 }
 
 let instanceCounter = 0

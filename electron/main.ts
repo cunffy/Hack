@@ -59,6 +59,10 @@ import { registerTOTPHandlers } from './ipc/totp'
 import { registerWordlistsHandlers } from './ipc/wordlists'
 import { registerPasswordHealthHandlers } from './ipc/password-health'
 import { registerWallpaperHandlers } from './ipc/wallpaper'
+import { registerClipboardHistoryHandlers } from './ipc/clipboard-history'
+import { registerColorPickerHandlers } from './ipc/color-picker'
+import { registerImageViewerHandlers } from './ipc/image-viewer'
+import { registerRSSReaderHandlers } from './ipc/rss-reader'
 
 let mainWindow: BrowserWindow | null = null
 let screenLocked = false  // tracked in main so shortcuts can check it
@@ -257,6 +261,10 @@ app.whenReady().then(() => {
   registerWordlistsHandlers()
   registerPasswordHealthHandlers()
   registerWallpaperHandlers()
+  registerClipboardHistoryHandlers()
+  registerColorPickerHandlers()
+  registerImageViewerHandlers()
+  registerRSSReaderHandlers()
 
   createWindow()
   startNotificationBridge()

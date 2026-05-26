@@ -285,6 +285,34 @@ declare global {
       listCustom(): Promise<{ id: string; name: string; path: string; type: string }[]>
       browse(): Promise<string | null>
     }
+    clipboardHistory: {
+      getAll(): Promise<ClipEntry[]>
+      copy(id: string): Promise<void>
+      pin(id: string): Promise<ClipEntry[]>
+      delete(id: string): Promise<ClipEntry[]>
+      clear(): Promise<ClipEntry[]>
+      onChange(cb: (entry: ClipEntry) => void): () => void
+    }
+    colorPicker: {
+      getPalettes(): Promise<ColorPalette[]>
+      savePalette(p: Omit<ColorPalette, 'id' | 'createdAt'>): Promise<ColorPalette>
+      updatePalette(id: string, patch: Partial<ColorPalette>): Promise<ColorPalette[]>
+      deletePalette(id: string): Promise<ColorPalette[]>
+    }
+    imageViewer: {
+      open(): Promise<ImageFile | null>
+      readFile(path: string): Promise<ImageFile | null>
+      browseDir(dir: string): Promise<string[]>
+    }
+    rssReader: {
+      getFeeds(): Promise<RSSFeed[]>
+      getItems(feedId?: string): Promise<RSSItem[]>
+      addFeed(url: string): Promise<{ feed: RSSFeed; items: RSSItem[] }>
+      removeFeed(id: string): Promise<void>
+      refresh(id: string): Promise<RSSItem[]>
+      markRead(itemId: string): Promise<void>
+      markAllRead(feedId: string): Promise<void>
+    }
     notifyUnlock(): void
     onLock(cb: () => void): () => void
     onOpenApp(cb: (appId: string) => void): () => void
@@ -782,6 +810,45 @@ declare global {
     originalPath: string
     deletionDate: string
     size: number
+  }
+
+  interface ClipEntry {
+    id: string
+    text: string
+    ts: number
+    pinned: boolean
+  }
+
+  interface ColorPalette {
+    id: string
+    name: string
+    colors: string[]
+    createdAt: number
+  }
+
+  interface ImageFile {
+    path: string
+    dataUrl: string
+    name: string
+    size: number
+  }
+
+  interface RSSFeed {
+    id: string
+    url: string
+    title: string
+    description: string
+    lastFetched: number
+  }
+
+  interface RSSItem {
+    id: string
+    feedId: string
+    title: string
+    link: string
+    description: string
+    pubDate: string
+    read: boolean
   }
 }
 

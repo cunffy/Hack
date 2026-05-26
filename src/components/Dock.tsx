@@ -74,7 +74,13 @@ export const APP_META: Record<AppId, { label: string; color: string; icon: React
   pomodoro:          { label: 'Pomodoro',         color: '#ef4444', icon: <PomodoroIcon /> },
   'audit-log':       { label: 'Audit Log',        color: '#94a3b8', icon: <AuditIcon /> },
   'code-scanner':    { label: 'Code Scanner',     color: '#ff4466', icon: <CodeScanIcon /> },
-  wallpaper:         { label: 'Wallpaper',        color: '#818cf8', icon: <WallpaperIcon /> },
+  wallpaper:           { label: 'Wallpaper',        color: '#818cf8', icon: <WallpaperIcon /> },
+  'clipboard-history': { label: 'Clipboard',        color: '#a78bfa', icon: <ClipboardIcon /> },
+  'color-picker':      { label: 'Color Picker',     color: '#f472b6', icon: <ColorPickerIcon /> },
+  'unit-converter':    { label: 'Unit Converter',   color: '#22d3ee', icon: <UnitConvIcon /> },
+  'world-clock':       { label: 'World Clock',      color: '#60a5fa', icon: <WorldClockIcon /> },
+  'image-viewer':      { label: 'Image Viewer',     color: '#34d399', icon: <ImageViewerIcon /> },
+  'rss-reader':        { label: 'RSS Reader',       color: '#fb923c', icon: <RSSIcon /> },
 }
 
 interface X11Win { id: string; desktop: number; title: string }
@@ -771,6 +777,59 @@ function WallpaperIcon() {
       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
       <circle cx="8.5" cy="8.5" r="1.5"/>
       <polyline points="21 15 16 10 5 21"/>
+    </svg>
+  )
+}
+function ClipboardIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+      <line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="14" y2="16"/>
+    </svg>
+  )
+}
+function ColorPickerIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="13.5" cy="6.5" r="3.5"/><circle cx="17.5" cy="10.5" r="3.5"/>
+      <circle cx="8.5" cy="7.5" r="3.5"/><circle cx="6.5" cy="12.5" r="3.5"/>
+      <circle cx="12" cy="17" r="4"/>
+    </svg>
+  )
+}
+function UnitConvIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/>
+      <path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+      <line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+    </svg>
+  )
+}
+function WorldClockIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="12" x2="15" y2="14"/>
+      <path d="M2 12h2M20 12h2M12 2v2M12 20v2"/>
+    </svg>
+  )
+}
+function ImageViewerIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+      <circle cx="9" cy="9" r="2"/>
+      <path d="M21 15l-5-5L5 21"/>
+    </svg>
+  )
+}
+function RSSIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/>
+      <circle cx="5" cy="19" r="1" fill="currentColor"/>
     </svg>
   )
 }
