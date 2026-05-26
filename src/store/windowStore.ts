@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes'
+export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail'
 
 export interface AppWindow {
   id: string
@@ -44,6 +44,7 @@ const APP_META: Record<AppId, { title: string; width: number; height: number }> 
   scanner:          { title: 'Network Scanner',     width: 900,  height: 620 },
   vpn:              { title: 'VPN Manager',         width: 720,  height: 560 },
   notes:            { title: 'Notes',               width: 820,  height: 580 },
+  mail:             { title: 'Gmail',               width: 1100, height: 780 },
 }
 
 let instanceCounter = 0

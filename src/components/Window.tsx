@@ -16,6 +16,7 @@ const PhoneApp           = lazy(() => import('../apps/phone/PhoneApp'))
 const NetworkScannerApp  = lazy(() => import('../apps/network-scanner/NetworkScannerApp'))
 const VPNApp             = lazy(() => import('../apps/vpn/VPNApp'))
 const NotesApp           = lazy(() => import('../apps/notes/NotesApp'))
+const MailApp            = lazy(() => import('../apps/mail/MailApp'))
 
 const APP_COLORS: Record<string, string> = {
   terminal:          '#00ff88',
@@ -31,6 +32,7 @@ const APP_COLORS: Record<string, string> = {
   scanner:           '#00ff88',
   vpn:               '#a78bfa',
   notes:             '#fbbf24',
+  mail:              '#ea4335',
 }
 
 function AppContent({ appId }: { appId: string }) {
@@ -60,6 +62,7 @@ function AppContent({ appId }: { appId: string }) {
       {appId === 'scanner'         && <NetworkScannerApp />}
       {appId === 'vpn'             && <VPNApp />}
       {appId === 'notes'           && <NotesApp />}
+      {appId === 'mail'            && <MailApp />}
     </Suspense>
   )
 }

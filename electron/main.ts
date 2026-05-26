@@ -34,6 +34,7 @@ import { registerPhoneHandlers } from './ipc/phone'
 import { registerUpdaterHandlers } from './ipc/updater'
 import { registerNetworkScannerHandlers } from './ipc/network-scanner'
 import { registerVpnHandlers } from './ipc/vpn'
+import { startNotificationBridge, stopNotificationBridge } from './ipc/notification-bridge'
 
 let mainWindow: BrowserWindow | null = null
 let screenLocked = false  // tracked in main so shortcuts can check it
@@ -201,6 +202,7 @@ app.whenReady().then(() => {
   registerVpnHandlers()
 
   createWindow()
+  startNotificationBridge()
 
   powerMonitor.on('resume',      () => lockScreen())
   powerMonitor.on('lock-screen', () => lockScreen())
@@ -213,6 +215,7 @@ app.whenReady().then(() => {
 app.on('before-quit', () => {
   globalShortcut.unregisterAll()
   killLaunchedApps()
+  stopNotificationBridge()
 })
 
 app.on('window-all-closed', () => {

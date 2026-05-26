@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import { AppId } from './windowStore'
 
 export const DEFAULT_DOCK: AppId[] = [
-  'terminal', 'editor', 'password-tester', 'leaker',
+  'terminal', 'editor', 'mail', 'password-tester', 'leaker',
   'files', 'opticseo', 'phone', 'launcher', 'settings', 'system',
 ]
 

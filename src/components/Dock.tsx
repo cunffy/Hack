@@ -42,6 +42,7 @@ export const APP_META: Record<AppId, { label: string; color: string; icon: React
   scanner:           { label: 'Net Scanner',      color: '#00ff88', icon: <ScannerIcon /> },
   vpn:               { label: 'VPN',              color: '#a78bfa', icon: <VPNIcon /> },
   notes:             { label: 'Notes',            color: '#fbbf24', icon: <NotesIcon /> },
+  mail:              { label: 'Gmail',            color: '#ea4335', icon: <MailIcon /> },
 }
 
 interface X11Win { id: string; desktop: number; title: string }
@@ -427,6 +428,15 @@ function NotesIcon() {
       <line x1="16" y1="13" x2="8" y2="13"/>
       <line x1="16" y1="17" x2="8" y2="17"/>
       <line x1="10" y1="9" x2="8" y2="9"/>
+    </svg>
+  )
+}
+
+function MailIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="M2 7l10 7 10-7"/>
     </svg>
   )
 }
