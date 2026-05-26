@@ -81,6 +81,7 @@ export const APP_META: Record<AppId, { label: string; color: string; icon: React
   'world-clock':       { label: 'World Clock',      color: '#60a5fa', icon: <WorldClockIcon /> },
   'image-viewer':      { label: 'Image Viewer',     color: '#34d399', icon: <ImageViewerIcon /> },
   'rss-reader':        { label: 'RSS Reader',       color: '#fb923c', icon: <RSSIcon /> },
+  'remote-desktop':    { label: 'Remote Desktop',   color: '#10b981', icon: <RemoteDesktopIcon /> },
 }
 
 interface X11Win { id: string; desktop: number; title: string }
@@ -830,6 +831,17 @@ function RSSIcon() {
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/>
       <circle cx="5" cy="19" r="1" fill="currentColor"/>
+    </svg>
+  )
+}
+function RemoteDesktopIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2"/>
+      <line x1="8" y1="21" x2="16" y2="21"/>
+      <line x1="12" y1="17" x2="12" y2="21"/>
+      <path d="M7 9l3 3-3 3"/>
+      <line x1="13" y1="15" x2="17" y2="15"/>
     </svg>
   )
 }

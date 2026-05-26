@@ -627,6 +627,19 @@ export function installMockCryogram(): void {
       browseDir: async () => [],
     },
 
+    remoteDesktop: {
+      checkDeps: async () => ({ x11vnc: false, websockify: false, novnc: false }),
+      installDeps: async () => ({ ok: true }),
+      start: async () => ({ ok: true, ip: '192.168.1.100', url: 'http://192.168.1.100:6081', vncPort: 5900, wsPort: 6080, httpPort: 6081 }),
+      stop: async () => ({ ok: true }),
+      status: async () => ({ running: false, vncAlive: false, wsAlive: false }),
+      getIP: async () => '192.168.1.100',
+      tailscaleStatus: async (): Promise<TailscaleStatus> => ({ installed: false, running: false, ip: '', hostname: '' }),
+      installTailscale: async () => ({ ok: true }),
+      tailscaleUp: async () => ({ ok: true }),
+      onLog: (cb: (msg: string) => void) => { void cb; return () => {} },
+      onStopped: (cb: () => void) => { void cb; return () => {} },
+    },
     rssReader: {
       getFeeds: async () => [] as RSSFeed[],
       getItems: async () => [] as RSSItem[],

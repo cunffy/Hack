@@ -12,6 +12,7 @@ export const DEFAULT_DOCK: AppId[] = [
   'json-explorer', 'totp', 'regex', 'encoding-chain', 'packet-sniffer',
   'backup', 'password-health', 'pomodoro', 'audit-log', 'code-scanner', 'wallpaper',
   'clipboard-history', 'color-picker', 'unit-converter', 'world-clock', 'image-viewer', 'rss-reader',
+  'remote-desktop',
 ]
 
 interface DockStore {
