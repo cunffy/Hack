@@ -294,4 +294,20 @@ export function registerSystemHandlers(): void {
     await sh(`wmctrl -ic ${id} 2>/dev/null`)
     return true
   })
+
+  ipcMain.handle('wm:getCurrentWorkspace', async () => {
+    const out = await sh('wmctrl -d 2>/dev/null')
+    const active = out.split('\n').find(l => l.includes('*'))
+    return active ? parseInt(active.split(/\s+/)[0]) : 0
+  })
+
+  ipcMain.handle('wm:switchWorkspace', async (_, n: number) => {
+    await sh(`wmctrl -s ${n} 2>/dev/null`)
+    return true
+  })
+
+  ipcMain.handle('wm:getWorkspaceCount', async () => {
+    const out = await sh('wmctrl -d 2>/dev/null')
+    return out.split('\n').filter(Boolean).length || 1
+  })
 }

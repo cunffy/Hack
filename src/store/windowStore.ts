@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail'
+export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot'
 
 export interface AppWindow {
   id: string
@@ -45,6 +45,13 @@ const APP_META: Record<AppId, { title: string; width: number; height: number }> 
   vpn:              { title: 'VPN Manager',         width: 720,  height: 560 },
   notes:            { title: 'Notes',               width: 820,  height: 580 },
   mail:             { title: 'Gmail',               width: 1100, height: 780 },
+  passwords:        { title: 'Password Manager',    width: 860,  height: 600 },
+  'ssh-keys':       { title: 'SSH Key Manager',     width: 820,  height: 600 },
+  firewall:         { title: 'Firewall',            width: 780,  height: 580 },
+  'task-manager':   { title: 'Task Manager',        width: 900,  height: 600 },
+  logs:             { title: 'Log Viewer',          width: 960,  height: 640 },
+  netmon:           { title: 'Network Monitor',     width: 900,  height: 600 },
+  screenshot:       { title: 'Screenshot',          width: 900,  height: 640 },
 }
 
 let instanceCounter = 0

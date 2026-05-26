@@ -35,6 +35,13 @@ import { registerUpdaterHandlers } from './ipc/updater'
 import { registerNetworkScannerHandlers } from './ipc/network-scanner'
 import { registerVpnHandlers } from './ipc/vpn'
 import { startNotificationBridge, stopNotificationBridge } from './ipc/notification-bridge'
+import { registerPasswordManagerHandlers } from './ipc/password-manager'
+import { registerSSHKeyHandlers } from './ipc/ssh-keys'
+import { registerFirewallHandlers } from './ipc/firewall'
+import { registerProcessHandlers } from './ipc/processes'
+import { registerLogHandlers } from './ipc/logs'
+import { registerNetmonHandlers } from './ipc/netmon'
+import { registerScreenshotHandlers } from './ipc/screenshot'
 
 let mainWindow: BrowserWindow | null = null
 let screenLocked = false  // tracked in main so shortcuts can check it
@@ -86,6 +93,15 @@ function createWindow(): void {
       }
     })
     globalShortcut.register('Super+Tab', () => {})
+    // Workspace switching
+    ;[1, 2, 3, 4].forEach(n => {
+      globalShortcut.register(`Super+${n}`, () => {
+        if (screenLocked) return
+        const { exec } = require('child_process')
+        exec(`wmctrl -s ${n - 1} 2>/dev/null`)
+        mainWindow?.webContents.send('workspace:changed', n - 1)
+      })
+    })
     globalShortcut.register('Super+L', () => lockScreen())
     globalShortcut.register('CommandOrControl+Alt+T', () => {
       if (screenLocked) return
@@ -200,6 +216,13 @@ app.whenReady().then(() => {
   registerUpdaterHandlers()
   registerNetworkScannerHandlers()
   registerVpnHandlers()
+  registerPasswordManagerHandlers()
+  registerSSHKeyHandlers()
+  registerFirewallHandlers()
+  registerProcessHandlers()
+  registerLogHandlers()
+  registerNetmonHandlers()
+  registerScreenshotHandlers()
 
   createWindow()
   startNotificationBridge()

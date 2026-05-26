@@ -114,10 +114,13 @@ contextBridge.exposeInMainWorld('cryogram', {
 
   // X11 window manager (wmctrl) — tracks ALL open apps including external ones
   wm: {
-    getWindows:  ()             => ipcRenderer.invoke('wm:getWindows'),
-    focusWindow: (id: string)   => ipcRenderer.invoke('wm:focusWindow', id),
-    closeWindow: (id: string)   => ipcRenderer.invoke('wm:closeWindow', id),
-    hideShell:   ()             => ipcRenderer.invoke('wm:hideShell'),
+    getWindows:         ()           => ipcRenderer.invoke('wm:getWindows'),
+    focusWindow:        (id: string) => ipcRenderer.invoke('wm:focusWindow', id),
+    closeWindow:        (id: string) => ipcRenderer.invoke('wm:closeWindow', id),
+    hideShell:          ()           => ipcRenderer.invoke('wm:hideShell'),
+    getCurrentWorkspace:()           => ipcRenderer.invoke('wm:getCurrentWorkspace'),
+    switchWorkspace:    (n: number)  => ipcRenderer.invoke('wm:switchWorkspace', n),
+    getWorkspaceCount:  ()           => ipcRenderer.invoke('wm:getWorkspaceCount'),
   },
 
   // Phone companion (ADB + scrcpy)
@@ -155,6 +158,75 @@ contextBridge.exposeInMainWorld('cryogram', {
     getStatus:  ()                => ipcRenderer.invoke('vpn:getStatus'),
     connect:    (profile: unknown)=> ipcRenderer.invoke('vpn:connect', profile),
     disconnect: ()                => ipcRenderer.invoke('vpn:disconnect'),
+  },
+
+  // Password manager (encrypted vault)
+  passwords: {
+    getAll:    ()                              => ipcRenderer.invoke('passwords:getAll'),
+    add:       (entry: unknown)                => ipcRenderer.invoke('passwords:add', entry),
+    update:    (id: string, patch: unknown)    => ipcRenderer.invoke('passwords:update', id, patch),
+    delete:    (id: string)                    => ipcRenderer.invoke('passwords:delete', id),
+    generate:  (opts: unknown)                 => ipcRenderer.invoke('passwords:generate', opts),
+  },
+
+  // SSH key manager
+  ssh: {
+    listKeys:      ()                           => ipcRenderer.invoke('ssh:listKeys'),
+    generateKey:   (opts: unknown)              => ipcRenderer.invoke('ssh:generateKey', opts),
+    deleteKey:     (name: string)               => ipcRenderer.invoke('ssh:deleteKey', name),
+    getPublicKey:  (name: string)               => ipcRenderer.invoke('ssh:getPublicKey', name),
+    listHosts:     ()                           => ipcRenderer.invoke('ssh:listHosts'),
+    saveConfig:    (content: string)            => ipcRenderer.invoke('ssh:saveConfig', content),
+  },
+
+  // Firewall manager (UFW)
+  firewall: {
+    status:     ()                              => ipcRenderer.invoke('firewall:status'),
+    enable:     ()                              => ipcRenderer.invoke('firewall:enable'),
+    disable:    ()                              => ipcRenderer.invoke('firewall:disable'),
+    addRule:    (rule: unknown)                 => ipcRenderer.invoke('firewall:addRule', rule),
+    deleteRule: (num: number)                   => ipcRenderer.invoke('firewall:deleteRule', num),
+    reset:      ()                              => ipcRenderer.invoke('firewall:reset'),
+  },
+
+  // Process / task manager
+  processes: {
+    list:           ()                          => ipcRenderer.invoke('processes:list'),
+    kill:           (pid: number, sig?: string) => ipcRenderer.invoke('processes:kill', pid, sig),
+    getSystemStats: ()                          => ipcRenderer.invoke('processes:getSystemStats'),
+  },
+
+  // Log viewer (journalctl)
+  logs: {
+    getUnits:   ()              => ipcRenderer.invoke('logs:getUnits'),
+    query:      (opts: unknown) => ipcRenderer.invoke('logs:query', opts),
+    stream:     (opts: unknown) => ipcRenderer.invoke('logs:stream', opts),
+    stopStream: ()              => ipcRenderer.invoke('logs:stopStream'),
+    onLine: (cb: (line: string) => void) => {
+      const listener = (_: unknown, line: string) => cb(line)
+      ipcRenderer.on('logs:line', listener)
+      return () => ipcRenderer.removeListener('logs:line', listener)
+    },
+  },
+
+  // Network monitor
+  netmon: {
+    getInterfaces:  () => ipcRenderer.invoke('netmon:getInterfaces'),
+    getConnections: () => ipcRenderer.invoke('netmon:getConnections'),
+    startStream:    () => ipcRenderer.invoke('netmon:startStream'),
+    stopStream:     () => ipcRenderer.invoke('netmon:stopStream'),
+    onStats: (cb: (stats: unknown) => void) => {
+      const listener = (_: unknown, stats: unknown) => cb(stats)
+      ipcRenderer.on('netmon:stats', listener)
+      return () => ipcRenderer.removeListener('netmon:stats', listener)
+    },
+  },
+
+  // Screenshot
+  screenshot: {
+    capture:          ()                         => ipcRenderer.invoke('screenshot:capture'),
+    save:             (dataUrl: string, name?: string) => ipcRenderer.invoke('screenshot:save', dataUrl, name),
+    copyToClipboard:  (dataUrl: string)          => ipcRenderer.invoke('screenshot:copyToClipboard', dataUrl),
   },
 
   // Update checker + runner
@@ -218,6 +290,13 @@ contextBridge.exposeInMainWorld('cryogram', {
     const listener = () => cb()
     ipcRenderer.on('open:spotlight', listener)
     return () => ipcRenderer.removeListener('open:spotlight', listener)
+  },
+
+  // Super+1/2/3/4 workspace switch from main
+  onWorkspaceChanged: (cb: (n: number) => void) => {
+    const listener = (_: unknown, n: unknown) => cb(n as number)
+    ipcRenderer.on('workspace:changed', listener)
+    return () => ipcRenderer.removeListener('workspace:changed', listener)
   },
 })
 

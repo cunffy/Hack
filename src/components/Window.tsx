@@ -17,6 +17,13 @@ const NetworkScannerApp  = lazy(() => import('../apps/network-scanner/NetworkSca
 const VPNApp             = lazy(() => import('../apps/vpn/VPNApp'))
 const NotesApp           = lazy(() => import('../apps/notes/NotesApp'))
 const MailApp            = lazy(() => import('../apps/mail/MailApp'))
+const PasswordManagerApp = lazy(() => import('../apps/password-manager/PasswordManagerApp'))
+const SSHKeyManagerApp   = lazy(() => import('../apps/ssh-keys/SSHKeyManagerApp'))
+const FirewallApp        = lazy(() => import('../apps/firewall/FirewallApp'))
+const TaskManagerApp     = lazy(() => import('../apps/task-manager/TaskManagerApp'))
+const LogViewerApp       = lazy(() => import('../apps/logs/LogViewerApp'))
+const NetworkMonitorApp  = lazy(() => import('../apps/netmon/NetworkMonitorApp'))
+const ScreenshotApp      = lazy(() => import('../apps/screenshot/ScreenshotApp'))
 
 const APP_COLORS: Record<string, string> = {
   terminal:          '#00ff88',
@@ -33,6 +40,13 @@ const APP_COLORS: Record<string, string> = {
   vpn:               '#a78bfa',
   notes:             '#fbbf24',
   mail:              '#ea4335',
+  passwords:         '#ffcc00',
+  'ssh-keys':        '#00d4ff',
+  firewall:          '#ff4466',
+  'task-manager':    '#818cf8',
+  logs:              '#a855f7',
+  netmon:            '#00d4ff',
+  screenshot:        '#34d399',
 }
 
 function AppContent({ appId }: { appId: string }) {
@@ -63,6 +77,13 @@ function AppContent({ appId }: { appId: string }) {
       {appId === 'vpn'             && <VPNApp />}
       {appId === 'notes'           && <NotesApp />}
       {appId === 'mail'            && <MailApp />}
+      {appId === 'passwords'       && <PasswordManagerApp />}
+      {appId === 'ssh-keys'        && <SSHKeyManagerApp />}
+      {appId === 'firewall'        && <FirewallApp />}
+      {appId === 'task-manager'    && <TaskManagerApp />}
+      {appId === 'logs'            && <LogViewerApp />}
+      {appId === 'netmon'          && <NetworkMonitorApp />}
+      {appId === 'screenshot'      && <ScreenshotApp />}
     </Suspense>
   )
 }

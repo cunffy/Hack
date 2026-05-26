@@ -5,7 +5,8 @@ import { WindowManager } from './components/WindowManager'
 import { Dock } from './components/Dock'
 import { TitleBar } from './components/TitleBar'
 import { NotificationToast } from './components/NotificationToast'
-import { SystemHUD, AppSwitcher } from './components/Taskbar'
+import { SystemHUD } from './components/Taskbar'
+import { AppSwitcherOverlay } from './components/AppSwitcherOverlay'
 import { AnimatedBackground } from './components/AnimatedBackground'
 import { BootSplash } from './components/BootSplash'
 import { LockScreen } from './components/LockScreen'
@@ -16,6 +17,7 @@ import { SpotlightSearch } from './components/SpotlightSearch'
 import { DesktopWidgets } from './components/DesktopWidgets'
 import { NotificationHistory } from './components/NotificationHistory'
 import { SetupWizard } from './components/SetupWizard'
+import { ClipboardManager } from './components/ClipboardManager'
 import { useDesktopStore } from './store/desktopStore'
 import { useLockStore } from './store/lockStore'
 import { useWindowStore } from './store/windowStore'
@@ -32,6 +34,7 @@ export default function App() {
   const [showUpdateScreen, setShowScreen] = useState(false)
   const [spotlightOpen, setSpotlightOpen] = useState(false)
   const [notifHistoryOpen, setNotifHistoryOpen] = useState(false)
+  const [clipboardOpen, setClipboardOpen] = useState(false)
   const [setupDone, setSetupDone]         = useState(true)
 
   // After boot splash: check if PIN is enabled and lock if so; check setup wizard
@@ -140,6 +143,11 @@ export default function App() {
         e.preventDefault()
         setSpotlightOpen(o => !o)
       }
+      // Ctrl+Shift+V → clipboard history
+      if (e.ctrlKey && e.shiftKey && e.code === 'KeyV') {
+        e.preventDefault()
+        setClipboardOpen(o => !o)
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -194,8 +202,9 @@ export default function App() {
             </div>
             <NotificationToast />
             <SystemHUD />
-            <AppSwitcher />
+
             <DesktopWidgets />
+            <AppSwitcherOverlay />
           </motion.div>
         )}
       </AnimatePresence>
@@ -232,6 +241,9 @@ export default function App() {
 
       {/* Notification history panel */}
       <NotificationHistory open={notifHistoryOpen} onClose={() => setNotifHistoryOpen(false)} />
+
+      {/* Clipboard history panel */}
+      <ClipboardManager open={clipboardOpen} onClose={() => setClipboardOpen(false)} />
 
       {/* First-run setup wizard */}
       <AnimatePresence>

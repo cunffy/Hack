@@ -43,6 +43,13 @@ export const APP_META: Record<AppId, { label: string; color: string; icon: React
   vpn:               { label: 'VPN',              color: '#a78bfa', icon: <VPNIcon /> },
   notes:             { label: 'Notes',            color: '#fbbf24', icon: <NotesIcon /> },
   mail:              { label: 'Gmail',            color: '#ea4335', icon: <MailIcon /> },
+  passwords:         { label: 'Passwords',        color: '#ffcc00', icon: <KeyVaultIcon /> },
+  'ssh-keys':        { label: 'SSH Keys',         color: '#00d4ff', icon: <SSHIcon /> },
+  firewall:          { label: 'Firewall',         color: '#ff4466', icon: <FirewallIcon /> },
+  'task-manager':    { label: 'Tasks',            color: '#818cf8', icon: <TaskIcon /> },
+  logs:              { label: 'Logs',             color: '#a855f7', icon: <LogIcon /> },
+  netmon:            { label: 'Net Monitor',      color: '#00d4ff', icon: <NetMonIcon /> },
+  screenshot:        { label: 'Screenshot',       color: '#34d399', icon: <ScreenshotIcon /> },
 }
 
 interface X11Win { id: string; desktop: number; title: string }
@@ -437,6 +444,76 @@ function MailIcon() {
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="4" width="20" height="16" rx="2"/>
       <path d="M2 7l10 7 10-7"/>
+    </svg>
+  )
+}
+
+function KeyVaultIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="14" r="4"/>
+      <line x1="12" y1="14" x2="20" y2="14"/>
+      <line x1="18" y1="14" x2="18" y2="17"/>
+      <line x1="20" y1="14" x2="20" y2="12"/>
+    </svg>
+  )
+}
+
+function SSHIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      <circle cx="12" cy="16" r="1.2" fill="currentColor"/>
+    </svg>
+  )
+}
+
+function FirewallIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="15" x2="12" y2="16"/>
+    </svg>
+  )
+}
+
+function TaskIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+      <line x1="3" y1="9" x2="21" y2="9"/>
+      <line x1="3" y1="15" x2="21" y2="15"/>
+      <line x1="9" y1="9" x2="9" y2="21"/>
+    </svg>
+  )
+}
+
+function LogIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="8" y1="13" x2="16" y2="13"/>
+      <line x1="8" y1="17" x2="12" y2="17"/>
+    </svg>
+  )
+}
+
+function NetMonIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+    </svg>
+  )
+}
+
+function ScreenshotIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+      <circle cx="12" cy="13" r="4"/>
     </svg>
   )
 }

@@ -95,6 +95,9 @@ declare global {
       focusWindow(id: string): Promise<boolean>
       closeWindow(id: string): Promise<boolean>
       hideShell(): Promise<boolean>
+      getCurrentWorkspace(): Promise<number>
+      switchWorkspace(n: number): Promise<boolean>
+      getWorkspaceCount(): Promise<number>
     }
     phone: {
       getDevices(): Promise<PhoneDevice[]>
@@ -128,6 +131,53 @@ declare global {
       run(password?: string): Promise<{ success: boolean }>
       onProgress(cb: (line: string) => void): () => void
     }
+    passwords: {
+      getAll(): Promise<PasswordEntry[]>
+      add(entry: Omit<PasswordEntry, 'id' | 'createdAt' | 'updatedAt'>): Promise<PasswordEntry>
+      update(id: string, patch: Partial<PasswordEntry>): Promise<boolean>
+      delete(id: string): Promise<boolean>
+      generate(opts: PasswordGenOpts): Promise<string>
+    }
+    ssh: {
+      listKeys(): Promise<SshKey[]>
+      generateKey(opts: SshKeyGenOpts): Promise<{ success: boolean; error?: string }>
+      deleteKey(name: string): Promise<boolean>
+      getPublicKey(name: string): Promise<string>
+      listHosts(): Promise<SshHost[]>
+      saveConfig(content: string): Promise<boolean>
+    }
+    firewall: {
+      status(): Promise<FirewallStatus>
+      enable(): Promise<{ success: boolean }>
+      disable(): Promise<{ success: boolean }>
+      addRule(rule: FirewallRuleInput): Promise<{ success: boolean; error?: string }>
+      deleteRule(num: number): Promise<{ success: boolean }>
+      reset(): Promise<{ success: boolean }>
+    }
+    processes: {
+      list(): Promise<ProcessEntry[]>
+      kill(pid: number, signal?: string): Promise<{ success: boolean; error?: string }>
+      getSystemStats(): Promise<SystemStats>
+    }
+    logs: {
+      getUnits(): Promise<string[]>
+      query(opts: LogQueryOpts): Promise<{ lines: LogLine[] }>
+      stream(opts: LogQueryOpts): Promise<void>
+      stopStream(): Promise<void>
+      onLine(cb: (line: string) => void): () => void
+    }
+    netmon: {
+      getInterfaces(): Promise<InterfaceStats[]>
+      getConnections(): Promise<NetworkConnection[]>
+      startStream(): Promise<void>
+      stopStream(): Promise<void>
+      onStats(cb: (stats: NetmonStats) => void): () => void
+    }
+    screenshot: {
+      capture(): Promise<{ dataUrl: string; width: number; height: number }>
+      save(dataUrl: string, filename?: string): Promise<{ path: string }>
+      copyToClipboard(dataUrl: string): Promise<boolean>
+    }
     notifyUnlock(): void
     onLock(cb: () => void): () => void
     onOpenApp(cb: (appId: string) => void): () => void
@@ -136,6 +186,126 @@ declare global {
     onHudBrightness(cb: (v: { level: number }) => void): () => void
     onAppSwitcher(cb: (dir: 'next' | 'prev') => void): () => void
     onSpotlight(cb: () => void): () => void
+    onWorkspaceChanged(cb: (n: number) => void): () => void
+  }
+
+  // ── New app types ────────────────────────────────────────────────────────────
+
+  interface PasswordEntry {
+    id: string
+    title: string
+    username: string
+    password: string
+    url?: string
+    notes?: string
+    tags?: string[]
+    createdAt: string
+    updatedAt: string
+  }
+
+  interface PasswordGenOpts {
+    length: number
+    upper: boolean
+    lower: boolean
+    numbers: boolean
+    symbols: boolean
+  }
+
+  interface SshKey {
+    name: string
+    type: string
+    fingerprint: string
+    publicKey: string
+    hasPrivate: boolean
+    path: string
+  }
+
+  interface SshKeyGenOpts {
+    name: string
+    type: 'ed25519' | 'rsa'
+    bits?: number
+    comment?: string
+    passphrase?: string
+  }
+
+  interface SshHost {
+    host: string
+    hostname?: string
+    user?: string
+    port?: string
+    identityFile?: string
+  }
+
+  interface FirewallStatus {
+    active: boolean
+    defaultIn: string
+    defaultOut: string
+    rules: FirewallRule[]
+  }
+
+  interface FirewallRule {
+    number: number
+    to: string
+    action: string
+    from: string
+    v6: boolean
+  }
+
+  interface FirewallRuleInput {
+    port?: string
+    proto?: string
+    from?: string
+    action: 'allow' | 'deny'
+  }
+
+  interface ProcessEntry {
+    pid: number
+    name: string
+    cpu: number
+    memMb: number
+    memPct: number
+    status: string
+    user: string
+    command: string
+  }
+
+  interface SystemStats {
+    cpuPct: number
+    memTotal: number
+    memUsed: number
+    memPct: number
+  }
+
+  interface LogLine {
+    timestamp: string
+    unit: string
+    level: string
+    message: string
+    raw: string
+  }
+
+  interface LogQueryOpts {
+    unit?: string
+    lines?: number
+    since?: string
+    priority?: string
+    search?: string
+  }
+
+  interface InterfaceStats {
+    name: string
+    rxBytes: number
+    txBytes: number
+  }
+
+  interface NetmonStats {
+    interfaces: Array<{
+      name: string
+      rxRate: number
+      txRate: number
+      rxTotal: number
+      txTotal: number
+    }>
   }
 
   interface WmWindow {

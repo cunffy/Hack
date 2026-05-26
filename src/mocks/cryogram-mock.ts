@@ -303,6 +303,56 @@ export function installMockCryogram(): void {
       focusWindow: async () => true,
       closeWindow: async () => true,
       hideShell: async () => true,
+      getCurrentWorkspace: async () => 0,
+      switchWorkspace: async () => true,
+      getWorkspaceCount: async () => 4,
+    },
+    passwords: {
+      getAll: async () => [],
+      add: async (e: any) => ({ ...e, id: 'mock', createdAt: '', updatedAt: '' }),
+      update: async () => true,
+      delete: async () => true,
+      generate: async () => 'MockPass123!',
+    },
+    ssh: {
+      listKeys: async () => [],
+      generateKey: async () => ({ success: false }),
+      deleteKey: async () => false,
+      getPublicKey: async () => '',
+      listHosts: async () => [],
+      saveConfig: async () => true,
+    },
+    firewall: {
+      status: async () => ({ active: false, defaultIn: 'deny', defaultOut: 'allow', rules: [] }),
+      enable: async () => ({ success: false }),
+      disable: async () => ({ success: false }),
+      addRule: async () => ({ success: false }),
+      deleteRule: async () => ({ success: false }),
+      reset: async () => ({ success: false }),
+    },
+    processes: {
+      list: async () => [],
+      kill: async () => ({ success: false }),
+      getSystemStats: async () => ({ cpuPct: 0, memTotal: 0, memUsed: 0, memPct: 0 }),
+    },
+    logs: {
+      getUnits: async () => ['all'],
+      query: async () => ({ lines: [] }),
+      stream: async () => {},
+      stopStream: async () => {},
+      onLine: (cb: any) => { void cb; return () => {} },
+    },
+    netmon: {
+      getInterfaces: async () => [],
+      getConnections: async () => [],
+      startStream: async () => {},
+      stopStream: async () => {},
+      onStats: (cb: any) => { void cb; return () => {} },
+    },
+    screenshot: {
+      capture: async () => ({ dataUrl: '', width: 0, height: 0 }),
+      save: async () => ({ path: '' }),
+      copyToClipboard: async () => false,
     },
 
     phone: {
@@ -351,6 +401,7 @@ export function installMockCryogram(): void {
     onHudBrightness: (cb) => { void cb; return () => {} },
     onAppSwitcher: (cb) => { void cb; return () => {} },
     onSpotlight: (cb) => { void cb; return () => {} },
+    onWorkspaceChanged: (cb) => { void cb; return () => {} },
 
     onNotification: (cb) => {
       notifListeners.push(cb)
