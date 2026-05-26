@@ -302,6 +302,7 @@ export function installMockCryogram(): void {
       getWindows: async () => [],
       focusWindow: async () => true,
       closeWindow: async () => true,
+      hideShell: async () => true,
     },
 
     phone: {

@@ -117,6 +117,7 @@ contextBridge.exposeInMainWorld('cryogram', {
     getWindows:  ()             => ipcRenderer.invoke('wm:getWindows'),
     focusWindow: (id: string)   => ipcRenderer.invoke('wm:focusWindow', id),
     closeWindow: (id: string)   => ipcRenderer.invoke('wm:closeWindow', id),
+    hideShell:   ()             => ipcRenderer.invoke('wm:hideShell'),
   },
 
   // Phone companion (ADB + scrcpy)

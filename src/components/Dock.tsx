@@ -258,7 +258,13 @@ export function Dock() {
                     >
                       <motion.button
                         onClick={async () => {
-                          try { await (window.cryogram as any).wm?.focusWindow(xwin.id) } catch {}
+                          try {
+                            // Hide the shell so the external window becomes visible
+                            await (window.cryogram as any).wm?.hideShell()
+                            // Small delay lets the shell minimize before wmctrl raises the target
+                            await new Promise(r => setTimeout(r, 120))
+                            await (window.cryogram as any).wm?.focusWindow(xwin.id)
+                          } catch {}
                         }}
                         animate={{ width: BASE, height: BASE }}
                         className="relative rounded-2xl flex items-center justify-center overflow-hidden"
@@ -294,7 +300,7 @@ export function Dock() {
             transition={{ delay: 3, duration: 0.5 }}
             style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', fontFamily: '-apple-system, sans-serif' }}
           >
-            Drag to reorder · Right-click for options
+            Drag to reorder · Right-click for options · Super+D to show/hide shell
           </motion.div>
         </div>
       </div>

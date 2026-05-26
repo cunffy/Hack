@@ -94,6 +94,7 @@ declare global {
       getWindows(): Promise<WmWindow[]>
       focusWindow(id: string): Promise<boolean>
       closeWindow(id: string): Promise<boolean>
+      hideShell(): Promise<boolean>
     }
     phone: {
       getDevices(): Promise<PhoneDevice[]>
@@ -141,6 +142,7 @@ declare global {
     id: string
     desktop: number
     title: string
+    host?: string
   }
 
   interface PhoneDevice { serial: string; model: string; status: string }

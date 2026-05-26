@@ -74,7 +74,16 @@ function createWindow(): void {
     mainWindow!.maximize()
     mainWindow!.on('restore', () => mainWindow?.maximize())
 
-    globalShortcut.register('Super+D', () => {})
+    globalShortcut.register('Super+D', () => {
+      if (screenLocked) return
+      if (mainWindow?.isMinimized() || !mainWindow?.isVisible()) {
+        mainWindow?.show()
+        mainWindow?.maximize()
+        mainWindow?.focus()
+      } else {
+        mainWindow?.minimize()
+      }
+    })
     globalShortcut.register('Super+Tab', () => {})
     globalShortcut.register('Super+L', () => lockScreen())
     globalShortcut.register('CommandOrControl+Alt+T', () => {
@@ -165,6 +174,12 @@ app.whenReady().then(() => {
     else mainWindow?.maximize()
   })
   ipcMain.on('window:close', () => mainWindow?.close())
+
+  // Hide shell so an external X11 app can be seen; Super+D restores it
+  ipcMain.handle('wm:hideShell', () => {
+    mainWindow?.minimize()
+    return true
+  })
 
   // Raise Electron above all X11 windows when locked so apps like Brave
   // cannot be seen or clicked through the lock screen.
