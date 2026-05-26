@@ -210,6 +210,7 @@ export function registerSystemHandlers(): void {
   // The sudoers rule in /etc/sudoers.d/cryogram-power grants NOPASSWD for these.
   ipcMain.handle('system:shutdown', async () => { await sh('sudo systemctl poweroff') })
   ipcMain.handle('system:reboot',   async () => { await sh('sudo systemctl reboot') })
+  ipcMain.handle('system:sleep',    async () => { await sh('sudo systemctl suspend') })
   ipcMain.handle('system:lock', async () => {
     // Tell renderer to show in-app lock screen
     BrowserWindow.getAllWindows()[0]?.webContents.send('screen:lock')

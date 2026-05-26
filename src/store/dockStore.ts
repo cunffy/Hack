@@ -5,7 +5,7 @@ import { AppId } from './windowStore'
 export const DEFAULT_DOCK: AppId[] = [
   'terminal', 'editor', 'mail', 'password-tester', 'leaker',
   'files', 'passwords', 'scanner', 'firewall', 'vpn',
-  'task-manager', 'netmon', 'logs', 'launcher', 'settings', 'system',
+  'task-manager', 'netmon', 'logs', 'launcher', 'settings',
 ]
 
 interface DockStore {

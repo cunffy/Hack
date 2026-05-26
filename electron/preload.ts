@@ -97,6 +97,7 @@ contextBridge.exposeInMainWorld('cryogram', {
     syncTime:             ()                              => ipcRenderer.invoke('system:syncTime'),
     shutdown:             ()                              => ipcRenderer.invoke('system:shutdown'),
     reboot:               ()                              => ipcRenderer.invoke('system:reboot'),
+    sleep:                ()                              => ipcRenderer.invoke('system:sleep'),
     lock:                 ()                              => ipcRenderer.invoke('system:lock'),
     pickWallpaper:        ()                              => ipcRenderer.invoke('system:pickWallpaper'),
     setWallpaper:         (path: string)                  => ipcRenderer.invoke('system:setWallpaper', path),

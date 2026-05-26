@@ -277,6 +277,7 @@ export function installMockCryogram(): void {
       setPinEnabled: async () => true,
       shutdown: async () => { alert('[mock] Shutdown called') },
       reboot: async () => { alert('[mock] Reboot called') },
+      sleep: async () => { alert('[mock] Sleep called') },
       lock: async () => { alert('[mock] Lock screen called') },
     },
 

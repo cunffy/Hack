@@ -10,7 +10,6 @@ const LeakerApp          = lazy(() => import('../apps/leaker/LeakerApp'))
 const SettingsApp        = lazy(() => import('../apps/settings/SettingsApp'))
 const FilesApp           = lazy(() => import('../apps/files/FilesApp'))
 const LauncherApp        = lazy(() => import('../apps/launcher/LauncherApp'))
-const SystemApp          = lazy(() => import('../apps/system/SystemApp'))
 const OpticSEOApp        = lazy(() => import('../apps/opticseo/OpticSEOApp'))
 const PhoneApp           = lazy(() => import('../apps/phone/PhoneApp'))
 const NetworkScannerApp  = lazy(() => import('../apps/network-scanner/NetworkScannerApp'))
@@ -67,10 +66,9 @@ function AppContent({ appId }: { appId: string }) {
       {appId === 'editor'          && <EditorApp />}
       {appId === 'password-tester' && <PasswordTesterApp />}
       {appId === 'leaker'          && <LeakerApp />}
-      {appId === 'settings'        && <SettingsApp />}
+      {(appId === 'settings' || appId === 'system') && <SettingsApp />}
       {appId === 'files'           && <FilesApp />}
       {appId === 'launcher'        && <LauncherApp />}
-      {appId === 'system'          && <SystemApp />}
       {appId === 'opticseo'        && <OpticSEOApp />}
       {appId === 'phone'           && <PhoneApp />}
       {appId === 'scanner'         && <NetworkScannerApp />}

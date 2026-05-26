@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useWindowStore } from '../store/windowStore'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
 import { QuickSettings } from './QuickSettings'
+import { UserPanel } from './UserPanel'
 
 // ── Power confirmation modal ───────────────────────────────────────────────
 function PowerModal({ action, onCancel }: { action: 'restart' | 'shutdown'; onCancel: () => void }) {
@@ -112,7 +113,7 @@ function CryogramMenu() {
   const items = [
     { label: 'About Cryogram',       action: () => { openApp('settings'); setOpen(false) } },
     { sep: true },
-    { label: 'System Preferences',   action: () => { openApp('system'); setOpen(false) } },
+    { label: 'System Preferences',   action: () => { openApp('settings'); setOpen(false) } },
     { sep: true },
     { label: 'Lock Screen',          action: () => { !isMock && window.cryogram.system.lock(); setOpen(false) } },
     { label: 'Restart…',             action: () => { if (!isMock) { setPowerModal('restart'); setOpen(false) } } },
@@ -198,6 +199,8 @@ export function TitleBar() {
   const [time, setTime] = useState('')
   const [date, setDate] = useState('')
   const [quickSettingsOpen, setQuickSettingsOpen] = useState(false)
+  const [userPanelOpen, setUserPanelOpen] = useState(false)
+  const [profileName, setProfileName] = useState('Operator')
   const focusedWindow = useWindowStore(s => s.windows.find(w => w.focused && !w.minimized))
   const systemTzRef = useRef<string>('')
 
@@ -217,6 +220,18 @@ export function TitleBar() {
     tick()
     const id = setInterval(tick, 10000)
     return () => clearInterval(id)
+  }, [])
+
+  // Refresh profile name when settings change
+  useEffect(() => {
+    const refresh = () => {
+      window.cryogram.settings.get('profile.name').then(v => {
+        if (v && typeof v === 'string') setProfileName(v)
+      }).catch(() => {})
+    }
+    refresh()
+    window.addEventListener('cryogram:profileUpdated', refresh)
+    return () => window.removeEventListener('cryogram:profileUpdated', refresh)
   }, [])
 
   return (
@@ -267,6 +282,30 @@ export function TitleBar() {
         className="ml-auto flex items-center gap-0.5"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       >
+        {/* User panel button */}
+        <button
+          onClick={() => setUserPanelOpen(o => !o)}
+          title={profileName}
+          className="flex items-center gap-1.5 px-2 h-6 rounded-md transition-colors"
+          style={{ background: userPanelOpen ? 'rgba(255,255,255,0.12)' : 'transparent', color: userPanelOpen ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.65)' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.09)'; e.currentTarget.style.color = 'rgba(255,255,255,0.9)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = userPanelOpen ? 'rgba(255,255,255,0.12)' : 'transparent'; e.currentTarget.style.color = userPanelOpen ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.65)' }}
+        >
+          <div style={{
+            width: 18, height: 18, borderRadius: 6, flexShrink: 0,
+            background: 'linear-gradient(135deg, var(--cryo-accent) 0%, #bb88ff 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 9, fontWeight: 700, color: '#000',
+          }}>
+            {profileName.trim()[0]?.toUpperCase() || 'O'}
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 500, maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {profileName}
+          </span>
+        </button>
+
+        <div style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.1)', margin: '0 2px' }} />
+
         {/* Notification history bell */}
         <button
           onClick={() => { (window as any).__cryogram_toggleNotifHistory?.() }}
@@ -302,6 +341,9 @@ export function TitleBar() {
 
       {/* Quick Settings panel */}
       <QuickSettings open={quickSettingsOpen} onClose={() => setQuickSettingsOpen(false)} />
+
+      {/* User panel */}
+      <UserPanel open={userPanelOpen} onClose={() => setUserPanelOpen(false)} />
 
       {/* Bottom accent line */}
       <div className="absolute inset-x-0 bottom-0 h-px pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, var(--cryo-a20) 30%, var(--cryo-a35) 50%, var(--cryo-a20) 70%, transparent)' }} />

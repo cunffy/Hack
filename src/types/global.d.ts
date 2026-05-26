@@ -78,6 +78,7 @@ declare global {
       syncTime(): Promise<{ success: boolean }>
       shutdown(): Promise<void>
       reboot(): Promise<void>
+      sleep(): Promise<void>
       lock(): Promise<void>
       pickWallpaper(): Promise<string | null>
       setWallpaper(path: string): Promise<boolean>
