@@ -241,6 +241,69 @@ contextBridge.exposeInMainWorld('cryogram', {
     },
   },
 
+  // TLS cert inspector
+  cert: {
+    inspect:  (host: string, port?: number) => ipcRenderer.invoke('cert:inspect', host, port),
+    parsePem: (pem: string)                 => ipcRenderer.invoke('cert:parsePem', pem),
+  },
+
+  // Docker
+  docker: {
+    listContainers: ()                          => ipcRenderer.invoke('docker:listContainers'),
+    listImages:     ()                          => ipcRenderer.invoke('docker:listImages'),
+    startContainer: (id: string)                => ipcRenderer.invoke('docker:startContainer', id),
+    stopContainer:  (id: string)                => ipcRenderer.invoke('docker:stopContainer', id),
+    restartContainer:(id: string)               => ipcRenderer.invoke('docker:restartContainer', id),
+    removeContainer: (id: string)               => ipcRenderer.invoke('docker:removeContainer', id),
+    getStats:       ()                          => ipcRenderer.invoke('docker:getStats'),
+    pullImage:      (name: string)              => ipcRenderer.invoke('docker:pullImage', name),
+    removeImage:    (id: string)                => ipcRenderer.invoke('docker:removeImage', id),
+    getLogs:        (id: string, lines?: number)=> ipcRenderer.invoke('docker:getLogs', id, lines),
+    onPullLine: (cb: (line: string) => void) => {
+      const listener = (_: unknown, line: string) => cb(line)
+      ipcRenderer.on('docker:pullLine', listener)
+      return () => ipcRenderer.removeListener('docker:pullLine', listener)
+    },
+  },
+
+  // Git
+  git: {
+    isRepo:      (repoPath: string)                        => ipcRenderer.invoke('git:isRepo', repoPath),
+    status:      (repoPath: string)                        => ipcRenderer.invoke('git:status', repoPath),
+    log:         (repoPath: string, limit?: number)        => ipcRenderer.invoke('git:log', repoPath, limit),
+    diff:        (repoPath: string, file?: string, staged?: boolean) => ipcRenderer.invoke('git:diff', repoPath, file, staged),
+    getBranches: (repoPath: string)                        => ipcRenderer.invoke('git:getBranches', repoPath),
+    checkout:    (repoPath: string, branch: string)        => ipcRenderer.invoke('git:checkout', repoPath, branch),
+    stage:       (repoPath: string, files: string[])       => ipcRenderer.invoke('git:stage', repoPath, files),
+    unstage:     (repoPath: string, files: string[])       => ipcRenderer.invoke('git:unstage', repoPath, files),
+    commit:      (repoPath: string, message: string)       => ipcRenderer.invoke('git:commit', repoPath, message),
+    push:        (repoPath: string)                        => ipcRenderer.invoke('git:push', repoPath),
+    pull:        (repoPath: string)                        => ipcRenderer.invoke('git:pull', repoPath),
+    stash:       (repoPath: string)                        => ipcRenderer.invoke('git:stash', repoPath),
+    stashPop:    (repoPath: string)                        => ipcRenderer.invoke('git:stashPop', repoPath),
+    init:        (repoPath: string)                        => ipcRenderer.invoke('git:init', repoPath),
+  },
+
+  // SQLite browser
+  db: {
+    open:             (filePath: string)                            => ipcRenderer.invoke('db:open', filePath),
+    close:            (sessionId: string)                           => ipcRenderer.invoke('db:close', sessionId),
+    listTables:       (sessionId: string)                           => ipcRenderer.invoke('db:listTables', sessionId),
+    getSchema:        (sessionId: string, table: string)            => ipcRenderer.invoke('db:getSchema', sessionId, table),
+    getTableRowCount: (sessionId: string, table: string)            => ipcRenderer.invoke('db:getTableRowCount', sessionId, table),
+    query:            (sessionId: string, sql: string, page?: number, pageSize?: number) => ipcRenderer.invoke('db:query', sessionId, sql, page, pageSize),
+  },
+
+  // Trash
+  trash: {
+    list:            ()            => ipcRenderer.invoke('trash:list'),
+    moveToTrash:     (path: string)=> ipcRenderer.invoke('trash:moveToTrash', path),
+    restore:         (name: string)=> ipcRenderer.invoke('trash:restore', name),
+    deletePermanent: (name: string)=> ipcRenderer.invoke('trash:deletePermanent', name),
+    empty:           ()            => ipcRenderer.invoke('trash:empty'),
+    getSize:         ()            => ipcRenderer.invoke('trash:getSize'),
+  },
+
   // Tell main process the lock screen was dismissed so it clears alwaysOnTop
   notifyUnlock: () => ipcRenderer.send('screen:unlock'),
 

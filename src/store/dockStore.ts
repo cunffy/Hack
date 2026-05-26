@@ -6,6 +6,8 @@ export const DEFAULT_DOCK: AppId[] = [
   'terminal', 'editor', 'mail', 'password-tester', 'leaker',
   'files', 'passwords', 'scanner', 'firewall', 'vpn',
   'task-manager', 'netmon', 'logs', 'launcher', 'settings',
+  'calculator', 'crypto-tools', 'api-tester', 'cert-inspector',
+  'docker', 'git', 'database', 'markdown', 'trash',
 ]
 
 interface DockStore {

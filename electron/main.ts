@@ -42,6 +42,11 @@ import { registerProcessHandlers } from './ipc/processes'
 import { registerLogHandlers } from './ipc/logs'
 import { registerNetmonHandlers } from './ipc/netmon'
 import { registerScreenshotHandlers } from './ipc/screenshot'
+import { registerCertHandlers } from './ipc/cert'
+import { registerDockerHandlers } from './ipc/docker'
+import { registerGitHandlers } from './ipc/git'
+import { registerDatabaseHandlers } from './ipc/database'
+import { registerTrashHandlers } from './ipc/trash'
 
 let mainWindow: BrowserWindow | null = null
 let screenLocked = false  // tracked in main so shortcuts can check it
@@ -223,6 +228,11 @@ app.whenReady().then(() => {
   registerLogHandlers()
   registerNetmonHandlers()
   registerScreenshotHandlers()
+  registerCertHandlers()
+  registerDockerHandlers()
+  registerGitHandlers()
+  registerDatabaseHandlers()
+  registerTrashHandlers()
 
   createWindow()
   startNotificationBridge()

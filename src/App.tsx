@@ -18,6 +18,8 @@ import { DesktopWidgets } from './components/DesktopWidgets'
 import { NotificationHistory } from './components/NotificationHistory'
 import { SetupWizard } from './components/SetupWizard'
 import { ClipboardManager } from './components/ClipboardManager'
+import { MissionControl } from './components/MissionControl'
+import { KeyboardShortcutsOverlay } from './components/KeyboardShortcutsOverlay'
 import { useDesktopStore } from './store/desktopStore'
 import { useLockStore } from './store/lockStore'
 import { useWindowStore } from './store/windowStore'
@@ -35,6 +37,8 @@ export default function App() {
   const [spotlightOpen, setSpotlightOpen] = useState(false)
   const [notifHistoryOpen, setNotifHistoryOpen] = useState(false)
   const [clipboardOpen, setClipboardOpen] = useState(false)
+  const [missionControlOpen, setMissionControlOpen] = useState(false)
+  const [kbShortcutsOpen, setKbShortcutsOpen] = useState(false)
   const [setupDone, setSetupDone]         = useState(true)
 
   // After boot splash: check if PIN is enabled and lock if so; check setup wizard
@@ -148,6 +152,16 @@ export default function App() {
         e.preventDefault()
         setClipboardOpen(o => !o)
       }
+      // Super+M → Mission Control
+      if (e.metaKey && e.code === 'KeyM') {
+        e.preventDefault()
+        setMissionControlOpen(o => !o)
+      }
+      // Ctrl+/ → Keyboard shortcuts
+      if (e.ctrlKey && e.code === 'Slash') {
+        e.preventDefault()
+        setKbShortcutsOpen(o => !o)
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -244,6 +258,12 @@ export default function App() {
 
       {/* Clipboard history panel */}
       <ClipboardManager open={clipboardOpen} onClose={() => setClipboardOpen(false)} />
+
+      {/* Mission Control (Super+M) */}
+      <MissionControl open={missionControlOpen} onClose={() => setMissionControlOpen(false)} />
+
+      {/* Keyboard shortcuts overlay (Ctrl+/) */}
+      <KeyboardShortcutsOverlay open={kbShortcutsOpen} onClose={() => setKbShortcutsOpen(false)} />
 
       {/* First-run setup wizard */}
       <AnimatePresence>

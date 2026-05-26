@@ -50,6 +50,15 @@ export const APP_META: Record<AppId, { label: string; color: string; icon: React
   logs:              { label: 'Logs',             color: '#a855f7', icon: <LogIcon /> },
   netmon:            { label: 'Net Monitor',      color: '#00d4ff', icon: <NetMonIcon /> },
   screenshot:        { label: 'Screenshot',       color: '#34d399', icon: <ScreenshotIcon /> },
+  calculator:        { label: 'Calculator',       color: '#facc15', icon: <CalcIcon /> },
+  'crypto-tools':    { label: 'Crypto Tools',     color: '#00d4ff', icon: <CryptoIcon /> },
+  'api-tester':      { label: 'API Tester',       color: '#fb923c', icon: <APIIcon /> },
+  'cert-inspector':  { label: 'Cert Inspector',   color: '#4ade80', icon: <CertIcon /> },
+  docker:            { label: 'Docker',           color: '#2496ed', icon: <DockerIcon /> },
+  git:               { label: 'Git',              color: '#f05033', icon: <GitIcon /> },
+  database:          { label: 'SQLite',           color: '#a855f7', icon: <DBIcon /> },
+  markdown:          { label: 'Markdown',         color: '#818cf8', icon: <MarkdownIcon /> },
+  trash:             { label: 'Trash',            color: '#94a3b8', icon: <TrashIcon /> },
 }
 
 interface X11Win { id: string; desktop: number; title: string }
@@ -517,3 +526,88 @@ function ScreenshotIcon() {
     </svg>
   )
 }
+
+function CalcIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="2" width="16" height="20" rx="2"/>
+      <line x1="8" y1="6" x2="16" y2="6"/>
+      <line x1="8" y1="10" x2="10" y2="10"/><line x1="12" y1="10" x2="14" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/>
+      <line x1="8" y1="14" x2="10" y2="14"/><line x1="12" y1="14" x2="14" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/>
+      <line x1="8" y1="18" x2="10" y2="18"/><line x1="12" y1="18" x2="16" y2="18"/>
+    </svg>
+  )
+}
+
+function CryptoIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>
+  )
+}
+
+function APIIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+    </svg>
+  )
+}
+
+function CertIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="6"/>
+      <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+    </svg>
+  )
+}
+
+function DockerIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+    </svg>
+  )
+}
+
+function GitIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+      <path d="M6 9v3a2 2 0 0 0 2 2h4"/><line x1="18" y1="9" x2="18" y2="15"/>
+    </svg>
+  )
+}
+
+function DBIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <ellipse cx="12" cy="5" rx="9" ry="3"/>
+      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+    </svg>
+  )
+}
+
+function MarkdownIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <path d="M10 13H8v4H6V13H4v-2h6v2z"/><polyline points="14 13 16 15 18 13"/><line x1="16" y1="15" x2="16" y2="17"/>
+    </svg>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6"/>
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+    </svg>
+  )
+}
+

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot'
+export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot' | 'calculator' | 'crypto-tools' | 'api-tester' | 'cert-inspector' | 'docker' | 'git' | 'database' | 'markdown' | 'trash'
 
 export interface AppWindow {
   id: string
@@ -52,6 +52,15 @@ const APP_META: Record<AppId, { title: string; width: number; height: number }> 
   logs:             { title: 'Log Viewer',          width: 960,  height: 640 },
   netmon:           { title: 'Network Monitor',     width: 900,  height: 600 },
   screenshot:       { title: 'Screenshot',          width: 900,  height: 640 },
+  calculator:       { title: 'Calculator',          width: 560,  height: 520 },
+  'crypto-tools':   { title: 'Crypto Tools',        width: 720,  height: 580 },
+  'api-tester':     { title: 'API Tester',          width: 1100, height: 720 },
+  'cert-inspector': { title: 'Cert Inspector',      width: 780,  height: 580 },
+  docker:           { title: 'Docker',              width: 960,  height: 640 },
+  git:              { title: 'Git Client',          width: 980,  height: 640 },
+  database:         { title: 'SQLite Browser',      width: 960,  height: 640 },
+  markdown:         { title: 'Markdown Editor',     width: 1000, height: 680 },
+  trash:            { title: 'Trash',               width: 820,  height: 560 },
 }
 
 let instanceCounter = 0

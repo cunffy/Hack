@@ -2,6 +2,7 @@ import { useRef, useCallback, lazy, Suspense, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AppWindow as AppWindowType, useWindowStore } from '../store/windowStore'
+import { AppCrashBoundary } from './AppCrashBoundary'
 
 const TerminalApp        = lazy(() => import('../apps/terminal/Terminal'))
 const EditorApp          = lazy(() => import('../apps/editor/Editor'))
@@ -23,6 +24,15 @@ const TaskManagerApp     = lazy(() => import('../apps/task-manager/TaskManagerAp
 const LogViewerApp       = lazy(() => import('../apps/logs/LogViewerApp'))
 const NetworkMonitorApp  = lazy(() => import('../apps/netmon/NetworkMonitorApp'))
 const ScreenshotApp      = lazy(() => import('../apps/screenshot/ScreenshotApp'))
+const CalculatorApp      = lazy(() => import('../apps/calculator/CalculatorApp'))
+const CryptoToolsApp     = lazy(() => import('../apps/crypto-tools/CryptoToolsApp'))
+const APITesterApp       = lazy(() => import('../apps/api-tester/APITesterApp'))
+const CertInspectorApp   = lazy(() => import('../apps/cert-inspector/CertInspectorApp'))
+const DockerApp          = lazy(() => import('../apps/docker/DockerApp'))
+const GitApp             = lazy(() => import('../apps/git/GitApp'))
+const DatabaseApp        = lazy(() => import('../apps/database/DatabaseApp'))
+const MarkdownEditorApp  = lazy(() => import('../apps/markdown/MarkdownEditorApp'))
+const TrashApp           = lazy(() => import('../apps/trash/TrashApp'))
 
 const APP_COLORS: Record<string, string> = {
   terminal:          '#00ff88',
@@ -46,10 +56,20 @@ const APP_COLORS: Record<string, string> = {
   logs:              '#a855f7',
   netmon:            '#00d4ff',
   screenshot:        '#34d399',
+  calculator:        '#facc15',
+  'crypto-tools':    '#00d4ff',
+  'api-tester':      '#fb923c',
+  'cert-inspector':  '#4ade80',
+  docker:            '#2496ed',
+  git:               '#f05033',
+  database:          '#a855f7',
+  markdown:          '#818cf8',
+  trash:             '#94a3b8',
 }
 
 function AppContent({ appId }: { appId: string }) {
   return (
+    <AppCrashBoundary appId={appId}>
     <Suspense
       fallback={
         <div className="flex-1 flex items-center justify-center">
@@ -82,7 +102,17 @@ function AppContent({ appId }: { appId: string }) {
       {appId === 'logs'            && <LogViewerApp />}
       {appId === 'netmon'          && <NetworkMonitorApp />}
       {appId === 'screenshot'      && <ScreenshotApp />}
+      {appId === 'calculator'      && <CalculatorApp />}
+      {appId === 'crypto-tools'    && <CryptoToolsApp />}
+      {appId === 'api-tester'      && <APITesterApp />}
+      {appId === 'cert-inspector'  && <CertInspectorApp />}
+      {appId === 'docker'          && <DockerApp />}
+      {appId === 'git'             && <GitApp />}
+      {appId === 'database'        && <DatabaseApp />}
+      {appId === 'markdown'        && <MarkdownEditorApp />}
+      {appId === 'trash'           && <TrashApp />}
     </Suspense>
+    </AppCrashBoundary>
   )
 }
 

@@ -179,6 +179,55 @@ declare global {
       save(dataUrl: string, filename?: string): Promise<{ path: string }>
       copyToClipboard(dataUrl: string): Promise<boolean>
     }
+    cert: {
+      inspect(host: string, port?: number): Promise<CertInfo>
+      parsePem(pem: string): Promise<CertInfo>
+    }
+    docker: {
+      listContainers(): Promise<DockerContainer[]>
+      listImages(): Promise<DockerImage[]>
+      startContainer(id: string): Promise<boolean>
+      stopContainer(id: string): Promise<boolean>
+      restartContainer(id: string): Promise<boolean>
+      removeContainer(id: string): Promise<boolean>
+      getStats(): Promise<DockerStat[]>
+      pullImage(name: string): Promise<boolean>
+      removeImage(id: string): Promise<boolean>
+      getLogs(id: string, lines?: number): Promise<string>
+      onPullLine(cb: (line: string) => void): () => void
+    }
+    git: {
+      isRepo(repoPath: string): Promise<boolean>
+      status(repoPath: string): Promise<GitStatus>
+      log(repoPath: string, limit?: number): Promise<GitCommit[]>
+      diff(repoPath: string, file?: string, staged?: boolean): Promise<string>
+      getBranches(repoPath: string): Promise<GitBranch[]>
+      checkout(repoPath: string, branch: string): Promise<boolean>
+      stage(repoPath: string, files: string[]): Promise<boolean>
+      unstage(repoPath: string, files: string[]): Promise<boolean>
+      commit(repoPath: string, message: string): Promise<boolean>
+      push(repoPath: string): Promise<string>
+      pull(repoPath: string): Promise<string>
+      stash(repoPath: string): Promise<boolean>
+      stashPop(repoPath: string): Promise<boolean>
+      init(repoPath: string): Promise<boolean>
+    }
+    db: {
+      open(filePath: string): Promise<{ sessionId: string } | { error: string }>
+      close(sessionId: string): Promise<boolean>
+      listTables(sessionId: string): Promise<{ name: string; type: string }[]>
+      getSchema(sessionId: string, table: string): Promise<DbColumn[]>
+      getTableRowCount(sessionId: string, table: string): Promise<number>
+      query(sessionId: string, sql: string, page?: number, pageSize?: number): Promise<DbQueryResult>
+    }
+    trash: {
+      list(): Promise<TrashItem[]>
+      moveToTrash(path: string): Promise<boolean>
+      restore(name: string): Promise<boolean>
+      deletePermanent(name: string): Promise<boolean>
+      empty(): Promise<boolean>
+      getSize(): Promise<{ count: number; bytes: number }>
+    }
     notifyUnlock(): void
     onLock(cb: () => void): () => void
     onOpenApp(cb: (appId: string) => void): () => void
@@ -487,6 +536,104 @@ declare global {
     category: string
     desktopFile: string
     terminal: boolean
+  }
+
+  // ── Cert Inspector types ──────────────────────────────────────────────────
+
+  interface CertInfo {
+    subject: Record<string, string>
+    issuer: Record<string, string>
+    validFrom: string
+    validTo: string
+    daysRemaining: number
+    sans: string[]
+    publicKey: { algorithm: string; bits?: number; curve?: string }
+    fingerprints: { sha256: string; sha1?: string }
+    serialNumber: string
+    signatureAlgorithm: string
+    isCA: boolean
+  }
+
+  // ── Docker types ──────────────────────────────────────────────────────────
+
+  interface DockerContainer {
+    ID: string
+    Names: string
+    Image: string
+    Status: string
+    State: string
+    Ports: string
+    Created: string
+  }
+
+  interface DockerImage {
+    ID: string
+    Repository: string
+    Tag: string
+    Size: string
+    CreatedAt: string
+  }
+
+  interface DockerStat {
+    ID: string
+    Name: string
+    CPUPerc: string
+    MemUsage: string
+    MemPerc: string
+    NetIO: string
+    BlockIO: string
+  }
+
+  // ── Git types ─────────────────────────────────────────────────────────────
+
+  interface GitStatus {
+    branch: string
+    files: { status: string; path: string; staged: boolean }[]
+    ahead: number
+    behind: number
+  }
+
+  interface GitCommit {
+    hash: string
+    shortHash: string
+    subject: string
+    author: string
+    email: string
+    relDate: string
+    date: string
+  }
+
+  interface GitBranch {
+    name: string
+    isCurrent: boolean
+  }
+
+  // ── Database types ────────────────────────────────────────────────────────
+
+  interface DbColumn {
+    cid: number
+    name: string
+    type: string
+    notnull: number
+    dflt_value: string | null
+    pk: number
+  }
+
+  interface DbQueryResult {
+    rows: Record<string, unknown>[]
+    columns: string[]
+    total: number
+    changes?: number
+    error: string | null
+  }
+
+  // ── Trash types ───────────────────────────────────────────────────────────
+
+  interface TrashItem {
+    name: string
+    originalPath: string
+    deletionDate: string
+    size: number
   }
 }
 
