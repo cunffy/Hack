@@ -1,6 +1,6 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron'
 import { spawn } from 'child_process'
-import { promises as fs } from 'fs'
+import { promises as fs, statSync } from 'fs'
 import path from 'path'
 
 interface Finding {
@@ -105,17 +105,71 @@ export function registerCodeScannerHandlers() {
     let findings: Finding[] = []
     let scanner = 'Pattern-based'
 
-    // Try semgrep if available and requested
-    if (scannerPref === 'Auto-detect' || scannerPref === 'semgrep') {
+    if (scannerPref === 'semgrep') {
       try {
         findings = await runSemgrep(targetPath)
         scanner = 'semgrep'
-      } catch { /* fall through to pattern-based */ }
-    }
-
-    // Fall back to pattern scan
-    if (findings.length === 0 || scanner !== 'semgrep') {
+      } catch {
+        findings = await patternScan(targetPath, event)
+      }
+    } else if (scannerPref === 'bandit (Python)') {
+      try {
+        findings = await runBandit(targetPath)
+        scanner = 'bandit'
+      } catch {
+        findings = await patternScan(targetPath, event)
+      }
+    } else if (scannerPref === 'npm audit') {
+      try {
+        findings = await runNpmAudit(targetPath)
+        scanner = 'npm audit'
+      } catch {
+        findings = await patternScan(targetPath, event)
+      }
+    } else if (scannerPref === 'eslint-security') {
+      // Try project's own eslint + security plugin; fall back to pattern scan
+      try {
+        findings = await runEslintSecurity(targetPath)
+        scanner = 'eslint-security'
+      } catch {
+        findings = await patternScan(targetPath, event)
+      }
+    } else if (scannerPref === 'Pattern-based') {
       findings = await patternScan(targetPath, event)
+    } else {
+      // Auto-detect: try semgrep → bandit (if .py files) → npm audit (if package.json) → pattern
+      let detected = false
+      try {
+        findings = await runSemgrep(targetPath)
+        scanner = 'semgrep'
+        detected = true
+      } catch {}
+
+      if (!detected) {
+        try {
+          const hasPy = await hasPythonFiles(targetPath)
+          if (hasPy) {
+            findings = await runBandit(targetPath)
+            scanner = 'bandit'
+            detected = true
+          }
+        } catch {}
+      }
+
+      if (!detected) {
+        try {
+          const hasPkg = await hasPackageJson(targetPath)
+          if (hasPkg) {
+            findings = await runNpmAudit(targetPath)
+            scanner = 'npm audit'
+            detected = true
+          }
+        } catch {}
+      }
+
+      if (!detected) {
+        findings = await patternScan(targetPath, event)
+      }
     }
 
     // Count scanned files
@@ -157,6 +211,146 @@ async function runSemgrep(targetPath: string): Promise<Finding[]> {
     })
     proc.on('error', reject)
   })
+}
+
+async function runBandit(targetPath: string): Promise<Finding[]> {
+  return new Promise((resolve, reject) => {
+    const args = ['-r', targetPath, '-f', 'json', '-q']
+    const proc = spawn('bandit', args, { timeout: 60000 })
+    let out = ''
+    let err = ''
+    proc.stdout.on('data', (d: Buffer) => out += d)
+    proc.stderr.on('data', (d: Buffer) => err += d)
+    proc.on('close', () => {
+      // bandit exits non-zero when issues found — parse output regardless
+      try {
+        const data = JSON.parse(out || err)
+        const results: any[] = data.results || []
+        resolve(results.map((r: any, i: number) => ({
+          id: `bandit-${i}`,
+          severity: mapBanditSeverity(r.issue_severity),
+          rule: r.test_id || r.test_name || 'bandit',
+          file: r.filename,
+          line: r.line_number || 0,
+          code: r.code?.trim() || '',
+          message: r.issue_text || '',
+          fix: r.more_info ? `See: ${r.more_info}` : undefined,
+        })))
+      } catch { reject(new Error('Failed to parse bandit output')) }
+    })
+    proc.on('error', reject)
+  })
+}
+
+function mapBanditSeverity(s: string): Finding['severity'] {
+  const u = (s || '').toUpperCase()
+  if (u === 'HIGH') return 'HIGH'
+  if (u === 'MEDIUM') return 'MEDIUM'
+  if (u === 'LOW') return 'LOW'
+  return 'INFO'
+}
+
+async function runNpmAudit(targetPath: string): Promise<Finding[]> {
+  return new Promise((resolve, reject) => {
+    const cwd = (await_stat_isDirectory(targetPath)) ? targetPath : path.dirname(targetPath)
+    const proc = spawn('npm', ['audit', '--json'], { cwd, timeout: 60000 })
+    let out = ''
+    proc.stdout.on('data', (d: Buffer) => out += d)
+    proc.on('close', () => {
+      try {
+        const data = JSON.parse(out)
+        const vulns: any = data.vulnerabilities || {}
+        const findings: Finding[] = []
+        let idx = 0
+        for (const [name, v] of Object.entries<any>(vulns)) {
+          const severity = mapNpmSeverity(v.severity)
+          const vias: any[] = Array.isArray(v.via) ? v.via.filter((x: any) => typeof x === 'object') : []
+          const msg = vias.length > 0 ? vias.map((x: any) => x.title || x.url || '').join('; ') : `Vulnerability in ${name}`
+          findings.push({
+            id: `npm-audit-${idx++}`,
+            severity,
+            rule: `NPM:${name}`,
+            file: 'package.json',
+            line: 0,
+            code: `"${name}": "${v.range || v.version || 'unknown'}"`,
+            message: msg,
+            fix: v.fixAvailable ? `Run: npm audit fix` : 'No automatic fix available — update manually',
+          })
+        }
+        resolve(findings)
+      } catch { reject(new Error('Failed to parse npm audit output')) }
+    })
+    proc.on('error', reject)
+  })
+}
+
+async function runEslintSecurity(targetPath: string): Promise<Finding[]> {
+  return new Promise((resolve, reject) => {
+    const cwd = await_stat_isDirectory(targetPath) ? targetPath : path.dirname(targetPath)
+    const proc = spawn('npx', ['eslint', '--format', 'json', await_stat_isDirectory(targetPath) ? '.' : targetPath], {
+      cwd, timeout: 60000,
+    })
+    let out = ''
+    proc.stdout.on('data', (d: Buffer) => out += d)
+    proc.on('close', () => {
+      try {
+        const data: any[] = JSON.parse(out)
+        const findings: Finding[] = []
+        let idx = 0
+        for (const file of data) {
+          for (const msg of (file.messages || [])) {
+            if (msg.severity === 0) continue
+            findings.push({
+              id: `eslint-${idx++}`,
+              severity: msg.severity >= 2 ? 'HIGH' : 'MEDIUM',
+              rule: msg.ruleId || 'eslint',
+              file: file.filePath,
+              line: msg.line || 0,
+              code: msg.source || '',
+              message: msg.message || '',
+            })
+          }
+        }
+        resolve(findings)
+      } catch { reject(new Error('Failed to parse eslint output')) }
+    })
+    proc.on('error', reject)
+  })
+}
+
+function await_stat_isDirectory(p: string): boolean {
+  try { return statSync(p).isDirectory() } catch { return false }
+}
+
+function mapNpmSeverity(s: string): Finding['severity'] {
+  const u = (s || '').toUpperCase()
+  if (u === 'CRITICAL') return 'CRITICAL'
+  if (u === 'HIGH') return 'HIGH'
+  if (u === 'MODERATE' || u === 'MEDIUM') return 'MEDIUM'
+  if (u === 'LOW') return 'LOW'
+  return 'INFO'
+}
+
+async function hasPythonFiles(targetPath: string): Promise<boolean> {
+  try {
+    const stat = await fs.stat(targetPath)
+    if (!stat.isDirectory()) return path.extname(targetPath) === '.py'
+    const entries = await fs.readdir(targetPath, { withFileTypes: true })
+    for (const e of entries) {
+      if (!e.isDirectory() && e.name.endsWith('.py')) return true
+    }
+    return false
+  } catch { return false }
+}
+
+async function hasPackageJson(targetPath: string): Promise<boolean> {
+  try {
+    const check = path.isAbsolute(targetPath) ? targetPath : path.resolve(targetPath)
+    const stat = await fs.stat(check)
+    const dir = stat.isDirectory() ? check : path.dirname(check)
+    await fs.access(path.join(dir, 'package.json'))
+    return true
+  } catch { return false }
 }
 
 async function countFiles(dir: string, count: { n: number }, depth = 0): Promise<void> {

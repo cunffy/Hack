@@ -23,7 +23,7 @@ export function registerDockerHandlers(): void {
   ipcMain.handle('docker:restartContainer', async (_, id: string) => { await sh(`docker restart ${id} 2>/dev/null`); return true })
   ipcMain.handle('docker:removeContainer',  async (_, id: string) => { await sh(`docker rm -f ${id} 2>/dev/null`);   return true })
 
-  ipcMain.handle('docker:containerLogs', async (_, id: string, lines = 200) =>
+  ipcMain.handle('docker:getLogs', async (_, id: string, lines = 200) =>
     sh(`docker logs --tail ${lines} ${id} 2>&1`)
   )
 
