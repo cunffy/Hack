@@ -32,6 +32,8 @@ import { registerSystemHandlers } from './ipc/system'
 import { registerLauncherHandlers, killLaunchedApps } from './ipc/launcher'
 import { registerPhoneHandlers } from './ipc/phone'
 import { registerUpdaterHandlers } from './ipc/updater'
+import { registerNetworkScannerHandlers } from './ipc/network-scanner'
+import { registerVpnHandlers } from './ipc/vpn'
 
 let mainWindow: BrowserWindow | null = null
 let screenLocked = false  // tracked in main so shortcuts can check it
@@ -78,6 +80,10 @@ function createWindow(): void {
     globalShortcut.register('CommandOrControl+Alt+T', () => {
       if (screenLocked) return
       mainWindow?.webContents.send('open:app', 'terminal')
+    })
+    globalShortcut.register('CommandOrControl+Space', () => {
+      if (screenLocked) return
+      mainWindow?.webContents.send('open:spotlight')
     })
 
     // ── Volume keys ────────────────────────────────────────────────────────
@@ -176,6 +182,8 @@ app.whenReady().then(() => {
   registerLauncherHandlers()
   registerPhoneHandlers()
   registerUpdaterHandlers()
+  registerNetworkScannerHandlers()
+  registerVpnHandlers()
 
   createWindow()
 

@@ -268,6 +268,13 @@ export function installMockCryogram(): void {
         ramUsed: 4.2 * 1024 * 1024 * 1024,
         uptime: '3h 42m',
       }),
+      syncTime: async () => ({ success: true }),
+      pickWallpaper: async () => null,
+      setWallpaper: async () => true,
+      verifyPin: async () => true,
+      setPin: async () => ({ success: true }),
+      removePin: async () => ({ success: true }),
+      setPinEnabled: async () => true,
       shutdown: async () => { alert('[mock] Shutdown called') },
       reboot: async () => { alert('[mock] Reboot called') },
       lock: async () => { alert('[mock] Lock screen called') },
@@ -290,6 +297,59 @@ export function installMockCryogram(): void {
       ],
       launch: async (app) => { alert(`[mock] Launching: ${app.name}`); return true },
     },
+
+    wm: {
+      getWindows: async () => [],
+      focusWindow: async () => true,
+      closeWindow: async () => true,
+    },
+
+    phone: {
+      getDevices: async () => [],
+      getInfo: async () => ({ model: 'Mock Phone', android: '14', serial: 'mock' }),
+      getBattery: async () => ({ level: 80, status: 'charging' }),
+      getStorage: async () => ({ total: 128, used: 40, free: 88 }),
+      checkScrcpy: async () => false,
+      installScrcpy: async () => false,
+      startMirror: async () => false,
+      stopMirror: async () => false,
+      isMirroring: async () => false,
+      enableWireless: async () => '',
+      connectWifi: async () => false,
+      disconnect: async () => false,
+      getDeviceIp: async () => '',
+      screenshot: async () => '',
+    },
+
+    scanner: {
+      check: async () => ({ available: false }),
+      run: async () => {},
+      cancel: () => {},
+      onProgress: (cb) => {
+        void cb
+        return () => {}
+      },
+    },
+
+    vpn: {
+      getStatus: async () => ({ connected: false }),
+      connect: async () => ({ success: false, error: '[mock] VPN not available' }),
+      disconnect: async () => ({ success: false }),
+    },
+
+    updater: {
+      check: async () => ({ hasUpdate: false }),
+      run: async () => ({ success: false }),
+      onProgress: (cb) => { void cb; return () => {} },
+    },
+
+    notifyUnlock: () => {},
+    onLock: (cb) => { void cb; return () => {} },
+    onOpenApp: (cb) => { void cb; return () => {} },
+    onHudVolume: (cb) => { void cb; return () => {} },
+    onHudBrightness: (cb) => { void cb; return () => {} },
+    onAppSwitcher: (cb) => { void cb; return () => {} },
+    onSpotlight: (cb) => { void cb; return () => {} },
 
     onNotification: (cb) => {
       notifListeners.push(cb)

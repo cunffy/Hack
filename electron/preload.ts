@@ -94,6 +94,7 @@ contextBridge.exposeInMainWorld('cryogram', {
     bluetoothDisconnect:  (address: string)             => ipcRenderer.invoke('system:bluetoothDisconnect', address),
     bluetoothScan:        ()                            => ipcRenderer.invoke('system:bluetoothScan'),
     getInfo:              ()                            => ipcRenderer.invoke('system:getInfo'),
+    syncTime:             ()                              => ipcRenderer.invoke('system:syncTime'),
     shutdown:             ()                              => ipcRenderer.invoke('system:shutdown'),
     reboot:               ()                              => ipcRenderer.invoke('system:reboot'),
     lock:                 ()                              => ipcRenderer.invoke('system:lock'),
@@ -134,6 +135,25 @@ contextBridge.exposeInMainWorld('cryogram', {
     disconnect:     (address: string)                => ipcRenderer.invoke('phone:disconnect', address),
     getDeviceIp:    (serial: string)                 => ipcRenderer.invoke('phone:getDeviceIp', serial),
     screenshot:     (serial: string)                 => ipcRenderer.invoke('phone:screenshot', serial),
+  },
+
+  // Network scanner
+  scanner: {
+    check:      ()                                             => ipcRenderer.invoke('scanner:check'),
+    run:        (target: string, type: string, ports?: string) => ipcRenderer.invoke('scanner:run', target, type, ports),
+    cancel:     ()                                             => ipcRenderer.send('scanner:cancel'),
+    onProgress: (cb: (line: string) => void) => {
+      const listener = (_: unknown, line: string) => cb(line)
+      ipcRenderer.on('scanner:progress', listener)
+      return () => ipcRenderer.removeListener('scanner:progress', listener)
+    },
+  },
+
+  // VPN manager
+  vpn: {
+    getStatus:  ()                => ipcRenderer.invoke('vpn:getStatus'),
+    connect:    (profile: unknown)=> ipcRenderer.invoke('vpn:connect', profile),
+    disconnect: ()                => ipcRenderer.invoke('vpn:disconnect'),
   },
 
   // Update checker + runner
@@ -190,6 +210,13 @@ contextBridge.exposeInMainWorld('cryogram', {
     const listener = (_: unknown, dir: unknown) => cb(dir as 'next' | 'prev')
     ipcRenderer.on('app:switcher', listener)
     return () => ipcRenderer.removeListener('app:switcher', listener)
+  },
+
+  // Ctrl+Space spotlight shortcut from main
+  onSpotlight: (cb: () => void) => {
+    const listener = () => cb()
+    ipcRenderer.on('open:spotlight', listener)
+    return () => ipcRenderer.removeListener('open:spotlight', listener)
   },
 })
 

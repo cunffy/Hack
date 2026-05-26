@@ -1,17 +1,21 @@
 import { useRef, useCallback, lazy, Suspense, useState } from 'react'
-import { motion } from 'framer-motion'
+import { createPortal } from 'react-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { AppWindow as AppWindowType, useWindowStore } from '../store/windowStore'
 
-const TerminalApp       = lazy(() => import('../apps/terminal/Terminal'))
-const EditorApp         = lazy(() => import('../apps/editor/Editor'))
-const PasswordTesterApp = lazy(() => import('../apps/password-tester/PasswordTester'))
-const LeakerApp         = lazy(() => import('../apps/leaker/LeakerApp'))
-const SettingsApp       = lazy(() => import('../apps/settings/SettingsApp'))
-const FilesApp          = lazy(() => import('../apps/files/FilesApp'))
-const LauncherApp       = lazy(() => import('../apps/launcher/LauncherApp'))
-const SystemApp         = lazy(() => import('../apps/system/SystemApp'))
-const OpticSEOApp       = lazy(() => import('../apps/opticseo/OpticSEOApp'))
-const PhoneApp          = lazy(() => import('../apps/phone/PhoneApp'))
+const TerminalApp        = lazy(() => import('../apps/terminal/Terminal'))
+const EditorApp          = lazy(() => import('../apps/editor/Editor'))
+const PasswordTesterApp  = lazy(() => import('../apps/password-tester/PasswordTester'))
+const LeakerApp          = lazy(() => import('../apps/leaker/LeakerApp'))
+const SettingsApp        = lazy(() => import('../apps/settings/SettingsApp'))
+const FilesApp           = lazy(() => import('../apps/files/FilesApp'))
+const LauncherApp        = lazy(() => import('../apps/launcher/LauncherApp'))
+const SystemApp          = lazy(() => import('../apps/system/SystemApp'))
+const OpticSEOApp        = lazy(() => import('../apps/opticseo/OpticSEOApp'))
+const PhoneApp           = lazy(() => import('../apps/phone/PhoneApp'))
+const NetworkScannerApp  = lazy(() => import('../apps/network-scanner/NetworkScannerApp'))
+const VPNApp             = lazy(() => import('../apps/vpn/VPNApp'))
+const NotesApp           = lazy(() => import('../apps/notes/NotesApp'))
 
 const APP_COLORS: Record<string, string> = {
   terminal:          '#00ff88',
@@ -24,6 +28,9 @@ const APP_COLORS: Record<string, string> = {
   system:            '#818cf8',
   opticseo:          '#10b981',
   phone:             '#a855f7',
+  scanner:           '#00ff88',
+  vpn:               '#a78bfa',
+  notes:             '#fbbf24',
 }
 
 function AppContent({ appId }: { appId: string }) {
@@ -50,14 +57,54 @@ function AppContent({ appId }: { appId: string }) {
       {appId === 'system'          && <SystemApp />}
       {appId === 'opticseo'        && <OpticSEOApp />}
       {appId === 'phone'           && <PhoneApp />}
+      {appId === 'scanner'         && <NetworkScannerApp />}
+      {appId === 'vpn'             && <VPNApp />}
+      {appId === 'notes'           && <NotesApp />}
     </Suspense>
   )
 }
 
+type SnapZone = 'left' | 'right' | 'top' | null
+
+// Snap preview overlay rendered into document.body via portal
+function SnapPreview({ zone }: { zone: SnapZone }) {
+  if (!zone) return null
+
+  const style: React.CSSProperties = {
+    position: 'fixed',
+    zIndex: 99998,
+    pointerEvents: 'none',
+    background: 'var(--cryo-accent, #00d4ff)',
+    opacity: 0.08,
+    border: '1px solid var(--cryo-accent, #00d4ff)',
+    borderRadius: 8,
+    top: zone === 'top' ? 0 : 36,
+    ...(zone === 'left'  && { left: 0,                        width: '50vw', bottom: 72 }),
+    ...(zone === 'right' && { left: '50vw',                   width: '50vw', bottom: 72 }),
+    ...(zone === 'top'   && { left: 0, right: 0, top: 0, bottom: 0, borderRadius: 0 }),
+  }
+
+  return createPortal(
+    <AnimatePresence>
+      <motion.div
+        key={zone}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.15 }}
+        style={style}
+      />
+    </AnimatePresence>,
+    document.body
+  )
+}
+
 export function AppWindow({ window: win }: { window: AppWindowType }) {
-  const { closeWindow, focusWindow, moveWindow, minimizeWindow, toggleMaximize } = useWindowStore()
+  const { closeWindow, focusWindow, moveWindow, minimizeWindow, toggleMaximize, resizeWindow } = useWindowStore()
   const dragRef = useRef<{ startX: number; startY: number; winX: number; winY: number } | null>(null)
+  const snapZoneRef = useRef<SnapZone>(null)
   const [titleHovered, setTitleHovered] = useState(false)
+  const [snapOverlay, setSnapOverlay] = useState<SnapZone>(null)
   const accent = APP_COLORS[win.appId] ?? 'var(--cryo-accent)'
 
   const onTitleBarMouseDown = useCallback(
@@ -73,16 +120,41 @@ export function AppWindow({ window: win }: { window: AppWindowType }) {
         const newX = Math.max(-win.width + 120, Math.min(window.innerWidth - 120, dragRef.current.winX + dx))
         const newY = Math.max(0, Math.min(window.innerHeight - 40, dragRef.current.winY + dy))
         moveWindow(win.id, newX, newY)
+
+        // Snap zone detection
+        let zone: SnapZone = null
+        if (ev.clientX < 80) zone = 'left'
+        else if (ev.clientX > window.innerWidth - 80) zone = 'right'
+        else if (ev.clientY < 10) zone = 'top'
+
+        if (zone !== snapZoneRef.current) {
+          snapZoneRef.current = zone
+          setSnapOverlay(zone)
+        }
       }
+
       const onUp = () => {
+        const zone = snapZoneRef.current
+        if (zone === 'left') {
+          moveWindow(win.id, 0, 36)
+          resizeWindow(win.id, window.innerWidth / 2, window.innerHeight - 36 - 72)
+        } else if (zone === 'right') {
+          moveWindow(win.id, window.innerWidth / 2, 36)
+          resizeWindow(win.id, window.innerWidth / 2, window.innerHeight - 36 - 72)
+        } else if (zone === 'top') {
+          toggleMaximize(win.id)
+        }
+        snapZoneRef.current = null
+        setSnapOverlay(null)
         dragRef.current = null
         window.removeEventListener('mousemove', onMove)
         window.removeEventListener('mouseup', onUp)
       }
+
       window.addEventListener('mousemove', onMove)
       window.addEventListener('mouseup', onUp)
     },
-    [win.id, win.x, win.y, win.maximized, focusWindow, moveWindow]
+    [win.id, win.x, win.y, win.maximized, focusWindow, moveWindow, resizeWindow, toggleMaximize]
   )
 
   const radius = win.maximized ? 0 : 12
@@ -94,146 +166,151 @@ export function AppWindow({ window: win }: { window: AppWindowType }) {
     : { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }
 
   return (
-    <motion.div
-      key={win.id}
-      className="absolute flex flex-col overflow-hidden pointer-events-auto"
-      style={{
-        left: win.x,
-        top: win.y,
-        width: win.width,
-        height: win.height,
-        zIndex: win.zIndex,
-        borderRadius: radius,
-        background: 'rgba(10,14,22,0.94)',
-        backdropFilter: 'blur(32px) saturate(1.6)',
-        WebkitBackdropFilter: 'blur(32px) saturate(1.6)',
-        border: win.maximized
-          ? 'none'
-          : win.focused
-          ? `1px solid ${accent}50`
-          : '1px solid rgba(255,255,255,0.07)',
-        boxShadow: win.maximized
-          ? 'none'
-          : win.focused
-          ? `0 0 0 1px ${accent}14, 0 28px 72px rgba(0,0,0,0.9), 0 4px 16px rgba(0,0,0,0.5)`
-          : '0 8px 40px rgba(0,0,0,0.7)',
-        pointerEvents: win.minimized ? 'none' : undefined,
-        transition: 'border-color 0.15s, box-shadow 0.2s',
-      }}
-      initial={{ opacity: 0, scale: 0.9, y: 20, filter: 'blur(4px)' }}
-      animate={{
-        ...minimizeAnim,
-        borderRadius: radius,
-        left: win.x,
-        top: win.y,
-        width: win.width,
-        height: win.height,
-      }}
-      exit={{ opacity: 0, scale: 0.86, y: -12, filter: 'blur(6px)' }}
-      transition={
-        win.minimized
-          ? { type: 'spring', stiffness: 340, damping: 26 }
-          : { type: 'spring', stiffness: 420, damping: 24 }
-      }
-      onMouseDown={() => focusWindow(win.id)}
-    >
-      {/* Accent top glow line */}
-      {!win.maximized && (
+    <>
+      {/* Snap preview overlay — only shown while dragging near an edge */}
+      <SnapPreview zone={snapOverlay} />
+
+      <motion.div
+        key={win.id}
+        className="absolute flex flex-col overflow-hidden pointer-events-auto"
+        style={{
+          left: win.x,
+          top: win.y,
+          width: win.width,
+          height: win.height,
+          zIndex: win.zIndex,
+          borderRadius: radius,
+          background: 'rgba(10,14,22,0.94)',
+          backdropFilter: 'blur(32px) saturate(1.6)',
+          WebkitBackdropFilter: 'blur(32px) saturate(1.6)',
+          border: win.maximized
+            ? 'none'
+            : win.focused
+            ? `1px solid ${accent}50`
+            : '1px solid rgba(255,255,255,0.07)',
+          boxShadow: win.maximized
+            ? 'none'
+            : win.focused
+            ? `0 0 0 1px ${accent}14, 0 28px 72px rgba(0,0,0,0.9), 0 4px 16px rgba(0,0,0,0.5)`
+            : '0 8px 40px rgba(0,0,0,0.7)',
+          pointerEvents: win.minimized ? 'none' : undefined,
+          transition: 'border-color 0.15s, box-shadow 0.2s',
+        }}
+        initial={{ opacity: 0, scale: 0.9, y: 20, filter: 'blur(4px)' }}
+        animate={{
+          ...minimizeAnim,
+          borderRadius: radius,
+          left: win.x,
+          top: win.y,
+          width: win.width,
+          height: win.height,
+        }}
+        exit={{ opacity: 0, scale: 0.86, y: -12, filter: 'blur(6px)' }}
+        transition={
+          win.minimized
+            ? { type: 'spring', stiffness: 340, damping: 26 }
+            : { type: 'spring', stiffness: 420, damping: 24 }
+        }
+        onMouseDown={() => focusWindow(win.id)}
+      >
+        {/* Accent top glow line */}
+        {!win.maximized && (
+          <div
+            className="absolute inset-x-0 top-0 h-px pointer-events-none"
+            style={{
+              background: win.focused
+                ? `linear-gradient(90deg, transparent 5%, ${accent}80 40%, ${accent}80 60%, transparent 95%)`
+                : 'transparent',
+              transition: 'background 0.3s',
+            }}
+          />
+        )}
+
+        {/* Title bar */}
         <div
-          className="absolute inset-x-0 top-0 h-px pointer-events-none"
+          className="flex items-center h-10 px-3 shrink-0 select-none relative"
           style={{
             background: win.focused
-              ? `linear-gradient(90deg, transparent 5%, ${accent}80 40%, ${accent}80 60%, transparent 95%)`
-              : 'transparent',
-            transition: 'background 0.3s',
+              ? 'rgba(16,22,34,0.92)'
+              : 'rgba(11,16,26,0.8)',
+            borderBottom: '1px solid rgba(255,255,255,0.055)',
+            cursor: win.maximized ? 'default' : 'move',
           }}
-        />
-      )}
-
-      {/* Title bar */}
-      <div
-        className="flex items-center h-10 px-3 shrink-0 select-none relative"
-        style={{
-          background: win.focused
-            ? 'rgba(16,22,34,0.92)'
-            : 'rgba(11,16,26,0.8)',
-          borderBottom: '1px solid rgba(255,255,255,0.055)',
-          cursor: win.maximized ? 'default' : 'move',
-        }}
-        onMouseDown={onTitleBarMouseDown}
-        onDoubleClick={() => toggleMaximize(win.id)}
-        onMouseEnter={() => setTitleHovered(true)}
-        onMouseLeave={() => setTitleHovered(false)}
-      >
-        {/* Traffic lights */}
-        <div
-          className="flex items-center gap-1.5 shrink-0 z-10"
-          onMouseDown={e => e.stopPropagation()}
+          onMouseDown={onTitleBarMouseDown}
+          onDoubleClick={() => toggleMaximize(win.id)}
+          onMouseEnter={() => setTitleHovered(true)}
+          onMouseLeave={() => setTitleHovered(false)}
         >
-          <TrafficLight
-            color="#ff5f57"
-            hoverColor="#ff3b30"
-            symbol="✕"
-            shown={titleHovered}
-            title="Close"
-            onClick={() => closeWindow(win.id)}
-          />
-          <TrafficLight
-            color="#ffbd2e"
-            hoverColor="#ff9500"
-            symbol="–"
-            shown={titleHovered}
-            title="Minimize"
-            onClick={() => minimizeWindow(win.id)}
-          />
-          <TrafficLight
-            color="#28c840"
-            hoverColor="#34c759"
-            symbol={win.maximized ? '⤡' : '⤢'}
-            shown={titleHovered}
-            title={win.maximized ? 'Restore' : 'Maximize'}
-            onClick={() => toggleMaximize(win.id)}
-          />
-        </div>
-
-        {/* Centered title */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span
-            className="text-xs font-medium truncate max-w-[55%]"
-            style={{
-              color: win.focused ? 'rgba(255,255,255,0.52)' : 'rgba(255,255,255,0.22)',
-              letterSpacing: '0.02em',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
-            }}
+          {/* Traffic lights */}
+          <div
+            className="flex items-center gap-1.5 shrink-0 z-10"
+            onMouseDown={e => e.stopPropagation()}
           >
-            {win.title}
-          </span>
+            <TrafficLight
+              color="#ff5f57"
+              hoverColor="#ff3b30"
+              symbol="✕"
+              shown={titleHovered}
+              title="Close"
+              onClick={() => closeWindow(win.id)}
+            />
+            <TrafficLight
+              color="#ffbd2e"
+              hoverColor="#ff9500"
+              symbol="–"
+              shown={titleHovered}
+              title="Minimize"
+              onClick={() => minimizeWindow(win.id)}
+            />
+            <TrafficLight
+              color="#28c840"
+              hoverColor="#34c759"
+              symbol={win.maximized ? '⤡' : '⤢'}
+              shown={titleHovered}
+              title={win.maximized ? 'Restore' : 'Maximize'}
+              onClick={() => toggleMaximize(win.id)}
+            />
+          </div>
+
+          {/* Centered title */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span
+              className="text-xs font-medium truncate max-w-[55%]"
+              style={{
+                color: win.focused ? 'rgba(255,255,255,0.52)' : 'rgba(255,255,255,0.22)',
+                letterSpacing: '0.02em',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+              }}
+            >
+              {win.title}
+            </span>
+          </div>
+
+          {/* Right accent dot */}
+          <div className="ml-auto shrink-0 z-10">
+            <motion.div
+              className="w-1.5 h-1.5 rounded-full"
+              animate={{
+                background: accent,
+                boxShadow: win.focused ? `0 0 8px ${accent}` : 'none',
+                opacity: win.focused ? 1 : 0.2,
+              }}
+              transition={{ duration: 0.2 }}
+            />
+          </div>
         </div>
 
-        {/* Right accent dot */}
-        <div className="ml-auto shrink-0 z-10">
-          <motion.div
-            className="w-1.5 h-1.5 rounded-full"
-            animate={{
-              background: accent,
-              boxShadow: win.focused ? `0 0 8px ${accent}` : 'none',
-              opacity: win.focused ? 1 : 0.2,
-            }}
-            transition={{ duration: 0.2 }}
-          />
+        {/* App content */}
+        <div className="flex-1 overflow-hidden flex flex-col">
+          <AppContent appId={win.appId} />
         </div>
-      </div>
 
-      {/* App content */}
-      <div className="flex-1 overflow-hidden flex flex-col">
-        <AppContent appId={win.appId} />
-      </div>
-
-      {/* Resize handle */}
-      {!win.maximized && (
-        <ResizeHandle winId={win.id} winWidth={win.width} winHeight={win.height} />
-      )}
-    </motion.div>
+        {/* Resize handle */}
+        {!win.maximized && (
+          <ResizeHandle winId={win.id} winWidth={win.width} winHeight={win.height} />
+        )}
+      </motion.div>
+    </>
   )
 }
 

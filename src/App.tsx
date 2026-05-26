@@ -12,6 +12,10 @@ import { LockScreen } from './components/LockScreen'
 import { ThemeProvider } from './components/ThemeProvider'
 import { UpdateNotification } from './components/UpdateNotification'
 import { UpdateScreen } from './components/UpdateScreen'
+import { SpotlightSearch } from './components/SpotlightSearch'
+import { DesktopWidgets } from './components/DesktopWidgets'
+import { NotificationHistory } from './components/NotificationHistory'
+import { SetupWizard } from './components/SetupWizard'
 import { useDesktopStore } from './store/desktopStore'
 import { useLockStore } from './store/lockStore'
 import { useWindowStore } from './store/windowStore'
@@ -26,14 +30,21 @@ export default function App() {
 
   const [updateInfo, setUpdateInfo]       = useState<UpdateInfo | null>(null)
   const [showUpdateScreen, setShowScreen] = useState(false)
+  const [spotlightOpen, setSpotlightOpen] = useState(false)
+  const [notifHistoryOpen, setNotifHistoryOpen] = useState(false)
+  const [setupDone, setSetupDone]         = useState(true)
 
-  // After boot splash: check if PIN is enabled and lock if so
+  // After boot splash: check if PIN is enabled and lock if so; check setup wizard
   const handleBooted = useCallback(async () => {
     try {
       const enabled = await window.cryogram.settings.get('pin.enabled')
       const hash    = await window.cryogram.settings.get('pin.hash')
       if (enabled && hash) lock(true)
       else if (enabled) lock(false)
+    } catch {}
+    try {
+      const done = await window.cryogram.settings.get('setup.done')
+      if (!done) setSetupDone(false)
     } catch {}
     setBooted(true)
   }, [lock])
@@ -109,6 +120,14 @@ export default function App() {
     return cleanup ?? undefined
   }, [openApp])
 
+  // Global shortcut → spotlight
+  useEffect(() => {
+    const cleanup = (window.cryogram as any).onSpotlight?.(() => {
+      setSpotlightOpen(o => !o)
+    })
+    return cleanup ?? undefined
+  }, [])
+
   // Alt+Tab
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -116,9 +135,20 @@ export default function App() {
         e.preventDefault()
         window.dispatchEvent(new CustomEvent('cryogram:switcher', { detail: e.shiftKey ? 'prev' : 'next' }))
       }
+      // Ctrl+Space → spotlight
+      if (e.ctrlKey && e.code === 'Space') {
+        e.preventDefault()
+        setSpotlightOpen(o => !o)
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
+  }, [])
+
+  // Expose notification history toggle globally (for TitleBar bell icon)
+  useEffect(() => {
+    ;(window as any).__cryogram_toggleNotifHistory = () => setNotifHistoryOpen(o => !o)
+    return () => { delete (window as any).__cryogram_toggleNotifHistory }
   }, [])
 
   return (
@@ -165,6 +195,7 @@ export default function App() {
             <NotificationToast />
             <SystemHUD />
             <AppSwitcher />
+            <DesktopWidgets />
           </motion.div>
         )}
       </AnimatePresence>
@@ -192,6 +223,25 @@ export default function App() {
           <UpdateScreen
             key="update-screen"
             onCancel={() => setShowScreen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Spotlight search */}
+      <SpotlightSearch open={spotlightOpen} onClose={() => setSpotlightOpen(false)} />
+
+      {/* Notification history panel */}
+      <NotificationHistory open={notifHistoryOpen} onClose={() => setNotifHistoryOpen(false)} />
+
+      {/* First-run setup wizard */}
+      <AnimatePresence>
+        {booted && !setupDone && (
+          <SetupWizard
+            key="setup"
+            onComplete={async () => {
+              await window.cryogram.settings.set('setup.done', true)
+              setSetupDone(true)
+            }}
           />
         )}
       </AnimatePresence>

@@ -196,12 +196,20 @@ export function TitleBar() {
   const [time, setTime] = useState('')
   const [date, setDate] = useState('')
   const focusedWindow = useWindowStore(s => s.windows.find(w => w.focused && !w.minimized))
+  const systemTzRef = useRef<string>('')
 
   useEffect(() => {
+    // Detect system timezone once at mount
+    systemTzRef.current = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+    // Sync time via IPC if available
+    window.cryogram.system?.syncTime?.()
+
     const tick = () => {
       const now = new Date()
-      setTime(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }))
-      setDate(now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }))
+      const tz = systemTzRef.current
+      setTime(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tz }))
+      setDate(now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: tz }))
     }
     tick()
     const id = setInterval(tick, 10000)

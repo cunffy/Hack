@@ -75,15 +75,92 @@ declare global {
       bluetoothDisconnect(address: string): Promise<boolean>
       bluetoothScan(): Promise<boolean>
       getInfo(): Promise<SystemInfo>
+      syncTime(): Promise<{ success: boolean }>
       shutdown(): Promise<void>
       reboot(): Promise<void>
       lock(): Promise<void>
+      pickWallpaper(): Promise<string | null>
+      setWallpaper(path: string): Promise<boolean>
+      verifyPin(pin: string): Promise<boolean>
+      setPin(pin: string, cur?: string): Promise<{ success: boolean; error?: string }>
+      removePin(cur: string): Promise<{ success: boolean; error?: string }>
+      setPinEnabled(on: boolean): Promise<boolean>
     }
     launcher: {
       getApps(): Promise<AppEntry[]>
       launch(app: AppEntry): Promise<boolean>
     }
+    wm: {
+      getWindows(): Promise<WmWindow[]>
+      focusWindow(id: string): Promise<boolean>
+      closeWindow(id: string): Promise<boolean>
+    }
+    phone: {
+      getDevices(): Promise<PhoneDevice[]>
+      getInfo(serial: string): Promise<PhoneInfo>
+      getBattery(serial: string): Promise<PhoneBattery>
+      getStorage(serial: string): Promise<PhoneStorage>
+      checkScrcpy(): Promise<boolean>
+      installScrcpy(): Promise<boolean>
+      startMirror(serial: string): Promise<boolean>
+      stopMirror(): Promise<boolean>
+      isMirroring(): Promise<boolean>
+      enableWireless(serial: string, port?: number): Promise<string>
+      connectWifi(ip: string, port?: number): Promise<boolean>
+      disconnect(address: string): Promise<boolean>
+      getDeviceIp(serial: string): Promise<string>
+      screenshot(serial: string): Promise<string>
+    }
+    scanner: {
+      check(): Promise<{ available: boolean }>
+      run(target: string, type: string, ports?: string): Promise<void>
+      cancel(): void
+      onProgress(cb: (line: string) => void): () => void
+    }
+    vpn: {
+      getStatus(): Promise<VpnStatus>
+      connect(profile: VpnProfile): Promise<{ success: boolean; error?: string }>
+      disconnect(): Promise<{ success: boolean }>
+    }
+    updater: {
+      check(): Promise<{ hasUpdate: boolean; commitCount?: number; changes?: string[] }>
+      run(password?: string): Promise<{ success: boolean }>
+      onProgress(cb: (line: string) => void): () => void
+    }
+    notifyUnlock(): void
+    onLock(cb: () => void): () => void
+    onOpenApp(cb: (appId: string) => void): () => void
     onNotification(cb: (n: { title: string; body: string }) => void): () => void
+    onHudVolume(cb: (v: { level: number; muted: boolean }) => void): () => void
+    onHudBrightness(cb: (v: { level: number }) => void): () => void
+    onAppSwitcher(cb: (dir: 'next' | 'prev') => void): () => void
+    onSpotlight(cb: () => void): () => void
+  }
+
+  interface WmWindow {
+    id: string
+    desktop: number
+    title: string
+  }
+
+  interface PhoneDevice { serial: string; model: string; status: string }
+  interface PhoneInfo { model: string; android: string; serial: string }
+  interface PhoneBattery { level: number; status: string }
+  interface PhoneStorage { total: number; used: number; free: number }
+
+  interface VpnStatus {
+    connected: boolean
+    interface?: string
+    ip?: string
+    connectedSince?: number
+  }
+
+  interface VpnProfile {
+    id: string
+    name: string
+    type: 'openvpn' | 'wireguard'
+    config?: string
+    configPath: string
   }
 
   // ── File system types ─────────────────────────────────────────────────────

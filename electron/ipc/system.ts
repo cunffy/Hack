@@ -197,6 +197,15 @@ export function registerSystemHandlers(): void {
 
   // ── Power actions ─────────────────────────────────────────────────────────
 
+  // Sync system clock with NTP — run after network connects so time is always accurate.
+  ipcMain.handle('system:syncTime', async () => {
+    try {
+      // Try chronyc first (most live OS distros), fall back to timedatectl
+      await sh('chronyc makestep 2>/dev/null || timedatectl set-ntp true')
+      return { success: true }
+    } catch { return { success: false } }
+  })
+
   // Use sudo so polkit allows power commands from the cryogram non-root user.
   // The sudoers rule in /etc/sudoers.d/cryogram-power grants NOPASSWD for these.
   ipcMain.handle('system:shutdown', async () => { await sh('sudo systemctl poweroff') })
