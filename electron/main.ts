@@ -63,6 +63,7 @@ import { registerClipboardHistoryHandlers } from './ipc/clipboard-history'
 import { registerColorPickerHandlers } from './ipc/color-picker'
 import { registerImageViewerHandlers } from './ipc/image-viewer'
 import { registerRSSReaderHandlers } from './ipc/rss-reader'
+import { registerRemoteDesktopHandlers } from './ipc/remote-desktop'
 
 let mainWindow: BrowserWindow | null = null
 let screenLocked = false  // tracked in main so shortcuts can check it
@@ -265,6 +266,7 @@ app.whenReady().then(() => {
   registerColorPickerHandlers()
   registerImageViewerHandlers()
   registerRSSReaderHandlers()
+  registerRemoteDesktopHandlers()
 
   createWindow()
   startNotificationBridge()

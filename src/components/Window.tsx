@@ -55,6 +55,7 @@ const UnitConverterApp    = lazy(() => import('../apps/unit-converter/UnitConver
 const WorldClockApp       = lazy(() => import('../apps/world-clock/WorldClockApp'))
 const ImageViewerApp      = lazy(() => import('../apps/image-viewer/ImageViewerApp'))
 const RSSReaderApp        = lazy(() => import('../apps/rss-reader/RSSReaderApp'))
+const RemoteDesktopApp    = lazy(() => import('../apps/remote-desktop/RemoteDesktopApp'))
 
 const APP_COLORS: Record<string, string> = {
   terminal:          '#00ff88',
@@ -109,6 +110,7 @@ const APP_COLORS: Record<string, string> = {
   'world-clock':       '#60a5fa',
   'image-viewer':      '#34d399',
   'rss-reader':        '#fb923c',
+  'remote-desktop':    '#10b981',
 }
 
 function AppContent({ appId }: { appId: string }) {
@@ -177,6 +179,7 @@ function AppContent({ appId }: { appId: string }) {
       {appId === 'world-clock'         && <WorldClockApp />}
       {appId === 'image-viewer'        && <ImageViewerApp />}
       {appId === 'rss-reader'          && <RSSReaderApp />}
+      {appId === 'remote-desktop'     && <RemoteDesktopApp />}
     </Suspense>
     </AppCrashBoundary>
   )

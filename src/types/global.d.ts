@@ -304,6 +304,16 @@ declare global {
       readFile(path: string): Promise<ImageFile | null>
       browseDir(dir: string): Promise<string[]>
     }
+    remoteDesktop: {
+      checkDeps(): Promise<{ x11vnc: boolean; websockify: boolean; novnc: boolean }>
+      installDeps(): Promise<{ ok: boolean; error?: string }>
+      start(opts: { password?: string; viewOnly?: boolean; vncPort?: number }): Promise<{ ok: boolean; ip: string; url: string; vncPort: number; wsPort: number; httpPort: number }>
+      stop(): Promise<{ ok: boolean }>
+      status(): Promise<{ running: boolean; vncAlive: boolean; wsAlive: boolean }>
+      getIP(): Promise<string>
+      onLog(cb: (msg: string) => void): () => void
+      onStopped(cb: () => void): () => void
+    }
     rssReader: {
       getFeeds(): Promise<RSSFeed[]>
       getItems(feedId?: string): Promise<RSSItem[]>

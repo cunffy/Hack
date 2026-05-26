@@ -496,6 +496,26 @@ contextBridge.exposeInMainWorld('cryogram', {
     markRead:    (itemId: string)    => ipcRenderer.invoke('rss:markRead', itemId),
     markAllRead: (feedId: string)    => ipcRenderer.invoke('rss:markAllRead', feedId),
   },
+
+  // Remote Desktop
+  remoteDesktop: {
+    checkDeps:   ()                                      => ipcRenderer.invoke('remoteDesktop:checkDeps'),
+    installDeps: ()                                      => ipcRenderer.invoke('remoteDesktop:installDeps'),
+    start:       (opts: { password?: string; viewOnly?: boolean; vncPort?: number }) => ipcRenderer.invoke('remoteDesktop:start', opts),
+    stop:        ()                                      => ipcRenderer.invoke('remoteDesktop:stop'),
+    status:      ()                                      => ipcRenderer.invoke('remoteDesktop:status'),
+    getIP:       ()                                      => ipcRenderer.invoke('remoteDesktop:getIP'),
+    onLog: (cb: (msg: string) => void) => {
+      const listener = (_: unknown, msg: string) => cb(msg)
+      ipcRenderer.on('remoteDesktop:log', listener)
+      return () => ipcRenderer.removeListener('remoteDesktop:log', listener)
+    },
+    onStopped: (cb: () => void) => {
+      const listener = () => cb()
+      ipcRenderer.on('remoteDesktop:stopped', listener)
+      return () => ipcRenderer.removeListener('remoteDesktop:stopped', listener)
+    },
+  },
 })
 
 export type CryogramAPI = typeof import('./preload')
