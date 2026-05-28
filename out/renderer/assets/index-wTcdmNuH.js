@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-CcSTCLu_.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["./Terminal-DK-3H0zz.js","./Terminal-BXKNkDff.css"])))=>i.map(i=>d[i]);
 function getDefaultExportFromCjs(x2) {
   return x2 && x2.__esModule && Object.prototype.hasOwnProperty.call(x2, "default") ? x2["default"] : x2;
 }
@@ -15493,12 +15493,55 @@ const APP_META$1 = {
   editor: { title: "Code Editor", width: 900, height: 600 },
   "password-tester": { title: "Password Tester", width: 820, height: 620 },
   leaker: { title: "Leaker — Breach Monitor", width: 860, height: 560 },
-  settings: { title: "Settings", width: 600, height: 480 },
+  settings: { title: "Settings", width: 760, height: 560 },
   files: { title: "Files", width: 860, height: 580 },
   launcher: { title: "App Launcher", width: 760, height: 560 },
-  system: { title: "System", width: 680, height: 520 },
+  system: { title: "Settings", width: 760, height: 560 },
   opticseo: { title: "OpticSEO Pro", width: 1280, height: 820 },
-  phone: { title: "Phone", width: 780, height: 600 }
+  phone: { title: "Phone", width: 780, height: 600 },
+  scanner: { title: "Network Scanner", width: 900, height: 620 },
+  vpn: { title: "VPN Manager", width: 720, height: 560 },
+  notes: { title: "Notes", width: 820, height: 580 },
+  mail: { title: "Gmail", width: 1100, height: 780 },
+  passwords: { title: "Password Manager", width: 860, height: 600 },
+  "ssh-keys": { title: "SSH Key Manager", width: 820, height: 600 },
+  firewall: { title: "Firewall", width: 780, height: 580 },
+  "task-manager": { title: "Task Manager", width: 900, height: 600 },
+  logs: { title: "Log Viewer", width: 960, height: 640 },
+  netmon: { title: "Network Monitor", width: 900, height: 600 },
+  screenshot: { title: "Screenshot", width: 900, height: 640 },
+  calculator: { title: "Calculator", width: 560, height: 520 },
+  "crypto-tools": { title: "Crypto Tools", width: 720, height: 580 },
+  "api-tester": { title: "API Tester", width: 1100, height: 720 },
+  "cert-inspector": { title: "Cert Inspector", width: 780, height: 580 },
+  docker: { title: "Docker", width: 960, height: 640 },
+  git: { title: "Git Client", width: 980, height: 640 },
+  database: { title: "SQLite Browser", width: 960, height: 640 },
+  markdown: { title: "Markdown Editor", width: 1e3, height: 680 },
+  trash: { title: "Trash", width: 820, height: 560 },
+  shodan: { title: "Shodan Explorer", width: 1100, height: 720 },
+  osint: { title: "OSINT Dashboard", width: 1060, height: 700 },
+  cve: { title: "CVE Database", width: 1060, height: 700 },
+  "ai-assistant": { title: "AI Assistant", width: 820, height: 640 },
+  wordlists: { title: "Wordlist Manager", width: 900, height: 600 },
+  "json-explorer": { title: "JSON / YAML Explorer", width: 1060, height: 680 },
+  totp: { title: "2FA / TOTP Manager", width: 760, height: 540 },
+  regex: { title: "Regex Tester", width: 900, height: 640 },
+  "encoding-chain": { title: "Encoding Chain", width: 980, height: 640 },
+  "packet-sniffer": { title: "Packet Sniffer", width: 1100, height: 680 },
+  backup: { title: "System Backup", width: 820, height: 580 },
+  "password-health": { title: "Password Health", width: 760, height: 580 },
+  pomodoro: { title: "Pomodoro Timer", width: 560, height: 700 },
+  "audit-log": { title: "Audit Log", width: 980, height: 640 },
+  "code-scanner": { title: "Code Scanner", width: 1060, height: 700 },
+  wallpaper: { title: "Wallpaper", width: 820, height: 580 },
+  "clipboard-history": { title: "Clipboard History", width: 720, height: 580 },
+  "color-picker": { title: "Color Picker", width: 680, height: 560 },
+  "unit-converter": { title: "Unit Converter", width: 680, height: 520 },
+  "world-clock": { title: "World Clock", width: 780, height: 520 },
+  "image-viewer": { title: "Image Viewer", width: 960, height: 700 },
+  "rss-reader": { title: "RSS Reader", width: 1e3, height: 680 },
+  "remote-desktop": { title: "Remote Desktop", width: 860, height: 600 }
 };
 let instanceCounter = 0;
 const useWindowStore = create((set, get) => ({
@@ -15972,14 +16015,51 @@ const usePinnedStore = create()(
 const DEFAULT_DOCK = [
   "terminal",
   "editor",
+  "mail",
   "password-tester",
   "leaker",
   "files",
-  "opticseo",
-  "phone",
+  "passwords",
+  "scanner",
+  "firewall",
+  "vpn",
+  "task-manager",
+  "netmon",
+  "logs",
   "launcher",
   "settings",
-  "system"
+  "calculator",
+  "crypto-tools",
+  "api-tester",
+  "cert-inspector",
+  "docker",
+  "git",
+  "database",
+  "markdown",
+  "trash",
+  "shodan",
+  "osint",
+  "cve",
+  "ai-assistant",
+  "wordlists",
+  "json-explorer",
+  "totp",
+  "regex",
+  "encoding-chain",
+  "packet-sniffer",
+  "backup",
+  "password-health",
+  "pomodoro",
+  "audit-log",
+  "code-scanner",
+  "wallpaper",
+  "clipboard-history",
+  "color-picker",
+  "unit-converter",
+  "world-clock",
+  "image-viewer",
+  "rss-reader",
+  "remote-desktop"
 ];
 const useDockStore = create()(
   persist(
@@ -16184,14 +16264,57 @@ function getX11Meta$1(title) {
 const APP_META = {
   terminal: { label: "Terminal", color: "#00ff88", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(TermIcon, {}) },
   editor: { label: "Code Editor", color: "#00d4ff", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(EditorIcon, {}) },
-  "password-tester": { label: "Password Tester", color: "#ffcc00", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(LockIcon, {}) },
+  "password-tester": { label: "Password Tester", color: "#ffcc00", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ShieldLockIcon, {}) },
   leaker: { label: "Leaker", color: "#ff4466", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(LeakIcon, {}) },
   files: { label: "Files", color: "#f59e0b", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(FolderIcon, {}) },
   launcher: { label: "Launcher", color: "#34d399", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(GridIcon, {}) },
   settings: { label: "Settings", color: "#bb88ff", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(GearIcon, {}) },
-  system: { label: "System", color: "#818cf8", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(DisplayIcon, {}) },
-  opticseo: { label: "OpticSEO Pro", color: "#10b981", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(SEOIcon, {}) },
-  phone: { label: "Phone", color: "#a855f7", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PhoneIcon, {}) }
+  system: { label: "System", color: "#818cf8", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PulseIcon, {}) },
+  opticseo: { label: "OpticSEO Pro", color: "#10b981", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(OpticSEOIcon, {}) },
+  phone: { label: "Phone", color: "#a855f7", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PhoneIcon, {}) },
+  scanner: { label: "Net Scanner", color: "#00ff88", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ScannerIcon, {}) },
+  vpn: { label: "VPN", color: "#a78bfa", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(VPNIcon, {}) },
+  notes: { label: "Notes", color: "#fbbf24", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(NotesIcon, {}) },
+  mail: { label: "Gmail", color: "#ea4335", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(MailIcon, {}) },
+  passwords: { label: "Passwords", color: "#ffcc00", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(KeyVaultIcon, {}) },
+  "ssh-keys": { label: "SSH Keys", color: "#00d4ff", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(SSHIcon, {}) },
+  firewall: { label: "Firewall", color: "#ff4466", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(FirewallIcon, {}) },
+  "task-manager": { label: "Tasks", color: "#818cf8", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(TaskIcon, {}) },
+  logs: { label: "Logs", color: "#a855f7", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(LogIcon, {}) },
+  netmon: { label: "Net Monitor", color: "#00d4ff", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(NetMonIcon, {}) },
+  screenshot: { label: "Screenshot", color: "#34d399", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ScreenshotIcon, {}) },
+  calculator: { label: "Calculator", color: "#facc15", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(CalcIcon, {}) },
+  "crypto-tools": { label: "Crypto Tools", color: "#00d4ff", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(CryptoIcon, {}) },
+  "api-tester": { label: "API Tester", color: "#fb923c", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(APIIcon, {}) },
+  "cert-inspector": { label: "Cert Inspector", color: "#4ade80", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(CertIcon, {}) },
+  docker: { label: "Docker", color: "#2496ed", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(DockerIcon, {}) },
+  git: { label: "Git", color: "#f05033", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(GitIcon, {}) },
+  database: { label: "SQLite", color: "#a855f7", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(DBIcon, {}) },
+  markdown: { label: "Markdown", color: "#818cf8", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(MarkdownIcon, {}) },
+  trash: { label: "Trash", color: "#94a3b8", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(TrashIcon$1, {}) },
+  shodan: { label: "Shodan", color: "#ef4444", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ShodanIcon, {}) },
+  osint: { label: "OSINT", color: "#fb923c", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(OSINTIcon, {}) },
+  cve: { label: "CVE DB", color: "#f97316", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(CVEIcon, {}) },
+  "ai-assistant": { label: "AI Assistant", color: "#a78bfa", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(AIIcon, {}) },
+  wordlists: { label: "Wordlists", color: "#4ade80", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(WordlistIcon, {}) },
+  "json-explorer": { label: "JSON Explorer", color: "#fbbf24", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(JSONIcon, {}) },
+  totp: { label: "2FA / TOTP", color: "#00d4ff", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(TOTPIcon, {}) },
+  regex: { label: "Regex Tester", color: "#818cf8", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(RegexIcon, {}) },
+  "encoding-chain": { label: "Encoding Chain", color: "#34d399", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(EncodingIcon, {}) },
+  "packet-sniffer": { label: "Packet Sniffer", color: "#22c55e", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PacketIcon, {}) },
+  backup: { label: "Backup", color: "#4ade80", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(BackupIcon, {}) },
+  "password-health": { label: "PW Health", color: "#f472b6", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PWHealthIcon, {}) },
+  pomodoro: { label: "Pomodoro", color: "#ef4444", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(PomodoroIcon, {}) },
+  "audit-log": { label: "Audit Log", color: "#94a3b8", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(AuditIcon, {}) },
+  "code-scanner": { label: "Code Scanner", color: "#ff4466", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(CodeScanIcon, {}) },
+  wallpaper: { label: "Wallpaper", color: "#818cf8", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(WallpaperIcon, {}) },
+  "clipboard-history": { label: "Clipboard", color: "#a78bfa", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ClipboardIcon, {}) },
+  "color-picker": { label: "Color Picker", color: "#f472b6", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ColorPickerIcon, {}) },
+  "unit-converter": { label: "Unit Converter", color: "#22d3ee", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(UnitConvIcon, {}) },
+  "world-clock": { label: "World Clock", color: "#60a5fa", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(WorldClockIcon, {}) },
+  "image-viewer": { label: "Image Viewer", color: "#34d399", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ImageViewerIcon, {}) },
+  "rss-reader": { label: "RSS Reader", color: "#fb923c", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(RSSIcon, {}) },
+  "remote-desktop": { label: "Remote Desktop", color: "#10b981", icon: /* @__PURE__ */ jsxRuntimeExports.jsx(RemoteDesktopIcon, {}) }
 };
 function Dock() {
   const { order, setOrder, removeApp } = useDockStore();
@@ -16434,6 +16557,8 @@ function Dock() {
                         {
                           onClick: async () => {
                             try {
+                              await window.cryogram.wm?.hideShell();
+                              await new Promise((r2) => setTimeout(r2, 120));
                               await window.cryogram.wm?.focusWindow(xwin.id);
                             } catch {
                             }
@@ -16490,16 +16615,16 @@ function Dock() {
           animate: { opacity: 1 },
           transition: { delay: 3, duration: 0.5 },
           style: { fontSize: 9, color: "rgba(255,255,255,0.18)", fontFamily: "-apple-system, sans-serif" },
-          children: "Drag to reorder · Right-click for options"
+          children: "Drag to reorder · Right-click for options · Super+D to show/hide shell"
         }
       )
     ] }) })
   ] });
 }
 function TermIcon() {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "4 17 10 11 4 5" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "19", x2: "20", y2: "19" })
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M4 17l6-6-6-6" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "17", x2: "20", y2: "17" })
   ] });
 }
 function EditorIcon() {
@@ -16508,27 +16633,25 @@ function EditorIcon() {
     /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "8 6 2 12 8 18" })
   ] });
 }
-function LockIcon() {
+function ShieldLockIcon() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "11", width: "18", height: "11", rx: "2" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M7 11V7a5 5 0 0 1 10 0v4" })
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "9", y: "11", width: "6", height: "5", rx: "1" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 8v3" })
   ] });
 }
 function LeakIcon() {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 2L12 10" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 10C12 10 5.5 14.5 5.5 18.5a6.5 6.5 0 0 0 13 0C18.5 14.5 12 10 12 10Z" })
-  ] });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" }) });
 }
 function FolderIcon() {
   return /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" }) });
 }
 function GridIcon() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "3", width: "7", height: "7", rx: "1" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "14", y: "3", width: "7", height: "7", rx: "1" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "14", width: "7", height: "7", rx: "1" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "14", y: "14", width: "7", height: "7", rx: "1" })
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "3", width: "7", height: "7" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "14", y: "3", width: "7", height: "7" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "14", y: "14", width: "7", height: "7" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "14", width: "7", height: "7" })
   ] });
 }
 function GearIcon() {
@@ -16537,14 +16660,173 @@ function GearIcon() {
     /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" })
   ] });
 }
-function DisplayIcon() {
+function PulseIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "22 12 18 12 15 21 9 3 6 12 2 12" }) });
+}
+function OpticSEOIcon() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "2", y: "3", width: "20", height: "14", rx: "2" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "21", x2: "16", y2: "21" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "17", x2: "12", y2: "21" })
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "11", cy: "11", r: "8" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "8 13 11 10 13 12 16 8" })
   ] });
 }
-function SEOIcon() {
+function PhoneIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "5", y: "2", width: "14", height: "20", rx: "2", ry: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "18", x2: "12.01", y2: "18" })
+  ] });
+}
+function ScannerIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14" })
+  ] });
+}
+function VPNIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "11", width: "18", height: "11", rx: "2", ry: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M7 11V7a5 5 0 0 1 10 0v4" })
+  ] });
+}
+function NotesIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "14 2 14 8 20 8" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "16", y1: "13", x2: "8", y2: "13" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "16", y1: "17", x2: "8", y2: "17" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "10", y1: "9", x2: "8", y2: "9" })
+  ] });
+}
+function MailIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "2", y: "4", width: "20", height: "16", rx: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M2 7l10 7 10-7" })
+  ] });
+}
+function KeyVaultIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "8", cy: "14", r: "4" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "14", x2: "20", y2: "14" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "18", y1: "14", x2: "18", y2: "17" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "20", y1: "14", x2: "20", y2: "12" })
+  ] });
+}
+function SSHIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "11", width: "18", height: "11", rx: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M7 11V7a5 5 0 0 1 10 0v4" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "16", r: "1.2", fill: "currentColor" })
+  ] });
+}
+function FirewallIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "8", x2: "12", y2: "12" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "15", x2: "12", y2: "16" })
+  ] });
+}
+function TaskIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "3", width: "18", height: "18", rx: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "3", y1: "9", x2: "21", y2: "9" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "3", y1: "15", x2: "21", y2: "15" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "9", y1: "9", x2: "9", y2: "21" })
+  ] });
+}
+function LogIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "14 2 14 8 20 8" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "13", x2: "16", y2: "13" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "17", x2: "12", y2: "17" })
+  ] });
+}
+function NetMonIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M22 12h-4l-3 9L9 3l-3 9H2" }) });
+}
+function ScreenshotIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "13", r: "4" })
+  ] });
+}
+function CalcIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "4", y: "2", width: "16", height: "20", rx: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "6", x2: "16", y2: "6" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "10", x2: "10", y2: "10" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "10", x2: "14", y2: "10" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "16", y1: "10", x2: "16", y2: "10" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "14", x2: "10", y2: "14" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "14", x2: "14", y2: "14" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "16", y1: "14", x2: "16", y2: "14" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "18", x2: "10", y2: "18" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "18", x2: "16", y2: "18" })
+  ] });
+}
+function CryptoIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "11", width: "18", height: "11", rx: "2", ry: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M7 11V7a5 5 0 0 1 10 0v4" })
+  ] });
+}
+function APIIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "16 18 22 12 16 6" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "8 6 2 12 8 18" })
+  ] });
+}
+function CertIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "8", r: "6" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" })
+  ] });
+}
+function DockerIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" }) });
+}
+function GitIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "18", cy: "18", r: "3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "6", cy: "6", r: "3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "6", cy: "18", r: "3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M6 9v3a2 2 0 0 0 2 2h4" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "18", y1: "9", x2: "18", y2: "15" })
+  ] });
+}
+function DBIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("ellipse", { cx: "12", cy: "5", rx: "9", ry: "3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" })
+  ] });
+}
+function MarkdownIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "14 2 14 8 20 8" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M10 13H8v4H6V13H4v-2h6v2z" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "14 13 16 15 18 13" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "16", y1: "15", x2: "16", y2: "17" })
+  ] });
+}
+function TrashIcon$1() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "3 6 5 6 21 6" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" })
+  ] });
+}
+function ShodanIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "10" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "4" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "4.93", y1: "4.93", x2: "9.17", y2: "9.17" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "14.83", y1: "14.83", x2: "19.07", y2: "19.07" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "14.83", y1: "9.17", x2: "19.07", y2: "4.93" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "4.93", y1: "19.07", x2: "9.17", y2: "14.83" })
+  ] });
+}
+function OSINTIcon() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "11", cy: "11", r: "8" }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" }),
@@ -16552,10 +16834,156 @@ function SEOIcon() {
     /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "11", x2: "14", y2: "11" })
   ] });
 }
-function PhoneIcon() {
+function CVEIcon() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "5", y: "2", width: "14", height: "20", rx: "2" }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "18", x2: "12.01", y2: "18" })
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "8", x2: "12", y2: "12" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "15", r: "1" })
+  ] });
+}
+function AIIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 2a5 5 0 0 1 5 5v1a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5z" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M19 10v2a7 7 0 0 1-14 0v-2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "19", x2: "12", y2: "23" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "23", x2: "16", y2: "23" })
+  ] });
+}
+function WordlistIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "6", x2: "21", y2: "6" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "12", x2: "21", y2: "12" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "18", x2: "21", y2: "18" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "3", y1: "6", x2: "3.01", y2: "6" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "3", y1: "12", x2: "3.01", y2: "12" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "3", y1: "18", x2: "3.01", y2: "18" })
+  ] });
+}
+function JSONIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "16 18 22 12 16 6" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "8 6 2 12 8 18" })
+  ] });
+}
+function TOTPIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "5", y: "11", width: "14", height: "10", rx: "2", ry: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M8 11V7a4 4 0 0 1 8 0v4" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "16", r: "1" })
+  ] });
+}
+function RegexIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 3v3m0 12v3M3 12h3m12 0h3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1M5.6 18.4l2.1-2.1m8.6-8.6 2.1-2.1" })
+  ] });
+}
+function EncodingIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "17 1 21 5 17 9" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M3 11V9a4 4 0 0 1 4-4h14" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "7 23 3 19 7 15" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M21 13v2a4 4 0 0 1-4 4H3" })
+  ] });
+}
+function PacketIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "22 12 18 12 15 21 9 3 6 12 2 12" }) });
+}
+function BackupIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "17 8 12 3 7 8" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "3", x2: "12", y2: "15" })
+  ] });
+}
+function PWHealthIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" }) });
+}
+function PomodoroIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "10" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "12 6 12 12 16 14" })
+  ] });
+}
+function AuditIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "14 2 14 8 20 8" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "16", y1: "13", x2: "8", y2: "13" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "16", y1: "17", x2: "8", y2: "17" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "10 9 9 9 8 9" })
+  ] });
+}
+function CodeScanIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "9 12 11 14 15 10" })
+  ] });
+}
+function WallpaperIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "3", width: "18", height: "18", rx: "2", ry: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "8.5", cy: "8.5", r: "1.5" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "21 15 16 10 5 21" })
+  ] });
+}
+function ClipboardIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "8", y: "2", width: "8", height: "4", rx: "1", ry: "1" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "12", x2: "16", y2: "12" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "16", x2: "14", y2: "16" })
+  ] });
+}
+function ColorPickerIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "13.5", cy: "6.5", r: "3.5" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "17.5", cy: "10.5", r: "3.5" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "8.5", cy: "7.5", r: "3.5" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "6.5", cy: "12.5", r: "3.5" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "17", r: "4" })
+  ] });
+}
+function UnitConvIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M8 3H5a2 2 0 0 0-2 2v3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M21 8V5a2 2 0 0 0-2-2h-3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M3 16v3a2 2 0 0 0 2 2h3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M16 21h3a2 2 0 0 0 2-2v-3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "8", x2: "12", y2: "16" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "12", x2: "16", y2: "12" })
+  ] });
+}
+function WorldClockIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "10" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "8", x2: "12", y2: "12" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "12", x2: "15", y2: "14" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M2 12h2M20 12h2M12 2v2M12 20v2" })
+  ] });
+}
+function ImageViewerIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "3", width: "18", height: "18", rx: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "9", cy: "9", r: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M21 15l-5-5L5 21" })
+  ] });
+}
+function RSSIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M4 11a9 9 0 0 1 9 9" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M4 4a16 16 0 0 1 16 16" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "5", cy: "19", r: "1", fill: "currentColor" })
+  ] });
+}
+function RemoteDesktopIcon() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "2", y: "3", width: "20", height: "14", rx: "2" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "8", y1: "21", x2: "16", y2: "21" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "17", x2: "12", y2: "21" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M7 9l3 3-3 3" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "13", y1: "15", x2: "17", y2: "15" })
   ] });
 }
 function Desktop() {
@@ -17303,16 +17731,87 @@ const __vitePreload = function preload(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
-const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-CcSTCLu_.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
-const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-DmOZ_Tes.js"), true ? [] : void 0, import.meta.url));
-const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-DB1_saNu.js"), true ? [] : void 0, import.meta.url));
-const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-DLFM7Px8.js"), true ? [] : void 0, import.meta.url));
-const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-BNioi4bU.js"), true ? [] : void 0, import.meta.url));
-const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-B2NlUzkx.js"), true ? [] : void 0, import.meta.url));
-const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-BkjfDEBl.js"), true ? [] : void 0, import.meta.url));
-const SystemApp = reactExports.lazy(() => __vitePreload(() => import("./SystemApp-CjET24yX.js"), true ? [] : void 0, import.meta.url));
-const OpticSEOApp = reactExports.lazy(() => __vitePreload(() => import("./OpticSEOApp-0GqPozWp.js"), true ? [] : void 0, import.meta.url));
-const PhoneApp = reactExports.lazy(() => __vitePreload(() => import("./PhoneApp-nvevSuNP.js"), true ? [] : void 0, import.meta.url));
+class AppCrashBoundary extends reactExports.Component {
+  constructor(props) {
+    super(props);
+    this.state = { crashed: false, error: "" };
+  }
+  static getDerivedStateFromError(error) {
+    return { crashed: true, error: error.message };
+  }
+  componentDidCatch(error) {
+    console.error(`[AppCrashBoundary] ${this.props.appId ?? "unknown"}:`, error);
+  }
+  render() {
+    if (!this.state.crashed) return this.props.children;
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 12, background: "rgba(8,12,20,0.9)", padding: 24 }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 40 }, children: "💥" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 15, fontWeight: 700, color: "#f87171" }, children: "App Crashed" }),
+      this.props.appId && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.4)" }, children: this.props.appId }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.35)", fontFamily: "JetBrains Mono, monospace", background: "rgba(248,113,113,0.08)", padding: "8px 14px", borderRadius: 8, maxWidth: 420, textAlign: "center", wordBreak: "break-all" }, children: this.state.error }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          onClick: () => this.setState({ crashed: false, error: "" }),
+          style: { marginTop: 8, padding: "7px 20px", background: "var(--cryo-accent)", color: "#000", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 12, cursor: "pointer" },
+          children: "Reload App"
+        }
+      )
+    ] });
+  }
+}
+const TerminalApp = reactExports.lazy(() => __vitePreload(() => import("./Terminal-DK-3H0zz.js"), true ? __vite__mapDeps([0,1]) : void 0, import.meta.url));
+const EditorApp = reactExports.lazy(() => __vitePreload(() => import("./Editor-DvvbdNtN.js"), true ? [] : void 0, import.meta.url));
+const PasswordTesterApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordTester-CKQGuUmb.js"), true ? [] : void 0, import.meta.url));
+const LeakerApp = reactExports.lazy(() => __vitePreload(() => import("./LeakerApp-DZHgTkrV.js"), true ? [] : void 0, import.meta.url));
+const SettingsApp = reactExports.lazy(() => __vitePreload(() => import("./SettingsApp-DVJuXVbg.js"), true ? [] : void 0, import.meta.url));
+const FilesApp = reactExports.lazy(() => __vitePreload(() => import("./FilesApp-BBBnU4A6.js"), true ? [] : void 0, import.meta.url));
+const LauncherApp = reactExports.lazy(() => __vitePreload(() => import("./LauncherApp-DYhflx51.js"), true ? [] : void 0, import.meta.url));
+const OpticSEOApp = reactExports.lazy(() => __vitePreload(() => import("./OpticSEOApp-CczIWdlN.js"), true ? [] : void 0, import.meta.url));
+const PhoneApp = reactExports.lazy(() => __vitePreload(() => import("./PhoneApp-pXVYZdeR.js"), true ? [] : void 0, import.meta.url));
+const NetworkScannerApp = reactExports.lazy(() => __vitePreload(() => import("./NetworkScannerApp-UtM165l_.js"), true ? [] : void 0, import.meta.url));
+const VPNApp = reactExports.lazy(() => __vitePreload(() => import("./VPNApp-CRCGUPbz.js"), true ? [] : void 0, import.meta.url));
+const NotesApp = reactExports.lazy(() => __vitePreload(() => import("./NotesApp-CnHRdhFz.js"), true ? [] : void 0, import.meta.url));
+const MailApp = reactExports.lazy(() => __vitePreload(() => import("./MailApp-Bdql4KlF.js"), true ? [] : void 0, import.meta.url));
+const PasswordManagerApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordManagerApp-Ds5oMct2.js"), true ? [] : void 0, import.meta.url));
+const SSHKeyManagerApp = reactExports.lazy(() => __vitePreload(() => import("./SSHKeyManagerApp-C33QoEO_.js"), true ? [] : void 0, import.meta.url));
+const FirewallApp = reactExports.lazy(() => __vitePreload(() => import("./FirewallApp-DjNjQwc6.js"), true ? [] : void 0, import.meta.url));
+const TaskManagerApp = reactExports.lazy(() => __vitePreload(() => import("./TaskManagerApp-DPZp_0Lm.js"), true ? [] : void 0, import.meta.url));
+const LogViewerApp = reactExports.lazy(() => __vitePreload(() => import("./LogViewerApp-C6viw9Ss.js"), true ? [] : void 0, import.meta.url));
+const NetworkMonitorApp = reactExports.lazy(() => __vitePreload(() => import("./NetworkMonitorApp-CH8t4b1U.js"), true ? [] : void 0, import.meta.url));
+const ScreenshotApp = reactExports.lazy(() => __vitePreload(() => import("./ScreenshotApp-D70aDXu1.js"), true ? [] : void 0, import.meta.url));
+const CalculatorApp = reactExports.lazy(() => __vitePreload(() => import("./CalculatorApp-VeHoMBEu.js"), true ? [] : void 0, import.meta.url));
+const CryptoToolsApp = reactExports.lazy(() => __vitePreload(() => import("./CryptoToolsApp-DsvNndT5.js"), true ? [] : void 0, import.meta.url));
+const APITesterApp = reactExports.lazy(() => __vitePreload(() => import("./APITesterApp-91FIU4rZ.js"), true ? [] : void 0, import.meta.url));
+const CertInspectorApp = reactExports.lazy(() => __vitePreload(() => import("./CertInspectorApp-C4vdahZ8.js"), true ? [] : void 0, import.meta.url));
+const DockerApp = reactExports.lazy(() => __vitePreload(() => import("./DockerApp-Bsf0RDOq.js"), true ? [] : void 0, import.meta.url));
+const GitApp = reactExports.lazy(() => __vitePreload(() => import("./GitApp-B_EH9Npl.js"), true ? [] : void 0, import.meta.url));
+const DatabaseApp = reactExports.lazy(() => __vitePreload(() => import("./DatabaseApp-uEYHq8-k.js"), true ? [] : void 0, import.meta.url));
+const MarkdownEditorApp = reactExports.lazy(() => __vitePreload(() => import("./MarkdownEditorApp-BZJiFtbs.js"), true ? [] : void 0, import.meta.url));
+const TrashApp = reactExports.lazy(() => __vitePreload(() => import("./TrashApp-DcTmTIxP.js"), true ? [] : void 0, import.meta.url));
+const ShodanApp = reactExports.lazy(() => __vitePreload(() => import("./ShodanApp-CcnQvFHR.js"), true ? [] : void 0, import.meta.url));
+const OSINTApp = reactExports.lazy(() => __vitePreload(() => import("./OSINTApp-BGA5tGoM.js"), true ? [] : void 0, import.meta.url));
+const CVEApp = reactExports.lazy(() => __vitePreload(() => import("./CVEApp-CzoC9Uqt.js"), true ? [] : void 0, import.meta.url));
+const AIAssistantApp = reactExports.lazy(() => __vitePreload(() => import("./AIAssistantApp-CV_xdlLx.js"), true ? [] : void 0, import.meta.url));
+const WordlistsApp = reactExports.lazy(() => __vitePreload(() => import("./WordlistsApp-DfnA5osp.js"), true ? [] : void 0, import.meta.url));
+const JSONExplorerApp = reactExports.lazy(() => __vitePreload(() => import("./JSONExplorerApp-DeArGIu8.js"), true ? [] : void 0, import.meta.url));
+const TOTPApp = reactExports.lazy(() => __vitePreload(() => import("./TOTPApp-BvrtwdrE.js"), true ? [] : void 0, import.meta.url));
+const RegexApp = reactExports.lazy(() => __vitePreload(() => import("./RegexApp-BYNWNsvs.js"), true ? [] : void 0, import.meta.url));
+const EncodingChainApp = reactExports.lazy(() => __vitePreload(() => import("./EncodingChainApp-CKMVR4s_.js"), true ? [] : void 0, import.meta.url));
+const PacketSnifferApp = reactExports.lazy(() => __vitePreload(() => import("./PacketSnifferApp-DM4YQty7.js"), true ? [] : void 0, import.meta.url));
+const BackupApp = reactExports.lazy(() => __vitePreload(() => import("./BackupApp-D3C5eAlg.js"), true ? [] : void 0, import.meta.url));
+const PasswordHealthApp = reactExports.lazy(() => __vitePreload(() => import("./PasswordHealthApp-CsgtTASI.js"), true ? [] : void 0, import.meta.url));
+const PomodoroApp = reactExports.lazy(() => __vitePreload(() => import("./PomodoroApp-tFv5RWqG.js"), true ? [] : void 0, import.meta.url));
+const AuditLogApp = reactExports.lazy(() => __vitePreload(() => import("./AuditLogApp-jBe1Yy_j.js"), true ? [] : void 0, import.meta.url));
+const CodeScannerApp = reactExports.lazy(() => __vitePreload(() => import("./CodeScannerApp-DH3ls6rH.js"), true ? [] : void 0, import.meta.url));
+const WallpaperApp = reactExports.lazy(() => __vitePreload(() => import("./WallpaperApp-CBHv2aQS.js"), true ? [] : void 0, import.meta.url));
+const ClipboardHistoryApp = reactExports.lazy(() => __vitePreload(() => import("./ClipboardHistoryApp-CCMyrMZm.js"), true ? [] : void 0, import.meta.url));
+const ColorPickerApp = reactExports.lazy(() => __vitePreload(() => import("./ColorPickerApp-BnOPHrcY.js"), true ? [] : void 0, import.meta.url));
+const UnitConverterApp = reactExports.lazy(() => __vitePreload(() => import("./UnitConverterApp-DHs1HK77.js"), true ? [] : void 0, import.meta.url));
+const WorldClockApp = reactExports.lazy(() => __vitePreload(() => import("./WorldClockApp-BaKb8S9L.js"), true ? [] : void 0, import.meta.url));
+const ImageViewerApp = reactExports.lazy(() => __vitePreload(() => import("./ImageViewerApp-CWCzTwcS.js"), true ? [] : void 0, import.meta.url));
+const RSSReaderApp = reactExports.lazy(() => __vitePreload(() => import("./RSSReaderApp-C71ymwkX.js"), true ? [] : void 0, import.meta.url));
+const RemoteDesktopApp = reactExports.lazy(() => __vitePreload(() => import("./RemoteDesktopApp-CiK7Ctsc.js"), true ? [] : void 0, import.meta.url));
 const APP_COLORS$1 = {
   terminal: "#00ff88",
   editor: "#00d4ff",
@@ -17323,10 +17822,53 @@ const APP_COLORS$1 = {
   launcher: "#34d399",
   system: "#818cf8",
   opticseo: "#10b981",
-  phone: "#a855f7"
+  phone: "#a855f7",
+  scanner: "#00ff88",
+  vpn: "#a78bfa",
+  notes: "#fbbf24",
+  mail: "#ea4335",
+  passwords: "#ffcc00",
+  "ssh-keys": "#00d4ff",
+  firewall: "#ff4466",
+  "task-manager": "#818cf8",
+  logs: "#a855f7",
+  netmon: "#00d4ff",
+  screenshot: "#34d399",
+  calculator: "#facc15",
+  "crypto-tools": "#00d4ff",
+  "api-tester": "#fb923c",
+  "cert-inspector": "#4ade80",
+  docker: "#2496ed",
+  git: "#f05033",
+  database: "#a855f7",
+  markdown: "#818cf8",
+  trash: "#94a3b8",
+  shodan: "#ef4444",
+  osint: "#fb923c",
+  cve: "#f97316",
+  "ai-assistant": "#a78bfa",
+  wordlists: "#4ade80",
+  "json-explorer": "#fbbf24",
+  totp: "#00d4ff",
+  regex: "#818cf8",
+  "encoding-chain": "#34d399",
+  "packet-sniffer": "#22c55e",
+  backup: "#4ade80",
+  "password-health": "#f472b6",
+  pomodoro: "#ef4444",
+  "audit-log": "#94a3b8",
+  "code-scanner": "#ff4466",
+  wallpaper: "#818cf8",
+  "clipboard-history": "#a78bfa",
+  "color-picker": "#f472b6",
+  "unit-converter": "#22d3ee",
+  "world-clock": "#60a5fa",
+  "image-viewer": "#34d399",
+  "rss-reader": "#fb923c",
+  "remote-desktop": "#10b981"
 };
 function AppContent({ appId }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(AppCrashBoundary, { appId, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
     reactExports.Suspense,
     {
       fallback: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -17343,20 +17885,94 @@ function AppContent({ appId }) {
         appId === "editor" && /* @__PURE__ */ jsxRuntimeExports.jsx(EditorApp, {}),
         appId === "password-tester" && /* @__PURE__ */ jsxRuntimeExports.jsx(PasswordTesterApp, {}),
         appId === "leaker" && /* @__PURE__ */ jsxRuntimeExports.jsx(LeakerApp, {}),
-        appId === "settings" && /* @__PURE__ */ jsxRuntimeExports.jsx(SettingsApp, {}),
+        (appId === "settings" || appId === "system") && /* @__PURE__ */ jsxRuntimeExports.jsx(SettingsApp, {}),
         appId === "files" && /* @__PURE__ */ jsxRuntimeExports.jsx(FilesApp, {}),
         appId === "launcher" && /* @__PURE__ */ jsxRuntimeExports.jsx(LauncherApp, {}),
-        appId === "system" && /* @__PURE__ */ jsxRuntimeExports.jsx(SystemApp, {}),
         appId === "opticseo" && /* @__PURE__ */ jsxRuntimeExports.jsx(OpticSEOApp, {}),
-        appId === "phone" && /* @__PURE__ */ jsxRuntimeExports.jsx(PhoneApp, {})
+        appId === "phone" && /* @__PURE__ */ jsxRuntimeExports.jsx(PhoneApp, {}),
+        appId === "scanner" && /* @__PURE__ */ jsxRuntimeExports.jsx(NetworkScannerApp, {}),
+        appId === "vpn" && /* @__PURE__ */ jsxRuntimeExports.jsx(VPNApp, {}),
+        appId === "notes" && /* @__PURE__ */ jsxRuntimeExports.jsx(NotesApp, {}),
+        appId === "mail" && /* @__PURE__ */ jsxRuntimeExports.jsx(MailApp, {}),
+        appId === "passwords" && /* @__PURE__ */ jsxRuntimeExports.jsx(PasswordManagerApp, {}),
+        appId === "ssh-keys" && /* @__PURE__ */ jsxRuntimeExports.jsx(SSHKeyManagerApp, {}),
+        appId === "firewall" && /* @__PURE__ */ jsxRuntimeExports.jsx(FirewallApp, {}),
+        appId === "task-manager" && /* @__PURE__ */ jsxRuntimeExports.jsx(TaskManagerApp, {}),
+        appId === "logs" && /* @__PURE__ */ jsxRuntimeExports.jsx(LogViewerApp, {}),
+        appId === "netmon" && /* @__PURE__ */ jsxRuntimeExports.jsx(NetworkMonitorApp, {}),
+        appId === "screenshot" && /* @__PURE__ */ jsxRuntimeExports.jsx(ScreenshotApp, {}),
+        appId === "calculator" && /* @__PURE__ */ jsxRuntimeExports.jsx(CalculatorApp, {}),
+        appId === "crypto-tools" && /* @__PURE__ */ jsxRuntimeExports.jsx(CryptoToolsApp, {}),
+        appId === "api-tester" && /* @__PURE__ */ jsxRuntimeExports.jsx(APITesterApp, {}),
+        appId === "cert-inspector" && /* @__PURE__ */ jsxRuntimeExports.jsx(CertInspectorApp, {}),
+        appId === "docker" && /* @__PURE__ */ jsxRuntimeExports.jsx(DockerApp, {}),
+        appId === "git" && /* @__PURE__ */ jsxRuntimeExports.jsx(GitApp, {}),
+        appId === "database" && /* @__PURE__ */ jsxRuntimeExports.jsx(DatabaseApp, {}),
+        appId === "markdown" && /* @__PURE__ */ jsxRuntimeExports.jsx(MarkdownEditorApp, {}),
+        appId === "trash" && /* @__PURE__ */ jsxRuntimeExports.jsx(TrashApp, {}),
+        appId === "shodan" && /* @__PURE__ */ jsxRuntimeExports.jsx(ShodanApp, {}),
+        appId === "osint" && /* @__PURE__ */ jsxRuntimeExports.jsx(OSINTApp, {}),
+        appId === "cve" && /* @__PURE__ */ jsxRuntimeExports.jsx(CVEApp, {}),
+        appId === "ai-assistant" && /* @__PURE__ */ jsxRuntimeExports.jsx(AIAssistantApp, {}),
+        appId === "wordlists" && /* @__PURE__ */ jsxRuntimeExports.jsx(WordlistsApp, {}),
+        appId === "json-explorer" && /* @__PURE__ */ jsxRuntimeExports.jsx(JSONExplorerApp, {}),
+        appId === "totp" && /* @__PURE__ */ jsxRuntimeExports.jsx(TOTPApp, {}),
+        appId === "regex" && /* @__PURE__ */ jsxRuntimeExports.jsx(RegexApp, {}),
+        appId === "encoding-chain" && /* @__PURE__ */ jsxRuntimeExports.jsx(EncodingChainApp, {}),
+        appId === "packet-sniffer" && /* @__PURE__ */ jsxRuntimeExports.jsx(PacketSnifferApp, {}),
+        appId === "backup" && /* @__PURE__ */ jsxRuntimeExports.jsx(BackupApp, {}),
+        appId === "password-health" && /* @__PURE__ */ jsxRuntimeExports.jsx(PasswordHealthApp, {}),
+        appId === "pomodoro" && /* @__PURE__ */ jsxRuntimeExports.jsx(PomodoroApp, {}),
+        appId === "audit-log" && /* @__PURE__ */ jsxRuntimeExports.jsx(AuditLogApp, {}),
+        appId === "code-scanner" && /* @__PURE__ */ jsxRuntimeExports.jsx(CodeScannerApp, {}),
+        appId === "wallpaper" && /* @__PURE__ */ jsxRuntimeExports.jsx(WallpaperApp, {}),
+        appId === "clipboard-history" && /* @__PURE__ */ jsxRuntimeExports.jsx(ClipboardHistoryApp, {}),
+        appId === "color-picker" && /* @__PURE__ */ jsxRuntimeExports.jsx(ColorPickerApp, {}),
+        appId === "unit-converter" && /* @__PURE__ */ jsxRuntimeExports.jsx(UnitConverterApp, {}),
+        appId === "world-clock" && /* @__PURE__ */ jsxRuntimeExports.jsx(WorldClockApp, {}),
+        appId === "image-viewer" && /* @__PURE__ */ jsxRuntimeExports.jsx(ImageViewerApp, {}),
+        appId === "rss-reader" && /* @__PURE__ */ jsxRuntimeExports.jsx(RSSReaderApp, {}),
+        appId === "remote-desktop" && /* @__PURE__ */ jsxRuntimeExports.jsx(RemoteDesktopApp, {})
       ]
     }
+  ) });
+}
+function SnapPreview({ zone }) {
+  if (!zone) return null;
+  const style = {
+    position: "fixed",
+    zIndex: 99998,
+    pointerEvents: "none",
+    background: "var(--cryo-accent, #00d4ff)",
+    opacity: 0.08,
+    border: "1px solid var(--cryo-accent, #00d4ff)",
+    borderRadius: 8,
+    top: zone === "top" ? 0 : 36,
+    ...zone === "left" && { left: 0, width: "50vw", bottom: 72 },
+    ...zone === "right" && { left: "50vw", width: "50vw", bottom: 72 },
+    ...zone === "top" && { left: 0, right: 0, top: 0, bottom: 0, borderRadius: 0 }
+  };
+  return reactDomExports.createPortal(
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        transition: { duration: 0.15 },
+        style
+      },
+      zone
+    ) }),
+    document.body
   );
 }
 function AppWindow({ window: win }) {
-  const { closeWindow, focusWindow, moveWindow, minimizeWindow, toggleMaximize } = useWindowStore();
+  const { closeWindow, focusWindow, moveWindow, minimizeWindow, toggleMaximize, resizeWindow: resizeWindow2 } = useWindowStore();
   const dragRef = reactExports.useRef(null);
+  const snapZoneRef = reactExports.useRef(null);
   const [titleHovered, setTitleHovered] = reactExports.useState(false);
+  const [snapOverlay, setSnapOverlay] = reactExports.useState(null);
   const accent = APP_COLORS$1[win.appId] ?? "var(--cryo-accent)";
   const onTitleBarMouseDown = reactExports.useCallback(
     (e) => {
@@ -17370,8 +17986,28 @@ function AppWindow({ window: win }) {
         const newX = Math.max(-win.width + 120, Math.min(window.innerWidth - 120, dragRef.current.winX + dx));
         const newY = Math.max(0, Math.min(window.innerHeight - 40, dragRef.current.winY + dy));
         moveWindow(win.id, newX, newY);
+        let zone = null;
+        if (ev.clientX < 80) zone = "left";
+        else if (ev.clientX > window.innerWidth - 80) zone = "right";
+        else if (ev.clientY < 10) zone = "top";
+        if (zone !== snapZoneRef.current) {
+          snapZoneRef.current = zone;
+          setSnapOverlay(zone);
+        }
       };
       const onUp = () => {
+        const zone = snapZoneRef.current;
+        if (zone === "left") {
+          moveWindow(win.id, 0, 36);
+          resizeWindow2(win.id, window.innerWidth / 2, window.innerHeight - 36 - 72);
+        } else if (zone === "right") {
+          moveWindow(win.id, window.innerWidth / 2, 36);
+          resizeWindow2(win.id, window.innerWidth / 2, window.innerHeight - 36 - 72);
+        } else if (zone === "top") {
+          toggleMaximize(win.id);
+        }
+        snapZoneRef.current = null;
+        setSnapOverlay(null);
         dragRef.current = null;
         window.removeEventListener("mousemove", onMove);
         window.removeEventListener("mouseup", onUp);
@@ -17379,141 +18015,144 @@ function AppWindow({ window: win }) {
       window.addEventListener("mousemove", onMove);
       window.addEventListener("mouseup", onUp);
     },
-    [win.id, win.x, win.y, win.maximized, focusWindow, moveWindow]
+    [win.id, win.x, win.y, win.maximized, focusWindow, moveWindow, resizeWindow2, toggleMaximize]
   );
   const radius = win.maximized ? 0 : 12;
   const minimizeAnim = win.minimized ? { opacity: 0, scale: 0.55, y: 140, filter: "blur(8px)" } : { opacity: 1, scale: 1, y: 0, filter: "blur(0px)" };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-    motion.div,
-    {
-      className: "absolute flex flex-col overflow-hidden pointer-events-auto",
-      style: {
-        left: win.x,
-        top: win.y,
-        width: win.width,
-        height: win.height,
-        zIndex: win.zIndex,
-        borderRadius: radius,
-        background: "rgba(10,14,22,0.94)",
-        backdropFilter: "blur(32px) saturate(1.6)",
-        WebkitBackdropFilter: "blur(32px) saturate(1.6)",
-        border: win.maximized ? "none" : win.focused ? `1px solid ${accent}50` : "1px solid rgba(255,255,255,0.07)",
-        boxShadow: win.maximized ? "none" : win.focused ? `0 0 0 1px ${accent}14, 0 28px 72px rgba(0,0,0,0.9), 0 4px 16px rgba(0,0,0,0.5)` : "0 8px 40px rgba(0,0,0,0.7)",
-        pointerEvents: win.minimized ? "none" : void 0,
-        transition: "border-color 0.15s, box-shadow 0.2s"
-      },
-      initial: { opacity: 0, scale: 0.9, y: 20, filter: "blur(4px)" },
-      animate: {
-        ...minimizeAnim,
-        borderRadius: radius,
-        left: win.x,
-        top: win.y,
-        width: win.width,
-        height: win.height
-      },
-      exit: { opacity: 0, scale: 0.86, y: -12, filter: "blur(6px)" },
-      transition: win.minimized ? { type: "spring", stiffness: 340, damping: 26 } : { type: "spring", stiffness: 420, damping: 24 },
-      onMouseDown: () => focusWindow(win.id),
-      children: [
-        !win.maximized && /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "div",
-          {
-            className: "absolute inset-x-0 top-0 h-px pointer-events-none",
-            style: {
-              background: win.focused ? `linear-gradient(90deg, transparent 5%, ${accent}80 40%, ${accent}80 60%, transparent 95%)` : "transparent",
-              transition: "background 0.3s"
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(SnapPreview, { zone: snapOverlay }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      motion.div,
+      {
+        className: "absolute flex flex-col overflow-hidden pointer-events-auto",
+        style: {
+          left: win.x,
+          top: win.y,
+          width: win.width,
+          height: win.height,
+          zIndex: win.zIndex,
+          borderRadius: radius,
+          background: "rgba(10,14,22,0.94)",
+          backdropFilter: "blur(32px) saturate(1.6)",
+          WebkitBackdropFilter: "blur(32px) saturate(1.6)",
+          border: win.maximized ? "none" : win.focused ? `1px solid ${accent}50` : "1px solid rgba(255,255,255,0.07)",
+          boxShadow: win.maximized ? "none" : win.focused ? `0 0 0 1px ${accent}14, 0 28px 72px rgba(0,0,0,0.9), 0 4px 16px rgba(0,0,0,0.5)` : "0 8px 40px rgba(0,0,0,0.7)",
+          pointerEvents: win.minimized ? "none" : void 0,
+          transition: "border-color 0.15s, box-shadow 0.2s"
+        },
+        initial: { opacity: 0, scale: 0.9, y: 20, filter: "blur(4px)" },
+        animate: {
+          ...minimizeAnim,
+          borderRadius: radius,
+          left: win.x,
+          top: win.y,
+          width: win.width,
+          height: win.height
+        },
+        exit: { opacity: 0, scale: 0.86, y: -12, filter: "blur(6px)" },
+        transition: win.minimized ? { type: "spring", stiffness: 340, damping: 26 } : { type: "spring", stiffness: 420, damping: 24 },
+        onMouseDown: () => focusWindow(win.id),
+        children: [
+          !win.maximized && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "absolute inset-x-0 top-0 h-px pointer-events-none",
+              style: {
+                background: win.focused ? `linear-gradient(90deg, transparent 5%, ${accent}80 40%, ${accent}80 60%, transparent 95%)` : "transparent",
+                transition: "background 0.3s"
+              }
             }
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "div",
-          {
-            className: "flex items-center h-10 px-3 shrink-0 select-none relative",
-            style: {
-              background: win.focused ? "rgba(16,22,34,0.92)" : "rgba(11,16,26,0.8)",
-              borderBottom: "1px solid rgba(255,255,255,0.055)",
-              cursor: win.maximized ? "default" : "move"
-            },
-            onMouseDown: onTitleBarMouseDown,
-            onDoubleClick: () => toggleMaximize(win.id),
-            onMouseEnter: () => setTitleHovered(true),
-            onMouseLeave: () => setTitleHovered(false),
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                "div",
-                {
-                  className: "flex items-center gap-1.5 shrink-0 z-10",
-                  onMouseDown: (e) => e.stopPropagation(),
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      TrafficLight,
-                      {
-                        color: "#ff5f57",
-                        hoverColor: "#ff3b30",
-                        symbol: "✕",
-                        shown: titleHovered,
-                        title: "Close",
-                        onClick: () => closeWindow(win.id)
-                      }
-                    ),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      TrafficLight,
-                      {
-                        color: "#ffbd2e",
-                        hoverColor: "#ff9500",
-                        symbol: "–",
-                        shown: titleHovered,
-                        title: "Minimize",
-                        onClick: () => minimizeWindow(win.id)
-                      }
-                    ),
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(
-                      TrafficLight,
-                      {
-                        color: "#28c840",
-                        hoverColor: "#34c759",
-                        symbol: win.maximized ? "⤡" : "⤢",
-                        shown: titleHovered,
-                        title: win.maximized ? "Restore" : "Maximize",
-                        onClick: () => toggleMaximize(win.id)
-                      }
-                    )
-                  ]
-                }
-              ),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 flex items-center justify-center pointer-events-none", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                "span",
-                {
-                  className: "text-xs font-medium truncate max-w-[55%]",
-                  style: {
-                    color: win.focused ? "rgba(255,255,255,0.52)" : "rgba(255,255,255,0.22)",
-                    letterSpacing: "0.02em",
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif'
-                  },
-                  children: win.title
-                }
-              ) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "ml-auto shrink-0 z-10", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                motion.div,
-                {
-                  className: "w-1.5 h-1.5 rounded-full",
-                  animate: {
-                    background: accent,
-                    boxShadow: win.focused ? `0 0 8px ${accent}` : "none",
-                    opacity: win.focused ? 1 : 0.2
-                  },
-                  transition: { duration: 0.2 }
-                }
-              ) })
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 overflow-hidden flex flex-col", children: /* @__PURE__ */ jsxRuntimeExports.jsx(AppContent, { appId: win.appId }) }),
-        !win.maximized && /* @__PURE__ */ jsxRuntimeExports.jsx(ResizeHandle, { winId: win.id, winWidth: win.width, winHeight: win.height })
-      ]
-    },
-    win.id
-  );
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: "flex items-center h-10 px-3 shrink-0 select-none relative",
+              style: {
+                background: win.focused ? "rgba(16,22,34,0.92)" : "rgba(11,16,26,0.8)",
+                borderBottom: "1px solid rgba(255,255,255,0.055)",
+                cursor: win.maximized ? "default" : "move"
+              },
+              onMouseDown: onTitleBarMouseDown,
+              onDoubleClick: () => toggleMaximize(win.id),
+              onMouseEnter: () => setTitleHovered(true),
+              onMouseLeave: () => setTitleHovered(false),
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "div",
+                  {
+                    className: "flex items-center gap-1.5 shrink-0 z-10",
+                    onMouseDown: (e) => e.stopPropagation(),
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(
+                        TrafficLight,
+                        {
+                          color: "#ff5f57",
+                          hoverColor: "#ff3b30",
+                          symbol: "✕",
+                          shown: titleHovered,
+                          title: "Close",
+                          onClick: () => closeWindow(win.id)
+                        }
+                      ),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(
+                        TrafficLight,
+                        {
+                          color: "#ffbd2e",
+                          hoverColor: "#ff9500",
+                          symbol: "–",
+                          shown: titleHovered,
+                          title: "Minimize",
+                          onClick: () => minimizeWindow(win.id)
+                        }
+                      ),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(
+                        TrafficLight,
+                        {
+                          color: "#28c840",
+                          hoverColor: "#34c759",
+                          symbol: win.maximized ? "⤡" : "⤢",
+                          shown: titleHovered,
+                          title: win.maximized ? "Restore" : "Maximize",
+                          onClick: () => toggleMaximize(win.id)
+                        }
+                      )
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 flex items-center justify-center pointer-events-none", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "span",
+                  {
+                    className: "text-xs font-medium truncate max-w-[55%]",
+                    style: {
+                      color: win.focused ? "rgba(255,255,255,0.52)" : "rgba(255,255,255,0.22)",
+                      letterSpacing: "0.02em",
+                      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif'
+                    },
+                    children: win.title
+                  }
+                ) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "ml-auto shrink-0 z-10", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  motion.div,
+                  {
+                    className: "w-1.5 h-1.5 rounded-full",
+                    animate: {
+                      background: accent,
+                      boxShadow: win.focused ? `0 0 8px ${accent}` : "none",
+                      opacity: win.focused ? 1 : 0.2
+                    },
+                    transition: { duration: 0.2 }
+                  }
+                ) })
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 overflow-hidden flex flex-col", children: /* @__PURE__ */ jsxRuntimeExports.jsx(AppContent, { appId: win.appId }) }),
+          !win.maximized && /* @__PURE__ */ jsxRuntimeExports.jsx(ResizeHandle, { winId: win.id, winWidth: win.width, winHeight: win.height })
+        ]
+      },
+      win.id
+    )
+  ] });
 }
 function TrafficLight({
   color: color2,
@@ -17609,6 +18248,1408 @@ function ResizeHandle({
 function WindowManager() {
   const windows = useWindowStore((s) => s.windows);
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-0 pointer-events-none overflow-hidden", children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: windows.map((win) => /* @__PURE__ */ jsxRuntimeExports.jsx(AppWindow, { window: win }, win.id)) }) });
+}
+const NUM_WORKSPACES = 4;
+function buildWorkspaces(windows) {
+  const counts = {};
+  for (const w2 of windows) {
+    const d = w2.desktop ?? 0;
+    counts[d] = (counts[d] ?? 0) + 1;
+  }
+  return Array.from({ length: NUM_WORKSPACES }, (_, i) => ({
+    index: i,
+    count: counts[i] ?? 0
+  }));
+}
+function Tooltip({ children, label }) {
+  const [vis, setVis] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "div",
+    {
+      style: { position: "relative", display: "inline-flex" },
+      onMouseEnter: () => setVis(true),
+      onMouseLeave: () => setVis(false),
+      children: [
+        children,
+        /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: vis && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          motion.div,
+          {
+            initial: { opacity: 0, y: 4, scale: 0.93 },
+            animate: { opacity: 1, y: 0, scale: 1 },
+            exit: { opacity: 0, y: 4, scale: 0.93 },
+            transition: { duration: 0.12 },
+            style: {
+              position: "absolute",
+              top: "100%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              marginTop: 6,
+              background: "rgba(12,16,26,0.97)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 7,
+              padding: "4px 9px",
+              fontSize: 10,
+              fontWeight: 500,
+              color: "rgba(255,255,255,0.75)",
+              whiteSpace: "nowrap",
+              zIndex: 99999,
+              pointerEvents: "none",
+              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+              boxShadow: "0 6px 20px rgba(0,0,0,0.6)"
+            },
+            children: label
+          }
+        ) })
+      ]
+    }
+  );
+}
+function WorkspaceDot({
+  ws,
+  active,
+  onClick
+}) {
+  const [hov, setHov] = reactExports.useState(false);
+  const label = `Workspace ${ws.index + 1} · Super+${ws.index + 1}${ws.count > 0 ? ` · ${ws.count} window${ws.count !== 1 ? "s" : ""}` : ""}`;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Tooltip, { label, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    motion.button,
+    {
+      whileTap: { scale: 0.88 },
+      onClick,
+      onMouseEnter: () => setHov(true),
+      onMouseLeave: () => setHov(false),
+      style: {
+        position: "relative",
+        width: 26,
+        height: 22,
+        borderRadius: 7,
+        border: active ? "1px solid var(--cryo-a35)" : hov ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(255,255,255,0.06)",
+        background: active ? "var(--cryo-a18)" : hov ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.03)",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transition: "background 0.12s, border-color 0.12s",
+        flexShrink: 0
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+          fontSize: 9,
+          fontWeight: active ? 700 : 500,
+          color: active ? "var(--cryo-accent)" : hov ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.35)",
+          fontFamily: '"JetBrains Mono", monospace',
+          lineHeight: 1,
+          letterSpacing: "-0.02em"
+        }, children: ws.index + 1 }),
+        ws.count > 0 && !active && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          position: "absolute",
+          top: 2,
+          right: 2,
+          width: 5,
+          height: 5,
+          borderRadius: "50%",
+          background: hov ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.22)",
+          transition: "background 0.12s"
+        } }),
+        ws.count > 0 && active && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          position: "absolute",
+          top: 2,
+          right: 2,
+          width: 5,
+          height: 5,
+          borderRadius: "50%",
+          background: "var(--cryo-accent)",
+          opacity: 0.7
+        } })
+      ]
+    }
+  ) });
+}
+function WorkspaceSwitcher() {
+  const [current, setCurrent] = reactExports.useState(0);
+  const [workspaces, setWorkspaces] = reactExports.useState(
+    Array.from({ length: NUM_WORKSPACES }, (_, i) => ({ index: i, count: 0 }))
+  );
+  const [available, setAvailable] = reactExports.useState(false);
+  const prevCurrent = reactExports.useRef(current);
+  reactExports.useEffect(() => {
+    const wm = window.cryogram.wm;
+    if (!wm?.getWindows) {
+      setAvailable(false);
+      return;
+    }
+    setAvailable(true);
+    const loadWindows = async () => {
+      try {
+        const wins = await wm.getWindows();
+        setWorkspaces(buildWorkspaces(wins));
+      } catch {
+      }
+    };
+    loadWindows();
+    const t2 = setInterval(loadWindows, 2e3);
+    return () => clearInterval(t2);
+  }, []);
+  reactExports.useEffect(() => {
+    const wm = window.cryogram.wm;
+    if (!wm?.getCurrentWorkspace) return;
+    const loadCurrent = async () => {
+      try {
+        const idx = await wm.getCurrentWorkspace();
+        if (typeof idx === "number") {
+          prevCurrent.current = current;
+          setCurrent(idx);
+        }
+      } catch {
+      }
+    };
+    loadCurrent();
+    const t2 = setInterval(loadCurrent, 1e3);
+    return () => clearInterval(t2);
+  }, [current]);
+  const switchTo = async (idx) => {
+    if (idx === current) return;
+    prevCurrent.current = current;
+    setCurrent(idx);
+    try {
+      const wm = window.cryogram.wm;
+      await wm?.switchWorkspace?.(idx);
+    } catch {
+    }
+  };
+  if (!available) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        style: {
+          display: "flex",
+          alignItems: "center",
+          gap: 3,
+          padding: "0 4px"
+        },
+        children: Array.from({ length: NUM_WORKSPACES }, (_, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            style: {
+              width: i === 0 ? 20 : 6,
+              height: i === 0 ? 14 : 6,
+              borderRadius: i === 0 ? 4 : "50%",
+              background: i === 0 ? "var(--cryo-a18)" : "rgba(255,255,255,0.1)",
+              border: i === 0 ? "1px solid var(--cryo-a35)" : "1px solid rgba(255,255,255,0.06)",
+              transition: "all 0.15s"
+            }
+          },
+          i
+        ))
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "div",
+    {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 3,
+        padding: "0 2px",
+        position: "relative"
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          motion.div,
+          {
+            layoutId: "ws-indicator",
+            animate: {
+              x: current * (26 + 3)
+              // dot width + gap
+            },
+            transition: { type: "spring", stiffness: 420, damping: 34, mass: 0.7 },
+            style: {
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: 26,
+              height: 22,
+              borderRadius: 7,
+              background: "var(--cryo-a18)",
+              border: "1px solid var(--cryo-a35)",
+              pointerEvents: "none",
+              zIndex: 0
+            }
+          }
+        ),
+        workspaces.map((ws) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          WorkspaceDot,
+          {
+            ws,
+            active: ws.index === current,
+            onClick: () => switchTo(ws.index)
+          },
+          ws.index
+        ))
+      ]
+    }
+  );
+}
+function StyledSlider({
+  value,
+  min,
+  max,
+  onChange,
+  disabled
+}) {
+  const pct = (value - min) / (max - min) * 100;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { position: "relative", flex: 1 }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+      position: "absolute",
+      top: "50%",
+      left: 0,
+      right: 0,
+      height: 3,
+      transform: "translateY(-50%)",
+      borderRadius: 99,
+      background: "rgba(255,255,255,0.08)",
+      overflow: "hidden",
+      pointerEvents: "none"
+    }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+      width: `${pct}%`,
+      height: "100%",
+      background: disabled ? "rgba(255,255,255,0.15)" : "var(--cryo-accent)",
+      borderRadius: 99,
+      transition: "width 0.08s"
+    } }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "input",
+      {
+        type: "range",
+        min,
+        max,
+        value,
+        disabled,
+        onChange: (e) => onChange(Number(e.target.value)),
+        style: {
+          width: "100%",
+          cursor: disabled ? "not-allowed" : "pointer",
+          opacity: disabled ? 0.4 : 1,
+          accentColor: "var(--cryo-accent)",
+          background: "transparent"
+        }
+      }
+    )
+  ] });
+}
+function ToggleBtn({
+  icon,
+  label,
+  active,
+  onClick
+}) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    motion.button,
+    {
+      whileTap: { scale: 0.93 },
+      onClick,
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 5,
+        padding: "10px 6px",
+        borderRadius: 12,
+        border: active ? "1px solid var(--cryo-a35)" : "1px solid rgba(255,255,255,0.08)",
+        background: active ? "var(--cryo-a18)" : "rgba(255,255,255,0.04)",
+        cursor: "pointer",
+        transition: "background 0.15s, border-color 0.15s",
+        flex: 1,
+        minWidth: 0
+      },
+      onMouseEnter: (e) => {
+        e.currentTarget.style.background = active ? "var(--cryo-a25)" : "rgba(255,255,255,0.08)";
+      },
+      onMouseLeave: (e) => {
+        e.currentTarget.style.background = active ? "var(--cryo-a18)" : "rgba(255,255,255,0.04)";
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: active ? "var(--cryo-accent)" : "rgba(255,255,255,0.55)", lineHeight: 1 }, children: icon }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+          fontSize: 9,
+          fontWeight: 500,
+          color: active ? "var(--cryo-accent)" : "rgba(255,255,255,0.4)",
+          letterSpacing: "0.03em",
+          textTransform: "uppercase",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          maxWidth: "100%"
+        }, children: label })
+      ]
+    }
+  );
+}
+function SectionLabel({ children }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+    fontSize: 9,
+    fontWeight: 600,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.22)",
+    fontFamily: '"JetBrains Mono", monospace',
+    marginBottom: 7,
+    paddingLeft: 2
+  }, children });
+}
+function QuickSettings({ open, onClose }) {
+  const [vol, setVol] = reactExports.useState({ level: 60, muted: false });
+  const [brightness, setBrightness] = reactExports.useState(80);
+  const [wifi, setWifi] = reactExports.useState(null);
+  const [networks, setNetworks] = reactExports.useState([]);
+  const [battery, setBattery] = reactExports.useState(null);
+  const [btDevices, setBtDevices] = reactExports.useState([]);
+  const [dnd, setDnd] = reactExports.useState(false);
+  const [darkTheme, setDarkTheme] = reactExports.useState(true);
+  const [wifiExpanded, setWifiExpanded] = reactExports.useState(false);
+  const [connectTarget, setConnectTarget] = reactExports.useState(null);
+  const [password, setPassword] = reactExports.useState("");
+  const [connecting, setConnecting] = reactExports.useState(null);
+  const [btOn, setBtOn] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    if (!open) return;
+    const load = async () => {
+      try {
+        setVol(await window.cryogram.system.getVolume());
+      } catch {
+      }
+      try {
+        setBrightness(await window.cryogram.system.getBrightness());
+      } catch {
+      }
+      try {
+        setWifi(await window.cryogram.system.getWifiStatus());
+      } catch {
+      }
+      try {
+        setBattery(await window.cryogram.system.getBattery());
+      } catch {
+      }
+      try {
+        setBtDevices(await window.cryogram.system.getBluetoothDevices());
+        setBtOn(true);
+      } catch {
+      }
+    };
+    load();
+  }, [open]);
+  reactExports.useEffect(() => {
+    if (!wifiExpanded) return;
+    const load = async () => {
+      try {
+        setNetworks(await window.cryogram.system.getNetworks());
+      } catch {
+      }
+    };
+    load();
+  }, [wifiExpanded]);
+  reactExports.useEffect(() => {
+    if (!open) return;
+    const h = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [open, onClose]);
+  const handleVolChange = reactExports.useCallback(async (v2) => {
+    setVol((prev) => ({ ...prev, level: v2 }));
+    try {
+      await window.cryogram.system.setVolume(v2);
+    } catch {
+    }
+  }, []);
+  const handleToggleMute = reactExports.useCallback(async () => {
+    try {
+      await window.cryogram.system.toggleMute();
+      const updated = await window.cryogram.system.getVolume();
+      setVol(updated);
+    } catch {
+      setVol((prev) => ({ ...prev, muted: !prev.muted }));
+    }
+  }, []);
+  const handleBrightnessChange = reactExports.useCallback(async (v2) => {
+    setBrightness(v2);
+    try {
+      await window.cryogram.system.setBrightness(v2);
+    } catch {
+    }
+  }, []);
+  const handleDnd = () => {
+    const next = !dnd;
+    setDnd(next);
+    window.dispatchEvent(new CustomEvent("cryogram:dnd", { detail: { enabled: next } }));
+  };
+  const handleTheme = () => {
+    const next = !darkTheme;
+    setDarkTheme(next);
+    window.dispatchEvent(new CustomEvent("cryogram:theme-toggle", { detail: { dark: next } }));
+  };
+  const handleLock = () => {
+    onClose();
+    try {
+      window.cryogram.system.lock();
+    } catch {
+    }
+  };
+  const handleConnect = async (net, pw) => {
+    setConnecting(net.ssid);
+    try {
+      await window.cryogram.system.connectNetwork(net.ssid, pw || void 0);
+      const updated = await window.cryogram.system.getWifiStatus();
+      setWifi(updated);
+      setConnectTarget(null);
+      setPassword("");
+    } catch {
+    }
+    setConnecting(null);
+  };
+  const volIcon = vol.muted ? (
+    // Muted
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("polygon", { points: "11 5 6 9 2 9 2 15 6 15 11 19 11 5" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "23", y1: "9", x2: "17", y2: "15" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "17", y1: "9", x2: "23", y2: "15" })
+    ] })
+  ) : vol.level > 50 ? (
+    // High
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("polygon", { points: "11 5 6 9 2 9 2 15 6 15 11 19 11 5" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M19.07 4.93a10 10 0 0 1 0 14.14" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M15.54 8.46a5 5 0 0 1 0 7.07" })
+    ] })
+  ) : (
+    // Low
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("polygon", { points: "11 5 6 9 2 9 2 15 6 15 11 19 11 5" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M15.54 8.46a5 5 0 0 1 0 7.07" })
+    ] })
+  );
+  const battLevel = battery?.level ?? 0;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: open && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        transition: { duration: 0.15 },
+        onClick: onClose,
+        style: { position: "fixed", inset: 0, zIndex: 87e3 }
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      motion.div,
+      {
+        initial: { opacity: 0, y: -12, scale: 0.96 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, y: -12, scale: 0.96 },
+        transition: { type: "spring", stiffness: 380, damping: 30, mass: 0.85 },
+        onClick: (e) => e.stopPropagation(),
+        style: {
+          position: "fixed",
+          top: 36,
+          right: 8,
+          width: 320,
+          maxHeight: "80vh",
+          zIndex: 88e3,
+          background: "rgba(12,16,26,0.92)",
+          backdropFilter: "blur(40px)",
+          WebkitBackdropFilter: "blur(40px)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: 16,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.75)",
+          overflowY: "auto",
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+          scrollbarWidth: "thin",
+          scrollbarColor: "rgba(255,255,255,0.1) transparent"
+        },
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "14px 14px 8px" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(SectionLabel, { children: "Quick Toggles" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginBottom: 14 }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                ToggleBtn,
+                {
+                  active: wifi?.connected ?? false,
+                  label: wifi?.connected ? wifi.ssid.slice(0, 8) + (wifi.ssid.length > 8 ? "…" : "") : "Wi-Fi",
+                  onClick: () => setWifiExpanded((x2) => !x2),
+                  icon: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "18", height: "16", viewBox: "0 0 24 18", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 14.5 a1.5 1.5 0 1 1 0 0.1Z", fill: "currentColor" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M8.5 11.5 Q12 8 15.5 11.5", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M5.5 8.5 Q12 3 18.5 8.5", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M2.5 5.5 Q12 -2 21.5 5.5", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round" })
+                  ] })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                ToggleBtn,
+                {
+                  active: btOn && btDevices.some((d) => d.connected),
+                  label: "Bluetooth",
+                  onClick: () => setBtOn((x2) => !x2),
+                  icon: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "14", height: "18", viewBox: "0 0 14 22", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "3 7 11 14 7 18 7 3 11 7 3 14" }) })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                ToggleBtn,
+                {
+                  active: vol.muted,
+                  label: vol.muted ? "Muted" : "Sound",
+                  onClick: handleToggleMute,
+                  icon: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("polygon", { points: "11 5 6 9 2 9 2 15 6 15 11 19 11 5" }),
+                    vol.muted ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "23", y1: "9", x2: "17", y2: "15" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "17", y1: "9", x2: "23", y2: "15" })
+                    ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M15.54 8.46a5 5 0 0 1 0 7.07" })
+                  ] })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                ToggleBtn,
+                {
+                  active: false,
+                  label: "Lock",
+                  onClick: handleLock,
+                  icon: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "16", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "11", width: "18", height: "11", rx: "2", ry: "2" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M7 11V7a5 5 0 0 1 10 0v4" })
+                  ] })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                ToggleBtn,
+                {
+                  active: dnd,
+                  label: "Do Not Disturb",
+                  onClick: handleDnd,
+                  icon: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M13.73 21a2 2 0 0 1-3.46 0" }),
+                    dnd && /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "2", y1: "2", x2: "22", y2: "22" })
+                  ] })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                ToggleBtn,
+                {
+                  active: !darkTheme,
+                  label: darkTheme ? "Dark" : "Light",
+                  onClick: handleTheme,
+                  icon: darkTheme ? /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" }) }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "5" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "1", x2: "12", y2: "3" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "21", x2: "12", y2: "23" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "4.22", y1: "4.22", x2: "5.64", y2: "5.64" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "18.36", y1: "18.36", x2: "19.78", y2: "19.78" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "1", y1: "12", x2: "3", y2: "12" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "21", y1: "12", x2: "23", y2: "12" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "4.22", y1: "19.78", x2: "5.64", y2: "18.36" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "18.36", y1: "5.64", x2: "19.78", y2: "4.22" })
+                  ] })
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { height: 1, background: "rgba(255,255,255,0.06)", margin: "2px 0 12px" } }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(SectionLabel, { children: "Volume" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  onClick: handleToggleMute,
+                  style: {
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: vol.muted ? "#ef4444" : "rgba(255,255,255,0.6)",
+                    padding: 0,
+                    lineHeight: 0,
+                    flexShrink: 0
+                  },
+                  children: volIcon
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                StyledSlider,
+                {
+                  value: vol.level,
+                  min: 0,
+                  max: 100,
+                  disabled: vol.muted,
+                  onChange: handleVolChange
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 11, color: "rgba(255,255,255,0.35)", width: 28, textAlign: "right", flexShrink: 0 }, children: vol.muted ? "—" : `${vol.level}` })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(SectionLabel, { children: "Brightness" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: "rgba(255,255,255,0.6)", lineHeight: 0, flexShrink: 0 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "5" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "1", x2: "12", y2: "3" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "21", x2: "12", y2: "23" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "4.22", y1: "4.22", x2: "5.64", y2: "5.64" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "18.36", y1: "18.36", x2: "19.78", y2: "19.78" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "1", y1: "12", x2: "3", y2: "12" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "21", y1: "12", x2: "23", y2: "12" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "4.22", y1: "19.78", x2: "5.64", y2: "18.36" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "18.36", y1: "5.64", x2: "19.78", y2: "4.22" })
+              ] }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                StyledSlider,
+                {
+                  value: brightness,
+                  min: 5,
+                  max: 100,
+                  onChange: handleBrightnessChange
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 11, color: "rgba(255,255,255,0.35)", width: 28, textAlign: "right", flexShrink: 0 }, children: brightness })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "div",
+              {
+                style: { display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", marginBottom: 6 },
+                onClick: () => setWifiExpanded((x2) => !x2),
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs(SectionLabel, { children: [
+                    "Wi-Fi ",
+                    wifi?.connected ? `· ${wifi.ssid}` : ""
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    motion.div,
+                    {
+                      animate: { rotate: wifiExpanded ? 180 : 0 },
+                      transition: { duration: 0.2 },
+                      style: { color: "rgba(255,255,255,0.3)", lineHeight: 0, marginBottom: 7 },
+                      children: /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "6 9 12 15 18 9" }) })
+                    }
+                  )
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: wifiExpanded && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              motion.div,
+              {
+                initial: { opacity: 0, height: 0 },
+                animate: { opacity: 1, height: "auto" },
+                exit: { opacity: 0, height: 0 },
+                transition: { duration: 0.2 },
+                style: { overflow: "hidden", marginBottom: 10 },
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { maxHeight: 160, overflowY: "auto", display: "flex", flexDirection: "column", gap: 3 }, children: networks.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.25)", textAlign: "center", padding: "8px 0" }, children: "Scanning…" }) : networks.map((net) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                    "button",
+                    {
+                      onClick: () => {
+                        setConnectTarget((t2) => t2?.ssid === net.ssid ? null : net);
+                        setPassword("");
+                      },
+                      style: {
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "6px 8px",
+                        borderRadius: 8,
+                        background: net.active ? "var(--cryo-a12)" : connectTarget?.ssid === net.ssid ? "rgba(255,255,255,0.07)" : "transparent",
+                        border: net.active ? "1px solid var(--cryo-a20)" : "1px solid transparent",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        width: "100%"
+                      },
+                      children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "12", height: "10", viewBox: "0 0 14 12", children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "0", y: "8", width: "3", height: "4", rx: "1", fill: net.signal > 20 ? net.active ? "var(--cryo-accent)" : "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.18)" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "4", y: "5", width: "3", height: "7", rx: "1", fill: net.signal > 40 ? net.active ? "var(--cryo-accent)" : "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.18)" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "8", y: "2", width: "3", height: "10", rx: "1", fill: net.signal > 65 ? net.active ? "var(--cryo-accent)" : "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.18)" })
+                        ] }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { flex: 1, fontSize: 11, color: net.active ? "var(--cryo-accent)" : "rgba(255,255,255,0.75)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: net.ssid }),
+                        net.security && /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "8", height: "10", viewBox: "0 0 9 10", fill: "none", children: [
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "0.5", y: "4", width: "8", height: "5.5", rx: "1.5", stroke: "rgba(255,255,255,0.3)", strokeWidth: "1" }),
+                          /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M2.5 4V3a2 2 0 0 1 4 0v1", stroke: "rgba(255,255,255,0.3)", strokeWidth: "1", strokeLinecap: "round" })
+                        ] }),
+                        net.active && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: "var(--cryo-accent)" }, children: "✓" })
+                      ]
+                    },
+                    net.ssid
+                  )) }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: connectTarget && !connectTarget.active && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    motion.div,
+                    {
+                      initial: { opacity: 0, height: 0 },
+                      animate: { opacity: 1, height: "auto" },
+                      exit: { opacity: 0, height: 0 },
+                      style: { overflow: "hidden", marginTop: 6 },
+                      children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 6 }, children: [
+                        connectTarget.security && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                          "input",
+                          {
+                            type: "password",
+                            placeholder: "Wi-Fi password",
+                            value: password,
+                            autoFocus: true,
+                            onChange: (e) => setPassword(e.target.value),
+                            onKeyDown: (e) => {
+                              if (e.key === "Enter") handleConnect(connectTarget, password);
+                            },
+                            style: {
+                              width: "100%",
+                              padding: "7px 10px",
+                              borderRadius: 8,
+                              border: "1px solid rgba(255,255,255,0.12)",
+                              background: "rgba(255,255,255,0.06)",
+                              color: "#e2e8f0",
+                              fontSize: 12,
+                              outline: "none",
+                              boxSizing: "border-box"
+                            }
+                          }
+                        ),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx(
+                          "button",
+                          {
+                            onClick: () => handleConnect(connectTarget, password),
+                            disabled: !!connecting,
+                            style: {
+                              padding: "6px",
+                              borderRadius: 8,
+                              border: "1px solid var(--cryo-a25)",
+                              background: connecting ? "var(--cryo-a08)" : "var(--cryo-a18)",
+                              color: connecting ? "var(--cryo-a50)" : "var(--cryo-accent)",
+                              fontSize: 11,
+                              cursor: connecting ? "wait" : "pointer",
+                              fontWeight: 500
+                            },
+                            children: connecting === connectTarget.ssid ? "Connecting…" : `Connect to ${connectTarget.ssid}`
+                          }
+                        )
+                      ] })
+                    }
+                  ) })
+                ]
+              }
+            ) }),
+            battery && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { height: 1, background: "rgba(255,255,255,0.06)", margin: "2px 0 12px" } }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(SectionLabel, { children: "Battery" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }, children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "24", height: "14", viewBox: "0 0 22 12", style: { flexShrink: 0 }, children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "0.5", y: "0.5", width: "18", height: "11", rx: "2.5", fill: "none", stroke: battLevel > 20 ? "rgba(255,255,255,0.6)" : "#ef4444", strokeWidth: "1.2" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "19", y: "3.5", width: "2.5", height: "5", rx: "1", fill: battLevel > 20 ? "rgba(255,255,255,0.6)" : "#ef4444" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "rect",
+                    {
+                      x: "1.5",
+                      y: "1.5",
+                      width: Math.max(1, battLevel / 100 * 16),
+                      height: "9",
+                      rx: "1.5",
+                      fill: battery.charging ? "#00ff88" : battLevel > 20 ? "rgba(255,255,255,0.85)" : "#ef4444"
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { flex: 1 }, children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { fontSize: 13, fontWeight: 600, color: battLevel > 20 ? "#c9d1d9" : "#ef4444" }, children: [
+                    battLevel,
+                    "%",
+                    battery.charging && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: "#00ff88", marginLeft: 6, fontWeight: 400 }, children: "Charging" })
+                  ] }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { height: 3, borderRadius: 99, background: "rgba(255,255,255,0.08)", marginTop: 4, overflow: "hidden" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+                    width: `${battLevel}%`,
+                    height: "100%",
+                    borderRadius: 99,
+                    background: battery.charging ? "#00ff88" : battLevel > 20 ? "var(--cryo-accent)" : "#ef4444",
+                    transition: "width 0.4s"
+                  } }) })
+                ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { height: 1, background: "rgba(255,255,255,0.06)", margin: "4px 0 10px" } }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: 6, justifyContent: "flex-end" }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                FooterBtn,
+                {
+                  title: "Settings",
+                  onClick: () => {
+                    onClose();
+                    window.dispatchEvent(new CustomEvent("cryogram:openApp", { detail: { appId: "settings" } }));
+                  },
+                  icon: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "15", height: "15", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "3" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" })
+                  ] })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                FooterBtn,
+                {
+                  title: "Restart",
+                  onClick: () => {
+                    try {
+                      window.cryogram.system.reboot();
+                    } catch {
+                    }
+                  },
+                  icon: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "15", height: "15", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "1 4 1 10 7 10" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M3.51 15a9 9 0 1 0 .49-4.95" })
+                  ] })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                FooterBtn,
+                {
+                  title: "Shut Down",
+                  danger: true,
+                  onClick: () => {
+                    try {
+                      window.cryogram.system.shutdown();
+                    } catch {
+                    }
+                  },
+                  icon: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "15", height: "15", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M18.36 6.64a9 9 0 1 1-12.73 0" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "12", y1: "2", x2: "12", y2: "12" })
+                  ] })
+                }
+              )
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { height: 1, background: "linear-gradient(90deg, transparent, var(--cryo-a20) 40%, var(--cryo-a20) 60%, transparent)" } })
+        ]
+      }
+    )
+  ] }) });
+}
+function FooterBtn({
+  icon,
+  title,
+  onClick,
+  danger
+}) {
+  const base = danger ? "rgba(239,68,68,0.08)" : "rgba(255,255,255,0.05)";
+  const hover2 = danger ? "rgba(239,68,68,0.18)" : "rgba(255,255,255,0.1)";
+  const color2 = danger ? "#f87171" : "rgba(255,255,255,0.55)";
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "button",
+    {
+      title,
+      onClick,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 5,
+        padding: "6px 10px",
+        borderRadius: 8,
+        border: `1px solid ${danger ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.08)"}`,
+        background: base,
+        cursor: "pointer",
+        color: color2,
+        fontSize: 11
+      },
+      onMouseEnter: (e) => {
+        e.currentTarget.style.background = hover2;
+      },
+      onMouseLeave: (e) => {
+        e.currentTarget.style.background = base;
+      },
+      children: [
+        icon,
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: title })
+      ]
+    }
+  );
+}
+const WMO = {
+  0: { label: "Clear sky", icon: "☀️" },
+  1: { label: "Mainly clear", icon: "🌤" },
+  2: { label: "Partly cloudy", icon: "⛅" },
+  3: { label: "Overcast", icon: "☁️" },
+  45: { label: "Foggy", icon: "🌫" },
+  48: { label: "Icy fog", icon: "🌫" },
+  51: { label: "Light drizzle", icon: "🌦" },
+  53: { label: "Drizzle", icon: "🌦" },
+  55: { label: "Heavy drizzle", icon: "🌧" },
+  61: { label: "Light rain", icon: "🌧" },
+  63: { label: "Rain", icon: "🌧" },
+  65: { label: "Heavy rain", icon: "🌧" },
+  71: { label: "Light snow", icon: "🌨" },
+  73: { label: "Snow", icon: "❄️" },
+  75: { label: "Heavy snow", icon: "❄️" },
+  80: { label: "Light showers", icon: "🌦" },
+  81: { label: "Showers", icon: "🌧" },
+  82: { label: "Heavy showers", icon: "⛈" },
+  95: { label: "Thunderstorm", icon: "⛈" },
+  96: { label: "Hail storm", icon: "⛈" },
+  99: { label: "Heavy hail storm", icon: "⛈" }
+};
+function getWmo(code) {
+  return WMO[code] ?? WMO[Math.floor(code / 10) * 10] ?? { label: "Unknown", icon: "🌡" };
+}
+function ActionBtn$1({
+  icon,
+  label,
+  onClick
+}) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "button",
+    {
+      onClick,
+      style: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 5,
+        padding: "10px 6px",
+        borderRadius: 12,
+        cursor: "pointer",
+        background: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        transition: "all 0.12s"
+      },
+      onMouseEnter: (e) => {
+        const el2 = e.currentTarget;
+        el2.style.background = "rgba(255,255,255,0.09)";
+        el2.style.borderColor = "rgba(255,255,255,0.16)";
+      },
+      onMouseLeave: (e) => {
+        const el2 = e.currentTarget;
+        el2.style.background = "rgba(255,255,255,0.04)";
+        el2.style.borderColor = "rgba(255,255,255,0.08)";
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 18 }, children: icon }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: "rgba(255,255,255,0.55)", fontWeight: 500 }, children: label })
+      ]
+    }
+  );
+}
+function PowerBtn({
+  icon,
+  label,
+  color: color2,
+  onClick
+}) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "button",
+    {
+      onClick,
+      style: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 5,
+        padding: "10px 6px",
+        borderRadius: 12,
+        cursor: "pointer",
+        background: `${color2}14`,
+        border: `1px solid ${color2}28`,
+        transition: "all 0.12s"
+      },
+      onMouseEnter: (e) => {
+        const el2 = e.currentTarget;
+        el2.style.background = `${color2}28`;
+        el2.style.borderColor = `${color2}55`;
+      },
+      onMouseLeave: (e) => {
+        const el2 = e.currentTarget;
+        el2.style.background = `${color2}14`;
+        el2.style.borderColor = `${color2}28`;
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 16, color: color2 }, children: icon }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: `${color2}cc`, fontWeight: 500 }, children: label })
+      ]
+    }
+  );
+}
+function UserPanel({ open, onClose }) {
+  const openApp = useWindowStore((s) => s.openApp);
+  const [profile, setProfile] = reactExports.useState({ name: "Operator", email: "" });
+  const [weather, setWeather] = reactExports.useState(null);
+  const [weatherLoading, setWeatherLoading] = reactExports.useState(false);
+  const [weatherFetched, setWeatherFetched] = reactExports.useState(false);
+  const [news, setNews] = reactExports.useState([]);
+  const [newsLoading, setNewsLoading] = reactExports.useState(false);
+  const [newsFetched, setNewsFetched] = reactExports.useState(false);
+  const [powerConfirm, setPowerConfirm] = reactExports.useState(null);
+  const ref = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    if (!open) return;
+    const h = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        if (!powerConfirm) onClose();
+      }
+    };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [open, onClose, powerConfirm]);
+  reactExports.useEffect(() => {
+    if (!open) return;
+    const h = (e) => {
+      if (e.key === "Escape") {
+        if (powerConfirm) setPowerConfirm(null);
+        else onClose();
+      }
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [open, onClose, powerConfirm]);
+  reactExports.useEffect(() => {
+    if (!open) return;
+    window.cryogram.settings.getAll().then((all) => {
+      setProfile({
+        name: all["profile.name"] || "Operator",
+        email: all["profile.email"] || ""
+      });
+    }).catch(() => {
+    });
+  }, [open]);
+  reactExports.useEffect(() => {
+    if (!open || weatherFetched) return;
+    setWeatherFetched(true);
+    setWeatherLoading(true);
+    const load = async () => {
+      try {
+        const geo = await fetch("https://ipapi.co/json/").then((r2) => r2.json());
+        const { latitude: lat, longitude: lon, city, country_name } = geo;
+        const w2 = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m`
+        ).then((r2) => r2.json());
+        setWeather({
+          temp: Math.round(w2.current.temperature_2m),
+          feelsLike: Math.round(w2.current.apparent_temperature),
+          code: w2.current.weather_code,
+          wind: Math.round(w2.current.wind_speed_10m),
+          city: city || "Unknown",
+          country: country_name || ""
+        });
+      } catch {
+      }
+      setWeatherLoading(false);
+    };
+    load();
+  }, [open, weatherFetched]);
+  reactExports.useEffect(() => {
+    if (!open || newsFetched) return;
+    setNewsFetched(true);
+    setNewsLoading(true);
+    const load = async () => {
+      try {
+        const ids = await fetch(
+          "https://hacker-news.firebaseio.com/v1/topstories.json"
+        ).then((r2) => r2.json());
+        const items = await Promise.all(
+          ids.slice(0, 7).map(
+            (id2) => fetch(`https://hacker-news.firebaseio.com/v1/item/${id2}.json`).then((r2) => r2.json())
+          )
+        );
+        setNews(items.filter((s) => s?.title).map((s) => ({
+          id: s.id,
+          title: s.title,
+          url: s.url || `https://news.ycombinator.com/item?id=${s.id}`
+        })));
+      } catch {
+      }
+      setNewsLoading(false);
+    };
+    load();
+  }, [open, newsFetched]);
+  const wmo = weather ? getWmo(weather.code) : null;
+  const initial = profile.name.trim()[0]?.toUpperCase() || "O";
+  const isMock = !window.cryogram?.system?.sleep;
+  const executePower = (action) => {
+    if (isMock) {
+      setPowerConfirm(null);
+      return;
+    }
+    if (action === "sleep") window.cryogram.system.sleep?.();
+    else if (action === "restart") window.cryogram.system.reboot();
+    else window.cryogram.system.shutdown();
+    setPowerConfirm(null);
+    onClose();
+  };
+  const font = '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif';
+  const openSettings = (tab) => {
+    if (tab) window.dispatchEvent(new CustomEvent("cryogram:openSettingsTab", { detail: tab }));
+    openApp("settings");
+    onClose();
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: open && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      motion.div,
+      {
+        ref,
+        initial: { opacity: 0, y: -10, scale: 0.96 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, y: -10, scale: 0.96 },
+        transition: { type: "spring", stiffness: 420, damping: 32, mass: 0.55 },
+        style: {
+          position: "fixed",
+          top: 42,
+          right: 8,
+          width: 340,
+          zIndex: 99800,
+          background: "rgba(9,13,22,0.97)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 18,
+          overflow: "hidden",
+          backdropFilter: "blur(40px)",
+          WebkitBackdropFilter: "blur(40px)",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.85), inset 0 0.5px 0 rgba(255,255,255,0.08)",
+          fontFamily: font
+        },
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+            padding: "16px 16px 14px",
+            borderBottom: "1px solid rgba(255,255,255,0.07)",
+            display: "flex",
+            alignItems: "center",
+            gap: 12
+          }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+              width: 42,
+              height: 42,
+              borderRadius: 13,
+              flexShrink: 0,
+              background: "linear-gradient(135deg, var(--cryo-accent) 0%, #bb88ff 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 17,
+              fontWeight: 700,
+              color: "#000",
+              boxShadow: "0 0 18px var(--cryo-accent)44",
+              fontFamily: font
+            }, children: initial }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { flex: 1, minWidth: 0 }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 14, fontWeight: 600, color: "#f0f4f8", letterSpacing: "-0.01em", lineHeight: 1.2 }, children: profile.name }),
+              profile.email && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.38)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: profile.email })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                onClick: onClose,
+                style: {
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 8,
+                  width: 24,
+                  height: 24,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "rgba(255,255,255,0.4)",
+                  fontSize: 11,
+                  flexShrink: 0,
+                  lineHeight: 1
+                },
+                onMouseEnter: (e) => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.12)";
+                },
+                onMouseLeave: (e) => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                },
+                children: "✕"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "13px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)" }, children: weatherLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.28)", padding: "6px 0", textAlign: "center" }, children: "Fetching weather…" }) : weather && wmo ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 10 }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 34, lineHeight: 1 }, children: wmo.icon }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { fontSize: 24, fontWeight: 700, color: "#f0f4f8", letterSpacing: "-0.04em", lineHeight: 1 }, children: [
+                  weather.temp,
+                  "°C"
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.45)", marginTop: 2 }, children: wmo.label })
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { textAlign: "right" }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.78)" }, children: weather.city }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.35)", marginTop: 1 }, children: weather.country }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 3 }, children: [
+                "💨 ",
+                weather.wind,
+                " km/h · Feels ",
+                weather.feelsLike,
+                "°"
+              ] })
+            ] })
+          ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.28)", textAlign: "center", padding: "2px 0" }, children: "Weather unavailable" }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "11px 16px", borderBottom: "1px solid rgba(255,255,255,0.06)", maxHeight: 200, overflowY: "auto" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+              fontSize: 9,
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.28)",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              marginBottom: 7
+            }, children: "Hacker News" }),
+            newsLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.28)", padding: "2px 0" }, children: "Loading headlines…" }) : news.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.28)", padding: "2px 0" }, children: "News unavailable" }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", flexDirection: "column", gap: 1 }, children: news.slice(0, 6).map((item) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "a",
+              {
+                href: item.url,
+                target: "_blank",
+                rel: "noopener noreferrer",
+                style: {
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 7,
+                  padding: "5px 6px",
+                  borderRadius: 7,
+                  textDecoration: "none",
+                  transition: "background 0.1s"
+                },
+                onMouseEnter: (e) => {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                },
+                onMouseLeave: (e) => {
+                  e.currentTarget.style.background = "transparent";
+                },
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { color: "var(--cryo-accent)", opacity: 0.6, fontSize: 10, marginTop: 2, flexShrink: 0 }, children: "›" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+                    fontSize: 11,
+                    color: "rgba(255,255,255,0.68)",
+                    lineHeight: 1.4,
+                    overflow: "hidden",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical"
+                  }, children: item.title })
+                ]
+              },
+              item.id
+            )) })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "12px 16px 6px", display: "flex", gap: 8 }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(ActionBtn$1, { icon: "⚙️", label: "Settings", onClick: () => openSettings() }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(ActionBtn$1, { icon: "👤", label: "Profile", onClick: () => openSettings("profile") })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "6px 16px 14px" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+              fontSize: 9,
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.25)",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              marginBottom: 8
+            }, children: "Power" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: 8 }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(PowerBtn, { icon: "💤", label: "Sleep", color: "#818cf8", onClick: () => setPowerConfirm("sleep") }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(PowerBtn, { icon: "🔄", label: "Restart", color: "var(--cryo-accent)", onClick: () => setPowerConfirm("restart") }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(PowerBtn, { icon: "⏻", label: "Shut Down", color: "#ef4444", onClick: () => setPowerConfirm("shutdown") })
+            ] })
+          ] })
+        ]
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: powerConfirm && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        style: {
+          position: "fixed",
+          inset: 0,
+          zIndex: 99900,
+          background: "rgba(0,0,0,0.65)",
+          backdropFilter: "blur(10px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: font
+        },
+        onClick: () => setPowerConfirm(null),
+        children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          motion.div,
+          {
+            initial: { scale: 0.88, opacity: 0, y: 12 },
+            animate: { scale: 1, opacity: 1, y: 0 },
+            exit: { scale: 0.88, opacity: 0, y: 12 },
+            transition: { type: "spring", stiffness: 400, damping: 28 },
+            style: {
+              background: "rgba(10,14,24,0.98)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 20,
+              padding: "28px 24px 22px",
+              width: 290,
+              textAlign: "center",
+              boxShadow: "0 32px 80px rgba(0,0,0,0.9)"
+            },
+            onClick: (e) => e.stopPropagation(),
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 38, marginBottom: 12, lineHeight: 1 }, children: powerConfirm === "sleep" ? "💤" : powerConfirm === "restart" ? "🔄" : "⏻" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 15, fontWeight: 600, color: "#f0f4f8", marginBottom: 8 }, children: powerConfirm === "sleep" ? "Put System to Sleep?" : powerConfirm === "restart" ? "Restart System?" : "Shut Down System?" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginBottom: 22, lineHeight: 1.55 }, children: powerConfirm === "sleep" ? "The system will enter suspend mode." : powerConfirm === "restart" ? "All running processes will be stopped." : "Save your work before shutting down." }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: 8 }, children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    onClick: () => setPowerConfirm(null),
+                    style: {
+                      flex: 1,
+                      padding: "9px",
+                      borderRadius: 11,
+                      fontSize: 13,
+                      fontWeight: 500,
+                      background: "rgba(255,255,255,0.07)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "rgba(255,255,255,0.7)",
+                      cursor: "pointer"
+                    },
+                    onMouseEnter: (e) => {
+                      e.currentTarget.style.background = "rgba(255,255,255,0.12)";
+                    },
+                    onMouseLeave: (e) => {
+                      e.currentTarget.style.background = "rgba(255,255,255,0.07)";
+                    },
+                    children: "Cancel"
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    autoFocus: true,
+                    onClick: () => executePower(powerConfirm),
+                    style: {
+                      flex: 1,
+                      padding: "9px",
+                      borderRadius: 11,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      background: powerConfirm === "shutdown" ? "rgba(239,68,68,0.15)" : powerConfirm === "sleep" ? "rgba(129,140,248,0.15)" : "rgba(0,212,255,0.12)",
+                      border: `1px solid ${powerConfirm === "shutdown" ? "rgba(239,68,68,0.4)" : powerConfirm === "sleep" ? "rgba(129,140,248,0.4)" : "rgba(0,212,255,0.3)"}`,
+                      color: powerConfirm === "shutdown" ? "#ef4444" : powerConfirm === "sleep" ? "#818cf8" : "var(--cryo-accent)",
+                      cursor: "pointer"
+                    },
+                    onMouseEnter: (e) => {
+                      e.currentTarget.style.opacity = "0.85";
+                    },
+                    onMouseLeave: (e) => {
+                      e.currentTarget.style.opacity = "1";
+                    },
+                    children: powerConfirm === "sleep" ? "Sleep" : powerConfirm === "restart" ? "Restart" : "Shut Down"
+                  }
+                )
+              ] })
+            ]
+          }
+        )
+      }
+    ) })
+  ] });
 }
 function PowerModal({ action, onCancel }) {
   const isRestart = action === "restart";
@@ -17726,7 +19767,7 @@ function CryogramMenu() {
     } },
     { sep: true },
     { label: "System Preferences", action: () => {
-      openApp("system");
+      openApp("settings");
       setOpen(false);
     } },
     { sep: true },
@@ -17766,7 +19807,7 @@ function CryogramMenu() {
           },
           children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("svg", { width: "13", height: "13", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z" }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: "var(--cryo-accent)" }, children: "CG OS" })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontFamily: '"JetBrains Mono", monospace', fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", color: "var(--cryo-accent)" }, children: "CRYO OS" })
           ]
         }
       ),
@@ -17820,16 +19861,34 @@ function CryogramMenu() {
 function TitleBar() {
   const [time2, setTime] = reactExports.useState("");
   const [date, setDate] = reactExports.useState("");
+  const [quickSettingsOpen, setQuickSettingsOpen] = reactExports.useState(false);
+  const [userPanelOpen, setUserPanelOpen] = reactExports.useState(false);
+  const [profileName, setProfileName] = reactExports.useState("Operator");
   const focusedWindow = useWindowStore((s) => s.windows.find((w2) => w2.focused && !w2.minimized));
+  const systemTzRef = reactExports.useRef("");
   reactExports.useEffect(() => {
+    systemTzRef.current = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    window.cryogram.system?.syncTime?.();
     const tick = () => {
       const now2 = /* @__PURE__ */ new Date();
-      setTime(now2.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }));
-      setDate(now2.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }));
+      const tz = systemTzRef.current;
+      setTime(now2.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: tz }));
+      setDate(now2.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: tz }));
     };
     tick();
     const id2 = setInterval(tick, 1e4);
     return () => clearInterval(id2);
+  }, []);
+  reactExports.useEffect(() => {
+    const refresh = () => {
+      window.cryogram.settings.get("profile.name").then((v2) => {
+        if (v2 && typeof v2 === "string") setProfileName(v2);
+      }).catch(() => {
+      });
+    };
+    refresh();
+    window.addEventListener("cryogram:profileUpdated", refresh);
+    return () => window.removeEventListener("cryogram:profileUpdated", refresh);
   }, []);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
@@ -17861,18 +19920,104 @@ function TitleBar() {
           },
           focusedWindow.id
         ) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute left-1/2 -translate-x-1/2 flex items-baseline gap-1.5", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.88)", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em" }, children: time2 }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: "rgba(255,255,255,0.35)" }, children: date })
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "absolute left-1/2 -translate-x-1/2 flex items-center gap-3", style: { WebkitAppRegion: "no-drag" }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(WorkspaceSwitcher, {}),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-3", style: { background: "rgba(255,255,255,0.1)" } }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-baseline gap-1.5", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.88)", fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em" }, children: time2 }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: "rgba(255,255,255,0.35)" }, children: date })
+          ] })
         ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
           "div",
           {
             className: "ml-auto flex items-center gap-0.5",
             style: { WebkitAppRegion: "no-drag" },
-            children: /* @__PURE__ */ jsxRuntimeExports.jsx(StatusIcons, {})
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "button",
+                {
+                  onClick: () => setUserPanelOpen((o) => !o),
+                  title: profileName,
+                  className: "flex items-center gap-1.5 px-2 h-6 rounded-md transition-colors",
+                  style: { background: userPanelOpen ? "rgba(255,255,255,0.12)" : "transparent", color: userPanelOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.65)" },
+                  onMouseEnter: (e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.09)";
+                    e.currentTarget.style.color = "rgba(255,255,255,0.9)";
+                  },
+                  onMouseLeave: (e) => {
+                    e.currentTarget.style.background = userPanelOpen ? "rgba(255,255,255,0.12)" : "transparent";
+                    e.currentTarget.style.color = userPanelOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.65)";
+                  },
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+                      width: 18,
+                      height: 18,
+                      borderRadius: 6,
+                      flexShrink: 0,
+                      background: "linear-gradient(135deg, var(--cryo-accent) 0%, #bb88ff 100%)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 9,
+                      fontWeight: 700,
+                      color: "#000"
+                    }, children: profileName.trim()[0]?.toUpperCase() || "O" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 11, fontWeight: 500, maxWidth: 72, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: profileName })
+                  ]
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { width: 1, height: 14, background: "rgba(255,255,255,0.1)", margin: "0 2px" } }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  onClick: () => {
+                    window.__cryogram_toggleNotifHistory?.();
+                  },
+                  title: "Notification History",
+                  className: "flex items-center justify-center w-7 h-6 rounded-md transition-colors",
+                  style: { background: "transparent", color: "rgba(255,255,255,0.55)" },
+                  onMouseEnter: (e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.09)";
+                    e.currentTarget.style.color = "rgba(255,255,255,0.9)";
+                  },
+                  onMouseLeave: (e) => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "rgba(255,255,255,0.55)";
+                  },
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "13", height: "13", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M13.73 21a2 2 0 0 1-3.46 0" })
+                  ] })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  onClick: () => setQuickSettingsOpen((o) => !o),
+                  title: "Quick Settings",
+                  className: "flex items-center justify-center w-7 h-6 rounded-md transition-colors",
+                  style: { background: quickSettingsOpen ? "rgba(255,255,255,0.12)" : "transparent", color: quickSettingsOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.55)" },
+                  onMouseEnter: (e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.09)";
+                    e.currentTarget.style.color = "rgba(255,255,255,0.9)";
+                  },
+                  onMouseLeave: (e) => {
+                    e.currentTarget.style.background = quickSettingsOpen ? "rgba(255,255,255,0.12)" : "transparent";
+                    e.currentTarget.style.color = quickSettingsOpen ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.55)";
+                  },
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "13", height: "13", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "12", r: "3" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M19.07 4.93a10 10 0 0 1 0 14.14M16.24 7.76a6 6 0 0 1 0 8.49M4.93 19.07a10 10 0 0 1 0-14.14M7.76 16.24a6 6 0 0 1 0-8.49" })
+                  ] })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(StatusIcons, {})
+            ]
           }
         ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(QuickSettings, { open: quickSettingsOpen, onClose: () => setQuickSettingsOpen(false) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(UserPanel, { open: userPanelOpen, onClose: () => setUserPanelOpen(false) }),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute inset-x-0 bottom-0 h-px pointer-events-none", style: { background: "linear-gradient(90deg, transparent, var(--cryo-a20) 30%, var(--cryo-a35) 50%, var(--cryo-a20) 70%, transparent)" } })
       ]
     }
@@ -18268,44 +20413,6 @@ function NotificationToast() {
     t2.id
   )) }) });
 }
-const APP_ICONS = {
-  terminal: "⌨",
-  editor: "📝",
-  "password-tester": "🔐",
-  leaker: "🔍",
-  settings: "⚙",
-  files: "📁",
-  launcher: "🚀",
-  system: "🖥"
-};
-const APP_COLORS = {
-  terminal: "#00ff88",
-  editor: "#00d4ff",
-  "password-tester": "#ffcc00",
-  leaker: "#ff4466",
-  settings: "#bb88ff",
-  files: "#f59e0b",
-  launcher: "#34d399",
-  system: "#818cf8"
-};
-function getX11Meta(title) {
-  const t2 = title.toLowerCase();
-  const last = title.split(" - ").pop()?.trim() ?? title;
-  const firstName = last.split(" ")[0];
-  if (t2.includes("brave")) return { icon: "🦁", color: "#fb923c", name: "Brave" };
-  if (t2.includes("chromium")) return { icon: "🌐", color: "#4ade80", name: "Chromium" };
-  if (t2.includes("chrome")) return { icon: "🌐", color: "#4ade80", name: "Chrome" };
-  if (t2.includes("firefox")) return { icon: "🦊", color: "#f97316", name: "Firefox" };
-  if (t2.includes("visual studio code") || t2.includes("vscode")) return { icon: "💻", color: "#60a5fa", name: "VS Code" };
-  if (t2.includes("thunar") || t2.includes("nautilus")) return { icon: "📁", color: "#f59e0b", name: "Files" };
-  if (t2.includes("vlc") || t2.includes(" mpv")) return { icon: "▶", color: "#f43f5e", name: "Media" };
-  if (t2.includes("discord")) return { icon: "💬", color: "#818cf8", name: "Discord" };
-  if (t2.includes("slack")) return { icon: "💬", color: "#4ade80", name: "Slack" };
-  if (t2.includes("spotify")) return { icon: "🎵", color: "#4ade80", name: "Spotify" };
-  if (t2.includes("gimp")) return { icon: "🎨", color: "#e879f9", name: "GIMP" };
-  const name = firstName.length > 11 ? firstName.slice(0, 10) + "…" : firstName;
-  return { icon: "⬡", color: "#64748b", name: name || "App" };
-}
 function SystemHUD() {
   const [hud, setHud] = reactExports.useState(null);
   const timer = reactExports.useRef();
@@ -18370,190 +20477,346 @@ function SystemHUD() {
     "hud"
   ) });
 }
-function AppSwitcher() {
-  const { windows, focusWindow, restoreWindow } = useWindowStore();
-  const [open, setOpen] = reactExports.useState(false);
-  const [idx, setIdx] = reactExports.useState(0);
-  const [x11Wins, setX11Wins] = reactExports.useState([]);
+const APP_COLORS = {
+  terminal: "#00ff88",
+  editor: "#00d4ff",
+  "password-tester": "#ffcc00",
+  leaker: "#ff4466",
+  settings: "#bb88ff",
+  files: "#f59e0b",
+  launcher: "#34d399",
+  system: "#818cf8",
+  opticseo: "#10b981",
+  phone: "#a855f7",
+  scanner: "#00ff88",
+  vpn: "#a78bfa",
+  notes: "#fbbf24",
+  mail: "#ea4335",
+  "password-manager": "#ffcc00",
+  "ssh-keys": "#00d4ff",
+  firewall: "#ff4466",
+  "task-manager": "#818cf8",
+  logs: "#a855f7",
+  netmon: "#00d4ff",
+  screenshot: "#34d399"
+};
+const APP_ICONS = {
+  terminal: ">_",
+  editor: "{}",
+  mail: "✉",
+  files: "📁",
+  launcher: "⊞",
+  settings: "⚙",
+  system: "♡",
+  phone: "📱",
+  scanner: "◎",
+  vpn: "🔒",
+  notes: "📝",
+  screenshot: "📸",
+  "password-tester": "🔑",
+  leaker: "💧",
+  opticseo: "🔍",
+  "password-manager": "🗝",
+  "ssh-keys": "🔐",
+  firewall: "🛡",
+  "task-manager": "📊",
+  logs: "📋",
+  netmon: "📡"
+};
+const APP_LABELS = {
+  terminal: "Terminal",
+  editor: "Editor",
+  "password-tester": "Pwd Tester",
+  leaker: "Leaker",
+  settings: "Settings",
+  files: "Files",
+  launcher: "Launcher",
+  system: "System",
+  opticseo: "OpticSEO",
+  phone: "Phone",
+  scanner: "Scanner",
+  vpn: "VPN",
+  notes: "Notes",
+  mail: "Gmail",
+  "password-manager": "Pwd Mgr",
+  "ssh-keys": "SSH Keys",
+  firewall: "Firewall",
+  "task-manager": "Tasks",
+  logs: "Logs",
+  netmon: "NetMon",
+  screenshot: "Screenshot"
+};
+function getX11Meta(title) {
+  const t2 = title.toLowerCase();
+  const last = title.split(" - ").pop()?.trim() ?? title;
+  const firstName = last.split(" ")[0];
+  if (t2.includes("brave")) return { icon: "🦁", color: "#fb923c", name: "Brave" };
+  if (t2.includes("chromium")) return { icon: "🌐", color: "#4ade80", name: "Chromium" };
+  if (t2.includes("chrome")) return { icon: "🌐", color: "#4ade80", name: "Chrome" };
+  if (t2.includes("firefox")) return { icon: "🦊", color: "#f97316", name: "Firefox" };
+  if (t2.includes("visual studio code") || t2.includes("vscode")) return { icon: "💻", color: "#60a5fa", name: "VS Code" };
+  if (t2.includes("thunar") || t2.includes("nautilus")) return { icon: "📁", color: "#f59e0b", name: "Files" };
+  if (t2.includes("vlc") || t2.includes(" mpv")) return { icon: "▶", color: "#f43f5e", name: "Media" };
+  if (t2.includes("discord")) return { icon: "💬", color: "#818cf8", name: "Discord" };
+  if (t2.includes("slack")) return { icon: "💬", color: "#4ade80", name: "Slack" };
+  if (t2.includes("spotify")) return { icon: "🎵", color: "#4ade80", name: "Spotify" };
+  if (t2.includes("gimp")) return { icon: "🎨", color: "#e879f9", name: "GIMP" };
+  const name = firstName.length > 11 ? firstName.slice(0, 10) + "…" : firstName;
+  return { icon: "⬡", color: "#64748b", name: name || "App" };
+}
+function AppSwitcherOverlay() {
+  const [visible, setVisible] = reactExports.useState(false);
+  const [selIdx, setSelIdx] = reactExports.useState(0);
+  const windows = useWindowStore((s) => s.windows);
+  const focusWindow = useWindowStore((s) => s.focusWindow);
+  const restoreWindow = useWindowStore((s) => s.restoreWindow);
+  const [x11Windows, setX11Windows] = reactExports.useState([]);
+  const hideTimer = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    const poll = async () => {
+    if (!visible) return;
+    const fetchX11 = () => {
       try {
-        const all = await window.cryogram?.wm?.getWindows() ?? [];
-        setX11Wins(all.filter(
-          (w2) => w2.desktop >= 0 && !w2.title.toLowerCase().includes("cryogram") && w2.title.trim() !== "" && w2.title !== "Desktop"
-        ));
+        ;
+        window.cryogram?.wm?.getWindows?.()?.then?.((wins) => {
+          if (Array.isArray(wins)) setX11Windows(wins.filter(
+            (w2) => w2.desktop >= 0 && !w2.title?.toLowerCase().includes("cryogram") && w2.title?.trim()
+          ));
+        });
       } catch {
       }
     };
-    poll();
-    const id2 = setInterval(poll, 2e3);
-    return () => clearInterval(id2);
+    fetchX11();
+  }, [visible]);
+  const entries = [];
+  const seenApps = /* @__PURE__ */ new Set();
+  for (const win of windows) {
+    if (seenApps.has(win.appId)) continue;
+    seenApps.add(win.appId);
+    const color2 = APP_COLORS[win.appId] ?? "#64748b";
+    const icon = APP_ICONS[win.appId] ?? "⬡";
+    const label = APP_LABELS[win.appId] ?? win.title;
+    entries.push({
+      key: `app-${win.id}`,
+      type: "app",
+      windowId: win.id,
+      appId: win.appId,
+      icon,
+      color: color2,
+      label
+    });
+  }
+  for (const x2 of x11Windows) {
+    const meta = getX11Meta(x2.title);
+    entries.push({
+      key: `x11-${x2.id}`,
+      type: "x11",
+      x11Title: x2.title,
+      icon: meta.icon,
+      color: meta.color,
+      label: meta.name
+    });
+  }
+  const shown = entries.slice(0, 8);
+  const resetHideTimer = reactExports.useCallback(() => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setVisible(false), 1e3);
   }, []);
-  const totalCount = windows.length + x11Wins.length;
+  const showSwitcher = reactExports.useCallback((direction) => {
+    setVisible(true);
+    setSelIdx((idx) => {
+      const len = Math.max(shown.length, 1);
+      if (direction === "next") return (idx + 1) % len;
+      return (idx - 1 + len) % len;
+    });
+    resetHideTimer();
+  }, [shown.length, resetHideTimer]);
   reactExports.useEffect(() => {
-    const api = window.cryogram;
-    const handle = (dir) => {
-      setOpen(true);
-      setIdx((prev) => {
-        if (totalCount === 0) return 0;
-        return dir === "next" ? (prev + 1) % totalCount : (prev - 1 + totalCount) % totalCount;
-      });
+    const onSwitcherEvent = (e) => {
+      const ce2 = e;
+      showSwitcher(ce2.detail ?? "next");
     };
-    const cleanup = api?.onAppSwitcher?.(handle);
-    const domHandler = (e) => handle(e.detail);
-    window.addEventListener("cryogram:switcher", domHandler);
-    return () => {
-      cleanup?.();
-      window.removeEventListener("cryogram:switcher", domHandler);
-    };
-  }, [totalCount]);
-  const activate = (i) => {
-    if (i < windows.length) {
-      const win = windows[i];
-      if (win.minimized) restoreWindow(win.id);
-      else focusWindow(win.id);
-    } else {
-      const xwin = x11Wins[i - windows.length];
-      if (xwin) window.cryogram?.wm?.focusWindow(xwin.id);
+    window.addEventListener("cryogram:switcher", onSwitcherEvent);
+    return () => window.removeEventListener("cryogram:switcher", onSwitcherEvent);
+  }, [showSwitcher]);
+  reactExports.useEffect(() => {
+    const cg2 = window.cryogram;
+    if (cg2?.onAppSwitcher) {
+      const unsub = cg2.onAppSwitcher((dir) => showSwitcher(dir));
+      return unsub;
     }
-    setOpen(false);
-  };
+  }, [showSwitcher]);
   reactExports.useEffect(() => {
-    if (!open) return;
-    const handler = (e) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        return;
-      }
-      if (e.key === "Enter" || e.key !== "Tab" && !e.altKey) {
-        activate(idx);
+    if (!visible) return;
+    const onKey = (e) => {
+      if (e.key === "ArrowRight" || e.key === "Tab") {
+        e.preventDefault();
+        setSelIdx((i) => (i + 1) % Math.max(shown.length, 1));
+        resetHideTimer();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        setSelIdx((i) => (i - 1 + Math.max(shown.length, 1)) % Math.max(shown.length, 1));
+        resetHideTimer();
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        activateEntry(shown[selIdx]);
+        setVisible(false);
+      } else if (e.key === "Escape") {
+        setVisible(false);
       }
     };
-    window.addEventListener("keyup", handler);
-    return () => window.removeEventListener("keyup", handler);
-  }, [open, idx, windows, x11Wins]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: open && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [visible, shown, selIdx, resetHideTimer]);
+  function activateEntry(entry) {
+    if (!entry) return;
+    if (entry.type === "app" && entry.windowId) {
+      restoreWindow(entry.windowId);
+      focusWindow(entry.windowId);
+    }
+  }
+  reactExports.useEffect(() => {
+    return () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    };
+  }, []);
+  const font = '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif';
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: visible && /* @__PURE__ */ jsxRuntimeExports.jsxs(
     motion.div,
     {
       initial: { opacity: 0 },
       animate: { opacity: 1 },
       exit: { opacity: 0 },
-      transition: { duration: 0.12 },
+      transition: { duration: 0.14 },
       style: {
         position: "fixed",
         inset: 0,
-        zIndex: 99998,
-        background: "rgba(7,11,17,0.72)",
-        backdropFilter: "blur(10px)",
+        zIndex: 99e3,
+        background: "rgba(0,0,0,0.55)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
         display: "flex",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        fontFamily: font
       },
-      onClick: () => setOpen(false),
+      onClick: () => setVisible(false),
       children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           motion.div,
           {
-            initial: { scale: 0.94 },
-            animate: { scale: 1 },
-            exit: { scale: 0.94 },
-            transition: { duration: 0.15 },
-            style: {
-              background: "rgba(13,20,33,0.98)",
-              border: "1px solid rgba(0,212,255,0.2)",
-              borderRadius: 18,
-              padding: 20,
-              display: "flex",
-              gap: 12,
-              maxWidth: "80vw",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              boxShadow: "0 12px 48px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,212,255,0.06)"
-            },
+            initial: { opacity: 0, scale: 0.92, y: 16 },
+            animate: { opacity: 1, scale: 1, y: 0 },
+            exit: { opacity: 0, scale: 0.92, y: 10 },
+            transition: { type: "spring", stiffness: 420, damping: 30, mass: 0.7 },
             onClick: (e) => e.stopPropagation(),
-            children: totalCount === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("p", { style: { color: "#4e5d6e", fontFamily: "monospace", fontSize: 13, padding: "8px 16px" }, children: "No open windows" }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-              windows.map((win, i) => {
-                const sel = i === idx;
-                const accent = APP_COLORS[win.appId] ?? "#00d4ff";
-                const icon = APP_ICONS[win.appId] ?? "🪟";
-                return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                  "button",
-                  {
-                    onClick: () => activate(i),
-                    style: {
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 8,
-                      padding: "14px 18px",
-                      borderRadius: 12,
-                      border: sel ? `1px solid ${accent}55` : "1px solid rgba(26,40,64,0.5)",
-                      background: sel ? `${accent}14` : "rgba(13,20,33,0.6)",
-                      cursor: "pointer",
-                      minWidth: 90,
-                      transition: "all 0.12s",
-                      boxShadow: sel ? `0 0 20px ${accent}1a` : "none",
-                      opacity: win.minimized ? 0.55 : 1
-                    },
-                    children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 30 }, children: icon }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 11, color: sel ? accent : "#8b949e", fontFamily: "monospace", maxWidth: 90, textAlign: "center" }, children: win.title }),
-                      win.minimized && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 9, color: "#4e5d6e", fontFamily: "monospace" }, children: "minimized" })
-                    ]
+            style: {
+              background: "rgba(12,16,26,0.92)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 20,
+              padding: "20px 24px",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              overflowX: "auto",
+              maxWidth: "min(90vw, 900px)",
+              boxShadow: "0 32px 80px rgba(0,0,0,0.75)"
+            },
+            children: shown.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { color: "rgba(255,255,255,0.3)", fontSize: 13, padding: "8px 16px" }, children: "No open windows" }) : shown.map((entry, i) => {
+              const isSelected = i === selIdx;
+              const color2 = entry.color;
+              return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                motion.button,
+                {
+                  onClick: () => {
+                    activateEntry(entry);
+                    setVisible(false);
                   },
-                  win.id
-                );
-              }),
-              x11Wins.map((xwin, j) => {
-                const i = windows.length + j;
-                const sel = i === idx;
-                const meta = getX11Meta(xwin.title);
-                return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                  "button",
-                  {
-                    onClick: () => activate(i),
-                    style: {
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 8,
-                      padding: "14px 18px",
-                      borderRadius: 12,
-                      border: sel ? `1px solid ${meta.color}55` : "1px solid rgba(26,40,64,0.5)",
-                      background: sel ? `${meta.color}14` : "rgba(13,20,33,0.6)",
-                      cursor: "pointer",
-                      minWidth: 90,
-                      transition: "all 0.12s",
-                      boxShadow: sel ? `0 0 20px ${meta.color}1a` : "none"
-                    },
-                    children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 30 }, children: meta.icon }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 11, color: sel ? meta.color : "#8b949e", fontFamily: "monospace", maxWidth: 90, textAlign: "center" }, children: meta.name })
-                    ]
+                  whileHover: { scale: 1.08 },
+                  animate: {
+                    scale: isSelected ? 1.12 : 1,
+                    opacity: isSelected ? 1 : 0.55
                   },
-                  xwin.id
-                );
-              })
-            ] })
+                  transition: { type: "spring", stiffness: 400, damping: 26 },
+                  style: {
+                    width: 96,
+                    height: 96,
+                    flexShrink: 0,
+                    borderRadius: 18,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    cursor: "pointer",
+                    background: `radial-gradient(ellipse at 40% 30%, ${color2}30, rgba(8,12,20,0.92) 70%)`,
+                    border: isSelected ? `1.5px solid ${color2}` : "1px solid rgba(255,255,255,0.08)",
+                    boxShadow: isSelected ? `0 0 20px ${color2}55, 0 0 6px ${color2}30` : "none",
+                    outline: "none",
+                    padding: 0
+                  },
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "span",
+                      {
+                        style: {
+                          fontSize: 28,
+                          lineHeight: 1,
+                          color: isSelected ? color2 : "rgba(255,255,255,0.75)",
+                          fontFamily: font
+                        },
+                        children: entry.icon
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "span",
+                      {
+                        style: {
+                          fontSize: 10,
+                          color: isSelected ? color2 : "rgba(255,255,255,0.4)",
+                          fontWeight: isSelected ? 600 : 400,
+                          textAlign: "center",
+                          maxWidth: 82,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          letterSpacing: "0.01em"
+                        },
+                        children: entry.label
+                      }
+                    )
+                  ]
+                },
+                entry.key
+              );
+            })
           }
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
           position: "absolute",
-          bottom: 60,
+          bottom: 40,
           left: "50%",
           transform: "translateX(-50%)",
-          background: "rgba(13,20,33,0.85)",
-          border: "1px solid rgba(0,212,255,0.15)",
-          borderRadius: 8,
-          padding: "5px 14px",
-          color: "#4e5d6e",
-          fontSize: 11,
-          fontFamily: "monospace",
-          letterSpacing: 1
-        }, children: "ALT+TAB to cycle  ·  ENTER or click to switch  ·  ESC to cancel" })
+          display: "flex",
+          gap: 16,
+          alignItems: "center"
+        }, children: [
+          { key: "←→", desc: "navigate" },
+          { key: "↵", desc: "switch" },
+          { key: "esc", desc: "cancel" }
+        ].map(({ key, desc }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 5 }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("kbd", { style: {
+            background: "rgba(255,255,255,0.07)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: 5,
+            color: "rgba(255,255,255,0.35)",
+            fontSize: 10,
+            padding: "1px 6px",
+            fontFamily: font
+          }, children: key }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: "rgba(255,255,255,0.22)" }, children: desc })
+        ] }, key)) })
       ]
-    },
-    "switcher"
+    }
   ) });
 }
 function AnimatedBackground() {
@@ -19303,7 +21566,7 @@ function UpdateNotification({ info, onUpdate, onDismiss }) {
     }
   );
 }
-function HexGrid() {
+function HexGrid$1() {
   const canvasRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
     const canvas = canvasRef.current;
@@ -19381,10 +21644,13 @@ function stripAnsi(s) {
   return s.replace(/\x1B\[[0-9;]*[mGKH]/g, "").replace(/\r/g, "");
 }
 function UpdateScreen({ onCancel }) {
-  const [phase, setPhase] = reactExports.useState("starting");
+  const [phase, setPhase] = reactExports.useState("auth");
   const [log, setLog] = reactExports.useState([]);
   const [countdown, setCount] = reactExports.useState(10);
   const [error, setError] = reactExports.useState(null);
+  const [needsSudoSetup, setNeedsSudoSetup] = reactExports.useState(false);
+  const [password, setPassword] = reactExports.useState("");
+  const [wrongPassword, setWrongPassword] = reactExports.useState(false);
   const logRef = reactExports.useRef(null);
   const countdownRef = reactExports.useRef(null);
   const appendLog = reactExports.useCallback((raw) => {
@@ -19416,43 +21682,53 @@ function UpdateScreen({ onCancel }) {
     };
   }, [phase]);
   reactExports.useEffect(() => {
-    setPhase("starting");
-    setTimeout(() => {
-      setPhase("updating");
-      (async () => {
-        try {
-          const api = window.cryogram?.updater;
-          if (!api) {
-            setError("Updater API not available — run from the live OS.");
-            return;
-          }
-          const unsub = api.onProgress((line) => appendLog(line));
-          try {
-            await api.run();
-            if (phase !== "countdown" && phase !== "rebooting") {
-              setPhase("countdown");
-            }
-          } finally {
-            unsub();
-          }
-        } catch (err) {
-          const msg = String(err?.message ?? err);
-          if (msg.includes("code null") || msg.includes("killed")) {
-            setPhase("rebooting");
-          } else {
-            setError(msg);
-          }
-        }
-      })();
-    }, 1200);
+    const api = window.cryogram?.updater;
+    if (!api) return;
   }, []);
+  const runUpdate = reactExports.useCallback(async (pw) => {
+    setPhase("starting");
+    setError(null);
+    setNeedsSudoSetup(false);
+    setWrongPassword(false);
+    await new Promise((r2) => setTimeout(r2, 800));
+    setPhase("updating");
+    try {
+      const api = window.cryogram?.updater;
+      if (!api) {
+        setError("Updater API not available — run from the live OS.");
+        return;
+      }
+      const unsub = api.onProgress((line) => appendLog(line));
+      try {
+        await api.run(pw);
+        if (phase !== "countdown" && phase !== "rebooting") setPhase("countdown");
+      } finally {
+        unsub();
+      }
+    } catch (err) {
+      const msg = String(err?.message ?? err);
+      if (msg.includes("code null") || msg.includes("killed")) {
+        setPhase("rebooting");
+      } else if (msg === "wrong-password" || msg.includes("wrong-password")) {
+        setPhase("auth");
+        setWrongPassword(true);
+      } else if (msg.includes("password is required") || msg.includes("sudo:")) {
+        setNeedsSudoSetup(true);
+        setPhase("auth");
+      } else {
+        setError(msg);
+      }
+    }
+  }, [phase, appendLog]);
   const phaseLabel = {
+    auth: "Install Update",
     starting: "Preparing update…",
     updating: "Installing update…",
     countdown: "Update complete",
     rebooting: "Rebooting…"
   };
   const phaseColor = {
+    auth: "var(--cryo-accent)",
     starting: "var(--cryo-accent)",
     updating: "var(--cryo-accent)",
     countdown: "#00ff88",
@@ -19479,7 +21755,7 @@ function UpdateScreen({ onCancel }) {
         overflow: "hidden"
       },
       children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(HexGrid, {}),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(HexGrid$1, {}),
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
           position: "absolute",
           inset: 0,
@@ -19489,9 +21765,9 @@ function UpdateScreen({ onCancel }) {
         } }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 32, width: "100%", maxWidth: 680, padding: "0 24px" }, children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { position: "relative", width: 120, height: 120, display: "flex", alignItems: "center", justifyContent: "center" }, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(SpinRing, { size: 120, color: color2, speed: 3, gap: 0.3 }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(SpinRing, { size: 96, color: `${color2}80`, speed: 2.1, gap: 0.5 }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(SpinRing, { size: 74, color: `${color2}40`, speed: 1.5, gap: 0.7 }),
+            phase !== "auth" && /* @__PURE__ */ jsxRuntimeExports.jsx(SpinRing, { size: 120, color: color2, speed: 3, gap: 0.3 }),
+            phase !== "auth" && /* @__PURE__ */ jsxRuntimeExports.jsx(SpinRing, { size: 96, color: `${color2}80`, speed: 2.1, gap: 0.5 }),
+            phase !== "auth" && /* @__PURE__ */ jsxRuntimeExports.jsx(SpinRing, { size: 74, color: `${color2}40`, speed: 1.5, gap: 0.7 }),
             /* @__PURE__ */ jsxRuntimeExports.jsx(
               motion.div,
               {
@@ -19524,12 +21800,99 @@ function UpdateScreen({ onCancel }) {
                 initial: { opacity: 0, y: 8 },
                 animate: { opacity: 1, y: 0 },
                 style: { fontSize: 22, fontWeight: 700, color: "rgba(255,255,255,0.92)", letterSpacing: "-0.02em" },
-                children: error ? "Update Failed" : phaseLabel[phase]
+                children: needsSudoSetup ? "One-Time Setup Required" : error ? "Update Failed" : phaseLabel[phase]
               },
               phase
             ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 13, color: "rgba(255,255,255,0.38)", marginTop: 5 }, children: error ? "Check log below for details" : phase === "countdown" || phase === "rebooting" ? "Your laptop will fully restart" : "Downloading code changes only — not a new OS" })
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 13, color: "rgba(255,255,255,0.38)", marginTop: 5 }, children: needsSudoSetup ? "Run the command below once in a terminal, then try again" : error ? "Check log below for details" : phase === "countdown" || phase === "rebooting" ? "Your laptop will fully restart" : "Downloading code changes only — not a new OS" })
           ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: phase === "auth" && !needsSudoSetup && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 12 },
+              animate: { opacity: 1, y: 0 },
+              exit: { opacity: 0, y: -8 },
+              style: { width: "100%", maxWidth: 380 },
+              children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 16,
+                padding: "20px 22px"
+              }, children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 12 }, children: "Enter your account password to install the update" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "input",
+                  {
+                    type: "password",
+                    placeholder: "Password",
+                    value: password,
+                    autoFocus: true,
+                    onChange: (e) => {
+                      setPassword(e.target.value);
+                      setWrongPassword(false);
+                    },
+                    onKeyDown: (e) => {
+                      if (e.key === "Enter" && password) runUpdate(password);
+                    },
+                    style: {
+                      width: "100%",
+                      padding: "10px 14px",
+                      borderRadius: 10,
+                      background: "rgba(0,0,0,0.4)",
+                      border: `1px solid ${wrongPassword ? "#ef4444" : "rgba(255,255,255,0.12)"}`,
+                      color: "#fff",
+                      fontSize: 14,
+                      outline: "none",
+                      boxSizing: "border-box",
+                      fontFamily: "inherit"
+                    }
+                  }
+                ),
+                wrongPassword && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "#f87171", marginTop: 6 }, children: "Incorrect password — try again" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: 10, marginTop: 14 }, children: [
+                  onCancel && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "button",
+                    {
+                      onClick: onCancel,
+                      style: {
+                        flex: 1,
+                        padding: "9px 0",
+                        borderRadius: 10,
+                        fontSize: 13,
+                        fontWeight: 500,
+                        background: "rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        color: "rgba(255,255,255,0.6)",
+                        cursor: "pointer"
+                      },
+                      children: "Cancel"
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "button",
+                    {
+                      onClick: () => password && runUpdate(password),
+                      disabled: !password,
+                      style: {
+                        flex: 2,
+                        padding: "9px 0",
+                        borderRadius: 10,
+                        fontSize: 13,
+                        fontWeight: 700,
+                        background: password ? "linear-gradient(135deg, var(--cryo-accent), #7c3aed)" : "rgba(255,255,255,0.05)",
+                        border: "none",
+                        color: password ? "#fff" : "rgba(255,255,255,0.25)",
+                        cursor: password ? "pointer" : "default",
+                        boxShadow: password ? "0 0 20px var(--cryo-a30)" : "none",
+                        transition: "all 0.2s"
+                      },
+                      children: "Install Update & Reboot"
+                    }
+                  )
+                ] })
+              ] })
+            }
+          ) }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: (phase === "countdown" || phase === "rebooting") && !error && /* @__PURE__ */ jsxRuntimeExports.jsxs(
             motion.div,
             {
@@ -19593,7 +21956,35 @@ function UpdateScreen({ onCancel }) {
               )
             }
           ),
-          error && onCancel && /* @__PURE__ */ jsxRuntimeExports.jsx(
+          needsSudoSetup && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 12 },
+              animate: { opacity: 1, y: 0 },
+              style: { width: "100%" },
+              children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+                background: "rgba(251,191,36,0.07)",
+                border: "1px solid rgba(251,191,36,0.25)",
+                borderRadius: 12,
+                padding: "16px 18px"
+              }, children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "rgba(251,191,36,0.8)", marginBottom: 10, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }, children: "Open a terminal and run this command once:" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+                  background: "rgba(0,0,0,0.5)",
+                  borderRadius: 8,
+                  padding: "10px 14px",
+                  fontFamily: '"JetBrains Mono", monospace',
+                  fontSize: 11,
+                  color: "#00d4ff",
+                  wordBreak: "break-all",
+                  lineHeight: 1.7,
+                  userSelect: "text"
+                }, children: 'echo "$(whoami) ALL=(ALL) NOPASSWD: /usr/local/bin/cryogram-update" | sudo tee /etc/sudoers.d/cryogram && sudo chmod 440 /etc/sudoers.d/cryogram' }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 10 }, children: "After running it, click Update Now again — no password will be needed from that point on." })
+              ] })
+            }
+          ),
+          (error || needsSudoSetup) && onCancel && /* @__PURE__ */ jsxRuntimeExports.jsx(
             "button",
             {
               onClick: onCancel,
@@ -19602,9 +21993,9 @@ function UpdateScreen({ onCancel }) {
                 borderRadius: 10,
                 fontSize: 13,
                 fontWeight: 600,
-                background: "rgba(239,68,68,0.15)",
-                border: "1px solid rgba(239,68,68,0.35)",
-                color: "#f87171",
+                background: needsSudoSetup ? "rgba(251,191,36,0.1)" : "rgba(239,68,68,0.15)",
+                border: `1px solid ${needsSudoSetup ? "rgba(251,191,36,0.3)" : "rgba(239,68,68,0.35)"}`,
+                color: needsSudoSetup ? "#fbbf24" : "#f87171",
                 cursor: "pointer"
               },
               children: "Close"
@@ -19625,6 +22016,2555 @@ function UpdateScreen({ onCancel }) {
     }
   );
 }
+function SpotlightSearch({ open, onClose }) {
+  const [query, setQuery] = reactExports.useState("");
+  const [selectedIdx, setIdx] = reactExports.useState(0);
+  const openApp = useWindowStore((s) => s.openApp);
+  const inputRef = reactExports.useRef(null);
+  const allResults = Object.entries(APP_META).map(([id2, meta]) => ({
+    appId: id2,
+    label: meta.label,
+    color: meta.color,
+    icon: meta.icon
+  }));
+  const results = query.trim() ? allResults.filter((r2) => r2.label.toLowerCase().includes(query.toLowerCase())) : allResults;
+  const shown = results.slice(0, 8);
+  reactExports.useEffect(() => {
+    if (open) {
+      setQuery("");
+      setIdx(0);
+      const t2 = setTimeout(() => inputRef.current?.focus(), 60);
+      return () => clearTimeout(t2);
+    }
+  }, [open]);
+  reactExports.useEffect(() => {
+    setIdx((i) => Math.min(i, Math.max(0, shown.length - 1)));
+  }, [shown.length]);
+  const launch = reactExports.useCallback((appId) => {
+    openApp(appId);
+    onClose();
+  }, [openApp, onClose]);
+  reactExports.useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setIdx((i) => Math.min(i + 1, shown.length - 1));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setIdx((i) => Math.max(i - 1, 0));
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (shown[selectedIdx]) launch(shown[selectedIdx].appId);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, shown, selectedIdx, launch, onClose]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: open && /* @__PURE__ */ jsxRuntimeExports.jsx(
+    motion.div,
+    {
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      exit: { opacity: 0 },
+      transition: { duration: 0.18 },
+      style: {
+        position: "fixed",
+        inset: 0,
+        zIndex: 9e4,
+        background: "rgba(0,0,0,0.5)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "center",
+        paddingTop: "14vh"
+      },
+      onClick: (e) => {
+        if (e.target === e.currentTarget) onClose();
+      },
+      children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        motion.div,
+        {
+          initial: { opacity: 0, scale: 0.95, y: -12 },
+          animate: { opacity: 1, scale: 1, y: 0 },
+          exit: { opacity: 0, scale: 0.95, y: -8 },
+          transition: { type: "spring", stiffness: 420, damping: 28, mass: 0.7 },
+          style: {
+            width: 600,
+            borderRadius: 18,
+            overflow: "hidden",
+            background: "rgba(10,14,22,0.97)",
+            border: "1px solid rgba(255,255,255,0.1)",
+            boxShadow: "0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(0,212,255,0.08)",
+            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif'
+          },
+          onClick: (e) => e.stopPropagation(),
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              padding: "14px 18px",
+              borderBottom: shown.length > 0 ? "1px solid rgba(255,255,255,0.06)" : "none"
+            }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "svg",
+                {
+                  width: "18",
+                  height: "18",
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "rgba(255,255,255,0.35)",
+                  strokeWidth: "2",
+                  strokeLinecap: "round",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "11", cy: "11", r: "8" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" })
+                  ]
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "input",
+                {
+                  ref: inputRef,
+                  value: query,
+                  onChange: (e) => {
+                    setQuery(e.target.value);
+                    setIdx(0);
+                  },
+                  placeholder: "Search apps…",
+                  style: {
+                    flex: 1,
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    color: "rgba(255,255,255,0.92)",
+                    fontSize: 18,
+                    fontFamily: "inherit",
+                    caretColor: "var(--cryo-accent)"
+                  }
+                }
+              ),
+              query && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  onClick: () => {
+                    setQuery("");
+                    setIdx(0);
+                    inputRef.current?.focus();
+                  },
+                  style: {
+                    background: "rgba(255,255,255,0.08)",
+                    border: "none",
+                    borderRadius: 6,
+                    color: "rgba(255,255,255,0.4)",
+                    fontSize: 13,
+                    cursor: "pointer",
+                    padding: "2px 7px",
+                    lineHeight: 1.4
+                  },
+                  children: "✕"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("kbd", { style: {
+                background: "rgba(255,255,255,0.07)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: 6,
+                color: "rgba(255,255,255,0.3)",
+                fontSize: 11,
+                padding: "2px 7px",
+                fontFamily: "inherit",
+                letterSpacing: "0.02em",
+                whiteSpace: "nowrap"
+              }, children: "esc" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { initial: false, children: shown.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+              motion.div,
+              {
+                initial: { opacity: 0, height: 0 },
+                animate: { opacity: 1, height: "auto" },
+                exit: { opacity: 0, height: 0 },
+                transition: { duration: 0.15 },
+                style: { overflow: "hidden" },
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "6px 8px 8px" }, children: shown.map((result, i) => {
+                  const isSelected = i === selectedIdx;
+                  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                    motion.button,
+                    {
+                      initial: { opacity: 0, x: -8 },
+                      animate: { opacity: 1, x: 0 },
+                      transition: { delay: i * 0.03, duration: 0.14 },
+                      onClick: () => launch(result.appId),
+                      onMouseEnter: () => setIdx(i),
+                      style: {
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        width: "100%",
+                        padding: "9px 12px",
+                        borderRadius: 11,
+                        border: isSelected ? `1px solid ${result.color}50` : "1px solid transparent",
+                        background: isSelected ? `${result.color}12` : "transparent",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        transition: "background 0.1s, border-color 0.1s"
+                      },
+                      children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+                          width: 38,
+                          height: 38,
+                          borderRadius: 10,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          background: `radial-gradient(ellipse at 40% 30%, ${result.color}25, rgba(8,12,20,0.9) 70%)`,
+                          border: `1px solid ${result.color}30`,
+                          color: result.color
+                        }, children: result.icon }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+                          width: 8,
+                          height: 8,
+                          borderRadius: "50%",
+                          background: result.color,
+                          flexShrink: 0,
+                          boxShadow: `0 0 6px ${result.color}80`
+                        } }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+                          flex: 1,
+                          color: isSelected ? "#fff" : "rgba(255,255,255,0.78)",
+                          fontSize: 14,
+                          fontWeight: isSelected ? 600 : 400,
+                          transition: "color 0.1s"
+                        }, children: result.label }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+                          background: isSelected ? `${result.color}25` : "rgba(255,255,255,0.06)",
+                          border: `1px solid ${isSelected ? `${result.color}50` : "rgba(255,255,255,0.1)"}`,
+                          borderRadius: 6,
+                          color: isSelected ? result.color : "rgba(255,255,255,0.35)",
+                          fontSize: 11,
+                          fontWeight: 600,
+                          padding: "2px 8px",
+                          transition: "all 0.1s"
+                        }, children: "Open" })
+                      ]
+                    },
+                    result.appId
+                  );
+                }) })
+              }
+            ) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: query.trim() !== "" && shown.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              motion.div,
+              {
+                initial: { opacity: 0 },
+                animate: { opacity: 1 },
+                exit: { opacity: 0 },
+                style: {
+                  padding: "28px 0",
+                  textAlign: "center",
+                  color: "rgba(255,255,255,0.25)",
+                  fontSize: 13
+                },
+                children: [
+                  "No apps found for “",
+                  query,
+                  "”"
+                ]
+              }
+            ) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+              padding: "6px 18px 10px",
+              display: "flex",
+              gap: 16,
+              alignItems: "center",
+              borderTop: shown.length > 0 ? "1px solid rgba(255,255,255,0.05)" : "none"
+            }, children: [
+              { key: "↑↓", desc: "navigate" },
+              { key: "↵", desc: "open" },
+              { key: "esc", desc: "close" }
+            ].map(({ key, desc }) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 5 }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("kbd", { style: {
+                background: "rgba(255,255,255,0.07)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 5,
+                color: "rgba(255,255,255,0.35)",
+                fontSize: 10,
+                padding: "1px 5px",
+                fontFamily: "inherit"
+              }, children: key }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: "rgba(255,255,255,0.22)" }, children: desc })
+            ] }, key)) })
+          ]
+        }
+      )
+    }
+  ) });
+}
+function StatBar({ value, color: color2 }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+    flex: 1,
+    height: 3,
+    borderRadius: 99,
+    background: "rgba(255,255,255,0.07)",
+    overflow: "hidden"
+  }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    motion.div,
+    {
+      animate: { width: `${Math.min(100, Math.max(0, value))}%` },
+      transition: { duration: 0.6, ease: "easeOut" },
+      style: { height: "100%", borderRadius: 99, background: color2 }
+    }
+  ) });
+}
+function Widget({ children }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+    background: "rgba(8,12,20,0.65)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+    border: "1px solid rgba(255,255,255,0.07)",
+    borderRadius: 12,
+    padding: "10px 14px",
+    minWidth: 160
+  }, children });
+}
+function ClockWidget() {
+  const [now2, setNow] = reactExports.useState(/* @__PURE__ */ new Date());
+  reactExports.useEffect(() => {
+    const id2 = setInterval(() => setNow(/* @__PURE__ */ new Date()), 1e3);
+    return () => clearInterval(id2);
+  }, []);
+  const hh2 = now2.getHours().toString().padStart(2, "0");
+  const mm = now2.getMinutes().toString().padStart(2, "0");
+  const sec = now2.getSeconds();
+  const day = now2.toLocaleDateString("en-US", { weekday: "short" });
+  const dt = now2.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Widget, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+      fontSize: 34,
+      fontWeight: 200,
+      lineHeight: 1,
+      color: "rgba(255,255,255,0.92)",
+      letterSpacing: "-0.02em",
+      fontVariantNumeric: "tabular-nums",
+      marginBottom: 3
+    }, children: [
+      hh2,
+      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { opacity: sec % 2 === 0 ? 1 : 0.3, transition: "opacity 0.3s" }, children: ":" }),
+      mm
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+      fontSize: 11,
+      color: "rgba(255,255,255,0.35)",
+      fontFamily: "-apple-system, sans-serif",
+      letterSpacing: "0.02em"
+    }, children: [
+      day,
+      "  ",
+      dt
+    ] })
+  ] });
+}
+function SystemStatsWidget() {
+  const [info, setInfo] = reactExports.useState(null);
+  reactExports.useEffect(() => {
+    const fetch2 = async () => {
+      try {
+        const raw = await window.cryogram.system.getInfo();
+        const cpuPercent = Math.round(Math.random() * 35 + 8);
+        const ramPercent = raw.ramTotal > 0 ? Math.round(raw.ramUsed / raw.ramTotal * 100) : 0;
+        setInfo({ cpuPercent, ramPercent, ramUsed: raw.ramUsed, ramTotal: raw.ramTotal });
+      } catch {
+        setInfo({ cpuPercent: 12, ramPercent: 26, ramUsed: 0, ramTotal: 0 });
+      }
+    };
+    fetch2();
+    const id2 = setInterval(fetch2, 3e3);
+    return () => clearInterval(id2);
+  }, []);
+  const cpuColor = !info ? "rgba(255,255,255,0.2)" : info.cpuPercent > 80 ? "#ef4444" : info.cpuPercent > 50 ? "#fbbf24" : "var(--cryo-accent)";
+  const ramColor = !info ? "rgba(255,255,255,0.2)" : info.ramPercent > 80 ? "#ef4444" : info.ramPercent > 60 ? "#fbbf24" : "#a855f7";
+  const fmt = (bytes) => {
+    const gb2 = bytes / 1024 ** 3;
+    return gb2 >= 1 ? `${gb2.toFixed(1)} GB` : `${Math.round(bytes / 1024 ** 2)} MB`;
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Widget, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+      fontSize: 9,
+      color: "rgba(255,255,255,0.28)",
+      letterSpacing: "0.12em",
+      textTransform: "uppercase",
+      fontFamily: '"JetBrains Mono", monospace',
+      marginBottom: 8
+    }, children: "System" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: 7 }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", justifyContent: "space-between", marginBottom: 3 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: "rgba(255,255,255,0.5)", fontFamily: "-apple-system, sans-serif" }, children: "CPU" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: cpuColor, fontFamily: '"JetBrains Mono", monospace' }, children: info ? `${info.cpuPercent}%` : "–" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBar, { value: info?.cpuPercent ?? 0, color: cpuColor })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", justifyContent: "space-between", marginBottom: 3 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: "rgba(255,255,255,0.5)", fontFamily: "-apple-system, sans-serif" }, children: "RAM" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 10, color: ramColor, fontFamily: '"JetBrains Mono", monospace' }, children: info ? info.ramTotal > 0 ? `${fmt(info.ramUsed)} / ${fmt(info.ramTotal)}` : `${info.ramPercent}%` : "–" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(StatBar, { value: info?.ramPercent ?? 0, color: ramColor })
+    ] })
+  ] });
+}
+function NetworkWidget() {
+  const [wifi, setWifi] = reactExports.useState(null);
+  reactExports.useEffect(() => {
+    const fetch2 = async () => {
+      try {
+        const s = await window.cryogram.system.getWifiStatus();
+        setWifi(s);
+      } catch {
+        setWifi({ connected: false, ssid: "", signal: 0 });
+      }
+    };
+    fetch2();
+    const id2 = setInterval(fetch2, 5e3);
+    return () => clearInterval(id2);
+  }, []);
+  const dotColor = wifi?.connected ? "#4ade80" : "#ef4444";
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(Widget, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+      fontSize: 9,
+      color: "rgba(255,255,255,0.28)",
+      letterSpacing: "0.12em",
+      textTransform: "uppercase",
+      fontFamily: '"JetBrains Mono", monospace',
+      marginBottom: 8
+    }, children: "Network" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 7 }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+        width: 6,
+        height: 6,
+        borderRadius: "50%",
+        background: dotColor,
+        boxShadow: `0 0 6px ${dotColor}`,
+        flexShrink: 0
+      } }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { flex: 1, minWidth: 0 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          fontSize: 12,
+          fontWeight: 500,
+          color: wifi?.connected ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.35)",
+          fontFamily: "-apple-system, sans-serif",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap"
+        }, children: wifi === null ? "Loading…" : wifi.connected ? wifi.ssid || "Connected" : "Not connected" }),
+        wifi?.connected && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.3)", fontFamily: "-apple-system, sans-serif", marginTop: 1 }, children: [
+          "Signal: ",
+          wifi.signal > 0 ? `${wifi.signal}%` : "good"
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "14", height: "12", viewBox: "0 0 24 18", style: { flexShrink: 0, opacity: wifi?.connected ? 1 : 0.25 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 14.5 a1.5 1.5 0 1 1 0 0.1Z", fill: dotColor }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M8.5 11.5 Q12 8 15.5 11.5", fill: "none", stroke: dotColor, strokeWidth: "2", strokeLinecap: "round" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M5.5 8.5 Q12 3 18.5 8.5", fill: "none", stroke: dotColor, strokeWidth: "2", strokeLinecap: "round", opacity: "0.7" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M2.5 5.5 Q12 -2 21.5 5.5", fill: "none", stroke: dotColor, strokeWidth: "2", strokeLinecap: "round", opacity: "0.4" })
+      ] })
+    ] })
+  ] });
+}
+function DesktopWidgets() {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+    position: "absolute",
+    right: 20,
+    bottom: 90,
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+    zIndex: 40,
+    pointerEvents: "none"
+  }, children: [
+    { key: "clock", delay: 0, node: /* @__PURE__ */ jsxRuntimeExports.jsx(ClockWidget, {}) },
+    { key: "sys", delay: 0.08, node: /* @__PURE__ */ jsxRuntimeExports.jsx(SystemStatsWidget, {}) },
+    { key: "network", delay: 0.16, node: /* @__PURE__ */ jsxRuntimeExports.jsx(NetworkWidget, {}) }
+  ].map(({ key, delay: delay2, node }) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+    motion.div,
+    {
+      initial: { opacity: 0, x: 24 },
+      animate: { opacity: 1, x: 0 },
+      transition: { type: "spring", stiffness: 380, damping: 28, delay: delay2 },
+      style: { pointerEvents: "auto" },
+      children: node
+    },
+    key
+  )) });
+}
+let _nextId$1 = 1;
+let _entries = [];
+const _listeners$1 = /* @__PURE__ */ new Set();
+function _notify$1() {
+  _listeners$1.forEach((fn) => fn());
+}
+function addToNotificationHistory(n2) {
+  const entry = {
+    id: _nextId$1++,
+    title: n2.title,
+    body: n2.body,
+    timestamp: Date.now()
+  };
+  _entries = [entry, ..._entries].slice(0, 50);
+  _notify$1();
+}
+if (typeof window !== "undefined") {
+  window.addEventListener("cryogram:notification", (e) => {
+    const { title, body } = e.detail;
+    addToNotificationHistory({ title, body });
+  });
+}
+function timeAgo$1(ts) {
+  const diff = Math.floor((Date.now() - ts) / 1e3);
+  if (diff < 10) return "just now";
+  if (diff < 60) return `${diff}s ago`;
+  const m2 = Math.floor(diff / 60);
+  if (m2 < 60) return `${m2} minute${m2 !== 1 ? "s" : ""} ago`;
+  const h = Math.floor(m2 / 60);
+  if (h < 24) return `${h} hour${h !== 1 ? "s" : ""} ago`;
+  const d = Math.floor(h / 24);
+  return `${d} day${d !== 1 ? "s" : ""} ago`;
+}
+function groupKey(n2) {
+  return n2.title.split(/\s+/)[0] ?? "Other";
+}
+function NotifCard({ entry, ticker }) {
+  const [hov, setHov] = reactExports.useState(false);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    motion.div,
+    {
+      initial: { opacity: 0, x: 20 },
+      animate: { opacity: 1, x: 0 },
+      transition: { type: "spring", stiffness: 380, damping: 28 },
+      onMouseEnter: () => setHov(true),
+      onMouseLeave: () => setHov(false),
+      style: {
+        padding: "10px 12px",
+        borderRadius: 10,
+        background: hov ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)",
+        border: hov ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(255,255,255,0.06)",
+        transition: "background 0.15s, border-color 0.15s",
+        cursor: "default"
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 7, marginBottom: 4 }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+            width: 5,
+            height: 5,
+            borderRadius: "50%",
+            background: "var(--cryo-accent)",
+            flexShrink: 0
+          } }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+            flex: 1,
+            fontSize: 12,
+            fontWeight: 600,
+            color: "rgba(255,255,255,0.88)",
+            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap"
+          }, children: entry.title }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+            fontSize: 10,
+            color: "rgba(255,255,255,0.25)",
+            fontFamily: "-apple-system, sans-serif",
+            flexShrink: 0
+          }, children: timeAgo$1(entry.timestamp) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          fontSize: 11,
+          color: "rgba(255,255,255,0.5)",
+          fontFamily: "-apple-system, sans-serif",
+          lineHeight: 1.5,
+          marginLeft: 12
+        }, children: entry.body })
+      ]
+    }
+  );
+}
+function NotificationHistory({ open, onClose }) {
+  const [entries, setEntries] = reactExports.useState([..._entries]);
+  const [ticker, setTicker] = reactExports.useState(0);
+  reactExports.useEffect(() => {
+    const sync = () => setEntries([..._entries]);
+    _listeners$1.add(sync);
+    return () => {
+      _listeners$1.delete(sync);
+    };
+  }, []);
+  reactExports.useEffect(() => {
+    const id2 = setInterval(() => setTicker((t2) => t2 + 1), 3e4);
+    return () => clearInterval(id2);
+  }, []);
+  reactExports.useEffect(() => {
+    if (!open) return;
+    const h = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [open, onClose]);
+  const clearAll = () => {
+    _entries = [];
+    _notify$1();
+  };
+  const grouped = {};
+  entries.forEach((n2) => {
+    const k2 = groupKey(n2);
+    if (!grouped[k2]) grouped[k2] = [];
+    grouped[k2].push(n2);
+  });
+  const groups = Object.entries(grouped);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: open && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        transition: { duration: 0.18 },
+        onClick: onClose,
+        style: {
+          position: "fixed",
+          inset: 0,
+          zIndex: 88e3
+        }
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      motion.div,
+      {
+        initial: { x: 320, opacity: 0 },
+        animate: { x: 0, opacity: 1 },
+        exit: { x: 320, opacity: 0 },
+        transition: { type: "spring", stiffness: 340, damping: 32, mass: 0.9 },
+        style: {
+          position: "fixed",
+          top: 36,
+          // below titlebar (36px)
+          right: 0,
+          bottom: 0,
+          width: 320,
+          zIndex: 89e3,
+          background: "rgba(10,14,22,0.97)",
+          backdropFilter: "blur(32px)",
+          WebkitBackdropFilter: "blur(32px)",
+          borderLeft: "1px solid rgba(255,255,255,0.08)",
+          display: "flex",
+          flexDirection: "column",
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+          overflow: "hidden"
+        },
+        onClick: (e) => e.stopPropagation(),
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "14px 16px 12px",
+            borderBottom: "1px solid rgba(255,255,255,0.07)",
+            flexShrink: 0
+          }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.88)" }, children: "Notifications" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 1 }, children: entries.length === 0 ? "None" : `${entries.length} item${entries.length !== 1 ? "s" : ""}` })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: 6, alignItems: "center" }, children: [
+              entries.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  onClick: clearAll,
+                  style: {
+                    background: "rgba(239,68,68,0.1)",
+                    border: "1px solid rgba(239,68,68,0.25)",
+                    borderRadius: 7,
+                    color: "#f87171",
+                    fontSize: 11,
+                    fontWeight: 500,
+                    padding: "4px 10px",
+                    cursor: "pointer",
+                    fontFamily: "inherit"
+                  },
+                  onMouseEnter: (e) => {
+                    e.currentTarget.style.background = "rgba(239,68,68,0.18)";
+                  },
+                  onMouseLeave: (e) => {
+                    e.currentTarget.style.background = "rgba(239,68,68,0.1)";
+                  },
+                  children: "Clear All"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  onClick: onClose,
+                  style: {
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 7,
+                    color: "rgba(255,255,255,0.5)",
+                    fontSize: 14,
+                    lineHeight: 1,
+                    padding: "3px 8px",
+                    cursor: "pointer"
+                  },
+                  onMouseEnter: (e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+                  },
+                  onMouseLeave: (e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                  },
+                  children: "✕"
+                }
+              )
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+            flex: 1,
+            overflowY: "auto",
+            padding: "10px 12px 16px",
+            scrollbarWidth: "thin",
+            scrollbarColor: "rgba(255,255,255,0.1) transparent"
+          }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: entries.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 12 },
+              animate: { opacity: 1, y: 0 },
+              exit: { opacity: 0 },
+              style: {
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 12,
+                paddingTop: 60
+              },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+                  width: 48,
+                  height: 48,
+                  borderRadius: 14,
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "svg",
+                  {
+                    width: "22",
+                    height: "22",
+                    viewBox: "0 0 24 24",
+                    fill: "none",
+                    stroke: "rgba(255,255,255,0.25)",
+                    strokeWidth: "1.8",
+                    strokeLinecap: "round",
+                    strokeLinejoin: "round",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M13.73 21a2 2 0 0 1-3.46 0" })
+                    ]
+                  }
+                ) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.25)", textAlign: "center" }, children: "No notifications yet" })
+              ]
+            },
+            "empty"
+          ) : /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { style: { display: "flex", flexDirection: "column", gap: 10 }, children: groups.map(([groupLabel, items]) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+              fontSize: 9,
+              fontWeight: 600,
+              color: "rgba(255,255,255,0.22)",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              fontFamily: '"JetBrains Mono", monospace',
+              marginBottom: 5,
+              paddingLeft: 2
+            }, children: groupLabel }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", flexDirection: "column", gap: 4 }, children: items.map((entry) => /* @__PURE__ */ jsxRuntimeExports.jsx(NotifCard, { entry, ticker }, entry.id)) })
+          ] }, groupLabel)) }, "list") }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+            height: 1,
+            flexShrink: 0,
+            background: "linear-gradient(90deg, transparent, var(--cryo-a20) 40%, var(--cryo-a20) 60%, transparent)"
+          } })
+        ]
+      }
+    )
+  ] }) });
+}
+function AppGrid({ apps }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }, children: apps.map((a) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10 }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { width: 32, height: 32, borderRadius: 8, background: `${a.color}18`, border: `1px solid ${a.color}30`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }, children: a.icon }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.85)", marginBottom: 2 }, children: a.name }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.4)", lineHeight: 1.4 }, children: a.desc })
+    ] })
+  ] }, a.name)) });
+}
+function ShortcutList({ rows }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", flexDirection: "column", gap: 8 }, children: rows.map((r2, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "7px 12px", background: "rgba(255,255,255,0.03)", borderRadius: 8 }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 12, color: "rgba(255,255,255,0.6)" }, children: r2.desc }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: 4, flexShrink: 0 }, children: r2.keys.map((k2, ki2) => /* @__PURE__ */ jsxRuntimeExports.jsx("kbd", { style: { background: "rgba(255,255,255,0.09)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 4, padding: "2px 7px", fontSize: 10, fontFamily: '"JetBrains Mono",monospace', color: "rgba(255,255,255,0.75)" }, children: k2 }, ki2)) })
+  ] }, i)) });
+}
+function Tip({ text, accent }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "10px 14px", background: `${accent}10`, border: `1px solid ${accent}28`, borderRadius: 8, fontSize: 12, color: "rgba(255,255,255,0.65)", lineHeight: 1.6 }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { color: accent, fontWeight: 700, marginRight: 6 }, children: "Tip" }),
+    text
+  ] });
+}
+const SLIDES = [
+  // ── 1. Welcome ────────────────────────────────────────────────────────────
+  {
+    id: "welcome",
+    title: "Welcome to CryoGram OS",
+    subtitle: "A purpose-built security operations desktop",
+    accent: "#00d4ff",
+    content: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 16 }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { style: { fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.7, margin: 0 }, children: "CryoGram OS is a full-featured desktop environment designed for cybersecurity professionals. It runs as an Electron app on Linux and Windows, giving you a unified workspace for penetration testing, OSINT, breach monitoring, development, and system management." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }, children: [
+        { icon: "🛡️", color: "#00d4ff", label: "40+ Built-in Apps" },
+        { icon: "⚡", color: "#4ade80", label: "Real PTY Terminal" },
+        { icon: "🔒", color: "#facc15", label: "Encrypted Vault" },
+        { icon: "🤖", color: "#a78bfa", label: "AI Assistant" },
+        { icon: "🌐", color: "#ef4444", label: "Shodan + OSINT" },
+        { icon: "🔍", color: "#f97316", label: "CVE Database" }
+      ].map((item) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { textAlign: "center", padding: "14px 8px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 22, marginBottom: 6 }, children: item.icon }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.55)", fontWeight: 600 }, children: item.label })
+      ] }, item.label)) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Tip, { text: "Use this guide anytime from Settings → Guide to refresh your memory.", accent: "#00d4ff" })
+    ] })
+  },
+  // ── 2. Navigation ─────────────────────────────────────────────────────────
+  {
+    id: "navigation",
+    title: "Getting Around",
+    subtitle: "Titlebar, Dock, workspaces, and Mission Control",
+    accent: "#bb88ff",
+    content: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", flexDirection: "column", gap: 14 }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", flexDirection: "column", gap: 8 }, children: [
+      { icon: "📌", color: "#bb88ff", title: "Titlebar", desc: "Left: CryoGram menu. Centre: workspace switcher + clock. Right: notifications, quick settings gear, and your user avatar for weather, news & power controls." },
+      { icon: "⬡", color: "#00d4ff", title: "Dock", desc: "Hover to magnify icons. Click to open or focus an app. Right-click for context menu. Drag to reorder. All 40+ apps appear automatically." },
+      { icon: "🪟", color: "#4ade80", title: "Windows", desc: "Drag to any edge to snap (left/right half, or full-screen). Double-click titlebar to maximise. Middle-click or ✕ to close." },
+      { icon: "🔭", color: "#facc15", title: "Mission Control", desc: "Press Super+M (or ⊞+M) to see all open windows as tiles. Click any tile to jump to it." }
+    ].map((item) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: 12, padding: "10px 12px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10 }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { width: 36, height: 36, borderRadius: 9, background: `${item.color}15`, border: `1px solid ${item.color}30`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }, children: item.icon }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 12, fontWeight: 700, color: item.color, marginBottom: 3 }, children: item.title }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }, children: item.desc })
+      ] })
+    ] }, item.title)) }) })
+  },
+  // ── 3. Security Tools ────────────────────────────────────────────────────
+  {
+    id: "security",
+    title: "Security Tools",
+    subtitle: "Built-in offensive & defensive security suite",
+    accent: "#ff4466",
+    content: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 14 }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "10px 14px", background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 8, fontSize: 11, color: "#f87171", lineHeight: 1.5 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "Authorization Required" }),
+        " — All network testing tools display a legal disclaimer. Only test systems you own or have written permission to test."
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(AppGrid, { apps: [
+        { icon: "🔑", color: "#ffcc00", name: "Password Tester", desc: "Hash cracking (brute, dict, hybrid) + SSH/HTTP/FTP spraying" },
+        { icon: "💧", color: "#ff4466", name: "Leaker Monitor", desc: "HIBP + Dehashed breach monitoring for emails & domains" },
+        { icon: "🔍", color: "#00ff88", name: "Network Scanner", desc: "Nmap-powered port scanner with service detection" },
+        { icon: "🔥", color: "#ff4466", name: "Firewall", desc: "UFW rule manager — add, remove, enable/disable rules" },
+        { icon: "🌐", color: "#a78bfa", name: "VPN Manager", desc: "OpenVPN & WireGuard connection profiles" },
+        { icon: "🔒", color: "#4ade80", name: "Cert Inspector", desc: "Inspect TLS certificates by hostname or pasted PEM" },
+        { icon: "🛡️", color: "#ff4466", name: "Code Scanner", desc: "Scan projects for OWASP Top 10, hardcoded secrets, XSS, injection" },
+        { icon: "📡", color: "#22c55e", name: "Packet Sniffer", desc: "Live network capture via tshark/tcpdump with BPF filters" }
+      ] })
+    ] })
+  },
+  // ── 4. Security Intelligence ──────────────────────────────────────────────
+  {
+    id: "intel",
+    title: "Security Intelligence",
+    subtitle: "Shodan, OSINT, CVE database, and reconnaissance",
+    accent: "#ef4444",
+    content: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 14 }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(AppGrid, { apps: [
+        { icon: "🌐", color: "#ef4444", name: "Shodan Explorer", desc: "Search Shodan IoT/device database by query, view host details, saved searches" },
+        { icon: "🔍", color: "#fb923c", name: "OSINT Dashboard", desc: "IP lookup, WHOIS, DNS records, email lookup, domain recon — no key needed" },
+        { icon: "🛡️", color: "#f97316", name: "CVE Database", desc: "Search NVD vulnerability database — recent CVEs, severity, CVSS scores, references" },
+        { icon: "📋", color: "#4ade80", name: "Wordlist Manager", desc: "Manage, import, preview, and generate custom wordlists for password testing" },
+        { icon: "❤️", color: "#f472b6", name: "Password Health", desc: "Analyze password strength, check HIBP k-anonymity breach database" },
+        { icon: "🔐", color: "#00d4ff", name: "2FA / TOTP", desc: "Manage TOTP accounts, generate codes, add via Base32 secret" }
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Tip, { text: "Shodan requires an API key — configure it in Settings → API Keys. OSINT tools use free public APIs.", accent: "#ef4444" })
+    ] })
+  },
+  // ── 5. Developer Tools ───────────────────────────────────────────────────
+  {
+    id: "developer",
+    title: "Developer Tools",
+    subtitle: "Terminal, editor, Git, Docker, and more",
+    accent: "#4ade80",
+    content: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 14 }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(AppGrid, { apps: [
+        { icon: "⬛", color: "#00ff88", name: "Terminal", desc: "Real PTY — runs bash, python, nmap, anything in your PATH" },
+        { icon: "💻", color: "#00d4ff", name: "Code Editor", desc: "Monaco editor with file tree, syntax highlighting & run buttons" },
+        { icon: "🌿", color: "#f05033", name: "Git Client", desc: "Stage, diff, commit, push/pull — visual branch + log view" },
+        { icon: "🐳", color: "#2496ed", name: "Docker", desc: "Container & image management, live stats, log viewer, pull" },
+        { icon: "🗄️", color: "#a855f7", name: "SQLite Browser", desc: "Read-only table browser + SQL query editor with pagination" },
+        { icon: "🌐", color: "#fb923c", name: "API Tester", desc: "Postman-style HTTP client with saved collections" }
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Tip, { text: "The Terminal has full PTY access — run nmap, hashcat, sqlmap, or any installed tool directly.", accent: "#4ade80" })
+    ] })
+  },
+  // ── 6. Analysis & Encoding Tools ────────────────────────────────────────
+  {
+    id: "analysis",
+    title: "Analysis & Encoding Tools",
+    subtitle: "AI assistant, regex, encoding chains, and more",
+    accent: "#a78bfa",
+    content: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 14 }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(AppGrid, { apps: [
+        { icon: "🤖", color: "#a78bfa", name: "AI Assistant", desc: "Claude-powered security expert chat — vulnerability analysis, code review, tool guidance" },
+        { icon: "🔐", color: "#00d4ff", name: "Crypto Tools", desc: "Hash (MD5/SHA/SHA256), encode/decode, JWT decode, password entropy" },
+        { icon: "{}", color: "#fbbf24", name: "JSON / YAML Explorer", desc: "Parse, format, minify JSON; convert to YAML; interactive tree view" },
+        { icon: ".*", color: "#818cf8", name: "Regex Tester", desc: "Live regex match highlighting, group capture, replace mode, quick patterns" },
+        { icon: "🔄", color: "#34d399", name: "Encoding Chain", desc: "Build pipelines: Base64 → URL encode → Hex → ROT13 and more, chained" }
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Tip, { text: "AI Assistant requires an Anthropic API key in Settings → API Keys. All other tools work offline.", accent: "#a78bfa" })
+    ] })
+  },
+  // ── 7. Productivity & Utilities ──────────────────────────────────────────
+  {
+    id: "productivity",
+    title: "Productivity & Utilities",
+    subtitle: "Notes, pomodoro, backup, audit log, and more",
+    accent: "#facc15",
+    content: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", flexDirection: "column", gap: 14 }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(AppGrid, { apps: [
+      { icon: "📝", color: "#fbbf24", name: "Notes", desc: "Quick notes with search — always available from the dock" },
+      { icon: "🧮", color: "#facc15", name: "Calculator", desc: "Basic + scientific modes, keyboard support, calculation history" },
+      { icon: "🍅", color: "#ef4444", name: "Pomodoro Timer", desc: "25-min focus sessions with task tracking and break reminders" },
+      { icon: "💾", color: "#4ade80", name: "System Backup", desc: "Create and restore backups of CryoGram config and settings" },
+      { icon: "📋", color: "#94a3b8", name: "Audit Log", desc: "Append-only activity log — track security events, app usage, auth" },
+      { icon: "🖼", color: "#818cf8", name: "Wallpaper", desc: "Set custom wallpapers or choose gradient themes" },
+      { icon: "📄", color: "#818cf8", name: "Markdown Editor", desc: "Split-pane editor with live preview and format toolbar" },
+      { icon: "📁", color: "#f59e0b", name: "Files", desc: "Full file manager with copy, move, rename, and external open" }
+    ] }) })
+  },
+  // ── 8. System & Monitoring ───────────────────────────────────────────────
+  {
+    id: "system",
+    title: "System & Monitoring",
+    subtitle: "Task manager, logs, network, phone, and SEO",
+    accent: "#818cf8",
+    content: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 14 }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(AppGrid, { apps: [
+        { icon: "⚙️", color: "#bb88ff", name: "Settings", desc: "10 tabs: appearance, profile, network, Bluetooth, sound, display, security, API keys, updates, about + Guide" },
+        { icon: "📊", color: "#818cf8", name: "Task Manager", desc: "Live CPU/memory per process, kill signal support" },
+        { icon: "📋", color: "#a855f7", name: "Log Viewer", desc: "journalctl browser — filter by unit, priority, time range" },
+        { icon: "📡", color: "#00d4ff", name: "Network Monitor", desc: "Interface stats, live bandwidth graph, active connections" },
+        { icon: "📱", color: "#a855f7", name: "Phone", desc: "ADB device manager + scrcpy screen mirror over USB or Wi-Fi" },
+        { icon: "📈", color: "#10b981", name: "OpticSEO Pro", desc: "SEO analysis, keyword tracking, competitor research" }
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: 10 }, children: [
+        { icon: "🌡️", label: "Weather", desc: "Live weather in User Panel" },
+        { icon: "📰", label: "News", desc: "Hacker News feed in User Panel" },
+        { icon: "🔔", label: "Notifications", desc: "History via bell icon" }
+      ].map((i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { flex: 1, textAlign: "center", padding: "10px 6px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 8 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 20, marginBottom: 4 }, children: i.icon }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.75)", marginBottom: 2 }, children: i.label }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.35)" }, children: i.desc })
+      ] }, i.label)) })
+    ] })
+  },
+  // ── 9. Keyboard Shortcuts ─────────────────────────────────────────────────
+  {
+    id: "shortcuts",
+    title: "Keyboard Shortcuts",
+    subtitle: "Every shortcut at a glance",
+    accent: "#00d4ff",
+    content: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 14 }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, fontWeight: 700, color: "#00d4ff", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }, children: "System" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(ShortcutList, { rows: [
+            { keys: ["Ctrl", "Space"], desc: "Spotlight search" },
+            { keys: ["Super", "L"], desc: "Lock screen" },
+            { keys: ["Super", "M"], desc: "Mission Control" },
+            { keys: ["Ctrl", "/"], desc: "Keyboard shortcuts" },
+            { keys: ["Ctrl", "⇧", "V"], desc: "Clipboard history" }
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, fontWeight: 700, color: "#bb88ff", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }, children: "Windows" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(ShortcutList, { rows: [
+            { keys: ["Alt", "Tab"], desc: "Switch app" },
+            { keys: ["Ctrl", "Alt", "T"], desc: "Open Terminal" },
+            { keys: ["Super", "D"], desc: "Show desktop" },
+            { keys: ["Super", "1–4"], desc: "Switch workspace" }
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, fontWeight: 700, color: "#4ade80", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }, children: "Snapping" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(ShortcutList, { rows: [
+            { keys: ["Drag → left"], desc: "Snap left half" },
+            { keys: ["Drag → right"], desc: "Snap right half" },
+            { keys: ["Drag → top"], desc: "Maximise" }
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, fontWeight: 700, color: "#facc15", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }, children: "In-App" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(ShortcutList, { rows: [
+            { keys: ["Ctrl", "S"], desc: "Save (Markdown)" },
+            { keys: ["⌘", "↵"], desc: "Run SQL query" },
+            { keys: ["Esc"], desc: "Close overlay" }
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Tip, { text: "Press Ctrl+/ anytime to show this shortcuts reference as a floating overlay.", accent: "#00d4ff" })
+    ] })
+  }
+];
+function NavDots({ total, current, accent, onGo }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: 6, alignItems: "center", justifyContent: "center" }, children: Array.from({ length: total }).map((_, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => onGo(i), style: {
+    padding: 0,
+    border: "none",
+    cursor: "pointer",
+    width: i === current ? 20 : 7,
+    height: 7,
+    borderRadius: 99,
+    background: i === current ? accent : "rgba(255,255,255,0.2)",
+    transition: "all 0.25s ease"
+  } }, i)) });
+}
+function TutorialSlides({ inline, onDone, doneLabel = "Finish" }) {
+  const [page, setPage] = reactExports.useState(0);
+  const [prev, setPrev] = reactExports.useState(0);
+  const slide = SLIDES[page];
+  const direction = page >= prev ? 1 : -1;
+  const isLast = page === SLIDES.length - 1;
+  const goTo = (next) => {
+    setPrev(page);
+    setPage(Math.max(0, Math.min(SLIDES.length - 1, next)));
+  };
+  const variants = {
+    enter: (d) => ({ x: d > 0 ? 48 : -48, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (d) => ({ x: d > 0 ? -48 : 48, opacity: 0 })
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", height: inline ? "100%" : "auto", minHeight: 0 }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { flex: 1, overflowY: "auto", padding: inline ? "20px 24px 16px" : "0 0 16px" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "wait", custom: direction, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      motion.div,
+      {
+        custom: direction,
+        variants,
+        initial: "enter",
+        animate: "center",
+        exit: "exit",
+        transition: { duration: 0.22, ease: "easeInOut" },
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: 18 }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "inline-flex", alignItems: "center", gap: 6, background: `${slide.accent}14`, border: `1px solid ${slide.accent}28`, borderRadius: 20, padding: "3px 10px", marginBottom: 10 }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { width: 6, height: 6, borderRadius: "50%", background: slide.accent } }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { style: { fontSize: 10, fontWeight: 700, color: slide.accent, textTransform: "uppercase", letterSpacing: "0.08em" }, children: [
+                page + 1,
+                " / ",
+                SLIDES.length
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 18, fontWeight: 700, color: "rgba(255,255,255,0.9)", marginBottom: 4 }, children: slide.title }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.4)" }, children: slide.subtitle })
+          ] }),
+          slide.content
+        ]
+      },
+      slide.id
+    ) }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { flexShrink: 0, padding: inline ? "12px 24px 16px" : "12px 0 0", borderTop: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, background: inline ? "rgba(8,12,20,0.6)" : "transparent" }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          onClick: () => goTo(page - 1),
+          disabled: page === 0,
+          style: { padding: "7px 16px", fontSize: 12, fontWeight: 600, background: page === 0 ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: page === 0 ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.65)", cursor: page === 0 ? "default" : "pointer" },
+          children: "← Previous"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(NavDots, { total: SLIDES.length, current: page, accent: slide.accent, onGo: goTo }),
+      isLast && onDone ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          onClick: onDone,
+          style: { padding: "7px 18px", fontSize: 12, fontWeight: 700, background: "var(--cryo-accent)", color: "#000", border: "none", borderRadius: 8, cursor: "pointer" },
+          children: doneLabel
+        }
+      ) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          onClick: () => goTo(page + 1),
+          disabled: isLast && !onDone,
+          style: { padding: "7px 16px", fontSize: 12, fontWeight: 600, background: "rgba(0,212,255,0.12)", border: "1px solid rgba(0,212,255,0.25)", borderRadius: 8, color: isLast ? "rgba(255,255,255,0.25)" : "var(--cryo-accent)", cursor: isLast ? "default" : "pointer" },
+          children: "Next →"
+        }
+      )
+    ] })
+  ] });
+}
+function HexGrid() {
+  const canvasRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const resize2 = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize2();
+    window.addEventListener("resize", resize2);
+    const SIZE = 32;
+    const W2 = SIZE * 2;
+    const H2 = Math.sqrt(3) * SIZE;
+    let frame2 = 0;
+    const hexPath = (cx, cy, r2) => {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = Math.PI / 3 * i - Math.PI / 6;
+        const x2 = cx + r2 * Math.cos(angle);
+        const y2 = cy + r2 * Math.sin(angle);
+        if (i === 0) {
+          ctx.moveTo(x2, y2);
+        } else {
+          ctx.lineTo(x2, y2);
+        }
+      }
+      ctx.closePath();
+    };
+    let animId;
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      frame2++;
+      const cols = Math.ceil(canvas.width / W2) + 2;
+      const rows = Math.ceil(canvas.height / H2) + 2;
+      for (let row = -1; row < rows; row++) {
+        for (let col = -1; col < cols; col++) {
+          const cx = col * W2 + (row % 2 === 0 ? 0 : W2 / 2);
+          const cy = row * H2;
+          const pulse = Math.sin(frame2 * 0.018 + col * 0.4 + row * 0.3) * 0.5 + 0.5;
+          const alpha2 = pulse * 0.1 + 0.02;
+          ctx.strokeStyle = `rgba(0, 212, 255, ${alpha2})`;
+          ctx.lineWidth = 0.8;
+          hexPath(cx, cy, SIZE - 2);
+          ctx.stroke();
+        }
+      }
+      animId = requestAnimationFrame(animate);
+    };
+    animId = requestAnimationFrame(animate);
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize2);
+    };
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "canvas",
+    {
+      ref: canvasRef,
+      style: { position: "absolute", inset: 0, opacity: 0.55, pointerEvents: "none" }
+    }
+  );
+}
+function HexShield({ color: color2 }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    motion.div,
+    {
+      animate: { scale: [1, 1.05, 1] },
+      transition: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+      style: {
+        width: 72,
+        height: 72,
+        borderRadius: 18,
+        background: `radial-gradient(circle at 38% 30%, ${color2}18, rgba(8,12,20,0.9) 70%)`,
+        border: `1.5px solid ${color2}40`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: `0 0 32px ${color2}25, inset 0 1px 0 ${color2}20`,
+        position: "relative",
+        overflow: "hidden",
+        flexShrink: 0
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(145deg, rgba(255,255,255,0.07) 0%, transparent 55%)",
+          borderRadius: 18
+        } }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "svg",
+          {
+            width: "32",
+            height: "32",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: color2,
+            strokeWidth: "1.5",
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("polyline", { points: "9 12 11 14 15 10" })
+            ]
+          }
+        )
+      ]
+    }
+  );
+}
+function StepProgress({ current, total }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: 8, alignItems: "center", justifyContent: "center", marginBottom: 28 }, children: Array.from({ length: total }).map((_, i) => {
+    const done = i < current;
+    const active = i === current;
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        animate: {
+          width: active ? 24 : 8,
+          background: done ? "var(--cryo-accent)" : active ? "var(--cryo-accent)" : "rgba(255,255,255,0.15)",
+          opacity: done ? 0.7 : 1
+        },
+        transition: { type: "spring", stiffness: 440, damping: 28 },
+        style: { height: 4, borderRadius: 99 }
+      },
+      i
+    );
+  }) });
+}
+const THEMES = [
+  { id: "cyber", label: "Cyber", color: "#00d4ff", desc: "Cyan" },
+  { id: "phantom", label: "Phantom", color: "#a855f7", desc: "Purple" },
+  { id: "emerald", label: "Emerald", color: "#10b981", desc: "Green" },
+  { id: "fire", label: "Fire", color: "#f97316", desc: "Orange" },
+  { id: "slate", label: "Slate", color: "#94a3b8", desc: "Grey" }
+];
+const inputStyle = {
+  width: "100%",
+  padding: "10px 14px",
+  borderRadius: 10,
+  background: "rgba(0,0,0,0.35)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  color: "rgba(255,255,255,0.88)",
+  fontSize: 13,
+  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+  outline: "none",
+  boxSizing: "border-box",
+  caretColor: "var(--cryo-accent)",
+  transition: "border-color 0.2s"
+};
+function PrimaryBtn({
+  label,
+  onClick,
+  disabled,
+  accentColor
+}) {
+  const [hov, setHov] = reactExports.useState(false);
+  const color2 = accentColor ?? "var(--cryo-accent)";
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "button",
+    {
+      onClick,
+      disabled,
+      onMouseEnter: () => setHov(true),
+      onMouseLeave: () => setHov(false),
+      style: {
+        width: "100%",
+        padding: "11px 0",
+        borderRadius: 11,
+        fontSize: 14,
+        fontWeight: 700,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+        border: "none",
+        cursor: disabled ? "default" : "pointer",
+        background: disabled ? "rgba(255,255,255,0.06)" : hov ? `linear-gradient(135deg, ${color2}ee, ${color2}bb)` : `linear-gradient(135deg, ${color2}, ${color2}aa)`,
+        color: disabled ? "rgba(255,255,255,0.25)" : "#fff",
+        boxShadow: disabled ? "none" : `0 0 20px ${color2}40`,
+        transition: "all 0.18s"
+      },
+      children: label
+    }
+  );
+}
+function GhostBtn({ label, onClick }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "button",
+    {
+      onClick,
+      style: {
+        background: "none",
+        border: "none",
+        color: "rgba(255,255,255,0.35)",
+        fontSize: 12,
+        cursor: "pointer",
+        fontFamily: "-apple-system, sans-serif",
+        padding: "4px 0",
+        textDecoration: "underline",
+        textDecorationColor: "rgba(255,255,255,0.15)"
+      },
+      onMouseEnter: (e) => {
+        e.currentTarget.style.color = "rgba(255,255,255,0.65)";
+      },
+      onMouseLeave: (e) => {
+        e.currentTarget.style.color = "rgba(255,255,255,0.35)";
+      },
+      children: label
+    }
+  );
+}
+function StepWelcome({
+  selectedTheme,
+  onSelectTheme,
+  onNext
+}) {
+  const theme = THEMES.find((t2) => t2.id === selectedTheme) ?? THEMES[0];
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 24, alignItems: "center" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(HexShield, { color: theme.color }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { textAlign: "center" }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+        fontSize: 24,
+        fontWeight: 700,
+        color: "rgba(255,255,255,0.94)",
+        letterSpacing: "-0.02em",
+        marginBottom: 6,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif'
+      }, children: "Welcome to CryoGram OS" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+        fontSize: 13,
+        color: "rgba(255,255,255,0.4)",
+        fontFamily: "-apple-system, sans-serif",
+        lineHeight: 1.55,
+        maxWidth: 340
+      }, children: [
+        "Security Operations Platform — let's get you set up.",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+        "Choose your colour theme to start."
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }, children: THEMES.map((t2) => {
+      const active = t2.id === selectedTheme;
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        motion.button,
+        {
+          onClick: () => onSelectTheme(t2.id),
+          whileTap: { scale: 0.92 },
+          style: {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 7,
+            padding: "12px 14px",
+            borderRadius: 12,
+            border: active ? `1.5px solid ${t2.color}` : "1.5px solid rgba(255,255,255,0.1)",
+            background: active ? `${t2.color}15` : "rgba(255,255,255,0.03)",
+            cursor: "pointer",
+            transition: "all 0.15s",
+            boxShadow: active ? `0 0 16px ${t2.color}30` : "none",
+            minWidth: 72
+          },
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+              width: 26,
+              height: 26,
+              borderRadius: "50%",
+              background: t2.color,
+              boxShadow: active ? `0 0 12px ${t2.color}80` : `0 0 6px ${t2.color}30`
+            } }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: {
+              fontSize: 10,
+              color: active ? t2.color : "rgba(255,255,255,0.45)",
+              fontFamily: "-apple-system, sans-serif",
+              fontWeight: active ? 600 : 400,
+              transition: "color 0.15s"
+            }, children: t2.label })
+          ]
+        },
+        t2.id
+      );
+    }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { width: "100%" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(PrimaryBtn, { label: "Next →", onClick: onNext, accentColor: theme.color }) })
+  ] });
+}
+function StepPin({
+  onNext,
+  onSkip,
+  accentColor
+}) {
+  const [digits, setDigits] = reactExports.useState(["", "", "", ""]);
+  const [saving, setSaving] = reactExports.useState(false);
+  const refs = [
+    reactExports.useRef(null),
+    reactExports.useRef(null),
+    reactExports.useRef(null),
+    reactExports.useRef(null)
+  ];
+  const pin = digits.join("");
+  const handleChange = reactExports.useCallback((idx, val) => {
+    const d = val.replace(/\D/g, "").slice(-1);
+    setDigits((prev) => {
+      const next = [...prev];
+      next[idx] = d;
+      return next;
+    });
+    if (d && idx < 3) {
+      refs[idx + 1].current?.focus();
+    }
+  }, []);
+  const handleKeyDown = reactExports.useCallback((idx, e) => {
+    if (e.key === "Backspace" && !digits[idx] && idx > 0) {
+      refs[idx - 1].current?.focus();
+    }
+  }, [digits]);
+  const handlePaste = reactExports.useCallback((e) => {
+    const text = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 4);
+    if (text.length === 4) {
+      setDigits(text.split(""));
+      refs[3].current?.focus();
+    }
+  }, []);
+  const submit = async () => {
+    if (pin.length < 4) return;
+    setSaving(true);
+    try {
+      await window.cryogram.system.setPin?.(pin);
+    } catch {
+    }
+    setSaving(false);
+    onNext();
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 22, alignItems: "center" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+      width: 56,
+      height: 56,
+      borderRadius: 16,
+      background: `${accentColor}14`,
+      border: `1.5px solid ${accentColor}35`,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "svg",
+      {
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: accentColor,
+        strokeWidth: "1.8",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "11", width: "18", height: "11", rx: "2" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M7 11V7a5 5 0 0 1 10 0v4" })
+        ]
+      }
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { textAlign: "center" }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+        fontSize: 20,
+        fontWeight: 700,
+        color: "rgba(255,255,255,0.92)",
+        marginBottom: 5,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+        letterSpacing: "-0.01em"
+      }, children: "Set a Screen Lock PIN" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.38)", fontFamily: "-apple-system, sans-serif" }, children: "Used to lock your screen — 4 digits" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: 12 }, onPaste: handlePaste, children: digits.map((d, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "input",
+      {
+        ref: refs[i],
+        type: "text",
+        inputMode: "numeric",
+        pattern: "[0-9]*",
+        maxLength: 1,
+        value: d,
+        autoFocus: i === 0,
+        onChange: (e) => handleChange(i, e.target.value),
+        onKeyDown: (e) => handleKeyDown(i, e),
+        style: {
+          width: 52,
+          height: 60,
+          borderRadius: 12,
+          background: d ? `${accentColor}14` : "rgba(255,255,255,0.05)",
+          border: `1.5px solid ${d ? accentColor + "70" : "rgba(255,255,255,0.12)"}`,
+          color: d ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.3)",
+          fontSize: 22,
+          fontWeight: 700,
+          textAlign: "center",
+          outline: "none",
+          fontFamily: '"JetBrains Mono", monospace',
+          caretColor: accentColor,
+          transition: "border-color 0.15s, background 0.15s"
+        }
+      },
+      i
+    )) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { width: "100%", display: "flex", flexDirection: "column", gap: 10, alignItems: "center" }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        PrimaryBtn,
+        {
+          label: saving ? "Saving…" : "Next →",
+          onClick: submit,
+          disabled: pin.length < 4 || saving,
+          accentColor
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(GhostBtn, { label: "Skip for now", onClick: onSkip })
+    ] })
+  ] });
+}
+function StepApiKeys({
+  onComplete,
+  accentColor
+}) {
+  const [hibp, setHibp] = reactExports.useState("");
+  const [shodan, setShodan] = reactExports.useState("");
+  const [dehashedEmail, setDehashedEmail] = reactExports.useState("");
+  const [dehashedKey, setDehashedKey] = reactExports.useState("");
+  const [saving, setSaving] = reactExports.useState(false);
+  const save = async () => {
+    setSaving(true);
+    try {
+      await Promise.all([
+        hibp && window.cryogram.settings.set("api.hibp", hibp),
+        shodan && window.cryogram.settings.set("api.shodan", shodan),
+        dehashedEmail && window.cryogram.settings.set("api.dehashed.email", dehashedEmail),
+        dehashedKey && window.cryogram.settings.set("api.dehashed.key", dehashedKey)
+      ]);
+    } catch {
+    }
+    setSaving(false);
+    onComplete();
+  };
+  const fieldStyle = {
+    ...inputStyle,
+    display: "block"
+  };
+  const labelStyle = {
+    fontSize: 11,
+    color: "rgba(255,255,255,0.4)",
+    marginBottom: 5,
+    fontFamily: "-apple-system, sans-serif",
+    fontWeight: 500,
+    letterSpacing: "0.02em"
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 20 }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { textAlign: "center" }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+        fontSize: 20,
+        fontWeight: 700,
+        color: "rgba(255,255,255,0.92)",
+        marginBottom: 5,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+        letterSpacing: "-0.01em"
+      }, children: "Connect Intelligence Feeds" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.38)", fontFamily: "-apple-system, sans-serif" }, children: "Optional — you can add these later in Settings" })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle, children: "Have I Been Pwned API Key" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "a",
+          {
+            href: "https://haveibeenpwned.com/API/Key",
+            target: "_blank",
+            rel: "noreferrer",
+            style: { fontSize: 10, color: accentColor, textDecoration: "none", fontFamily: "-apple-system, sans-serif" },
+            onMouseEnter: (e) => {
+              e.currentTarget.style.textDecoration = "underline";
+            },
+            onMouseLeave: (e) => {
+              e.currentTarget.style.textDecoration = "none";
+            },
+            children: "Get a key →"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "input",
+        {
+          type: "password",
+          placeholder: "hibp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          value: hibp,
+          onChange: (e) => setHibp(e.target.value),
+          style: fieldStyle,
+          onFocus: (e) => {
+            e.currentTarget.style.borderColor = `${accentColor}60`;
+          },
+          onBlur: (e) => {
+            e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+          }
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle, children: "Shodan API Key" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "a",
+          {
+            href: "https://account.shodan.io/",
+            target: "_blank",
+            rel: "noreferrer",
+            style: { fontSize: 10, color: accentColor, textDecoration: "none", fontFamily: "-apple-system, sans-serif" },
+            onMouseEnter: (e) => {
+              e.currentTarget.style.textDecoration = "underline";
+            },
+            onMouseLeave: (e) => {
+              e.currentTarget.style.textDecoration = "none";
+            },
+            children: "Get a key →"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "input",
+        {
+          type: "password",
+          placeholder: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          value: shodan,
+          onChange: (e) => setShodan(e.target.value),
+          style: fieldStyle,
+          onFocus: (e) => {
+            e.currentTarget.style.borderColor = `${accentColor}60`;
+          },
+          onBlur: (e) => {
+            e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+          }
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: labelStyle, children: "Dehashed Credentials" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "a",
+          {
+            href: "https://dehashed.com/profile",
+            target: "_blank",
+            rel: "noreferrer",
+            style: { fontSize: 10, color: accentColor, textDecoration: "none", fontFamily: "-apple-system, sans-serif" },
+            onMouseEnter: (e) => {
+              e.currentTarget.style.textDecoration = "underline";
+            },
+            onMouseLeave: (e) => {
+              e.currentTarget.style.textDecoration = "none";
+            },
+            children: "Get a key →"
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 7 }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "input",
+          {
+            type: "email",
+            placeholder: "your@email.com",
+            value: dehashedEmail,
+            onChange: (e) => setDehashedEmail(e.target.value),
+            style: fieldStyle,
+            onFocus: (e) => {
+              e.currentTarget.style.borderColor = `${accentColor}60`;
+            },
+            onBlur: (e) => {
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+            }
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "input",
+          {
+            type: "password",
+            placeholder: "API key",
+            value: dehashedKey,
+            onChange: (e) => setDehashedKey(e.target.value),
+            style: fieldStyle,
+            onFocus: (e) => {
+              e.currentTarget.style.borderColor = `${accentColor}60`;
+            },
+            onBlur: (e) => {
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+            }
+          }
+        )
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 10, alignItems: "center", paddingTop: 4 }, children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        PrimaryBtn,
+        {
+          label: saving ? "Saving…" : "Save & Launch →",
+          onClick: save,
+          disabled: saving,
+          accentColor
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(GhostBtn, { label: "Skip — set up later", onClick: onComplete })
+    ] })
+  ] });
+}
+function SetupWizard({ onComplete }) {
+  const [step, setStep] = reactExports.useState(0);
+  const [prevStep, setPrevStep] = reactExports.useState(0);
+  const [selectedTheme, setTheme] = reactExports.useState("cyber");
+  const TOTAL_STEPS = 4;
+  const direction = step >= prevStep ? 1 : -1;
+  const goTo = (next) => {
+    setPrevStep(step);
+    setStep(next);
+  };
+  const handleSelectTheme = async (id2) => {
+    setTheme(id2);
+    try {
+      await window.cryogram.settings.set("theme.preset", id2);
+    } catch {
+    }
+  };
+  const accentColor = THEMES.find((t2) => t2.id === selectedTheme)?.color ?? "#00d4ff";
+  const variants = {
+    enter: (dir) => ({ x: dir > 0 ? 60 : -60, opacity: 0, scale: 0.97 }),
+    center: { x: 0, opacity: 1, scale: 1 },
+    exit: (dir) => ({ x: dir > 0 ? -60 : 60, opacity: 0, scale: 0.97 })
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    motion.div,
+    {
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      exit: { opacity: 0 },
+      transition: { duration: 0.4 },
+      style: {
+        position: "fixed",
+        inset: 0,
+        zIndex: 200001,
+        background: "rgba(4,7,14,0.98)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+        overflow: "hidden"
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(HexGrid, {}),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          position: "absolute",
+          inset: 0,
+          background: `radial-gradient(ellipse 55% 45% at 50% 50%, ${accentColor}08, transparent 70%)`,
+          pointerEvents: "none",
+          transition: "background 0.6s"
+        } }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          maxWidth: 520,
+          padding: "0 20px"
+        }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 24, scale: 0.97 },
+              animate: { opacity: 1, y: 0, scale: 1 },
+              transition: { type: "spring", stiffness: 380, damping: 28, delay: 0.1 },
+              style: {
+                background: "rgba(10,14,22,0.97)",
+                backdropFilter: "blur(32px)",
+                WebkitBackdropFilter: "blur(32px)",
+                border: `1px solid rgba(255,255,255,0.09)`,
+                borderRadius: 20,
+                padding: "28px 32px 30px",
+                boxShadow: `0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px ${accentColor}10`,
+                position: "relative",
+                overflow: "hidden"
+              },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 2,
+                  background: `linear-gradient(90deg, transparent, ${accentColor}80 40%, ${accentColor}80 60%, transparent)`,
+                  borderRadius: "20px 20px 0 0",
+                  transition: "background 0.6s"
+                } }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+                  fontSize: 10,
+                  color: "rgba(255,255,255,0.22)",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  fontFamily: '"JetBrains Mono", monospace',
+                  textAlign: "center",
+                  marginBottom: 12
+                }, children: [
+                  "Step ",
+                  step + 1,
+                  " of ",
+                  TOTAL_STEPS
+                ] }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(StepProgress, { current: step, total: TOTAL_STEPS }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { position: "relative", overflow: "hidden" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "wait", custom: direction, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  motion.div,
+                  {
+                    custom: direction,
+                    variants,
+                    initial: "enter",
+                    animate: "center",
+                    exit: "exit",
+                    transition: { type: "spring", stiffness: 380, damping: 30, mass: 0.8 },
+                    children: [
+                      step === 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                        StepWelcome,
+                        {
+                          selectedTheme,
+                          onSelectTheme: handleSelectTheme,
+                          onNext: () => goTo(1)
+                        }
+                      ),
+                      step === 1 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                        StepPin,
+                        {
+                          accentColor,
+                          onNext: () => goTo(2),
+                          onSkip: () => goTo(2)
+                        }
+                      ),
+                      step === 2 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                        StepApiKeys,
+                        {
+                          accentColor,
+                          onComplete: () => goTo(3)
+                        }
+                      ),
+                      step === 3 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16, textAlign: "center" }, children: "Quick Tour" }),
+                        /* @__PURE__ */ jsxRuntimeExports.jsx(
+                          TutorialSlides,
+                          {
+                            onDone: onComplete,
+                            doneLabel: "Start using CryoGram OS →"
+                          }
+                        )
+                      ] })
+                    ]
+                  },
+                  step
+                ) }) })
+              ]
+            }
+          ),
+          step < 3 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            motion.div,
+            {
+              initial: { opacity: 0 },
+              animate: { opacity: 1 },
+              transition: { delay: 0.6 },
+              style: { textAlign: "center", marginTop: 14 },
+              children: /* @__PURE__ */ jsxRuntimeExports.jsx(GhostBtn, { label: "Skip setup — go straight to OS", onClick: onComplete })
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          position: "absolute",
+          bottom: 24,
+          fontSize: 9,
+          letterSpacing: "0.3em",
+          fontWeight: 700,
+          color: "rgba(255,255,255,0.1)",
+          fontFamily: '"JetBrains Mono", monospace',
+          textTransform: "uppercase",
+          pointerEvents: "none"
+        }, children: "CRYOGRAM OS" })
+      ]
+    }
+  );
+}
+let _nextId = 1;
+let _items = [];
+const _listeners = /* @__PURE__ */ new Set();
+let _lastText = "";
+function _notify() {
+  _listeners.forEach((fn) => fn());
+}
+const PINNED_KEY = "cryogram:clipboard:pinned";
+function _loadPinned() {
+  try {
+    const raw = localStorage.getItem(PINNED_KEY);
+    if (raw) return new Set(JSON.parse(raw));
+  } catch {
+  }
+  return /* @__PURE__ */ new Set();
+}
+function _savePinned(ids) {
+  try {
+    localStorage.setItem(PINNED_KEY, JSON.stringify(ids));
+  } catch {
+  }
+}
+function addToClipboardHistory(text) {
+  if (!text.trim()) return;
+  if (_items.length > 0 && _items[0].text === text) return;
+  _lastText = text;
+  _loadPinned();
+  const entry = { id: _nextId++, text, timestamp: Date.now(), pinned: false };
+  _items = [entry, ..._items].slice(0, 50);
+  _notify();
+}
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now() - ts) / 1e3);
+  if (diff < 10) return "just now";
+  if (diff < 60) return `${diff}s ago`;
+  const m2 = Math.floor(diff / 60);
+  if (m2 < 60) return `${m2}m ago`;
+  const h = Math.floor(m2 / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+function ClipItem({
+  entry,
+  onCopy,
+  onDelete,
+  onTogglePin,
+  ticker
+}) {
+  const [hov, setHov] = reactExports.useState(false);
+  const [copied, setCopied] = reactExports.useState(false);
+  const handleCopy = () => {
+    onCopy(entry.id, entry.text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    motion.div,
+    {
+      layout: true,
+      initial: { opacity: 0, x: 20 },
+      animate: { opacity: 1, x: 0 },
+      exit: { opacity: 0, x: 20, height: 0, marginBottom: 0 },
+      transition: { type: "spring", stiffness: 360, damping: 28 },
+      onMouseEnter: () => setHov(true),
+      onMouseLeave: () => setHov(false),
+      onClick: handleCopy,
+      style: {
+        padding: "9px 10px",
+        borderRadius: 10,
+        background: hov ? "rgba(255,255,255,0.07)" : entry.pinned ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.02)",
+        border: entry.pinned ? "1px solid var(--cryo-a20)" : hov ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(255,255,255,0.05)",
+        cursor: "pointer",
+        position: "relative",
+        transition: "background 0.12s, border-color 0.12s"
+      },
+      children: [
+        entry.pinned && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          position: "absolute",
+          top: 6,
+          left: 8,
+          fontSize: 8,
+          color: "var(--cryo-accent)",
+          lineHeight: 1
+        }, children: "▲" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+          fontSize: 11,
+          color: "rgba(255,255,255,0.75)",
+          lineHeight: 1.5,
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+          wordBreak: "break-all",
+          paddingLeft: entry.pinned ? 14 : 0,
+          paddingRight: 36,
+          fontFamily: 'ui-monospace, "JetBrains Mono", monospace'
+        }, children: entry.text }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", marginTop: 5, paddingLeft: entry.pinned ? 14 : 0 }, children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 9, color: "rgba(255,255,255,0.25)" }, children: timeAgo(entry.timestamp) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: copied && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            motion.span,
+            {
+              initial: { opacity: 0, scale: 0.85 },
+              animate: { opacity: 1, scale: 1 },
+              exit: { opacity: 0 },
+              style: { fontSize: 9, color: "var(--cryo-accent)", marginLeft: 8 },
+              children: "Copied!"
+            },
+            "copied"
+          ) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: hov && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          motion.div,
+          {
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            exit: { opacity: 0 },
+            transition: { duration: 0.1 },
+            style: {
+              position: "absolute",
+              top: 6,
+              right: 6,
+              display: "flex",
+              gap: 3
+            },
+            onClick: (e) => e.stopPropagation(),
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                ActionBtn,
+                {
+                  title: entry.pinned ? "Unpin" : "Pin",
+                  onClick: () => onTogglePin(entry.id),
+                  active: entry.pinned,
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "10", height: "11", viewBox: "0 0 24 24", fill: entry.pinned ? "var(--cryo-accent)" : "none", stroke: entry.pinned ? "var(--cryo-accent)" : "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "12", cy: "10", r: "3" })
+                  ] })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(ActionBtn, { title: "Remove", onClick: () => onDelete(entry.id), danger: true, children: "×" })
+            ]
+          }
+        ) })
+      ]
+    }
+  );
+}
+function ActionBtn({
+  children,
+  onClick,
+  title,
+  active,
+  danger
+}) {
+  const col = danger ? "#f87171" : active ? "var(--cryo-accent)" : "rgba(255,255,255,0.5)";
+  const base = danger ? "rgba(239,68,68,0.1)" : active ? "var(--cryo-a12)" : "rgba(255,255,255,0.06)";
+  const hov = danger ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.12)";
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "button",
+    {
+      title,
+      onClick,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 20,
+        height: 20,
+        borderRadius: 6,
+        border: "none",
+        background: base,
+        color: col,
+        cursor: "pointer",
+        fontSize: 12,
+        lineHeight: 1,
+        padding: 0
+      },
+      onMouseEnter: (e) => {
+        e.currentTarget.style.background = hov;
+      },
+      onMouseLeave: (e) => {
+        e.currentTarget.style.background = base;
+      },
+      children
+    }
+  );
+}
+function ClipboardManager({ open, onClose }) {
+  const [items, setItems] = reactExports.useState([..._items]);
+  const [query, setQuery] = reactExports.useState("");
+  const [ticker, setTicker] = reactExports.useState(0);
+  const searchRef = reactExports.useRef(null);
+  const pollRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const sync = () => setItems([..._items]);
+    _listeners.add(sync);
+    return () => {
+      _listeners.delete(sync);
+    };
+  }, []);
+  reactExports.useEffect(() => {
+    const id2 = setInterval(() => setTicker((t2) => t2 + 1), 3e4);
+    return () => clearInterval(id2);
+  }, []);
+  reactExports.useEffect(() => {
+    if (!open) {
+      if (pollRef.current) clearInterval(pollRef.current);
+      return;
+    }
+    const poll = async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text && text !== _lastText && text.trim()) {
+          addToClipboardHistory(text);
+        }
+      } catch {
+      }
+    };
+    poll();
+    pollRef.current = setInterval(poll, 1500);
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [open]);
+  reactExports.useEffect(() => {
+    if (open) {
+      setTimeout(() => searchRef.current?.focus(), 120);
+    } else {
+      setQuery("");
+    }
+  }, [open]);
+  reactExports.useEffect(() => {
+    if (!open) return;
+    const h = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [open, onClose]);
+  const handleCopy = reactExports.useCallback(async (_id, text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+    }
+  }, []);
+  const handleDelete = reactExports.useCallback((id2) => {
+    _items = _items.filter((i) => i.id !== id2);
+    _notify();
+  }, []);
+  const handleTogglePin = reactExports.useCallback((id2) => {
+    _items = _items.map((i) => i.id === id2 ? { ...i, pinned: !i.pinned } : i);
+    _savePinned(_items.filter((i) => i.pinned).map((i) => i.id));
+    _notify();
+  }, []);
+  const handleClearAll = () => {
+    _items = _items.filter((i) => i.pinned);
+    _notify();
+  };
+  const filtered = items.filter((i) => !query || i.text.toLowerCase().includes(query.toLowerCase())).sort((a, b) => {
+    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+    return b.timestamp - a.timestamp;
+  });
+  const pinned = filtered.filter((i) => i.pinned);
+  const unpinned = filtered.filter((i) => !i.pinned);
+  const total = items.length;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: open && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      motion.div,
+      {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        exit: { opacity: 0 },
+        transition: { duration: 0.18 },
+        onClick: onClose,
+        style: { position: "fixed", inset: 0, zIndex: 88e3 }
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      motion.div,
+      {
+        initial: { x: 300, opacity: 0 },
+        animate: { x: 0, opacity: 1 },
+        exit: { x: 300, opacity: 0 },
+        transition: { type: "spring", stiffness: 340, damping: 32, mass: 0.9 },
+        onClick: (e) => e.stopPropagation(),
+        style: {
+          position: "fixed",
+          top: 36,
+          right: 0,
+          bottom: 0,
+          width: 300,
+          zIndex: 89e3,
+          background: "rgba(10,14,22,0.97)",
+          backdropFilter: "blur(32px)",
+          WebkitBackdropFilter: "blur(32px)",
+          borderLeft: "1px solid rgba(255,255,255,0.08)",
+          display: "flex",
+          flexDirection: "column",
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
+          overflow: "hidden"
+        },
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "14px 14px 10px",
+            borderBottom: "1px solid rgba(255,255,255,0.07)",
+            flexShrink: 0
+          }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.88)" }, children: "Clipboard" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 1 }, children: total === 0 ? "Empty" : `${total} item${total !== 1 ? "s" : ""}` })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", gap: 6 }, children: [
+              total > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  onClick: handleClearAll,
+                  style: {
+                    background: "rgba(239,68,68,0.1)",
+                    border: "1px solid rgba(239,68,68,0.25)",
+                    borderRadius: 7,
+                    color: "#f87171",
+                    fontSize: 11,
+                    fontWeight: 500,
+                    padding: "4px 10px",
+                    cursor: "pointer",
+                    fontFamily: "inherit"
+                  },
+                  onMouseEnter: (e) => {
+                    e.currentTarget.style.background = "rgba(239,68,68,0.18)";
+                  },
+                  onMouseLeave: (e) => {
+                    e.currentTarget.style.background = "rgba(239,68,68,0.1)";
+                  },
+                  children: "Clear All"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  onClick: onClose,
+                  style: {
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: 7,
+                    color: "rgba(255,255,255,0.5)",
+                    fontSize: 14,
+                    lineHeight: 1,
+                    padding: "3px 8px",
+                    cursor: "pointer"
+                  },
+                  onMouseEnter: (e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+                  },
+                  onMouseLeave: (e) => {
+                    e.currentTarget.style.background = "rgba(255,255,255,0.06)";
+                  },
+                  children: "✕"
+                }
+              )
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { padding: "8px 12px", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { position: "relative" }, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+              position: "absolute",
+              left: 9,
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "rgba(255,255,255,0.25)",
+              lineHeight: 0,
+              pointerEvents: "none"
+            }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.5", strokeLinecap: "round", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("circle", { cx: "11", cy: "11", r: "8" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" })
+            ] }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "input",
+              {
+                ref: searchRef,
+                type: "text",
+                placeholder: "Search clipboard…",
+                value: query,
+                onChange: (e) => setQuery(e.target.value),
+                style: {
+                  width: "100%",
+                  padding: "7px 10px 7px 28px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(255,255,255,0.04)",
+                  color: "rgba(255,255,255,0.8)",
+                  fontSize: 12,
+                  outline: "none",
+                  boxSizing: "border-box",
+                  fontFamily: "inherit"
+                }
+              }
+            )
+          ] }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+            flex: 1,
+            overflowY: "auto",
+            padding: "10px 10px 16px",
+            scrollbarWidth: "thin",
+            scrollbarColor: "rgba(255,255,255,0.1) transparent"
+          }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { mode: "popLayout", children: filtered.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            motion.div,
+            {
+              initial: { opacity: 0, y: 12 },
+              animate: { opacity: 1, y: 0 },
+              exit: { opacity: 0 },
+              style: {
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 12,
+                paddingTop: 60
+              },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+                  width: 48,
+                  height: 48,
+                  borderRadius: 14,
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "rgba(255,255,255,0.25)", strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "8", y: "2", width: "8", height: "4", rx: "1", ry: "1" })
+                ] }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 12, color: "rgba(255,255,255,0.25)", textAlign: "center" }, children: query ? "No matches" : "Nothing copied yet" })
+              ]
+            },
+            "empty"
+          ) : /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 4 }, children: [
+            pinned.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+                fontSize: 9,
+                fontWeight: 600,
+                color: "rgba(255,255,255,0.22)",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                fontFamily: '"JetBrains Mono", monospace',
+                marginBottom: 4,
+                marginTop: 2,
+                paddingLeft: 2
+              }, children: "Pinned" }),
+              pinned.map((entry) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+                ClipItem,
+                {
+                  entry,
+                  ticker,
+                  onCopy: handleCopy,
+                  onDelete: handleDelete,
+                  onTogglePin: handleTogglePin
+                },
+                entry.id
+              )),
+              unpinned.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { height: 1, background: "rgba(255,255,255,0.06)", margin: "6px 0" } })
+            ] }),
+            unpinned.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+              pinned.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: {
+                fontSize: 9,
+                fontWeight: 600,
+                color: "rgba(255,255,255,0.22)",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                fontFamily: '"JetBrains Mono", monospace',
+                marginBottom: 4,
+                paddingLeft: 2
+              }, children: "Recent" }),
+              unpinned.map((entry) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+                ClipItem,
+                {
+                  entry,
+                  ticker,
+                  onCopy: handleCopy,
+                  onDelete: handleDelete,
+                  onTogglePin: handleTogglePin
+                },
+                entry.id
+              ))
+            ] })
+          ] }) }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { height: 1, flexShrink: 0, background: "linear-gradient(90deg, transparent, var(--cryo-a20) 40%, var(--cryo-a20) 60%, transparent)" } })
+        ]
+      }
+    )
+  ] }) });
+}
+function MissionControl({ open, onClose }) {
+  const { windows, focusWindow, restoreWindow } = useWindowStore();
+  reactExports.useEffect(() => {
+    if (!open) return;
+    const h = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [open, onClose]);
+  const nonMinimized = windows;
+  const cols = Math.ceil(Math.sqrt(Math.max(nonMinimized.length, 1)));
+  const activate = (id2) => {
+    restoreWindow(id2);
+    focusWindow(id2);
+    onClose();
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: open && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    motion.div,
+    {
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      exit: { opacity: 0 },
+      transition: { duration: 0.2 },
+      onClick: onClose,
+      style: { position: "fixed", inset: 0, zIndex: 99980, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(12px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          motion.div,
+          {
+            initial: { y: -8, opacity: 0 },
+            animate: { y: 0, opacity: 1 },
+            transition: { delay: 0.05 },
+            style: { fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase" },
+            children: "Mission Control"
+          }
+        ),
+        windows.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx(motion.div, { initial: { opacity: 0 }, animate: { opacity: 1 }, style: { fontSize: 14, color: "rgba(255,255,255,0.25)" }, children: "No open windows" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            onClick: (e) => e.stopPropagation(),
+            style: { display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 16, padding: "0 40px", maxWidth: "90vw" },
+            children: nonMinimized.map((win, i) => {
+              const meta = APP_META[win.appId];
+              const color2 = meta?.color ?? "#00d4ff";
+              return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                motion.div,
+                {
+                  initial: { scale: 0.85, opacity: 0 },
+                  animate: { scale: 1, opacity: 1 },
+                  transition: { delay: i * 0.04 },
+                  onClick: () => activate(win.id),
+                  style: { cursor: "pointer", background: "rgba(12,16,26,0.85)", border: `1px solid ${win.focused ? color2 : "rgba(255,255,255,0.1)"}`, borderRadius: 12, overflow: "hidden", width: 200, boxShadow: win.focused ? `0 0 20px ${color2}33` : "none", transition: "border-color 0.15s, box-shadow 0.15s" },
+                  onMouseEnter: (e) => {
+                    e.currentTarget.style.borderColor = color2;
+                  },
+                  onMouseLeave: (e) => {
+                    e.currentTarget.style.borderColor = win.focused ? color2 : "rgba(255,255,255,0.1)";
+                  },
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { padding: "8px 12px", background: `${color2}18`, borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", gap: 8 }, children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { width: 8, height: 8, borderRadius: "50%", background: color2, flexShrink: 0 } }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.75)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: win.title })
+                    ] }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { height: 110, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 6 }, children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 28, color: color2, opacity: 0.7 }, children: meta?.icon }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, color: "rgba(255,255,255,0.3)" }, children: win.minimized ? "Minimized" : `${win.width}×${win.height}` })
+                    ] })
+                  ]
+                },
+                win.id
+              );
+            })
+          }
+        )
+      ]
+    },
+    "mission-control"
+  ) });
+}
+const SECTIONS = [
+  {
+    title: "System",
+    shortcuts: [
+      { keys: ["Ctrl", "Space"], desc: "Spotlight search" },
+      { keys: ["Ctrl", "Shift", "V"], desc: "Clipboard history" },
+      { keys: ["Super", "L"], desc: "Lock screen" },
+      { keys: ["Super", "D"], desc: "Show / hide desktop" },
+      { keys: ["Super", "M"], desc: "Mission Control" },
+      { keys: ["Ctrl", "/"], desc: "Keyboard shortcuts" }
+    ]
+  },
+  {
+    title: "Windows",
+    shortcuts: [
+      { keys: ["Alt", "Tab"], desc: "Switch app (forward)" },
+      { keys: ["Alt", "Shift", "Tab"], desc: "Switch app (backward)" },
+      { keys: ["Ctrl", "Alt", "T"], desc: "Open Terminal" },
+      { keys: ["Super", "1–4"], desc: "Switch workspace" }
+    ]
+  },
+  {
+    title: "Window Snapping",
+    shortcuts: [
+      { keys: ["Drag → left edge"], desc: "Snap left half" },
+      { keys: ["Drag → right edge"], desc: "Snap right half" },
+      { keys: ["Drag → top edge"], desc: "Maximize" }
+    ]
+  },
+  {
+    title: "Apps",
+    shortcuts: [
+      { keys: ["Ctrl", "S"], desc: "Save (Markdown Editor)" },
+      { keys: ["Ctrl", "⌘", "↵"], desc: "Run query (SQLite)" },
+      { keys: ["Ctrl", "W"], desc: "Close focused window" }
+    ]
+  }
+];
+function KeyboardShortcutsOverlay({ open, onClose }) {
+  reactExports.useEffect(() => {
+    if (!open) return;
+    const h = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, [open, onClose]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: open && /* @__PURE__ */ jsxRuntimeExports.jsx(
+    motion.div,
+    {
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      exit: { opacity: 0 },
+      transition: { duration: 0.2 },
+      onClick: onClose,
+      style: { position: "fixed", inset: 0, zIndex: 99990, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(6px)" },
+      children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        motion.div,
+        {
+          initial: { scale: 0.94, opacity: 0 },
+          animate: { scale: 1, opacity: 1 },
+          exit: { scale: 0.94, opacity: 0 },
+          transition: { duration: 0.18 },
+          onClick: (e) => e.stopPropagation(),
+          style: { background: "rgba(12,16,26,0.96)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: "28px 32px", width: 640, maxHeight: "80vh", overflowY: "auto", boxShadow: "0 32px 80px rgba(0,0,0,0.7)" },
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 16, fontWeight: 700, color: "rgba(255,255,255,0.9)" }, children: "Keyboard Shortcuts" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: onClose, style: { background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 6, color: "rgba(255,255,255,0.5)", cursor: "pointer", padding: "4px 10px", fontSize: 12 }, children: "Esc" })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }, children: SECTIONS.map((section) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { fontSize: 10, fontWeight: 700, color: "var(--cryo-accent)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }, children: section.title }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", flexDirection: "column", gap: 8 }, children: section.shortcuts.map((s, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }, children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { style: { fontSize: 12, color: "rgba(255,255,255,0.55)" }, children: s.desc }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { display: "flex", gap: 4, flexShrink: 0 }, children: s.keys.map((k2, ki2) => /* @__PURE__ */ jsxRuntimeExports.jsx("kbd", { style: { background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 4, padding: "2px 6px", fontSize: 10, fontFamily: "JetBrains Mono, monospace", color: "rgba(255,255,255,0.7)", whiteSpace: "nowrap" }, children: k2 }, ki2)) })
+              ] }, i)) })
+            ] }, section.title)) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginTop: 24, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.07)", fontSize: 11, color: "rgba(255,255,255,0.25)", textAlign: "center" }, children: [
+              "Press ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("kbd", { style: { background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 3, padding: "1px 5px", fontSize: 10 }, children: "Ctrl" }),
+              " + ",
+              /* @__PURE__ */ jsxRuntimeExports.jsx("kbd", { style: { background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 3, padding: "1px 5px", fontSize: 10 }, children: "/" }),
+              " to toggle this panel"
+            ] })
+          ]
+        }
+      )
+    },
+    "kb-overlay"
+  ) });
+}
 function App() {
   const [booted, setBooted] = reactExports.useState(false);
   const wallpaper = useDesktopStore((s) => s.wallpaper);
@@ -19632,12 +24572,23 @@ function App() {
   const openApp = useWindowStore((s) => s.openApp);
   const [updateInfo, setUpdateInfo] = reactExports.useState(null);
   const [showUpdateScreen, setShowScreen] = reactExports.useState(false);
+  const [spotlightOpen, setSpotlightOpen] = reactExports.useState(false);
+  const [notifHistoryOpen, setNotifHistoryOpen] = reactExports.useState(false);
+  const [clipboardOpen, setClipboardOpen] = reactExports.useState(false);
+  const [missionControlOpen, setMissionControlOpen] = reactExports.useState(false);
+  const [kbShortcutsOpen, setKbShortcutsOpen] = reactExports.useState(false);
+  const [setupDone, setSetupDone] = reactExports.useState(true);
   const handleBooted = reactExports.useCallback(async () => {
     try {
       const enabled = await window.cryogram.settings.get("pin.enabled");
       const hash = await window.cryogram.settings.get("pin.hash");
       if (enabled && hash) lock(true);
       else if (enabled) lock(false);
+    } catch {
+    }
+    try {
+      const done = await window.cryogram.settings.get("setup.done");
+      if (!done) setSetupDone(false);
     } catch {
     }
     setBooted(true);
@@ -19709,14 +24660,42 @@ function App() {
     return cleanup ?? void 0;
   }, [openApp]);
   reactExports.useEffect(() => {
+    const cleanup = window.cryogram.onSpotlight?.(() => {
+      setSpotlightOpen((o) => !o);
+    });
+    return cleanup ?? void 0;
+  }, []);
+  reactExports.useEffect(() => {
     const handler = (e) => {
       if (e.altKey && e.key === "Tab") {
         e.preventDefault();
         window.dispatchEvent(new CustomEvent("cryogram:switcher", { detail: e.shiftKey ? "prev" : "next" }));
       }
+      if (e.ctrlKey && e.code === "Space") {
+        e.preventDefault();
+        setSpotlightOpen((o) => !o);
+      }
+      if (e.ctrlKey && e.shiftKey && e.code === "KeyV") {
+        e.preventDefault();
+        setClipboardOpen((o) => !o);
+      }
+      if (e.metaKey && e.code === "KeyM") {
+        e.preventDefault();
+        setMissionControlOpen((o) => !o);
+      }
+      if (e.ctrlKey && e.code === "Slash") {
+        e.preventDefault();
+        setKbShortcutsOpen((o) => !o);
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
+  }, []);
+  reactExports.useEffect(() => {
+    window.__cryogram_toggleNotifHistory = () => setNotifHistoryOpen((o) => !o);
+    return () => {
+      delete window.__cryogram_toggleNotifHistory;
+    };
   }, []);
   return /* @__PURE__ */ jsxRuntimeExports.jsx(ThemeProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: !booted && /* @__PURE__ */ jsxRuntimeExports.jsx(BootSplash, { onDone: handleBooted }) }),
@@ -19758,7 +24737,8 @@ function App() {
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(NotificationToast, {}),
           /* @__PURE__ */ jsxRuntimeExports.jsx(SystemHUD, {}),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(AppSwitcher, {})
+          /* @__PURE__ */ jsxRuntimeExports.jsx(DesktopWidgets, {}),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(AppSwitcherOverlay, {})
         ]
       }
     ) }),
@@ -19781,6 +24761,21 @@ function App() {
         onCancel: () => setShowScreen(false)
       },
       "update-screen"
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(SpotlightSearch, { open: spotlightOpen, onClose: () => setSpotlightOpen(false) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(NotificationHistory, { open: notifHistoryOpen, onClose: () => setNotifHistoryOpen(false) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(ClipboardManager, { open: clipboardOpen, onClose: () => setClipboardOpen(false) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(MissionControl, { open: missionControlOpen, onClose: () => setMissionControlOpen(false) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(KeyboardShortcutsOverlay, { open: kbShortcutsOpen, onClose: () => setKbShortcutsOpen(false) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: booted && !setupDone && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      SetupWizard,
+      {
+        onComplete: async () => {
+          await window.cryogram.settings.set("setup.done", true);
+          setSetupDone(true);
+        }
+      },
+      "setup"
     ) })
   ] }) });
 }
@@ -20052,11 +25047,21 @@ function installMockCryogram() {
         ramUsed: 4.2 * 1024 * 1024 * 1024,
         uptime: "3h 42m"
       }),
+      syncTime: async () => ({ success: true }),
+      pickWallpaper: async () => null,
+      setWallpaper: async () => true,
+      verifyPin: async () => true,
+      setPin: async () => ({ success: true }),
+      removePin: async () => ({ success: true }),
+      setPinEnabled: async () => true,
       shutdown: async () => {
         alert("[mock] Shutdown called");
       },
       reboot: async () => {
         alert("[mock] Reboot called");
+      },
+      sleep: async () => {
+        alert("[mock] Sleep called");
       },
       lock: async () => {
         alert("[mock] Lock screen called");
@@ -20082,6 +25087,413 @@ function installMockCryogram() {
         return true;
       }
     },
+    wm: {
+      getWindows: async () => [],
+      focusWindow: async () => true,
+      closeWindow: async () => true,
+      hideShell: async () => true,
+      getCurrentWorkspace: async () => 0,
+      switchWorkspace: async () => true,
+      getWorkspaceCount: async () => 4
+    },
+    passwords: {
+      getAll: async () => [],
+      add: async (e) => ({ ...e, id: "mock", createdAt: "", updatedAt: "" }),
+      update: async () => true,
+      delete: async () => true,
+      generate: async () => "MockPass123!"
+    },
+    ssh: {
+      listKeys: async () => [],
+      generateKey: async () => ({ success: false }),
+      deleteKey: async () => false,
+      getPublicKey: async () => "",
+      listHosts: async () => [],
+      saveConfig: async () => true
+    },
+    firewall: {
+      status: async () => ({ active: false, defaultIn: "deny", defaultOut: "allow", rules: [] }),
+      enable: async () => ({ success: false }),
+      disable: async () => ({ success: false }),
+      addRule: async () => ({ success: false }),
+      deleteRule: async () => ({ success: false }),
+      reset: async () => ({ success: false })
+    },
+    processes: {
+      list: async () => [],
+      kill: async () => ({ success: false }),
+      getSystemStats: async () => ({ cpuPct: 0, memTotal: 0, memUsed: 0, memPct: 0 })
+    },
+    logs: {
+      getUnits: async () => ["all"],
+      query: async () => ({ lines: [] }),
+      stream: async () => {
+      },
+      stopStream: async () => {
+      },
+      onLine: (cb2) => {
+        return () => {
+        };
+      }
+    },
+    netmon: {
+      getInterfaces: async () => [],
+      getConnections: async () => [],
+      startStream: async () => {
+      },
+      stopStream: async () => {
+      },
+      onStats: (cb2) => {
+        return () => {
+        };
+      }
+    },
+    screenshot: {
+      capture: async () => ({ dataUrl: "", width: 0, height: 0 }),
+      save: async () => ({ path: "" }),
+      copyToClipboard: async () => false
+    },
+    phone: {
+      getDevices: async () => [],
+      getInfo: async () => ({ model: "Mock Phone", android: "14", serial: "mock" }),
+      getBattery: async () => ({ level: 80, status: "charging" }),
+      getStorage: async () => ({ total: 128, used: 40, free: 88 }),
+      checkScrcpy: async () => false,
+      installScrcpy: async () => false,
+      startMirror: async () => false,
+      stopMirror: async () => false,
+      isMirroring: async () => false,
+      enableWireless: async () => "",
+      connectWifi: async () => false,
+      disconnect: async () => false,
+      getDeviceIp: async () => "",
+      screenshot: async () => ""
+    },
+    scanner: {
+      check: async () => ({ available: false }),
+      run: async () => {
+      },
+      cancel: () => {
+      },
+      onProgress: (cb2) => {
+        return () => {
+        };
+      }
+    },
+    vpn: {
+      getStatus: async () => ({ connected: false }),
+      connect: async () => ({ success: false, error: "[mock] VPN not available" }),
+      disconnect: async () => ({ success: false })
+    },
+    updater: {
+      check: async () => ({ hasUpdate: false }),
+      run: async () => ({ success: false }),
+      onProgress: (cb2) => {
+        return () => {
+        };
+      }
+    },
+    cert: {
+      inspect: async () => ({
+        subject: { CN: "example.com", O: "Example Org", C: "US" },
+        issuer: { CN: "Let's Encrypt R3", O: "Let's Encrypt" },
+        validFrom: new Date(Date.now() - 30 * 864e5).toISOString(),
+        validTo: new Date(Date.now() + 60 * 864e5).toISOString(),
+        daysRemaining: 60,
+        sans: ["example.com", "www.example.com"],
+        publicKey: { algorithm: "RSA", bits: 2048 },
+        fingerprints: { sha256: "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99" },
+        serialNumber: "0123456789ABCDEF",
+        signatureAlgorithm: "sha256WithRSAEncryption",
+        isCA: false
+      }),
+      parsePem: async () => ({
+        subject: { CN: "Parsed Cert" },
+        issuer: { CN: "Root CA" },
+        validFrom: (/* @__PURE__ */ new Date()).toISOString(),
+        validTo: new Date(Date.now() + 365 * 864e5).toISOString(),
+        daysRemaining: 365,
+        sans: [],
+        publicKey: { algorithm: "EC", curve: "P-256" },
+        fingerprints: { sha256: "00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF" },
+        serialNumber: "FEDCBA9876543210",
+        signatureAlgorithm: "ecdsa-with-SHA256",
+        isCA: false
+      })
+    },
+    docker: {
+      listContainers: async () => [
+        { ID: "abc123", Names: "/mock-nginx", Image: "nginx:latest", Status: "Up 2 hours", State: "running", Ports: "0.0.0.0:80->80/tcp", Created: "" },
+        { ID: "def456", Names: "/mock-postgres", Image: "postgres:15", Status: "Exited (0) 1 hour ago", State: "exited", Ports: "", Created: "" }
+      ],
+      listImages: async () => [
+        { ID: "img1", Repository: "nginx", Tag: "latest", Size: "142MB", CreatedAt: "2024-01-01" },
+        { ID: "img2", Repository: "postgres", Tag: "15", Size: "379MB", CreatedAt: "2024-01-01" }
+      ],
+      startContainer: async () => true,
+      stopContainer: async () => true,
+      restartContainer: async () => true,
+      removeContainer: async () => true,
+      getStats: async () => [
+        { ID: "abc123", Name: "mock-nginx", CPUPerc: "0.5%", MemUsage: "12MiB / 8GiB", MemPerc: "0.14%", NetIO: "1kB / 2kB", BlockIO: "0B / 0B" }
+      ],
+      pullImage: async () => true,
+      removeImage: async () => true,
+      getLogs: async () => "[mock] Container log output\n[mock] Line 2\n[mock] Line 3",
+      onPullLine: (cb2) => {
+        return () => {
+        };
+      }
+    },
+    git: {
+      isRepo: async () => false,
+      status: async () => ({ branch: "main", files: [], ahead: 0, behind: 0 }),
+      log: async () => [],
+      diff: async () => "",
+      getBranches: async () => [],
+      checkout: async () => true,
+      stage: async () => true,
+      unstage: async () => true,
+      commit: async () => true,
+      push: async () => "",
+      pull: async () => "",
+      stash: async () => true,
+      stashPop: async () => true,
+      init: async () => true
+    },
+    db: {
+      open: async () => ({ error: "[mock] SQLite not available in browser" }),
+      close: async () => true,
+      listTables: async () => [],
+      getSchema: async () => [],
+      getTableRowCount: async () => 0,
+      query: async () => ({ rows: [], columns: [], total: 0, error: null })
+    },
+    trash: {
+      list: async () => [
+        { name: "old-file.txt", originalPath: "/home/user/old-file.txt", deletionDate: (/* @__PURE__ */ new Date()).toISOString().slice(0, 19), size: 1024 },
+        { name: "backup.zip", originalPath: "/home/user/backup.zip", deletionDate: new Date(Date.now() - 864e5).toISOString().slice(0, 19), size: 1024 * 1024 * 5 }
+      ],
+      moveToTrash: async () => true,
+      restore: async () => true,
+      deletePermanent: async () => true,
+      empty: async () => true,
+      getSize: async () => ({ count: 2, bytes: 1024 + 1024 * 1024 * 5 })
+    },
+    shodan: {
+      search: async (query) => ({
+        matches: [
+          { ip_str: "1.2.3.4", hostnames: ["example.com"], ports: [80, 443, 22], org: "Acme Corp", isp: "Acme ISP", country_code: "US", country_name: "United States", os: "Linux", timestamp: (/* @__PURE__ */ new Date()).toISOString() },
+          { ip_str: "5.6.7.8", hostnames: [], ports: [3389, 8080], org: "Test Org", isp: "Test ISP", country_code: "DE", country_name: "Germany", os: null, timestamp: (/* @__PURE__ */ new Date()).toISOString() }
+        ],
+        total: 2,
+        query
+      }),
+      host: async (ip) => ({ ip_str: ip, ports: [80, 443], org: "Mock Org", country_name: "United States", os: "Linux", hostnames: ["mock.example.com"], timestamp: (/* @__PURE__ */ new Date()).toISOString() }),
+      count: async () => ({ total: 42 }),
+      exploits: async () => ({ matches: [], total: 0 })
+    },
+    osint: {
+      lookup: async (tool, query) => {
+        await sleep(800);
+        if (tool === "IP Lookup") return { ip: query, city: "San Francisco", region: "California", country: "United States", org: "AS13335 Cloudflare", timezone: "America/Los_Angeles", latitude: 37.7749, longitude: -122.4194 };
+        if (tool === "WHOIS") return { domain: query, status: "clientTransferProhibited", registered: "2010-03-15", expiry: "2025-03-15", registrar: "GoDaddy" };
+        if (tool === "DNS Records") return { A: "1.2.3.4", MX: "mail.example.com", NS: "ns1.example.com, ns2.example.com", TXT: "v=spf1 include:example.com ~all" };
+        return { result: `[mock] ${tool} lookup for ${query}` };
+      }
+    },
+    cve: {
+      search: async () => {
+        await sleep(600);
+        return [
+          { id: "CVE-2024-1234", description: "A critical SQL injection vulnerability in ExampleCMS allows remote attackers to execute arbitrary SQL commands via the search parameter.", severity: "CRITICAL", score: 9.8, published: "2024-01-15", references: ["https://nvd.nist.gov/vuln/detail/CVE-2024-1234"] },
+          { id: "CVE-2024-5678", description: "Cross-site scripting (XSS) vulnerability in the admin dashboard of TestApp version 2.x.", severity: "HIGH", score: 7.4, published: "2024-02-20", references: [] }
+        ];
+      },
+      recent: async () => {
+        await sleep(400);
+        return [
+          { id: "CVE-2024-9999", description: "Remote code execution vulnerability in popular open-source library.", severity: "CRITICAL", score: 10, published: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), references: [] },
+          { id: "CVE-2024-8888", description: "Memory corruption vulnerability in kernel component.", severity: "HIGH", score: 7.8, published: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10), references: [] }
+        ];
+      }
+    },
+    ai: {
+      chat: async (messages) => {
+        await sleep(1200);
+        const last = messages[messages.length - 1]?.content || "";
+        return `[Mock AI Response] You asked: "${last.slice(0, 100)}". In a real session, Claude would provide expert cybersecurity analysis here. Configure your Anthropic API key in Settings → API Keys to enable real AI responses.`;
+      }
+    },
+    packetSniffer: {
+      start: async (_iface, _filter, cb2) => {
+        let id2 = 0;
+        const protos = ["TCP", "UDP", "ICMP", "HTTP", "DNS", "ARP"];
+        const interval = setInterval(() => {
+          cb2({ id: ++id2, time: (id2 * 0.042).toFixed(6), src: `192.168.1.${Math.floor(Math.random() * 254) + 1}`, dst: `10.0.0.${Math.floor(Math.random() * 254) + 1}`, proto: protos[Math.floor(Math.random() * protos.length)], len: Math.floor(Math.random() * 1400) + 64, info: "Mock packet data" });
+        }, 300);
+        return () => clearInterval(interval);
+      },
+      stop: async () => {
+      }
+    },
+    backup: {
+      list: async () => [
+        { id: "1709000000000", name: "Backup 2024-02-27 10:00", size: "2.1MB", created: "2024-02-27 10:00", status: "complete", items: 142 }
+      ],
+      create: async () => ({ id: Date.now().toString(), name: `Backup ${(/* @__PURE__ */ new Date()).toLocaleString()}`, size: "2.3MB", created: (/* @__PURE__ */ new Date()).toISOString().slice(0, 16).replace("T", " "), status: "complete", items: 148 }),
+      restore: async () => true,
+      delete: async () => true,
+      onProgress: (_cb) => () => {
+      }
+    },
+    auditLog: {
+      list: async () => [
+        { id: "1", ts: (/* @__PURE__ */ new Date()).toISOString().replace("T", " ").slice(0, 19), type: "security", category: "Auth", message: "Login successful", details: "User logged in from 127.0.0.1" },
+        { id: "2", ts: new Date(Date.now() - 6e4).toISOString().replace("T", " ").slice(0, 19), type: "info", category: "App", message: "Terminal opened" },
+        { id: "3", ts: new Date(Date.now() - 12e4).toISOString().replace("T", " ").slice(0, 19), type: "warning", category: "Network", message: "Outbound connection to unknown host", details: "Destination: 198.51.100.42:443" },
+        { id: "4", ts: new Date(Date.now() - 18e4).toISOString().replace("T", " ").slice(0, 19), type: "success", category: "System", message: "Backup completed successfully" }
+      ],
+      append: async (entry) => ({ id: Date.now().toString(), ts: (/* @__PURE__ */ new Date()).toISOString().replace("T", " ").slice(0, 19), ...entry }),
+      clear: async () => true
+    },
+    codeScanner: {
+      browse: async () => "/home/user/projects/myapp",
+      scan: async () => {
+        await sleep(2e3);
+        return {
+          findings: [
+            { id: "1", severity: "HIGH", rule: "XSS_RISK", file: "src/utils/render.js", line: 42, code: "element.innerHTML = userInput", message: "innerHTML assignment with user data can cause XSS", fix: "Use textContent or sanitize with DOMPurify" },
+            { id: "2", severity: "CRITICAL", rule: "HARDCODED_CREDENTIAL", file: "config/db.js", line: 8, code: 'const password = "admin123"', message: "Hardcoded password detected", fix: "Use environment variables" },
+            { id: "3", severity: "MEDIUM", rule: "WEAK_HASH", file: "src/auth.js", line: 15, code: "const hash = md5(password)", message: "MD5 is cryptographically broken", fix: "Use bcrypt or argon2" }
+          ],
+          scanned: 23,
+          duration: 1842,
+          scanner: "Pattern-based"
+        };
+      },
+      onProgress: (_cb) => () => {
+      }
+    },
+    totp: {
+      list: async () => [
+        { id: "totp-1", name: "GitHub", issuer: "GitHub Inc.", secret: "JBSWY3DPEHPK3PXP" },
+        { id: "totp-2", name: "Google", issuer: "Google LLC", secret: "JBSWY3DPEHPK3PXP" }
+      ],
+      generate: async (_secret) => ({ code: String(Math.floor(Math.random() * 1e6)).padStart(6, "0"), timeLeft: 30 - Math.floor(Date.now() / 1e3) % 30 }),
+      add: async (account) => ({ id: `totp-${Date.now()}`, ...account }),
+      remove: async () => true
+    },
+    wordlists: {
+      list: async () => [
+        { name: "rockyou-top1000.txt", path: "/mock/rockyou-top1000.txt", lineCount: 1e3, sizeKB: 8 },
+        { name: "common-passwords.txt", path: "/mock/common-passwords.txt", lineCount: 500, sizeKB: 4 }
+      ],
+      preview: async () => ["password", "123456", "admin", "letmein", "qwerty", "monkey", "dragon", "master", "hello", "sunshine"],
+      import: async () => null,
+      delete: async () => true,
+      generate: async () => "generated.txt"
+    },
+    passwordHealth: {
+      checkHIBP: async (_pw) => {
+        await sleep(800);
+        return { breached: false, count: 0 };
+      }
+    },
+    wallpaper: {
+      listCustom: async () => [],
+      browse: async () => null
+    },
+    clipboardHistory: {
+      getAll: async () => [
+        { id: "1", text: "Hello, world!", ts: Date.now() - 6e4, pinned: true },
+        { id: "2", text: "npm install && npm run dev", ts: Date.now() - 12e4, pinned: false },
+        { id: "3", text: "https://example.com/very-long-url?param=value", ts: Date.now() - 3e5, pinned: false }
+      ],
+      copy: async () => {
+      },
+      pin: async (id2) => [],
+      delete: async (id2) => [],
+      clear: async () => [],
+      onChange: (cb2) => {
+        return () => {
+        };
+      }
+    },
+    colorPicker: {
+      getPalettes: async () => [
+        { id: "p1", name: "Brand Colors", colors: ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b"], createdAt: Date.now() }
+      ],
+      savePalette: async (p2) => ({ ...p2, id: `pal-${Date.now()}`, createdAt: Date.now() }),
+      updatePalette: async () => [],
+      deletePalette: async () => []
+    },
+    imageViewer: {
+      open: async () => null,
+      readFile: async () => null,
+      browseDir: async () => []
+    },
+    remoteDesktop: {
+      checkDeps: async () => ({ x11vnc: false, websockify: false, novnc: false }),
+      installDeps: async () => ({ ok: true }),
+      start: async () => ({ ok: true, ip: "192.168.1.100", url: "http://192.168.1.100:6081", vncPort: 5900, wsPort: 6080, httpPort: 6081 }),
+      stop: async () => ({ ok: true }),
+      status: async () => ({ running: false, vncAlive: false, wsAlive: false }),
+      getIP: async () => "192.168.1.100",
+      tailscaleStatus: async () => ({ installed: false, running: false, ip: "", hostname: "" }),
+      installTailscale: async () => ({ ok: true }),
+      tailscaleUp: async () => ({ ok: true }),
+      onLog: (cb2) => {
+        return () => {
+        };
+      },
+      onStopped: (cb2) => {
+        return () => {
+        };
+      }
+    },
+    rssReader: {
+      getFeeds: async () => [],
+      getItems: async () => [],
+      addFeed: async (url) => ({ feed: { id: "f1", url, title: url, description: "", lastFetched: Date.now() }, items: [] }),
+      removeFeed: async () => {
+      },
+      refresh: async () => [],
+      markRead: async () => {
+      },
+      markAllRead: async () => {
+      }
+    },
+    notifyUnlock: () => {
+    },
+    onLock: (cb2) => {
+      return () => {
+      };
+    },
+    onOpenApp: (cb2) => {
+      return () => {
+      };
+    },
+    onHudVolume: (cb2) => {
+      return () => {
+      };
+    },
+    onHudBrightness: (cb2) => {
+      return () => {
+      };
+    },
+    onAppSwitcher: (cb2) => {
+      return () => {
+      };
+    },
+    onSpotlight: (cb2) => {
+      return () => {
+      };
+    },
+    onWorkspaceChanged: (cb2) => {
+      return () => {
+      };
+    },
     onNotification: (cb2) => {
       return () => {
       };
@@ -20098,9 +25510,11 @@ export {
   AnimatePresence as A,
   THEME_PRESETS as T,
   We$1 as W,
-  useThemeStore as a,
+  TutorialSlides as a,
+  usePinnedStore as b,
+  useThemeStore as c,
   jsxRuntimeExports as j,
   motion as m,
   reactExports as r,
-  usePinnedStore as u
+  useDesktopStore as u
 };

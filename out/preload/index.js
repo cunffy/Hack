@@ -87,8 +87,10 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
     bluetoothDisconnect: (address) => electron.ipcRenderer.invoke("system:bluetoothDisconnect", address),
     bluetoothScan: () => electron.ipcRenderer.invoke("system:bluetoothScan"),
     getInfo: () => electron.ipcRenderer.invoke("system:getInfo"),
+    syncTime: () => electron.ipcRenderer.invoke("system:syncTime"),
     shutdown: () => electron.ipcRenderer.invoke("system:shutdown"),
     reboot: () => electron.ipcRenderer.invoke("system:reboot"),
+    sleep: () => electron.ipcRenderer.invoke("system:sleep"),
     lock: () => electron.ipcRenderer.invoke("system:lock"),
     pickWallpaper: () => electron.ipcRenderer.invoke("system:pickWallpaper"),
     setWallpaper: (path) => electron.ipcRenderer.invoke("system:setWallpaper", path),
@@ -106,7 +108,11 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
   wm: {
     getWindows: () => electron.ipcRenderer.invoke("wm:getWindows"),
     focusWindow: (id) => electron.ipcRenderer.invoke("wm:focusWindow", id),
-    closeWindow: (id) => electron.ipcRenderer.invoke("wm:closeWindow", id)
+    closeWindow: (id) => electron.ipcRenderer.invoke("wm:closeWindow", id),
+    hideShell: () => electron.ipcRenderer.invoke("wm:hideShell"),
+    getCurrentWorkspace: () => electron.ipcRenderer.invoke("wm:getCurrentWorkspace"),
+    switchWorkspace: (n) => electron.ipcRenderer.invoke("wm:switchWorkspace", n),
+    getWorkspaceCount: () => electron.ipcRenderer.invoke("wm:getWorkspaceCount")
   },
   // Phone companion (ADB + scrcpy)
   phone: {
@@ -125,15 +131,152 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
     getDeviceIp: (serial) => electron.ipcRenderer.invoke("phone:getDeviceIp", serial),
     screenshot: (serial) => electron.ipcRenderer.invoke("phone:screenshot", serial)
   },
+  // Network scanner
+  scanner: {
+    check: () => electron.ipcRenderer.invoke("scanner:check"),
+    run: (target, type, ports) => electron.ipcRenderer.invoke("scanner:run", target, type, ports),
+    cancel: () => electron.ipcRenderer.send("scanner:cancel"),
+    onProgress: (cb) => {
+      const listener = (_, line) => cb(line);
+      electron.ipcRenderer.on("scanner:progress", listener);
+      return () => electron.ipcRenderer.removeListener("scanner:progress", listener);
+    }
+  },
+  // VPN manager
+  vpn: {
+    getStatus: () => electron.ipcRenderer.invoke("vpn:getStatus"),
+    connect: (profile) => electron.ipcRenderer.invoke("vpn:connect", profile),
+    disconnect: () => electron.ipcRenderer.invoke("vpn:disconnect")
+  },
+  // Password manager (encrypted vault)
+  passwords: {
+    getAll: () => electron.ipcRenderer.invoke("passwords:getAll"),
+    add: (entry) => electron.ipcRenderer.invoke("passwords:add", entry),
+    update: (id, patch) => electron.ipcRenderer.invoke("passwords:update", id, patch),
+    delete: (id) => electron.ipcRenderer.invoke("passwords:delete", id),
+    generate: (opts) => electron.ipcRenderer.invoke("passwords:generate", opts)
+  },
+  // SSH key manager
+  ssh: {
+    listKeys: () => electron.ipcRenderer.invoke("ssh:listKeys"),
+    generateKey: (opts) => electron.ipcRenderer.invoke("ssh:generateKey", opts),
+    deleteKey: (name) => electron.ipcRenderer.invoke("ssh:deleteKey", name),
+    getPublicKey: (name) => electron.ipcRenderer.invoke("ssh:getPublicKey", name),
+    listHosts: () => electron.ipcRenderer.invoke("ssh:listHosts"),
+    saveConfig: (content) => electron.ipcRenderer.invoke("ssh:saveConfig", content)
+  },
+  // Firewall manager (UFW)
+  firewall: {
+    status: () => electron.ipcRenderer.invoke("firewall:status"),
+    enable: () => electron.ipcRenderer.invoke("firewall:enable"),
+    disable: () => electron.ipcRenderer.invoke("firewall:disable"),
+    addRule: (rule) => electron.ipcRenderer.invoke("firewall:addRule", rule),
+    deleteRule: (num) => electron.ipcRenderer.invoke("firewall:deleteRule", num),
+    reset: () => electron.ipcRenderer.invoke("firewall:reset")
+  },
+  // Process / task manager
+  processes: {
+    list: () => electron.ipcRenderer.invoke("processes:list"),
+    kill: (pid, sig) => electron.ipcRenderer.invoke("processes:kill", pid, sig),
+    getSystemStats: () => electron.ipcRenderer.invoke("processes:getSystemStats")
+  },
+  // Log viewer (journalctl)
+  logs: {
+    getUnits: () => electron.ipcRenderer.invoke("logs:getUnits"),
+    query: (opts) => electron.ipcRenderer.invoke("logs:query", opts),
+    stream: (opts) => electron.ipcRenderer.invoke("logs:stream", opts),
+    stopStream: () => electron.ipcRenderer.invoke("logs:stopStream"),
+    onLine: (cb) => {
+      const listener = (_, line) => cb(line);
+      electron.ipcRenderer.on("logs:line", listener);
+      return () => electron.ipcRenderer.removeListener("logs:line", listener);
+    }
+  },
+  // Network monitor
+  netmon: {
+    getInterfaces: () => electron.ipcRenderer.invoke("netmon:getInterfaces"),
+    getConnections: () => electron.ipcRenderer.invoke("netmon:getConnections"),
+    startStream: () => electron.ipcRenderer.invoke("netmon:startStream"),
+    stopStream: () => electron.ipcRenderer.invoke("netmon:stopStream"),
+    onStats: (cb) => {
+      const listener = (_, stats) => cb(stats);
+      electron.ipcRenderer.on("netmon:stats", listener);
+      return () => electron.ipcRenderer.removeListener("netmon:stats", listener);
+    }
+  },
+  // Screenshot
+  screenshot: {
+    capture: () => electron.ipcRenderer.invoke("screenshot:capture"),
+    save: (dataUrl, name) => electron.ipcRenderer.invoke("screenshot:save", dataUrl, name),
+    copyToClipboard: (dataUrl) => electron.ipcRenderer.invoke("screenshot:copyToClipboard", dataUrl)
+  },
   // Update checker + runner
   updater: {
     check: () => electron.ipcRenderer.invoke("updater:check"),
-    run: () => electron.ipcRenderer.invoke("updater:run"),
+    run: (password) => electron.ipcRenderer.invoke("updater:run", password),
     onProgress: (cb) => {
       const listener = (_, line) => cb(line);
       electron.ipcRenderer.on("updater:progress", listener);
       return () => electron.ipcRenderer.removeListener("updater:progress", listener);
     }
+  },
+  // TLS cert inspector
+  cert: {
+    inspect: (host, port) => electron.ipcRenderer.invoke("cert:inspect", host, port),
+    parsePem: (pem) => electron.ipcRenderer.invoke("cert:parsePem", pem)
+  },
+  // Docker
+  docker: {
+    listContainers: () => electron.ipcRenderer.invoke("docker:listContainers"),
+    listImages: () => electron.ipcRenderer.invoke("docker:listImages"),
+    startContainer: (id) => electron.ipcRenderer.invoke("docker:startContainer", id),
+    stopContainer: (id) => electron.ipcRenderer.invoke("docker:stopContainer", id),
+    restartContainer: (id) => electron.ipcRenderer.invoke("docker:restartContainer", id),
+    removeContainer: (id) => electron.ipcRenderer.invoke("docker:removeContainer", id),
+    getStats: () => electron.ipcRenderer.invoke("docker:getStats"),
+    pullImage: (name) => electron.ipcRenderer.invoke("docker:pullImage", name),
+    removeImage: (id) => electron.ipcRenderer.invoke("docker:removeImage", id),
+    getLogs: (id, lines) => electron.ipcRenderer.invoke("docker:getLogs", id, lines),
+    onPullLine: (cb) => {
+      const listener = (_, line) => cb(line);
+      electron.ipcRenderer.on("docker:pullLine", listener);
+      return () => electron.ipcRenderer.removeListener("docker:pullLine", listener);
+    }
+  },
+  // Git
+  git: {
+    isRepo: (repoPath) => electron.ipcRenderer.invoke("git:isRepo", repoPath),
+    status: (repoPath) => electron.ipcRenderer.invoke("git:status", repoPath),
+    log: (repoPath, limit) => electron.ipcRenderer.invoke("git:log", repoPath, limit),
+    diff: (repoPath, file, staged) => electron.ipcRenderer.invoke("git:diff", repoPath, file, staged),
+    getBranches: (repoPath) => electron.ipcRenderer.invoke("git:getBranches", repoPath),
+    checkout: (repoPath, branch) => electron.ipcRenderer.invoke("git:checkout", repoPath, branch),
+    stage: (repoPath, files) => electron.ipcRenderer.invoke("git:stage", repoPath, files),
+    unstage: (repoPath, files) => electron.ipcRenderer.invoke("git:unstage", repoPath, files),
+    commit: (repoPath, message) => electron.ipcRenderer.invoke("git:commit", repoPath, message),
+    push: (repoPath) => electron.ipcRenderer.invoke("git:push", repoPath),
+    pull: (repoPath) => electron.ipcRenderer.invoke("git:pull", repoPath),
+    stash: (repoPath) => electron.ipcRenderer.invoke("git:stash", repoPath),
+    stashPop: (repoPath) => electron.ipcRenderer.invoke("git:stashPop", repoPath),
+    init: (repoPath) => electron.ipcRenderer.invoke("git:init", repoPath)
+  },
+  // SQLite browser
+  db: {
+    open: (filePath) => electron.ipcRenderer.invoke("db:open", filePath),
+    close: (sessionId) => electron.ipcRenderer.invoke("db:close", sessionId),
+    listTables: (sessionId) => electron.ipcRenderer.invoke("db:listTables", sessionId),
+    getSchema: (sessionId, table) => electron.ipcRenderer.invoke("db:getSchema", sessionId, table),
+    getTableRowCount: (sessionId, table) => electron.ipcRenderer.invoke("db:getTableRowCount", sessionId, table),
+    query: (sessionId, sql, page, pageSize) => electron.ipcRenderer.invoke("db:query", sessionId, sql, page, pageSize)
+  },
+  // Trash
+  trash: {
+    list: () => electron.ipcRenderer.invoke("trash:list"),
+    moveToTrash: (path) => electron.ipcRenderer.invoke("trash:moveToTrash", path),
+    restore: (name) => electron.ipcRenderer.invoke("trash:restore", name),
+    deletePermanent: (name) => electron.ipcRenderer.invoke("trash:deletePermanent", name),
+    empty: () => electron.ipcRenderer.invoke("trash:empty"),
+    getSize: () => electron.ipcRenderer.invoke("trash:getSize")
   },
   // Tell main process the lock screen was dismissed so it clears alwaysOnTop
   notifyUnlock: () => electron.ipcRenderer.send("screen:unlock"),
@@ -172,5 +315,157 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
     const listener = (_, dir) => cb(dir);
     electron.ipcRenderer.on("app:switcher", listener);
     return () => electron.ipcRenderer.removeListener("app:switcher", listener);
+  },
+  // Ctrl+Space spotlight shortcut from main
+  onSpotlight: (cb) => {
+    const listener = () => cb();
+    electron.ipcRenderer.on("open:spotlight", listener);
+    return () => electron.ipcRenderer.removeListener("open:spotlight", listener);
+  },
+  // Super+1/2/3/4 workspace switch from main
+  onWorkspaceChanged: (cb) => {
+    const listener = (_, n) => cb(n);
+    electron.ipcRenderer.on("workspace:changed", listener);
+    return () => electron.ipcRenderer.removeListener("workspace:changed", listener);
+  },
+  // Shodan
+  shodan: {
+    search: (query, page) => electron.ipcRenderer.invoke("shodan:search", query, page),
+    host: (ip) => electron.ipcRenderer.invoke("shodan:host", ip),
+    count: (query) => electron.ipcRenderer.invoke("shodan:count", query),
+    exploits: (query) => electron.ipcRenderer.invoke("shodan:exploits", query)
+  },
+  // OSINT
+  osint: {
+    lookup: (tool, query) => electron.ipcRenderer.invoke("osint:lookup", tool, query)
+  },
+  // CVE Database
+  cve: {
+    search: (query) => electron.ipcRenderer.invoke("cve:search", query),
+    recent: (count) => electron.ipcRenderer.invoke("cve:recent", count)
+  },
+  // AI Assistant
+  ai: {
+    chat: (messages) => electron.ipcRenderer.invoke("ai:chat", messages)
+  },
+  // Packet Sniffer
+  packetSniffer: {
+    start: (iface, filter, cb) => {
+      const listener = (_, pkt) => cb(pkt);
+      electron.ipcRenderer.on("packetSniffer:packet", listener);
+      electron.ipcRenderer.invoke("packetSniffer:start", iface, filter);
+      return () => electron.ipcRenderer.removeListener("packetSniffer:packet", listener);
+    },
+    stop: () => electron.ipcRenderer.invoke("packetSniffer:stop")
+  },
+  // System Backup
+  backup: {
+    list: () => electron.ipcRenderer.invoke("backup:list"),
+    create: () => electron.ipcRenderer.invoke("backup:create"),
+    restore: (id) => electron.ipcRenderer.invoke("backup:restore", id),
+    delete: (id) => electron.ipcRenderer.invoke("backup:delete", id),
+    onProgress: (cb) => {
+      const listener = (_, msg, pct) => cb(msg, pct);
+      electron.ipcRenderer.on("backup:progress", listener);
+      return () => electron.ipcRenderer.removeListener("backup:progress", listener);
+    }
+  },
+  // Audit Log
+  auditLog: {
+    list: () => electron.ipcRenderer.invoke("auditLog:list"),
+    append: (entry) => electron.ipcRenderer.invoke("auditLog:append", entry),
+    clear: () => electron.ipcRenderer.invoke("auditLog:clear")
+  },
+  // Code Scanner
+  codeScanner: {
+    browse: () => electron.ipcRenderer.invoke("codeScanner:browse"),
+    scan: (path, scanner) => electron.ipcRenderer.invoke("codeScanner:scan", path, scanner),
+    onProgress: (cb) => {
+      const listener = (_, pct) => cb(pct);
+      electron.ipcRenderer.on("codeScanner:progress", listener);
+      return () => electron.ipcRenderer.removeListener("codeScanner:progress", listener);
+    }
+  },
+  // TOTP / 2FA
+  totp: {
+    list: () => electron.ipcRenderer.invoke("totp:list"),
+    generate: (secret) => electron.ipcRenderer.invoke("totp:generate", secret),
+    add: (account) => electron.ipcRenderer.invoke("totp:add", account),
+    remove: (id) => electron.ipcRenderer.invoke("totp:remove", id)
+  },
+  // Wordlists
+  wordlists: {
+    list: () => electron.ipcRenderer.invoke("wordlists:list"),
+    preview: (path, n) => electron.ipcRenderer.invoke("wordlists:preview", path, n),
+    import: () => electron.ipcRenderer.invoke("wordlists:import"),
+    delete: (path) => electron.ipcRenderer.invoke("wordlists:delete", path),
+    generate: (opts) => electron.ipcRenderer.invoke("wordlists:generate", opts)
+  },
+  // Password Health
+  passwordHealth: {
+    checkHIBP: (password) => electron.ipcRenderer.invoke("passwordHealth:checkHIBP", password)
+  },
+  // Wallpaper
+  wallpaper: {
+    listCustom: () => electron.ipcRenderer.invoke("wallpaper:listCustom"),
+    browse: () => electron.ipcRenderer.invoke("wallpaper:browse")
+  },
+  // Clipboard History
+  clipboardHistory: {
+    getAll: () => electron.ipcRenderer.invoke("clipboard:getAll"),
+    copy: (id) => electron.ipcRenderer.invoke("clipboard:copy", id),
+    pin: (id) => electron.ipcRenderer.invoke("clipboard:pin", id),
+    delete: (id) => electron.ipcRenderer.invoke("clipboard:delete", id),
+    clear: () => electron.ipcRenderer.invoke("clipboard:clear"),
+    onChange: (cb) => {
+      const listener = (_, entry) => cb(entry);
+      electron.ipcRenderer.on("clipboard:change", listener);
+      return () => electron.ipcRenderer.removeListener("clipboard:change", listener);
+    }
+  },
+  // Color Picker
+  colorPicker: {
+    getPalettes: () => electron.ipcRenderer.invoke("colorPicker:getPalettes"),
+    savePalette: (p) => electron.ipcRenderer.invoke("colorPicker:savePalette", p),
+    updatePalette: (id, patch) => electron.ipcRenderer.invoke("colorPicker:updatePalette", id, patch),
+    deletePalette: (id) => electron.ipcRenderer.invoke("colorPicker:deletePalette", id)
+  },
+  // Image Viewer
+  imageViewer: {
+    open: () => electron.ipcRenderer.invoke("imageViewer:open"),
+    readFile: (path) => electron.ipcRenderer.invoke("imageViewer:readFile", path),
+    browseDir: (dir) => electron.ipcRenderer.invoke("imageViewer:browseDir", dir)
+  },
+  // RSS Reader
+  rssReader: {
+    getFeeds: () => electron.ipcRenderer.invoke("rss:getFeeds"),
+    getItems: (feedId) => electron.ipcRenderer.invoke("rss:getItems", feedId),
+    addFeed: (url) => electron.ipcRenderer.invoke("rss:addFeed", url),
+    removeFeed: (id) => electron.ipcRenderer.invoke("rss:removeFeed", id),
+    refresh: (id) => electron.ipcRenderer.invoke("rss:refresh", id),
+    markRead: (itemId) => electron.ipcRenderer.invoke("rss:markRead", itemId),
+    markAllRead: (feedId) => electron.ipcRenderer.invoke("rss:markAllRead", feedId)
+  },
+  // Remote Desktop
+  remoteDesktop: {
+    checkDeps: () => electron.ipcRenderer.invoke("remoteDesktop:checkDeps"),
+    installDeps: () => electron.ipcRenderer.invoke("remoteDesktop:installDeps"),
+    start: (opts) => electron.ipcRenderer.invoke("remoteDesktop:start", opts),
+    stop: () => electron.ipcRenderer.invoke("remoteDesktop:stop"),
+    status: () => electron.ipcRenderer.invoke("remoteDesktop:status"),
+    getIP: () => electron.ipcRenderer.invoke("remoteDesktop:getIP"),
+    tailscaleStatus: () => electron.ipcRenderer.invoke("remoteDesktop:tailscaleStatus"),
+    installTailscale: () => electron.ipcRenderer.invoke("remoteDesktop:installTailscale"),
+    tailscaleUp: () => electron.ipcRenderer.invoke("remoteDesktop:tailscaleUp"),
+    onLog: (cb) => {
+      const listener = (_, msg) => cb(msg);
+      electron.ipcRenderer.on("remoteDesktop:log", listener);
+      return () => electron.ipcRenderer.removeListener("remoteDesktop:log", listener);
+    },
+    onStopped: (cb) => {
+      const listener = () => cb();
+      electron.ipcRenderer.on("remoteDesktop:stopped", listener);
+      return () => electron.ipcRenderer.removeListener("remoteDesktop:stopped", listener);
+    }
   }
 });

@@ -77,6 +77,13 @@ redshift-gtk &
 # Launch Cryogram as the full desktop shell
 # --kiosk disables the Electron menu bar; DISPLAY and home are set by LightDM
 sleep 1 && cryogram --start-maximized --no-sandbox &
+
+# On live boot: auto-launch the graphical installer so the user can install
+# to disk. Calamares appears as a window on top of Cryogram after 4 seconds.
+# On an installed system boot=live is not in /proc/cmdline so this is skipped.
+if grep -q "boot=live" /proc/cmdline 2>/dev/null; then
+  sleep 4 && sudo /usr/bin/calamares &
+fi
 EOF
 chmod +x /etc/skel/.config/openbox/autostart
 
@@ -314,7 +321,7 @@ cat > /etc/skel/.config/openbox/menu.xml << 'EOF'
     </menu>
     <separator/>
     <item label="Install Cryogram OS">
-      <action name="Execute"><command>pkexec calamares</command></action>
+      <action name="Execute"><command>sudo /usr/bin/calamares</command></action>
     </item>
     <separator/>
     <item label="Lock Screen"><action name="Execute"><command>i3lock -c 080c12 -e</command></action></item>
