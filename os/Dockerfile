@@ -4,9 +4,14 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LC_ALL=C
 
 # Install live-build and all build deps
-# -o Acquire::Check-Valid-Until=false handles clock-skew in constrained environments
-RUN apt-get update -o Acquire::Check-Valid-Until=false && \
-    apt-get install -y -o Acquire::Check-Valid-Until=false \
+# Both flags handle clock-skew: Check-Valid-Until=false covers expired certs,
+# Check-Date=false covers "not valid yet" (clock behind the release timestamp)
+RUN apt-get update \
+      -o Acquire::Check-Valid-Until=false \
+      -o Acquire::Check-Date=false && \
+    apt-get install -y \
+      -o Acquire::Check-Valid-Until=false \
+      -o Acquire::Check-Date=false \
     live-build \
     live-config \
     live-boot \
