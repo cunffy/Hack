@@ -289,7 +289,6 @@ pavucontrol
 joystick
 jstest-gtk
 ffmpeg
-mesa-utils-extra
 PKGEOF
 
 cat > "$PKG_LISTS/base.list.chroot" << 'PKGEOF'
