@@ -350,8 +350,12 @@ deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free
 deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
 deb http://deb.debian.org/debian bookworm-backports main contrib non-free non-free-firmware
 SOURCES
-apt-get update -qq 2>/dev/null || true
+apt-get update \
+  -o Acquire::Check-Valid-Until=false \
+  -o Acquire::Check-Date=false \
+  -qq 2>/dev/null || true
 echo "[apt-sources] Done."
+exit 0
 HOOKEOF
 chmod +x "$HOOKS_DIR/0100-apt-sources.hook.chroot"
 echo "[build] Apt sources hook written."
