@@ -8,7 +8,10 @@ set -euo pipefail
 VERSION="${CRYOGRAM_VERSION:-1.0}"
 CODENAME="${CRYOGRAM_CODENAME:-obsidian}"
 OUTPUT_DIR="/build/output"
-LB_DIR="/build/live-build"
+# Config source — read-only Windows volume mount
+CONF_DIR="/build/live-build"
+# Working dir — inside the container (ephemeral, always fresh, no NTFS locking)
+LB_DIR="/tmp/lb-work"
 ASSETS_DIR="/build/assets"
 
 # Print which command failed, for diagnosis
@@ -24,18 +27,18 @@ echo ""
 
 mkdir -p "$OUTPUT_DIR"
 
-# Ensure hook scripts are executable (volume mounts may drop exec bit)
+# Set up a fresh working directory inside the container.
+# Running lb from a container-internal path avoids NTFS locking issues
+# that prevent rm -rf from cleaning stale chroot/binary on Windows mounts.
+echo "[build] Setting up fresh live-build work directory at $LB_DIR..."
+rm -rf "$LB_DIR"
+mkdir -p "$LB_DIR"
+cp -r "$CONF_DIR/config" "$LB_DIR/"
+cp -r "$CONF_DIR/auto"   "$LB_DIR/"
+
+# Ensure hook and auto scripts are executable
 find "$LB_DIR/config/hooks" -name "*.chroot" -exec chmod +x {} \; 2>/dev/null || true
 find "$LB_DIR/auto" -type f -exec chmod +x {} \; 2>/dev/null || true
-
-# Clear any stale chroot/binary state left over from a previous failed build.
-# The live-build directory is volume-mounted so state persists between runs.
-echo "[build] Cleaning stale live-build state..."
-cd "$LB_DIR"
-lb clean --all 2>/dev/null || true
-# Belt-and-suspenders: remove dirs that lb clean sometimes misses
-rm -rf chroot binary .build cache/bootstrap 2>/dev/null || true
-cd - >/dev/null
 
 # Write authoritative package lists directly — overrides whatever is on disk.
 # This guarantees the build works even if local files were never git-pulled.
