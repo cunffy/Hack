@@ -32,7 +32,9 @@ find "$LB_DIR/auto" -type f -exec chmod +x {} \; 2>/dev/null || true
 # The live-build directory is volume-mounted so state persists between runs.
 echo "[build] Cleaning stale live-build state..."
 cd "$LB_DIR"
-lb clean --chroot --binary 2>/dev/null || true
+lb clean --all 2>/dev/null || true
+# Belt-and-suspenders: remove dirs that lb clean sometimes misses
+rm -rf chroot binary .build cache/bootstrap 2>/dev/null || true
 cd - >/dev/null
 
 # Write authoritative package lists directly — overrides whatever is on disk.
