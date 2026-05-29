@@ -200,7 +200,6 @@ gnome-font-viewer
 font-manager
 xfce4-terminal
 xterm
-alacritty
 nitrogen
 lxrandr
 arandr
@@ -225,7 +224,6 @@ fonts-liberation
 fonts-freefont-ttf
 fonts-dejavu
 ttf-bitstream-vera
-fonts-inter
 fonts-noto-color-emoji
 tlp
 tlp-rdw
@@ -268,8 +266,6 @@ i965-va-driver
 xserver-xorg-video-nouveau
 wine
 wine64
-winetricks
-lutris
 gamemode
 libgamemode0
 libgamemodeauto0
@@ -342,6 +338,24 @@ echo "[build] Package lists written."
 # Write hook scripts from here so stale volume-mounted copies can't break the build.
 HOOKS_DIR="$LB_DIR/config/hooks/normal"
 mkdir -p "$HOOKS_DIR"
+
+# First hook: ensure full apt sources (non-free-firmware etc.) are active
+# before any package installation hooks run.
+cat > "$HOOKS_DIR/0100-apt-sources.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set +e
+echo "[apt-sources] Configuring full Debian Bookworm sources..."
+cat > /etc/apt/sources.list << 'SOURCES'
+deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
+deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian bookworm-backports main contrib non-free non-free-firmware
+SOURCES
+apt-get update -qq 2>/dev/null || true
+echo "[apt-sources] Done."
+HOOKEOF
+chmod +x "$HOOKS_DIR/0100-apt-sources.hook.chroot"
+echo "[build] Apt sources hook written."
 
 cat > "$HOOKS_DIR/0400-calamares.hook.chroot" << 'HOOKEOF'
 #!/bin/bash
