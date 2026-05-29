@@ -9,6 +9,7 @@ lb config noauto \
   --archive-areas "main contrib non-free non-free-firmware" \
   --apt-recommends false \
   --apt-indices false \
+  --apt-options "--yes -o APT::Get::Fix-Missing=true" \
   --debootstrap-options "--variant=minbase" \
   --bootappend-live "boot=live components quiet splash username=cryogram hostname=cryogram" \
   --iso-volume "CRYOGRAM" \

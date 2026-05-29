@@ -40,18 +40,6 @@ cp -r "$CONF_DIR/auto"   "$LB_DIR/"
 find "$LB_DIR/config/hooks" -name "*.chroot" -exec chmod +x {} \; 2>/dev/null || true
 find "$LB_DIR/auto" -type f -exec chmod +x {} \; 2>/dev/null || true
 
-# Write apt sources into config/archives/ — this is the live-build mechanism
-# that injects sources into the chroot BEFORE package installation runs.
-# The --archive-areas lb config flag alone is not reliable for non-free-firmware.
-mkdir -p "$LB_DIR/config/archives"
-cat > "$LB_DIR/config/archives/cryogram.list.chroot" << 'EOF'
-deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
-deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
-deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
-deb http://deb.debian.org/debian bookworm-backports main contrib non-free non-free-firmware
-EOF
-echo "[build] Apt sources staged in config/archives/."
-
 # Write authoritative package lists directly — overrides whatever is on disk.
 # This guarantees the build works even if local files were never git-pulled.
 echo "[build] Writing package lists..."
