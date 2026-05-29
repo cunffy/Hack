@@ -361,7 +361,7 @@ cat > /usr/share/applications/install-cryogram.desktop << 'DESKTOP'
 [Desktop Entry]
 Name=Install Cryogram OS
 Comment=Install Cryogram OS to this computer
-Exec=pkexec calamares
+Exec=sudo /usr/bin/calamares
 Icon=system-software-install
 Terminal=false
 Type=Application
@@ -386,7 +386,7 @@ cat > /usr/local/bin/cryogram-installer-launch << 'LAUNCHER'
 # Only launch installer when running from live USB
 if grep -q "boot=live" /proc/cmdline 2>/dev/null; then
   sleep 4  # wait for desktop to fully load
-  pkexec calamares
+  sudo /usr/bin/calamares
 fi
 LAUNCHER
 chmod +x /usr/local/bin/cryogram-installer-launch
@@ -834,6 +834,12 @@ WM_PID=$!
 # Hide cursor when idle — security OS aesthetic
 unclutter -root -idle 5 2>/dev/null &
 
+# On live boot: pop up the graphical installer after the desktop loads.
+# boot=live is only in cmdline when running from the USB — never on installed system.
+if grep -q "boot=live" /proc/cmdline 2>/dev/null; then
+  (sleep 5 && sudo /usr/bin/calamares) &
+fi
+
 # ── Launch Cryogram OS shell ──────────────────────────────────────────────
 # Auto-restart on crash (exit non-zero). Exit 0 = clean shutdown/update,
 # which triggers session end via systemctl restart display-manager.
@@ -926,6 +932,10 @@ cat > /etc/sudoers.d/cryogram-power << 'SUDOERS'
 cryogram ALL=(ALL) NOPASSWD: /bin/systemctl poweroff, /bin/systemctl reboot, /bin/systemctl hibernate, /bin/systemctl suspend, /bin/systemctl restart lightdm, /bin/systemctl restart display-manager
 SUDOERS
 chmod 440 /etc/sudoers.d/cryogram-power
+
+# Calamares installer — allow cryogram to run without password on live boot
+echo "cryogram ALL=(ALL) NOPASSWD: /usr/bin/calamares" > /etc/sudoers.d/calamares
+chmod 440 /etc/sudoers.d/calamares
 
 echo "[session] Cryogram OS session configured."
 exit 0
