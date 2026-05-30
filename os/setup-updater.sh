@@ -1,9 +1,10 @@
 #!/bin/bash
 # Cryogram OS — apply updates and install built-in updater infrastructure.
 # Invoked automatically by the one-liner:
-#   sudo bash -c 'D=/opt/cryogram-src; [ -d "$D/.git" ] \
-#     && git -C "$D" pull \
-#     || git clone --depth=1 -b claude/custom-security-os-URNk5 https://github.com/cunffy/Hack.git "$D"; \
+#   sudo bash -c 'D=/opt/cryogram-src; SSL="-c http.sslCAInfo=/etc/ssl/certs/ca-certificates.crt"; \
+#     update-ca-certificates --fresh 2>/dev/null || true; \
+#     [ -d "$D/.git" ] && git $SSL -C "$D" pull \
+#     || git $SSL clone --depth=1 -b claude/custom-security-os-URNk5 https://github.com/cunffy/Hack.git "$D"; \
 #     bash "$D/os/setup-updater.sh"'
 set -euo pipefail
 
@@ -29,11 +30,17 @@ chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true
 NMD
 chmod +x /etc/NetworkManager/dispatcher.d/10-cryogram-timesync
 
-# Ensure SSL certificates are present
+# Ensure SSL certificates are present and the bundle is up to date
 if [ ! -f /etc/ssl/certs/ca-certificates.crt ] || [ ! -s /etc/ssl/certs/ca-certificates.crt ]; then
   echo "  [pre] Installing ca-certificates..."
-  apt-get install -y -qq ca-certificates && update-ca-certificates --fresh
+  apt-get install -y -qq ca-certificates
 fi
+# Always rebuild the bundle — on some Debian systems the certs are installed
+# but git still reports CAfile:none until update-ca-certificates is run.
+update-ca-certificates --fresh 2>/dev/null || true
+# Point git at the bundle explicitly for all subsequent operations
+export GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt
+git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="/opt/cryogram"
@@ -103,14 +110,23 @@ trap 'rm -rf "\$STAGING"' EXIT
 echo "── Cryogram OS Updater ──────────────────────────"
 # Ensure SSL certs are present before any HTTPS git operation
 if [ ! -f /etc/ssl/certs/ca-certificates.crt ] || [ ! -s /etc/ssl/certs/ca-certificates.crt ]; then
-  apt-get update -qq && apt-get install -y -qq ca-certificates && update-ca-certificates --fresh
+  apt-get update -qq && apt-get install -y -qq ca-certificates
 fi
+# Always refresh the bundle so git finds it — on some Debian installs the
+# bundle exists but the symlinks need rebuilding for git to detect it.
+update-ca-certificates --fresh 2>/dev/null || true
+
+# Tell git explicitly where the CA bundle lives — avoids "CAfile: none" even
+# when ca-certificates is installed but git's default lookup path differs.
+export GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt
+git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
+
 if [ ! -d "\$SRC/.git" ]; then
   echo "── First run: cloning source repository..."
-  git clone --depth=1 --branch "\$BRANCH" "$REPO_URL" "\$SRC"
+  git -c http.sslCAInfo=/etc/ssl/certs/ca-certificates.crt clone --depth=1 --branch "\$BRANCH" "$REPO_URL" "\$SRC"
 else
   echo "── Pulling latest changes from \$BRANCH..."
-  git -C "\$SRC" fetch --depth=1 origin "\$BRANCH"
+  git -C "\$SRC" -c http.sslCAInfo=/etc/ssl/certs/ca-certificates.crt fetch --depth=1 origin "\$BRANCH"
   git -C "\$SRC" reset --hard "origin/\$BRANCH"
 fi
 
