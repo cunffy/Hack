@@ -27,9 +27,8 @@ export const useDockStore = create<DockStore>()(
       migrate: (_state: any, _fromVersion: number) => ({ order: DEFAULT_DOCK }),
       merge: (persisted: any, current) => {
         const stored: AppId[] = persisted?.order ?? current.order
-        // Reset to defaults if stored dock has more apps than expected (stale large list)
-        if (stored.length > DEFAULT_DOCK.length + 4) return { ...current, order: DEFAULT_DOCK }
         const merged = [...stored]
+        // Ensure core apps are always present, but never reset user customizations
         for (const id of DEFAULT_DOCK) {
           if (!merged.includes(id)) merged.push(id)
         }
