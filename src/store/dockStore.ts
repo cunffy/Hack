@@ -23,7 +23,10 @@ export const useDockStore = create<DockStore>()(
     }),
     {
       name: 'cryogram-dock-order',
-      version: 2,
+      version: 3,
+      // v3: one-time reset to the 5-app default dock.
+      // Bumping the version guarantees migrate() fires exactly once on this
+      // update regardless of what version was previously stored.
       migrate: (_state: any, _fromVersion: number) => ({ order: DEFAULT_DOCK }),
       merge: (persisted: any, current) => {
         const stored: AppId[] = persisted?.order ?? current.order
