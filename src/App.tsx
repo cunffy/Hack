@@ -147,10 +147,13 @@ export default function App() {
         e.preventDefault()
         setSpotlightOpen(o => !o)
       }
-      // Ctrl+Shift+V → clipboard history
+      // Ctrl+Shift+V → clipboard history (skip when xterm has focus)
       if (e.ctrlKey && e.shiftKey && e.code === 'KeyV') {
-        e.preventDefault()
-        setClipboardOpen(o => !o)
+        const inTerminal = !!(e.target as HTMLElement)?.closest('.xterm-helper-textarea, .xterm-screen, .xterm-viewport')
+        if (!inTerminal) {
+          e.preventDefault()
+          setClipboardOpen(o => !o)
+        }
       }
       // Super+M → Mission Control
       if (e.metaKey && e.code === 'KeyM') {

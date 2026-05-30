@@ -63,6 +63,24 @@ export default function Terminal() {
 
     term.onData((data) => window.cryogram.terminal.write(id, data))
 
+    // Ctrl+Shift+C → copy selection; Ctrl+Shift+V → paste from clipboard
+    term.attachCustomKeyEventHandler((event) => {
+      if (event.type === 'keydown' && event.ctrlKey && event.shiftKey) {
+        if (event.key === 'C') {
+          const sel = term.getSelection()
+          if (sel) navigator.clipboard.writeText(sel).catch(() => {})
+          return false
+        }
+        if (event.key === 'V') {
+          navigator.clipboard.readText().then(text => {
+            if (text) window.cryogram.terminal.write(id, text)
+          }).catch(() => {})
+          return false
+        }
+      }
+      return true
+    })
+
     const removeListener = window.cryogram.terminal.onData(id, (data) => term.write(data))
     cleanupRef.current = removeListener
 

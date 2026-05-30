@@ -23,8 +23,12 @@ export const useDockStore = create<DockStore>()(
     }),
     {
       name: 'cryogram-dock-order',
+      version: 2,
+      migrate: (_state: any, _fromVersion: number) => ({ order: DEFAULT_DOCK }),
       merge: (persisted: any, current) => {
         const stored: AppId[] = persisted?.order ?? current.order
+        // Reset to defaults if stored dock has more apps than expected (stale large list)
+        if (stored.length > DEFAULT_DOCK.length + 4) return { ...current, order: DEFAULT_DOCK }
         const merged = [...stored]
         for (const id of DEFAULT_DOCK) {
           if (!merged.includes(id)) merged.push(id)
