@@ -478,15 +478,27 @@ function VolumeIcon({ muted, level }: { muted: boolean; level: number }) {
 }
 
 function BattIcon({ level, charging }: { level: number; charging: boolean }) {
-  const color = level > 20 ? 'rgba(255,255,255,0.85)' : '#ef4444'
-  const fill = level > 20 ? (charging ? '#00ff88' : 'rgba(255,255,255,0.85)') : '#ef4444'
+  const low = level <= 20
+  const stroke = low ? '#ef4444' : charging ? '#00ff88' : 'rgba(255,255,255,0.85)'
+  const fill   = low ? '#ef4444' : charging ? '#00ff88' : 'rgba(255,255,255,0.85)'
+  const fillW  = Math.max(1, (level / 100) * 16)
   return (
-    <svg width="18" height="11" viewBox="0 0 22 12">
-      <rect x="0.5" y="0.5" width="18" height="11" rx="2.5" fill="none" stroke={color} strokeWidth="1.2" />
-      <rect x="19" y="3.5" width="2.5" height="5" rx="1" fill={color} />
-      <rect x="1.5" y="1.5" width={Math.max(1, (level / 100) * 16)} height="9" rx="1.5" fill={fill} />
-      {charging && (
-        <text x="9" y="10" fontSize="8" fill="#080c12" textAnchor="middle" fontWeight="bold">⚡</text>
+    <svg
+      width="18" height="11" viewBox="0 0 22 12"
+      style={charging ? { filter: 'drop-shadow(0 0 3px rgba(0,255,136,0.6))' } : undefined}
+    >
+      <rect x="0.5" y="0.5" width="18" height="11" rx="2.5" fill="none" stroke={stroke} strokeWidth="1.2" />
+      <rect x="19" y="3.5" width="2.5" height="5" rx="1" fill={stroke} />
+      {charging ? (
+        <motion.g
+          animate={{ opacity: [0.55, 1, 0.55] }}
+          transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <rect x="1.5" y="1.5" width={fillW} height="9" rx="1.5" fill={fill} />
+          <text x="9" y="10" fontSize="8" fill="#050a0f" textAnchor="middle" fontWeight="bold">⚡</text>
+        </motion.g>
+      ) : (
+        <rect x="1.5" y="1.5" width={fillW} height="9" rx="1.5" fill={fill} />
       )}
     </svg>
   )

@@ -519,6 +519,45 @@ GRUB_GFXMODE="1920x1080,1280x720,auto"
 GRUB_GFXPAYLOAD_LINUX=keep
 GRUBDEFAULT
 
+# ── Update infrastructure ─────────────────────────────────────────────────
+mkdir -p /etc/cryogram
+cat > /etc/cryogram/update.conf << 'UPDATECONF'
+REPO_URL="https://github.com/cunffy/Hack.git"
+BRANCH="claude/custom-security-os-URNk5"
+UPDATECONF
+
+cat > /usr/local/bin/cryogram-update << 'UPDATER'
+#!/bin/bash
+set -euo pipefail
+REPO_URL="https://github.com/cunffy/Hack.git"
+BRANCH="claude/custom-security-os-URNk5"
+SRC="/opt/cryogram-src"
+DEST="/opt/cryogram"
+
+echo "── Cryogram OS Updater ──────────────────────────"
+if [ ! -d "$SRC/.git" ]; then
+  echo "── First run: cloning source repository..."
+  git clone --depth=1 --branch "$BRANCH" "$REPO_URL" "$SRC"
+else
+  echo "── Pulling latest changes from $BRANCH..."
+  git -C "$SRC" fetch --depth=1 origin "$BRANCH"
+  git -C "$SRC" reset --hard "origin/$BRANCH"
+fi
+
+echo "── Syncing app files..."
+rsync -a --delete "$SRC/out/" "$DEST/out/"
+
+echo "── Update complete — rebooting in 5 seconds..."
+sleep 5
+reboot
+UPDATER
+chmod +x /usr/local/bin/cryogram-update
+
+# Allow the cryogram user to run the update without a password prompt
+echo "cryogram ALL=(ALL) NOPASSWD: /usr/local/bin/cryogram-update" \
+  > /etc/sudoers.d/cryogram-update
+chmod 440 /etc/sudoers.d/cryogram-update
+
 echo "[cryogram] Setup complete at $INSTALL_DIR ($(du -sh $INSTALL_DIR | cut -f1))"
 exit 0
 HOOKEOF
