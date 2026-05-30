@@ -212,10 +212,21 @@ if [ -f "$OB_CONF" ]; then
     echo "  [+] Patching openbox config with brightness keybindings..."
     sed -i 's|</keyboard>|  <keybind key="XF86MonBrightnessUp"><action name="Execute"><execute>brightnessctl set +10%</execute></action></keybind>\n    <keybind key="XF86MonBrightnessDown"><action name="Execute"><execute>brightnessctl set 10%-</execute></action></keybind>\n  </keyboard>|' "$OB_CONF"
   fi
-  # Volume keys — add openbox-level handler so they work even if Electron does not intercept them
+  # Volume keys — pactl needs XDG_RUNTIME_DIR to locate the PipeWire socket.
+  # Install a tiny wrapper so every call site (openbox + shell) gets it automatically.
+  cat > /usr/local/bin/cryogram-pactl << 'PACTL_WRAP'
+#!/bin/bash
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+exec pactl "$@"
+PACTL_WRAP
+  chmod +x /usr/local/bin/cryogram-pactl
+
   if ! grep -q 'XF86AudioRaiseVolume' "$OB_CONF"; then
     echo "  [+] Patching openbox config with volume keybindings..."
-    sed -i 's|</keyboard>|  <keybind key="XF86AudioRaiseVolume"><action name="Execute"><execute>pactl set-sink-volume @DEFAULT_SINK@ +5%</execute></action></keybind>\n    <keybind key="XF86AudioLowerVolume"><action name="Execute"><execute>pactl set-sink-volume @DEFAULT_SINK@ -5%</execute></action></keybind>\n    <keybind key="XF86AudioMute"><action name="Execute"><execute>pactl set-sink-mute @DEFAULT_SINK@ toggle</execute></action></keybind>\n  </keyboard>|' "$OB_CONF"
+    sed -i 's|</keyboard>|  <keybind key="XF86AudioRaiseVolume"><action name="Execute"><execute>cryogram-pactl set-sink-volume @DEFAULT_SINK@ +5%</execute></action></keybind>\n    <keybind key="XF86AudioLowerVolume"><action name="Execute"><execute>cryogram-pactl set-sink-volume @DEFAULT_SINK@ -5%</execute></action></keybind>\n    <keybind key="XF86AudioMute"><action name="Execute"><execute>cryogram-pactl set-sink-mute @DEFAULT_SINK@ toggle</execute></action></keybind>\n  </keyboard>|' "$OB_CONF"
+  else
+    # Keybindings already exist — upgrade any bare 'pactl' calls to use the wrapper
+    sed -i 's|<execute>pactl |<execute>cryogram-pactl |g' "$OB_CONF"
   fi
   # Ensure 4 workspaces for Super+1–4 switching
   sed -i 's|<desktops>[^<]*<number>[0-9]*</number>[^<]*</desktops>|<desktops><number>4</number></desktops>|' "$OB_CONF" 2>/dev/null || true
