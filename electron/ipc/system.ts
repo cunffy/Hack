@@ -7,8 +7,15 @@ import { getSettingsStore } from './settings'
 
 const execAsync = promisify(exec)
 
+// PipeWire/PulseAudio find their socket via XDG_RUNTIME_DIR.
+// Pass explicitly so pactl works even when the session env is incomplete.
+const audioEnv = {
+  ...process.env,
+  XDG_RUNTIME_DIR: process.env['XDG_RUNTIME_DIR'] ?? `/run/user/${process.getuid?.() ?? 1000}`,
+}
+
 function sh(cmd: string): Promise<string> {
-  return execAsync(cmd).then(r => r.stdout.trim()).catch(() => '')
+  return execAsync(cmd, { env: audioEnv }).then(r => r.stdout.trim()).catch(() => '')
 }
 
 export function registerSystemHandlers(): void {

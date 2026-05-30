@@ -167,13 +167,20 @@ function createWindow(): void {
     // when pactl is slow or the sink isn't resolved yet.
     let _vol = -1
 
+    // PipeWire/PulseAudio find their socket via XDG_RUNTIME_DIR.
+    // Pass it explicitly so pactl works even if the session env is incomplete.
+    const audioEnv = {
+      ...process.env,
+      XDG_RUNTIME_DIR: process.env['XDG_RUNTIME_DIR'] ?? `/run/user/${process.getuid?.() ?? 1000}`,
+    }
+
     const readVolAndSend = () => {
-      exec('pactl get-sink-volume @DEFAULT_SINK@', (err, volOut) => {
+      exec('pactl get-sink-volume @DEFAULT_SINK@', { env: audioEnv }, (err, volOut) => {
         if (err || !volOut) return
         const match = volOut.match(/(\d+)%/)
         if (!match) return
         _vol = Math.min(100, parseInt(match[1]))
-        exec('pactl get-sink-mute @DEFAULT_SINK@', (_, muteOut) => {
+        exec('pactl get-sink-mute @DEFAULT_SINK@', { env: audioEnv }, (_, muteOut) => {
           mainWindow?.webContents.send('hud:volume', { level: _vol, muted: muteOut?.includes('yes') ?? false })
         })
       })
@@ -188,22 +195,22 @@ function createWindow(): void {
     }
 
     globalShortcut.register('VolumeUp', () => {
-      exec('pactl set-sink-volume @DEFAULT_SINK@ +5%')
+      exec('pactl set-sink-volume @DEFAULT_SINK@ +5%', { env: audioEnv })
       sendVolOptimistic(5)
     })
     globalShortcut.register('VolumeDown', () => {
-      exec('pactl set-sink-volume @DEFAULT_SINK@ -5%')
+      exec('pactl set-sink-volume @DEFAULT_SINK@ -5%', { env: audioEnv })
       sendVolOptimistic(-5)
     })
     globalShortcut.register('VolumeMute', () => {
-      exec('pactl set-sink-mute @DEFAULT_SINK@ toggle')
+      exec('pactl set-sink-mute @DEFAULT_SINK@ toggle', { env: audioEnv })
       setTimeout(readVolAndSend, 300)
     })
 
     // ── Brightness keys ────────────────────────────────────────────────────
-    // BrightnessUp/Down are not valid Electron accelerator names on Linux.
-    // Brightness is handled by ACPI (configured by cryogram-update) at OS level.
-    // The brightness slider in System Settings works via setBrightness IPC.
+    // XF86MonBrightnessUp/Down are not valid Electron accelerator names on Linux.
+    // Brightness is handled by openbox keybindings calling brightnessctl directly.
+    // The udev rule (90-backlight.rules) sets brightness sysfs nodes to 0666.
 
     // ── Alt+Tab window switcher ────────────────────────────────────────────
     globalShortcut.register('Alt+Tab', () => {

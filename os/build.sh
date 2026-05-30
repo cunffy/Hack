@@ -927,6 +927,10 @@ export DISPLAY="${DISPLAY:-:0}"
 export HOME="${HOME:-/home/cryogram}"
 export XDG_SESSION_TYPE=x11
 export XDG_CURRENT_DESKTOP=Cryogram
+# XDG_RUNTIME_DIR is where PipeWire/PulseAudio create their sockets.
+# LightDM PAM may set it; fall back to the standard path if not.
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+mkdir -p "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR" 2>/dev/null || true
 
 # Paint the screen dark immediately — eliminates white flash before Electron loads
 xsetroot -solid '#070b11' 2>/dev/null || true
@@ -1028,7 +1032,23 @@ cat > /etc/xdg/openbox/cryogram-rc.xml << 'OBCONF'
         </finalactions>
       </action>
     </keybind>
-    <!-- Disable workspace switching to prevent accidental switches -->
+    <!-- Volume keys — handled by openbox so they work even if Electron misses them -->
+    <keybind key="XF86AudioRaiseVolume">
+      <action name="Execute"><execute>pactl set-sink-volume @DEFAULT_SINK@ +5%</execute></action>
+    </keybind>
+    <keybind key="XF86AudioLowerVolume">
+      <action name="Execute"><execute>pactl set-sink-volume @DEFAULT_SINK@ -5%</execute></action>
+    </keybind>
+    <keybind key="XF86AudioMute">
+      <action name="Execute"><execute>pactl set-sink-mute @DEFAULT_SINK@ toggle</execute></action>
+    </keybind>
+    <!-- Brightness keys — Electron cannot register XF86MonBrightness* on Linux -->
+    <keybind key="XF86MonBrightnessUp">
+      <action name="Execute"><execute>brightnessctl set +10%</execute></action>
+    </keybind>
+    <keybind key="XF86MonBrightnessDown">
+      <action name="Execute"><execute>brightnessctl set 10%-</execute></action>
+    </keybind>
   </keyboard>
   <menu>
     <file>/etc/xdg/openbox/cryogram-menu.xml</file>

@@ -533,8 +533,12 @@ function registerEditorHandlers() {
   });
 }
 const execAsync$8 = util.promisify(child_process.exec);
+const audioEnv = {
+  ...process.env,
+  XDG_RUNTIME_DIR: process.env["XDG_RUNTIME_DIR"] ?? `/run/user/${process.getuid?.() ?? 1e3}`
+};
 function sh$6(cmd) {
-  return execAsync$8(cmd).then((r) => r.stdout.trim()).catch(() => "");
+  return execAsync$8(cmd, { env: audioEnv }).then((r) => r.stdout.trim()).catch(() => "");
 }
 function registerSystemHandlers() {
   electron.ipcMain.handle("system:getNetworks", async () => {
@@ -4016,13 +4020,17 @@ function createWindow() {
       mainWindow?.webContents.send("open:spotlight");
     });
     let _vol = -1;
+    const audioEnv2 = {
+      ...process.env,
+      XDG_RUNTIME_DIR: process.env["XDG_RUNTIME_DIR"] ?? `/run/user/${process.getuid?.() ?? 1e3}`
+    };
     const readVolAndSend = () => {
-      child_process.exec("pactl get-sink-volume @DEFAULT_SINK@", (err, volOut) => {
+      child_process.exec("pactl get-sink-volume @DEFAULT_SINK@", { env: audioEnv2 }, (err, volOut) => {
         if (err || !volOut) return;
         const match = volOut.match(/(\d+)%/);
         if (!match) return;
         _vol = Math.min(100, parseInt(match[1]));
-        child_process.exec("pactl get-sink-mute @DEFAULT_SINK@", (_, muteOut) => {
+        child_process.exec("pactl get-sink-mute @DEFAULT_SINK@", { env: audioEnv2 }, (_, muteOut) => {
           mainWindow?.webContents.send("hud:volume", { level: _vol, muted: muteOut?.includes("yes") ?? false });
         });
       });
@@ -4035,15 +4043,15 @@ function createWindow() {
       setTimeout(readVolAndSend, 300);
     };
     electron.globalShortcut.register("VolumeUp", () => {
-      child_process.exec("pactl set-sink-volume @DEFAULT_SINK@ +5%");
+      child_process.exec("pactl set-sink-volume @DEFAULT_SINK@ +5%", { env: audioEnv2 });
       sendVolOptimistic(5);
     });
     electron.globalShortcut.register("VolumeDown", () => {
-      child_process.exec("pactl set-sink-volume @DEFAULT_SINK@ -5%");
+      child_process.exec("pactl set-sink-volume @DEFAULT_SINK@ -5%", { env: audioEnv2 });
       sendVolOptimistic(-5);
     });
     electron.globalShortcut.register("VolumeMute", () => {
-      child_process.exec("pactl set-sink-mute @DEFAULT_SINK@ toggle");
+      child_process.exec("pactl set-sink-mute @DEFAULT_SINK@ toggle", { env: audioEnv2 });
       setTimeout(readVolAndSend, 300);
     });
     electron.globalShortcut.register("Alt+Tab", () => {
