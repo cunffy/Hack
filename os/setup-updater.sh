@@ -7,6 +7,12 @@
 #     bash "$D/os/setup-updater.sh"'
 set -euo pipefail
 
+# Ensure SSL certificates are present — minimal Debian installs sometimes lack them
+if [ ! -f /etc/ssl/certs/ca-certificates.crt ] || [ ! -s /etc/ssl/certs/ca-certificates.crt ]; then
+  echo "  [pre] Installing ca-certificates (required for HTTPS git clone)..."
+  apt-get update -qq && apt-get install -y -qq ca-certificates && update-ca-certificates --fresh
+fi
+
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="/opt/cryogram"
 BRANCH="claude/custom-security-os-URNk5"
@@ -65,6 +71,10 @@ STAGING=\$(mktemp -d)
 trap 'rm -rf "\$STAGING"' EXIT
 
 echo "── Cryogram OS Updater ──────────────────────────"
+# Ensure SSL certs are present before any HTTPS git operation
+if [ ! -f /etc/ssl/certs/ca-certificates.crt ] || [ ! -s /etc/ssl/certs/ca-certificates.crt ]; then
+  apt-get update -qq && apt-get install -y -qq ca-certificates && update-ca-certificates --fresh
+fi
 if [ ! -d "\$SRC/.git" ]; then
   echo "── First run: cloning source repository..."
   git clone --depth=1 --branch "\$BRANCH" "$REPO_URL" "\$SRC"
