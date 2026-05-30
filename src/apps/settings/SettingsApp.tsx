@@ -977,6 +977,7 @@ function UpdatePanel() {
 function UpdateSection() {
   const [checking, setChecking]   = useState(false)
   const [status, setStatus]       = useState<'idle' | 'uptodate' | 'available' | 'error'>('idle')
+  const [errorCode, setErrorCode] = useState('')
   const [commitCount, setCount]   = useState(0)
   const [changes, setChanges]     = useState<string[]>([])
   const [errorMsg, setErrorMsg]   = useState('')
@@ -985,6 +986,7 @@ function UpdateSection() {
     setChecking(true)
     setStatus('idle')
     setErrorMsg('')
+    setErrorCode('')
     try {
       const result = await (window as any).__cryogram_checkUpdate?.()
       if (result?.hasUpdate) {
@@ -993,6 +995,7 @@ function UpdateSection() {
         setChanges(result.changes ?? [])
       } else if (result?.error) {
         setStatus('error')
+        setErrorCode(result.error)
         setErrorMsg(result.message ?? result.error)
       } else {
         setStatus('uptodate')
@@ -1007,6 +1010,8 @@ function UpdateSection() {
   const startUpdate = () => {
     ;(window as any).__cryogram_startUpdate?.()
   }
+
+  const isSSLError = errorCode === 'ssl-error'
 
   return (
     <section className="panel p-4 space-y-3">
@@ -1024,12 +1029,41 @@ function UpdateSection() {
         {status === 'uptodate' && (
           <span style={{ fontSize: 12, color: '#4ade80' }}>✓ Cryogram OS is up to date</span>
         )}
-        {status === 'error' && (
+        {status === 'error' && !isSSLError && (
           <div style={{ fontSize: 11, color: '#f87171', maxWidth: 360, lineHeight: 1.5 }}>
             {errorMsg || 'Could not reach update server'}
           </div>
         )}
       </div>
+
+      {/* SSL error — update script installs certs, so offer to run it directly */}
+      {status === 'error' && isSSLError && (
+        <div style={{
+          background: 'rgba(251,146,60,0.08)',
+          border: '1px solid rgba(251,146,60,0.25)',
+          borderRadius: 10,
+          padding: '12px 14px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+        }}>
+          <div style={{ fontSize: 12, color: '#fb923c', fontWeight: 600 }}>
+            ⚠ SSL certificates not installed
+          </div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6 }}>
+            The update check requires SSL certificates which are missing on this system.
+            Click <strong style={{ color: '#fb923c' }}>Update Now</strong> — the update script
+            installs them automatically before downloading updates.
+          </div>
+          <button
+            className="btn"
+            onClick={startUpdate}
+            style={{ alignSelf: 'flex-start', background: 'rgba(251,146,60,0.15)', borderColor: 'rgba(251,146,60,0.4)', color: '#fb923c' }}
+          >
+            Update Now (auto-fixes SSL)
+          </button>
+        </div>
+      )}
 
       {status === 'available' && (
         <div style={{

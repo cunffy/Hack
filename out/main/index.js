@@ -1177,10 +1177,12 @@ function registerUpdaterHandlers() {
       if (remoteSha === localSha) return { hasUpdate: false };
       return { hasUpdate: true, commitCount: 1, changes: ["New updates are available — click Update Now to install."] };
     } catch (e) {
+      const msg = e.message ?? "";
+      const isSSL = msg.includes("certificate") || msg.includes("CAfile") || msg.includes("SSL") || msg.includes("ssl");
       return {
         hasUpdate: false,
-        error: "fetch-failed",
-        message: `Could not reach update server: ${e.message}`
+        error: isSSL ? "ssl-error" : "fetch-failed",
+        message: isSSL ? 'SSL certificates are not installed on this system. Click "Update Now" — the update script installs them automatically and then applies all pending updates.' : `Could not reach update server: ${msg}`
       };
     }
   });
