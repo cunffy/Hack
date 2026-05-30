@@ -107,6 +107,7 @@ interface SwitcherEntry {
   appId?: AppId
   // x11 window
   x11Title?: string
+  x11Id?: string
   // display
   icon: string
   color: string
@@ -127,6 +128,9 @@ export function AppSwitcherOverlay() {
 
   // Auto-hide timer ref
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Keep a ref to current selection so timer callbacks don't capture stale state
+  const selIdxRef = useRef(0)
+  useEffect(() => { selIdxRef.current = selIdx }, [selIdx])
 
   // ── Fetch X11 windows ────────────────────────────────────────────────────
 
@@ -174,6 +178,7 @@ export function AppSwitcherOverlay() {
       key:      `x11-${x.id}`,
       type:     'x11',
       x11Title: x.title,
+      x11Id:    x.id,
       icon:     meta.icon,
       color:    meta.color,
       label:    meta.name,
@@ -187,8 +192,11 @@ export function AppSwitcherOverlay() {
 
   const resetHideTimer = useCallback(() => {
     if (hideTimer.current) clearTimeout(hideTimer.current)
-    hideTimer.current = setTimeout(() => setVisible(false), 1000)
-  }, [])
+    hideTimer.current = setTimeout(() => {
+      activateEntry(shown[selIdxRef.current])
+      setVisible(false)
+    }, 1200)
+  }, [shown])
 
   const showSwitcher = useCallback((direction: 'next' | 'prev') => {
     setVisible(true)
@@ -253,9 +261,26 @@ export function AppSwitcherOverlay() {
     if (entry.type === 'app' && entry.windowId) {
       restoreWindow(entry.windowId)
       focusWindow(entry.windowId)
+    } else if (entry.type === 'x11' && entry.x11Id) {
+      // Focus the X11 window via IPC — this runs wmctrl + xdotool windowlower
+      // in the main process so Electron drops below the target window
+      ;(window.cryogram as any)?.wm?.focusWindow?.(entry.x11Id)
     }
-    // X11 windows: no JS focus possible from renderer; no-op
   }
+
+  // ── Commit selection when Alt key is released ────────────────────────────
+
+  useEffect(() => {
+    if (!visible) return
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') {
+        activateEntry(shown[selIdxRef.current])
+        setVisible(false)
+      }
+    }
+    window.addEventListener('keyup', onKeyUp)
+    return () => window.removeEventListener('keyup', onKeyUp)
+  }, [visible, shown])
 
   // ── Cleanup timer on unmount ─────────────────────────────────────────────
 

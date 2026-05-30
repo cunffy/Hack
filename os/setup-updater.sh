@@ -30,6 +30,14 @@ echo "  Cryogram OS — System Update & Setup"
 echo "  ──────────────────────────────────────"
 echo ""
 
+# ── Ensure required X11 tools are installed ───────────────────────────────────
+for pkg in xdotool wmctrl rsync; do
+  if ! command -v "$pkg" &>/dev/null; then
+    echo "  [pre] Installing missing tool: $pkg ..."
+    apt-get install -y -qq "$pkg" 2>/dev/null || true
+  fi
+done
+
 # ── Sanity checks ─────────────────────────────────────────────────────────────
 if [ ! -d "$DEST/out" ]; then
   echo "  ERROR: $DEST/out not found — is Cryogram OS installed at $DEST?"
@@ -124,6 +132,20 @@ echo "cryogram ALL=(ALL) NOPASSWD: /usr/local/bin/cryogram-update" \
   > /etc/sudoers.d/cryogram-update
 chmod 440 /etc/sudoers.d/cryogram-update
 echo "        Done."
+
+# ── Patch openbox config (Alt+Tab keybindings + single workspace) ─────────────
+OB_CONF="/etc/xdg/openbox/cryogram-rc.xml"
+if [ -f "$OB_CONF" ]; then
+  # Only patch if Alt+Tab binding is missing
+  if ! grep -q 'A-Tab' "$OB_CONF"; then
+    echo "  [+] Patching openbox config with Alt+Tab keybindings..."
+    sed -i 's|</keyboard>|  <keybind key="A-Tab"><action name="NextWindow"><dialog>icons</dialog><bar>no</bar><raise>yes</raise><allDesktops>no</allDesktops><panels>no</panels><desktop>no</desktop></action></keybind>\n    <keybind key="A-S-Tab"><action name="PreviousWindow"><dialog>icons</dialog><bar>no</bar><raise>yes</raise><allDesktops>no</allDesktops><panels>no</panels><desktop>no</desktop></action></keybind>\n  </keyboard>|' "$OB_CONF"
+  fi
+  # Ensure single desktop (no accidental workspace 2)
+  if ! grep -q '<number>1</number>' "$OB_CONF"; then
+    sed -i 's|<desktops>.*</desktops>|<desktops><number>1</number></desktops>|' "$OB_CONF"
+  fi
+fi
 
 # ── Restart the app ───────────────────────────────────────────────────────────
 # The session loop in /usr/local/bin/cryogram-session restarts Electron
