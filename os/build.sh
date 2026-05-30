@@ -933,7 +933,26 @@ cat > /etc/xdg/openbox/cryogram-rc.xml << 'OBCONF'
     <titleLayout></titleLayout>
   </theme>
   <keyboard>
-    <!-- No keybindings — Cryogram registers global shortcuts via Electron -->
+    <!-- Alt+Tab: cycle through windows on current workspace -->
+    <keybind key="A-Tab">
+      <action name="NextWindow">
+        <finalactions>
+          <action name="Focus"/>
+          <action name="Raise"/>
+          <action name="Unshade"/>
+        </finalactions>
+      </action>
+    </keybind>
+    <keybind key="A-S-Tab">
+      <action name="PreviousWindow">
+        <finalactions>
+          <action name="Focus"/>
+          <action name="Raise"/>
+          <action name="Unshade"/>
+        </finalactions>
+      </action>
+    </keybind>
+    <!-- Disable workspace switching to prevent accidental switches -->
   </keyboard>
   <mouse>
     <context name="Root">
