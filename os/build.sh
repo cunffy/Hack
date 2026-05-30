@@ -284,6 +284,7 @@ cat > "$PKG_LISTS/base.list.chroot" << 'PKGEOF'
 # Base system — core utilities
 apt-transport-https
 ca-certificates
+chrony
 curl
 wget
 gnupg
@@ -557,6 +558,18 @@ chmod +x /usr/local/bin/cryogram-update
 echo "cryogram ALL=(ALL) NOPASSWD: /usr/local/bin/cryogram-update" \
   > /etc/sudoers.d/cryogram-update
 chmod 440 /etc/sudoers.d/cryogram-update
+
+# ── NTP time sync via chrony ──────────────────────────────────────────────────
+systemctl enable chrony 2>/dev/null || true
+
+# NetworkManager dispatcher: sync clock the moment any interface comes up
+mkdir -p /etc/NetworkManager/dispatcher.d
+cat > /etc/NetworkManager/dispatcher.d/10-cryogram-timesync << 'NMD'
+#!/bin/bash
+[ "$2" = "up" ] || exit 0
+chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true
+NMD
+chmod +x /etc/NetworkManager/dispatcher.d/10-cryogram-timesync
 
 echo "[cryogram] Setup complete at $INSTALL_DIR ($(du -sh $INSTALL_DIR | cut -f1))"
 exit 0

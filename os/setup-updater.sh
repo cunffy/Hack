@@ -7,10 +7,32 @@
 #     bash "$D/os/setup-updater.sh"'
 set -euo pipefail
 
-# Ensure SSL certificates are present — minimal Debian installs sometimes lack them
+# ── Pre-flight: time sync + SSL certs ────────────────────────────────────────
+# Fix clock first — SSL cert verification fails if the clock is wrong.
+# Install chrony (NTP daemon) so time stays correct automatically from now on.
+if ! command -v chronyc &>/dev/null; then
+  echo "  [pre] Installing chrony (NTP time sync)..."
+  apt-get update -qq && apt-get install -y -qq chrony
+fi
+systemctl enable chrony 2>/dev/null || true
+systemctl start  chrony 2>/dev/null || true
+# Force immediate step sync (don't wait for gradual slew)
+chronyc makestep 2>/dev/null || true
+
+# NetworkManager dispatcher: sync time the moment any network comes up
+mkdir -p /etc/NetworkManager/dispatcher.d
+cat > /etc/NetworkManager/dispatcher.d/10-cryogram-timesync << 'NMD'
+#!/bin/bash
+# Sync system clock whenever a network interface comes up
+[ "$2" = "up" ] || exit 0
+chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true
+NMD
+chmod +x /etc/NetworkManager/dispatcher.d/10-cryogram-timesync
+
+# Ensure SSL certificates are present
 if [ ! -f /etc/ssl/certs/ca-certificates.crt ] || [ ! -s /etc/ssl/certs/ca-certificates.crt ]; then
-  echo "  [pre] Installing ca-certificates (required for HTTPS git clone)..."
-  apt-get update -qq && apt-get install -y -qq ca-certificates && update-ca-certificates --fresh
+  echo "  [pre] Installing ca-certificates..."
+  apt-get install -y -qq ca-certificates && update-ca-certificates --fresh
 fi
 
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
