@@ -49,12 +49,24 @@ function registerTerminalHandlers() {
     });
     sessions$1.set(id, proc2);
     const win = electron.BrowserWindow.fromWebContents(event.sender);
-    proc2.onData((data) => {
-      win?.webContents.send(`terminal:data:${id}`, data);
-    });
+    const safeSend = (channel, ...args) => {
+      try {
+        if (win && !win.isDestroyed() && !win.webContents.isDestroyed())
+          win.webContents.send(channel, ...args);
+      } catch {
+      }
+    };
+    proc2.onData((data) => safeSend(`terminal:data:${id}`, data));
     proc2.onExit(() => {
       sessions$1.delete(id);
-      win?.webContents.send(`terminal:data:${id}`, "\r\n[Process exited]\r\n");
+      safeSend(`terminal:data:${id}`, "\r\n[Process exited]\r\n");
+    });
+    win?.once("closed", () => {
+      try {
+        proc2.kill();
+      } catch {
+      }
+      sessions$1.delete(id);
     });
     return { pid: proc2.pid };
   });
