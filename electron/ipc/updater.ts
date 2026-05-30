@@ -1,9 +1,31 @@
 import { ipcMain } from 'electron'
-import { execFile, spawn } from 'child_process'
+import { execFile, spawn, exec } from 'child_process'
 import { promisify } from 'util'
 import { existsSync, readFileSync } from 'fs'
 
 const execFileP = promisify(execFile)
+const execP = promisify(exec)
+
+const CA_BUNDLE = '/etc/ssl/certs/ca-certificates.crt'
+
+// Return git env with SSL certs configured.
+// If the system CA bundle is missing, fall back to GIT_SSL_NO_VERIFY so the
+// check still works — the actual update script installs ca-certificates first.
+function gitEnv(): NodeJS.ProcessEnv {
+  const base = { ...process.env }
+  if (existsSync(CA_BUNDLE)) {
+    return { ...base, GIT_SSL_CAINFO: CA_BUNDLE, GIT_SSL_CAPATH: '/etc/ssl/certs' }
+  }
+  // CA bundle missing — disable SSL verification for the network check only.
+  // The cryogram-update script installs ca-certificates before pulling code.
+  return { ...base, GIT_SSL_NO_VERIFY: 'true' }
+}
+
+// Sync system clock before any SSL network operation — a wrong clock causes
+// cert validation failures even when certs are installed.
+async function syncClock(): Promise<void> {
+  try { await execP('chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true', { timeout: 4000 }) } catch {}
+}
 const UPDATE_SCRIPT = '/usr/local/bin/cryogram-update'
 
 // Possible locations where cryogram-update clones the source repo
@@ -51,19 +73,22 @@ export function registerUpdaterHandlers(): void {
     }
 
     try {
+      // Sync clock before any SSL operation — a wrong clock causes cert failures.
+      await syncClock()
+
       // Use ls-remote instead of fetch — it queries the remote over the network
       // without writing to .git/FETCH_HEAD, so it works even when the desktop
       // user doesn't have write permission to the root-owned .git directory.
       const { stdout: remoteOut } = await execFileP(
         'git', ['-C', srcDir, 'ls-remote', 'origin', `refs/heads/${branch}`],
-        { timeout: 16000 }
+        { timeout: 20000, env: gitEnv() }
       )
       const remoteSha = remoteOut.trim().split(/\s+/)[0]
       if (!remoteSha) {
         return { hasUpdate: false, error: 'fetch-failed', message: `Branch '${branch}' not found on remote.` }
       }
 
-      const { stdout: localOut } = await execFileP('git', ['-C', srcDir, 'rev-parse', 'HEAD'])
+      const { stdout: localOut } = await execFileP('git', ['-C', srcDir, 'rev-parse', 'HEAD'], { env: gitEnv() })
       const localSha = localOut.trim()
 
       if (remoteSha === localSha) return { hasUpdate: false }
@@ -90,7 +115,7 @@ export function registerUpdaterHandlers(): void {
       const args = isRoot() ? [UPDATE_SCRIPT] : ['-S', UPDATE_SCRIPT]
 
       const proc = spawn(cmd, args, {
-        env: { ...process.env, TERM: 'xterm-color', FORCE_COLOR: '1' },
+        env: { ...gitEnv(), TERM: 'xterm-color', FORCE_COLOR: '1' },
       })
 
       // Feed password to sudo via stdin

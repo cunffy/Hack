@@ -1102,6 +1102,21 @@ function registerPhoneHandlers() {
   });
 }
 const execFileP = util.promisify(child_process.execFile);
+const execP = util.promisify(child_process.exec);
+const CA_BUNDLE = "/etc/ssl/certs/ca-certificates.crt";
+function gitEnv() {
+  const base = { ...process.env };
+  if (fs$1.existsSync(CA_BUNDLE)) {
+    return { ...base, GIT_SSL_CAINFO: CA_BUNDLE, GIT_SSL_CAPATH: "/etc/ssl/certs" };
+  }
+  return { ...base, GIT_SSL_NO_VERIFY: "true" };
+}
+async function syncClock() {
+  try {
+    await execP("chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true", { timeout: 4e3 });
+  } catch {
+  }
+}
 const UPDATE_SCRIPT = "/usr/local/bin/cryogram-update";
 const SRC_CANDIDATES = ["/opt/cryogram-src", "/opt/cryogram"];
 function findSrcDir() {
@@ -1143,16 +1158,17 @@ function registerUpdaterHandlers() {
       });
     }
     try {
+      await syncClock();
       const { stdout: remoteOut } = await execFileP(
         "git",
         ["-C", srcDir, "ls-remote", "origin", `refs/heads/${branch}`],
-        { timeout: 16e3 }
+        { timeout: 2e4, env: gitEnv() }
       );
       const remoteSha = remoteOut.trim().split(/\s+/)[0];
       if (!remoteSha) {
         return { hasUpdate: false, error: "fetch-failed", message: `Branch '${branch}' not found on remote.` };
       }
-      const { stdout: localOut } = await execFileP("git", ["-C", srcDir, "rev-parse", "HEAD"]);
+      const { stdout: localOut } = await execFileP("git", ["-C", srcDir, "rev-parse", "HEAD"], { env: gitEnv() });
       const localSha = localOut.trim();
       if (remoteSha === localSha) return { hasUpdate: false };
       return { hasUpdate: true, commitCount: 1, changes: ["New updates are available — click Update Now to install."] };
@@ -1172,7 +1188,7 @@ function registerUpdaterHandlers() {
       const cmd = isRoot() ? "bash" : "sudo";
       const args = isRoot() ? [UPDATE_SCRIPT] : ["-S", UPDATE_SCRIPT];
       const proc2 = child_process.spawn(cmd, args, {
-        env: { ...process.env, TERM: "xterm-color", FORCE_COLOR: "1" }
+        env: { ...gitEnv(), TERM: "xterm-color", FORCE_COLOR: "1" }
       });
       if (!isRoot() && password) {
         proc2.stdin?.write(password + "\n");
