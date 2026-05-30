@@ -3990,6 +3990,8 @@ function createWindow() {
     electron.globalShortcut.register("Super+L", () => lockScreen());
     electron.globalShortcut.register("CommandOrControl+Alt+T", () => {
       if (screenLocked) return;
+      mainWindow?.moveTop();
+      mainWindow?.focus();
       mainWindow?.webContents.send("open:app", "terminal");
     });
     electron.globalShortcut.register("CommandOrControl+Space", () => {

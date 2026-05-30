@@ -133,9 +133,33 @@ echo "cryogram ALL=(ALL) NOPASSWD: /usr/local/bin/cryogram-update" \
 chmod 440 /etc/sudoers.d/cryogram-update
 echo "        Done."
 
+# ── Emergency right-click desktop menu ───────────────────────────────────────
+cat > /etc/xdg/openbox/cryogram-menu.xml << 'OBMENU'
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu>
+  <menu id="root-menu" label="Cryogram OS">
+    <item label="Open Terminal">
+      <action name="Execute"><execute>xterm -bg '#0a0e14' -fg '#c9d1d9' -fa 'JetBrains Mono' -fs 11</execute></action>
+    </item>
+    <item label="Raise Desktop">
+      <action name="Execute"><execute>bash -c "xdotool search --class 'cryogram' | head -1 | xargs -r xdotool windowraise"</execute></action>
+    </item>
+    <separator/>
+    <item label="Restart Cryogram">
+      <action name="Execute"><execute>bash -c "pkill -f 'electron.*out/main'"</execute></action>
+    </item>
+  </menu>
+</openbox_menu>
+OBMENU
+
 # ── Patch openbox config (Alt+Tab keybindings + single workspace) ─────────────
 OB_CONF="/etc/xdg/openbox/cryogram-rc.xml"
 if [ -f "$OB_CONF" ]; then
+  # Enable right-click menu if not already wired up
+  if ! grep -q 'cryogram-menu' "$OB_CONF"; then
+    sed -i 's|<mouse>|<menu><file>/etc/xdg/openbox/cryogram-menu.xml</file></menu>\n  <mouse>|' "$OB_CONF"
+    sed -i 's|<context name="Root">.*</context>|<context name="Root"><mousebind button="Right" action="Press"><action name="ShowMenu"><menu>root-menu</menu></action></mousebind></context>|' "$OB_CONF"
+  fi
   # Only patch if Alt+Tab binding is missing
   if ! grep -q 'A-Tab' "$OB_CONF"; then
     echo "  [+] Patching openbox config with Alt+Tab keybindings..."

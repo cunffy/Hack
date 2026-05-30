@@ -133,6 +133,9 @@ function createWindow(): void {
     globalShortcut.register('Super+L', () => lockScreen())
     globalShortcut.register('CommandOrControl+Alt+T', () => {
       if (screenLocked) return
+      // Raise Electron first so the terminal is visible even if desktop was behind Brave
+      mainWindow?.moveTop()
+      mainWindow?.focus()
       mainWindow?.webContents.send('open:app', 'terminal')
     })
     globalShortcut.register('CommandOrControl+Space', () => {

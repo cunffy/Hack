@@ -880,6 +880,25 @@ cat > "$HOOKS_DIR/0545-cryogram-os-session.hook.chroot" << 'HOOKEOF'
 set -e
 echo "[session] Configuring Cryogram OS dedicated session..."
 
+# Emergency right-click menu — gives a terminal even if the Electron desktop is hidden
+cat > /etc/xdg/openbox/cryogram-menu.xml << 'OBMENU'
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu>
+  <menu id="root-menu" label="Cryogram OS">
+    <item label="Open Terminal">
+      <action name="Execute"><execute>xterm -bg '#0a0e14' -fg '#c9d1d9' -fa 'JetBrains Mono' -fs 11</execute></action>
+    </item>
+    <item label="Raise Desktop">
+      <action name="Execute"><execute>bash -c "xdotool search --class 'cryogram' | head -1 | xargs -r xdotool windowraise"</execute></action>
+    </item>
+    <separator/>
+    <item label="Restart Cryogram">
+      <action name="Execute"><execute>bash -c "pkill -f 'electron.*out/main'"</execute></action>
+    </item>
+  </menu>
+</openbox_menu>
+OBMENU
+
 # ── 1. Session launcher script ────────────────────────────────────────────
 # This script IS the desktop session. LightDM runs it after autologin.
 # Cryogram is the only application; openbox is an invisible WM backend.
@@ -993,11 +1012,19 @@ cat > /etc/xdg/openbox/cryogram-rc.xml << 'OBCONF'
     </keybind>
     <!-- Disable workspace switching to prevent accidental switches -->
   </keyboard>
+  <menu>
+    <file>/etc/xdg/openbox/cryogram-menu.xml</file>
+  </menu>
   <mouse>
     <context name="Root">
-      <!-- No right-click menu on root window — Cryogram is fullscreen anyway -->
+      <mousebind button="Right" action="Press">
+        <action name="ShowMenu"><menu>root-menu</menu></action>
+      </mousebind>
     </context>
     <context name="Desktop">
+      <mousebind button="Right" action="Press">
+        <action name="ShowMenu"><menu>root-menu</menu></action>
+      </mousebind>
     </context>
   </mouse>
   <applications>
