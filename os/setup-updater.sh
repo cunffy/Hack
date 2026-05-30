@@ -198,6 +198,50 @@ if [ -f "$OB_CONF" ]; then
   fi
 fi
 
+# ── Rewrite session script (openbox before picom, xrender compositor) ────────
+cat > /usr/local/bin/cryogram-session << 'SESSION'
+#!/bin/bash
+export DISPLAY="${DISPLAY:-:0}"
+export HOME="${HOME:-/home/cryogram}"
+export XDG_SESSION_TYPE=x11
+export XDG_CURRENT_DESKTOP=Cryogram
+
+# Paint the screen dark immediately — eliminates white flash before Electron loads
+xsetroot -solid '#070b11' 2>/dev/null || true
+
+# Disable X11 screensaver and power management
+xset s off 2>/dev/null || true
+xset s noblank 2>/dev/null || true
+xset -dpms 2>/dev/null || true
+
+# Openbox WM first — must be running before picom attaches
+openbox --config-file /etc/xdg/openbox/cryogram-rc.xml &
+WM_PID=$!
+sleep 0.3
+
+# Compositor for Electron transparency — xrender is faster to start than glx
+picom --backend xrender --vsync --no-fading-openclose --daemon 2>/dev/null || true
+
+# Hide cursor when idle
+unclutter -root -idle 5 2>/dev/null &
+
+# On live boot: launch installer after desktop loads
+if grep -q "boot=live" /proc/cmdline 2>/dev/null; then
+  (sleep 5 && sudo /usr/bin/calamares) &
+fi
+
+# Launch Cryogram — auto-restart on crash, exit 0 = clean shutdown
+while true; do
+  /usr/local/bin/cryogram
+  STATUS=$?
+  [ $STATUS -eq 0 ] && break
+  sleep 1
+done
+
+kill $WM_PID 2>/dev/null || true
+SESSION
+chmod +x /usr/local/bin/cryogram-session
+
 # ── Ensure persistent data directory is owned by cryogram ────────────────────
 # Electron stores settings (theme, PIN, API keys) in /opt/cryogram-data.
 # If the dir is missing or root-owned the cryogram user can't write there and

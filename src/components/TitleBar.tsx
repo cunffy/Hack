@@ -370,7 +370,7 @@ function StatusIcons() {
       try { setVol(await window.cryogram.system.getVolume()) } catch {}
     }
     load()
-    const t = setInterval(load, 5000)
+    const t = setInterval(load, 12000)
     return () => clearInterval(t)
   }, [])
 

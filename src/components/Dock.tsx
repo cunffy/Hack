@@ -111,7 +111,7 @@ export function Dock() {
         ))
       } catch {}
     }
-    poll(); const id = setInterval(poll, 2000); return () => clearInterval(id)
+    poll(); const id = setInterval(poll, 3000); return () => clearInterval(id)
   }, [])
 
   const onMouseMove = useCallback((e: React.MouseEvent) => {
@@ -300,10 +300,8 @@ export function Dock() {
                       <motion.button
                         onClick={async () => {
                           try {
-                            // Hide the shell so the external window becomes visible
-                            await (window.cryogram as any).wm?.hideShell()
-                            // Small delay lets the shell minimize before wmctrl raises the target
-                            await new Promise(r => setTimeout(r, 120))
+                            // Electron is pinned to the desktop layer (below all X11 windows),
+                            // so just raising the target window is sufficient.
                             await (window.cryogram as any).wm?.focusWindow(xwin.id)
                           } catch {}
                         }}

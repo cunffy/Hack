@@ -5,6 +5,16 @@ import { existsSync, mkdirSync } from 'fs'
 
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
+// ── Performance flags (set before app.ready) ──────────────────────────────────
+// Disable spare renderer pre-spawn — saves ~40 MB RAM on a single-window app.
+app.commandLine.appendSwitch('disable-features', 'SpareRendererForSitePerProcess,TranslateUI,AutofillServerCommunication,HardwareMediaKeyHandling,MediaSessionService')
+// Enable GPU raster and zero-copy for faster 2D rendering.
+app.commandLine.appendSwitch('enable-gpu-rasterization')
+app.commandLine.appendSwitch('enable-zero-copy')
+// Disable background throttling — Electron is the desktop shell, always needs full speed.
+app.commandLine.appendSwitch('disable-background-timer-throttling')
+app.commandLine.appendSwitch('disable-renderer-backgrounding')
+
 // On the live OS, store userData at a fixed path inside /opt/ which is
 // guaranteed persistent (the app itself lives there). The default path
 // (/root/.config/...) is often on a tmpfs or un-persisted overlay layer.
@@ -293,7 +303,10 @@ app.whenReady().then(() => {
   createWindow()
   startNotificationBridge()
 
-  powerMonitor.on('resume',      () => lockScreen())
+  // Lock immediately when the lid closes (suspend) so the lock screen is
+  // already visible when the display turns back on — no desktop flash on wake.
+  powerMonitor.on('suspend',     () => lockScreen())
+  powerMonitor.on('resume',      () => lockScreen())  // belt-and-suspenders fallback
   powerMonitor.on('lock-screen', () => lockScreen())
 
   app.on('activate', () => {

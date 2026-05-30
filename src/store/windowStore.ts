@@ -98,7 +98,10 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     if (appId === 'brave') {
       try {
         const api = (window as any).cryogram
-        api?.launcher?.launch({ exec: 'brave-browser', name: 'Brave', icon: '', comment: '', categories: ['Network'], category: 'Other', desktopFile: '/usr/share/applications/brave-browser.desktop', terminal: false })
+        // Empty desktopFile forces exec fallback (gio launch skips our custom flags).
+        // --password-store=basic: skip gnome-keyring prompt on every launch.
+        // --start-maximized: open fullscreen like a proper OS browser.
+        api?.launcher?.launch({ exec: 'brave-browser --password-store=basic --start-maximized', name: 'Brave', icon: '', comment: '', categories: ['Network'], category: 'Other', desktopFile: '', terminal: false })
       } catch {}
       return
     }

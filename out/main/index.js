@@ -3906,6 +3906,11 @@ function registerRemoteDesktopHandlers() {
     });
   });
 }
+electron.app.commandLine.appendSwitch("disable-features", "SpareRendererForSitePerProcess,TranslateUI,AutofillServerCommunication,HardwareMediaKeyHandling,MediaSessionService");
+electron.app.commandLine.appendSwitch("enable-gpu-rasterization");
+electron.app.commandLine.appendSwitch("enable-zero-copy");
+electron.app.commandLine.appendSwitch("disable-background-timer-throttling");
+electron.app.commandLine.appendSwitch("disable-renderer-backgrounding");
 if (!utils.is.dev) {
   try {
     const PERSISTENT_USERDATA = "/opt/cryogram-data";
@@ -4108,6 +4113,7 @@ electron.app.whenReady().then(() => {
   registerRemoteDesktopHandlers();
   createWindow();
   startNotificationBridge();
+  electron.powerMonitor.on("suspend", () => lockScreen());
   electron.powerMonitor.on("resume", () => lockScreen());
   electron.powerMonitor.on("lock-screen", () => lockScreen());
   electron.app.on("activate", () => {

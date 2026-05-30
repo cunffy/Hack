@@ -183,7 +183,7 @@ export function WorkspaceSwitcher() {
     }
 
     loadWindows()
-    const t = setInterval(loadWindows, 2000)
+    const t = setInterval(loadWindows, 4000)
     return () => clearInterval(t)
   }, [])
 
@@ -203,7 +203,7 @@ export function WorkspaceSwitcher() {
     }
 
     loadCurrent()
-    const t = setInterval(loadCurrent, 1000)
+    const t = setInterval(loadCurrent, 2000)
     return () => clearInterval(t)
   }, [current])
 

@@ -937,15 +937,14 @@ xset s off 2>/dev/null || true
 xset s noblank 2>/dev/null || true
 xset -dpms 2>/dev/null || true
 
-# Lightweight GPU compositor — Electron uses GPU compositing and needs a compositor
-# for proper transparency/shadows. Fall back to software renderer if GPU fails.
-picom --backend glx --vsync --no-fading-openclose --daemon 2>/dev/null || \
-  picom --backend xrender --daemon 2>/dev/null || true
-
-# Openbox as invisible WM backend — provides the EWMH/ICCCM window management
-# that Electron expects. All user-facing features are disabled via config.
+# Openbox WM first — it must be running before picom attaches.
 openbox --config-file /etc/xdg/openbox/cryogram-rc.xml &
 WM_PID=$!
+sleep 0.3
+
+# Compositor — needed for Electron glassmorphism transparency.
+# Start with xrender (instant) instead of probing glx first (saves ~1s).
+picom --backend xrender --vsync --no-fading-openclose --daemon 2>/dev/null || true
 
 # Hide cursor when idle — security OS aesthetic
 unclutter -root -idle 5 2>/dev/null &
