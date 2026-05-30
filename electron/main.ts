@@ -107,10 +107,16 @@ function createWindow(): void {
     globalShortcut.register('Super+D', () => {
       if (screenLocked) return
       if (mainWindow?.isMinimized() || !mainWindow?.isVisible()) {
+        // Bring back from minimized / hidden
         mainWindow?.show()
         mainWindow?.maximize()
         mainWindow?.focus()
+      } else if (!mainWindow?.isFocused()) {
+        // Window is open but behind Brave / another X11 app — raise it
+        mainWindow?.moveTop()
+        mainWindow?.focus()
       } else {
+        // Already in front — minimize (toggle)
         mainWindow?.minimize()
       }
     })

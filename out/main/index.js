@@ -904,35 +904,28 @@ function registerLauncherHandlers() {
   });
   electron.ipcMain.handle("launcher:launch", async (_, app) => {
     try {
-      const desktopId = app.desktopFile.split("/").pop()?.replace(/\.desktop$/, "") ?? "";
+      const env = { ...process.env, DISPLAY: process.env["DISPLAY"] || ":0" };
       let proc2 = null;
-      if (desktopId) {
-        proc2 = child_process.spawn("gtk-launch", [desktopId], {
-          detached: true,
-          stdio: "ignore",
-          env: { ...process.env, DISPLAY: process.env["DISPLAY"] || ":0" }
-        });
-      } else if (app.terminal) {
+      if (app.terminal) {
         const terms = ["x-terminal-emulator", "xfce4-terminal", "gnome-terminal", "konsole", "xterm"];
-        const term = terms[0];
-        proc2 = child_process.spawn(term, ["-e", app.exec], {
-          detached: true,
-          stdio: "ignore",
-          env: { ...process.env, DISPLAY: process.env["DISPLAY"] || ":0" }
-        });
+        proc2 = child_process.spawn(terms[0], ["-e", app.exec], { detached: true, stdio: "ignore", env });
       } else {
-        const parts = app.exec.split(" ");
-        proc2 = child_process.spawn(parts[0], parts.slice(1), {
-          detached: true,
-          stdio: "ignore",
-          env: { ...process.env, DISPLAY: process.env["DISPLAY"] || ":0" }
-        });
+        const safeDesktop = app.desktopFile.replace(/'/g, "'\\''");
+        const safeExec = app.exec.replace(/'/g, "'\\''");
+        const cmd = `gio launch '${safeDesktop}' 2>/dev/null || exec bash -c '${safeExec}'`;
+        proc2 = child_process.spawn("bash", ["-c", cmd], { detached: true, stdio: "ignore", env });
       }
       if (proc2?.pid) {
         launchedPids.add(proc2.pid);
         proc2.on("exit", () => launchedPids.delete(proc2.pid));
       }
       proc2?.unref();
+      setTimeout(() => {
+        child_process.spawn("bash", [
+          "-c",
+          "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r xdotool windowlower"
+        ], { stdio: "ignore" }).unref();
+      }, 1200);
       return true;
     } catch {
       return false;
@@ -3976,6 +3969,9 @@ function createWindow() {
       if (mainWindow?.isMinimized() || !mainWindow?.isVisible()) {
         mainWindow?.show();
         mainWindow?.maximize();
+        mainWindow?.focus();
+      } else if (!mainWindow?.isFocused()) {
+        mainWindow?.moveTop();
         mainWindow?.focus();
       } else {
         mainWindow?.minimize();

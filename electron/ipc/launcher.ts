@@ -133,33 +133,19 @@ export function registerLauncherHandlers(): void {
 
   ipcMain.handle('launcher:launch', async (_, app: AppEntry) => {
     try {
-      // gtk-launch handles dbus activation, env setup, steam:// etc. correctly
-      const desktopId = app.desktopFile.split('/').pop()?.replace(/\.desktop$/, '') ?? ''
+      const env = { ...process.env, DISPLAY: process.env['DISPLAY'] || ':0' }
       let proc: ReturnType<typeof spawn> | null = null
 
-      if (desktopId) {
-        // Preferred: use gtk-launch with the .desktop basename
-        proc = spawn('gtk-launch', [desktopId], {
-          detached: true,
-          stdio: 'ignore',
-          env: { ...process.env, DISPLAY: process.env['DISPLAY'] || ':0' },
-        })
-      } else if (app.terminal) {
-        // Fallback terminal: try common terminal emulators
+      if (app.terminal) {
         const terms = ['x-terminal-emulator', 'xfce4-terminal', 'gnome-terminal', 'konsole', 'xterm']
-        const term = terms[0] // x-terminal-emulator is the Debian alternative
-        proc = spawn(term, ['-e', app.exec], {
-          detached: true,
-          stdio: 'ignore',
-          env: { ...process.env, DISPLAY: process.env['DISPLAY'] || ':0' },
-        })
+        proc = spawn(terms[0], ['-e', app.exec], { detached: true, stdio: 'ignore', env })
       } else {
-        const parts = app.exec.split(' ')
-        proc = spawn(parts[0], parts.slice(1), {
-          detached: true,
-          stdio: 'ignore',
-          env: { ...process.env, DISPLAY: process.env['DISPLAY'] || ':0' },
-        })
+        // gtk-launch is not available on Debian Bookworm (libgtk-3-bin removed).
+        // Use gio launch (handles DBus activation) with a direct exec fallback.
+        const safeDesktop = app.desktopFile.replace(/'/g, "'\\''")
+        const safeExec    = app.exec.replace(/'/g, "'\\''")
+        const cmd = `gio launch '${safeDesktop}' 2>/dev/null || exec bash -c '${safeExec}'`
+        proc = spawn('bash', ['-c', cmd], { detached: true, stdio: 'ignore', env })
       }
 
       if (proc?.pid) {
@@ -167,6 +153,15 @@ export function registerLauncherHandlers(): void {
         proc.on('exit', () => launchedPids.delete(proc.pid!))
       }
       proc?.unref()
+
+      // Lower Electron after the app has had a moment to open so it
+      // appears above the shell rather than behind it.
+      setTimeout(() => {
+        spawn('bash', ['-c',
+          "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r xdotool windowlower"
+        ], { stdio: 'ignore' }).unref()
+      }, 1200)
+
       return true
     } catch {
       return false
