@@ -287,11 +287,8 @@ export function registerSystemHandlers(): void {
   })
 
   ipcMain.handle('wm:focusWindow', async (_, id: string) => {
-    // Raise the target window, then lower Electron so X11 apps float above the shell
+    // Raise the target X11 window — Electron is pinned to desktop layer below
     await sh(`wmctrl -ia ${id} 2>/dev/null`)
-    await sh(`xdotool getactivewindow windowraise 2>/dev/null || true`)
-    const electronId = await sh(`xdotool search --name "Cryogram" 2>/dev/null | head -1`)
-    if (electronId.trim()) await sh(`xdotool windowlower ${electronId.trim()} 2>/dev/null || true`)
     return true
   })
 

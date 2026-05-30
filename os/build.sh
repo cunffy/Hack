@@ -1028,6 +1028,14 @@ cat > /etc/xdg/openbox/cryogram-rc.xml << 'OBCONF'
     </context>
   </mouse>
   <applications>
+    <!-- Cryogram is the desktop shell — keep it pinned to the bottom layer -->
+    <application class="cryogram">
+      <layer>below</layer>
+      <decor>no</decor>
+      <border>no</border>
+      <skip_taskbar>yes</skip_taskbar>
+      <skip_pager>yes</skip_pager>
+    </application>
     <application class="*">
       <decor>no</decor>
       <border>no</border>

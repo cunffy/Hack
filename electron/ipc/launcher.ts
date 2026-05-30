@@ -153,15 +153,6 @@ export function registerLauncherHandlers(): void {
         proc.on('exit', () => launchedPids.delete(proc.pid!))
       }
       proc?.unref()
-
-      // Lower Electron after the app has had a moment to open so it
-      // appears above the shell rather than behind it.
-      setTimeout(() => {
-        spawn('bash', ['-c',
-          "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r xdotool windowlower"
-        ], { stdio: 'ignore' }).unref()
-      }, 1200)
-
       return true
     } catch {
       return false

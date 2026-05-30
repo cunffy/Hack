@@ -155,6 +155,10 @@ OBMENU
 # ── Patch openbox config (Alt+Tab keybindings + single workspace) ─────────────
 OB_CONF="/etc/xdg/openbox/cryogram-rc.xml"
 if [ -f "$OB_CONF" ]; then
+  # Pin Cryogram to the desktop layer in openbox (never above normal windows)
+  if ! grep -q 'class="cryogram"' "$OB_CONF"; then
+    sed -i 's|<applications>|<applications>\n    <application class="cryogram"><layer>below</layer><decor>no</decor><border>no</border><skip_taskbar>yes</skip_taskbar><skip_pager>yes</skip_pager></application>|' "$OB_CONF"
+  fi
   # Enable right-click menu if not already wired up
   if ! grep -q 'cryogram-menu' "$OB_CONF"; then
     sed -i 's|<mouse>|<menu><file>/etc/xdg/openbox/cryogram-menu.xml</file></menu>\n  <mouse>|' "$OB_CONF"

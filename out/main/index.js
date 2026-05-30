@@ -765,9 +765,6 @@ function registerSystemHandlers() {
   });
   electron.ipcMain.handle("wm:focusWindow", async (_, id) => {
     await sh$6(`wmctrl -ia ${id} 2>/dev/null`);
-    await sh$6(`xdotool getactivewindow windowraise 2>/dev/null || true`);
-    const electronId = await sh$6(`xdotool search --name "Cryogram" 2>/dev/null | head -1`);
-    if (electronId.trim()) await sh$6(`xdotool windowlower ${electronId.trim()} 2>/dev/null || true`);
     return true;
   });
   electron.ipcMain.handle("wm:closeWindow", async (_, id) => {
@@ -920,12 +917,6 @@ function registerLauncherHandlers() {
         proc2.on("exit", () => launchedPids.delete(proc2.pid));
       }
       proc2?.unref();
-      setTimeout(() => {
-        child_process.spawn("bash", [
-          "-c",
-          "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r xdotool windowlower"
-        ], { stdio: "ignore" }).unref();
-      }, 1200);
       return true;
     } catch {
       return false;
@@ -3933,6 +3924,13 @@ if (!utils.is.dev) {
 }
 let mainWindow = null;
 let screenLocked = false;
+function pinToDesktopLayer() {
+  child_process.exec(
+    "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} wmctrl -i -r {} -b add,below",
+    () => {
+    }
+  );
+}
 function lockScreen() {
   if (!mainWindow) return;
   screenLocked = true;
@@ -3963,19 +3961,16 @@ function createWindow() {
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
     mainWindow.maximize();
+    setTimeout(pinToDesktopLayer, 500);
+    mainWindow.on("minimize", () => {
+      mainWindow?.restore();
+      setTimeout(pinToDesktopLayer, 200);
+    });
     mainWindow.on("restore", () => mainWindow?.maximize());
     electron.globalShortcut.register("Super+D", () => {
       if (screenLocked) return;
-      if (mainWindow?.isMinimized() || !mainWindow?.isVisible()) {
-        mainWindow?.show();
-        mainWindow?.maximize();
-        mainWindow?.focus();
-      } else if (!mainWindow?.isFocused()) {
-        mainWindow?.moveTop();
-        mainWindow?.focus();
-      } else {
-        mainWindow?.minimize();
-      }
+      mainWindow?.moveTop();
+      mainWindow?.focus();
     });
     electron.globalShortcut.register("Super+Tab", () => {
     });
@@ -4066,6 +4061,7 @@ electron.app.whenReady().then(() => {
   electron.ipcMain.on("screen:unlock", () => {
     screenLocked = false;
     mainWindow?.setAlwaysOnTop(false);
+    setTimeout(pinToDesktopLayer, 300);
   });
   registerTerminalHandlers();
   registerPasswordTesterHandlers();

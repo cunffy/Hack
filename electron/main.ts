@@ -68,6 +68,15 @@ import { registerRemoteDesktopHandlers } from './ipc/remote-desktop'
 let mainWindow: BrowserWindow | null = null
 let screenLocked = false  // tracked in main so shortcuts can check it
 
+// Pin Electron to the desktop layer so every X11 app always floats above it.
+// Called after show and after unlock (lock screen uses setAlwaysOnTop to override).
+function pinToDesktopLayer(): void {
+  exec(
+    "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} wmctrl -i -r {} -b add,below",
+    () => {}
+  )
+}
+
 function lockScreen(): void {
   if (!mainWindow) return
   screenLocked = true
@@ -102,23 +111,23 @@ function createWindow(): void {
   mainWindow.on('ready-to-show', () => {
     mainWindow!.show()
     mainWindow!.maximize()
+
+    // Pin to desktop layer — X11 apps always float on top, Electron is the floor
+    setTimeout(pinToDesktopLayer, 500)
+
+    // Never minimize under any condition — restore immediately if the WM tries
+    mainWindow!.on('minimize', () => {
+      mainWindow?.restore()
+      setTimeout(pinToDesktopLayer, 200)
+    })
     mainWindow!.on('restore', () => mainWindow?.maximize())
 
+    // Super+D raises Electron to front so user can reach the dock,
+    // then re-pins it to the desktop layer after a moment
     globalShortcut.register('Super+D', () => {
       if (screenLocked) return
-      if (mainWindow?.isMinimized() || !mainWindow?.isVisible()) {
-        // Bring back from minimized / hidden
-        mainWindow?.show()
-        mainWindow?.maximize()
-        mainWindow?.focus()
-      } else if (!mainWindow?.isFocused()) {
-        // Window is open but behind Brave / another X11 app — raise it
-        mainWindow?.moveTop()
-        mainWindow?.focus()
-      } else {
-        // Already in front — minimize (toggle)
-        mainWindow?.minimize()
-      }
+      mainWindow?.moveTop()
+      mainWindow?.focus()
     })
     globalShortcut.register('Super+Tab', () => {})
     // Workspace switching
@@ -234,6 +243,7 @@ app.whenReady().then(() => {
   ipcMain.on('screen:unlock', () => {
     screenLocked = false
     mainWindow?.setAlwaysOnTop(false)
+    setTimeout(pinToDesktopLayer, 300)
   })
 
   registerTerminalHandlers()
