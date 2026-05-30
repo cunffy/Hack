@@ -617,6 +617,22 @@ HOOKEOF
 chmod +x "$HOOKS_DIR/0402-calamares-unpackfs.hook.chroot"
 echo "[build] unpackfs config hook written."
 
+cat > "$HOOKS_DIR/0403-grub-wrapper.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set +e
+echo "[grub-wrapper] Creating grub-install wrapper with --no-nvram..."
+mkdir -p /usr/local/sbin
+cat > /usr/local/sbin/cryogram-grub-install << 'WRAPPER'
+#!/bin/bash
+exec /usr/sbin/grub-install --no-nvram "$@"
+WRAPPER
+chmod +x /usr/local/sbin/cryogram-grub-install
+echo "[grub-wrapper] Done."
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0403-grub-wrapper.hook.chroot"
+echo "[build] GRUB wrapper hook written."
+
 # Fix skel timing: write a hook that copies /etc/skel to /home/cryogram
 # AFTER all other hooks have populated skel. The configure-system hook
 # creates the user early (before skel is filled), so the home dir misses
