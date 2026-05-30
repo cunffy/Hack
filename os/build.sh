@@ -246,6 +246,8 @@ squashfs-tools
 grub-efi-amd64
 grub-pc-bin
 grub-common
+libgtk-3-bin
+xdg-utils
 PKGEOF
 
 cat > "$PKG_LISTS/gaming.list.chroot" << 'PKGEOF'
