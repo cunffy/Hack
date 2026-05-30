@@ -3,16 +3,7 @@ import { persist } from 'zustand/middleware'
 import { AppId } from './windowStore'
 
 export const DEFAULT_DOCK: AppId[] = [
-  'terminal', 'editor', 'mail', 'password-tester', 'leaker',
-  'files', 'passwords', 'scanner', 'firewall', 'vpn',
-  'task-manager', 'netmon', 'logs', 'launcher', 'settings',
-  'calculator', 'crypto-tools', 'api-tester', 'cert-inspector',
-  'docker', 'git', 'database', 'markdown', 'trash',
-  'shodan', 'osint', 'cve', 'ai-assistant', 'wordlists',
-  'json-explorer', 'totp', 'regex', 'encoding-chain', 'packet-sniffer',
-  'backup', 'password-health', 'pomodoro', 'audit-log', 'code-scanner', 'wallpaper',
-  'clipboard-history', 'color-picker', 'unit-converter', 'world-clock', 'image-viewer', 'rss-reader',
-  'remote-desktop',
+  'launcher', 'settings', 'files', 'ai-assistant', 'terminal',
 ]
 
 interface DockStore {

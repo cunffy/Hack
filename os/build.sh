@@ -913,6 +913,9 @@ mkdir -p /etc/xdg/openbox
 cat > /etc/xdg/openbox/cryogram-rc.xml << 'OBCONF'
 <?xml version="1.0" encoding="UTF-8"?>
 <openbox_config xmlns="http://openbox.org/3.4/rc">
+  <desktops>
+    <number>1</number>
+  </desktops>
   <resistance>
     <strength>0</strength>
     <screen_edge_strength>0</screen_edge_strength>

@@ -753,6 +753,9 @@ function registerSystemHandlers() {
   });
   electron.ipcMain.handle("wm:focusWindow", async (_, id) => {
     await sh$6(`wmctrl -ia ${id} 2>/dev/null`);
+    await sh$6(`xdotool getactivewindow windowraise 2>/dev/null || true`);
+    const electronId = await sh$6(`xdotool search --name "Cryogram" 2>/dev/null | head -1`);
+    if (electronId.trim()) await sh$6(`xdotool windowlower ${electronId.trim()} 2>/dev/null || true`);
     return true;
   });
   electron.ipcMain.handle("wm:closeWindow", async (_, id) => {
