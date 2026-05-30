@@ -82,6 +82,7 @@ export const APP_META: Record<AppId, { label: string; color: string; icon: React
   'image-viewer':      { label: 'Image Viewer',     color: '#34d399', icon: <ImageViewerIcon /> },
   'rss-reader':        { label: 'RSS Reader',       color: '#fb923c', icon: <RSSIcon /> },
   'remote-desktop':    { label: 'Remote Desktop',   color: '#10b981', icon: <RemoteDesktopIcon /> },
+  brave:               { label: 'Brave Browser',    color: '#fb923c', icon: <BraveIcon /> },
 }
 
 interface X11Win { id: string; desktop: number; title: string }
@@ -842,6 +843,15 @@ function RemoteDesktopIcon() {
       <line x1="12" y1="17" x2="12" y2="21"/>
       <path d="M7 9l3 3-3 3"/>
       <line x1="13" y1="15" x2="17" y2="15"/>
+    </svg>
+  )
+}
+function BraveIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+      <path d="M9.5 9.5l2.5 5 2.5-5" strokeWidth="1.5"/>
+      <line x1="12" y1="14.5" x2="12" y2="16.5" strokeWidth="1.5"/>
     </svg>
   )
 }

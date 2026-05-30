@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot' | 'calculator' | 'crypto-tools' | 'api-tester' | 'cert-inspector' | 'docker' | 'git' | 'database' | 'markdown' | 'trash' | 'shodan' | 'osint' | 'cve' | 'ai-assistant' | 'wordlists' | 'json-explorer' | 'totp' | 'regex' | 'encoding-chain' | 'packet-sniffer' | 'backup' | 'password-health' | 'pomodoro' | 'audit-log' | 'code-scanner' | 'wallpaper' | 'clipboard-history' | 'color-picker' | 'unit-converter' | 'world-clock' | 'image-viewer' | 'rss-reader' | 'remote-desktop'
+export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot' | 'calculator' | 'crypto-tools' | 'api-tester' | 'cert-inspector' | 'docker' | 'git' | 'database' | 'markdown' | 'trash' | 'shodan' | 'osint' | 'cve' | 'ai-assistant' | 'wordlists' | 'json-explorer' | 'totp' | 'regex' | 'encoding-chain' | 'packet-sniffer' | 'backup' | 'password-health' | 'pomodoro' | 'audit-log' | 'code-scanner' | 'wallpaper' | 'clipboard-history' | 'color-picker' | 'unit-converter' | 'world-clock' | 'image-viewer' | 'rss-reader' | 'remote-desktop' | 'brave'
 
 export interface AppWindow {
   id: string
@@ -84,6 +84,7 @@ const APP_META: Record<AppId, { title: string; width: number; height: number }> 
   'image-viewer':      { title: 'Image Viewer',        width: 960,  height: 700 },
   'rss-reader':        { title: 'RSS Reader',          width: 1000, height: 680 },
   'remote-desktop':    { title: 'Remote Desktop',      width: 860,  height: 600 },
+  brave:               { title: 'Brave Browser',       width: 0,    height: 0 },
 }
 
 let instanceCounter = 0
@@ -93,6 +94,15 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   nextZ: 10,
 
   openApp(appId) {
+    // External apps — launch via OS rather than opening an internal window.
+    if (appId === 'brave') {
+      try {
+        const api = (window as any).cryogram
+        api?.launcher?.launch({ exec: 'brave-browser', name: 'Brave', icon: '', comment: '', categories: ['Network'], category: 'Other', desktopFile: '/usr/share/applications/brave-browser.desktop', terminal: false })
+      } catch {}
+      return
+    }
+
     // Restore/focus existing window — never open a second instance of the same app.
     // This matches macOS/Windows behaviour: clicking the dock/taskbar icon brings
     // the window back rather than spawning a duplicate.

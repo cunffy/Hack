@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import { AppId } from './windowStore'
 
 export const DEFAULT_DOCK: AppId[] = [
-  'launcher', 'settings', 'files', 'ai-assistant', 'terminal',
+  'launcher', 'brave', 'settings', 'files', 'ai-assistant', 'terminal',
 ]
 
 interface DockStore {
@@ -23,11 +23,12 @@ export const useDockStore = create<DockStore>()(
     }),
     {
       name: 'cryogram-dock-order',
-      version: 3,
-      // v3: one-time reset to the 5-app default dock.
-      // Bumping the version guarantees migrate() fires exactly once on this
-      // update regardless of what version was previously stored.
-      migrate: (_state: any, _fromVersion: number) => ({ order: DEFAULT_DOCK }),
+      version: 4,
+      // v4: add Brave to dock; one-time merge of Brave into existing order.
+      migrate: (state: any, _fromVersion: number) => {
+        const order: AppId[] = state?.order ?? DEFAULT_DOCK
+        return { order: order.includes('brave') ? order : ['launcher', 'brave', ...order.filter((id: AppId) => id !== 'launcher')] }
+      },
       merge: (persisted: any, current) => {
         const stored: AppId[] = persisted?.order ?? current.order
         const merged = [...stored]

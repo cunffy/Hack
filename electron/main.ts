@@ -221,6 +221,9 @@ function createWindow(): void {
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.cryogram.app')
 
+  // Sync system clock immediately — the hardware RTC can drift when offline.
+  exec('chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true', () => {})
+
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })

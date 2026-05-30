@@ -56,6 +56,7 @@ export function registerSystemHandlers(): void {
       const { stdout } = await execAsync(cmd)
       const out = stdout.trim()
       const success = out.toLowerCase().includes('successfully') || out.toLowerCase().includes('activated')
+      if (success) sh('chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true')
       return { success, message: success ? '' : (out || 'Connection failed') }
     } catch (err: any) {
       const msg: string = (err.stdout ?? err.message ?? 'Connection failed').trim()

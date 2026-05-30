@@ -573,6 +573,7 @@ function registerSystemHandlers() {
       const { stdout } = await execAsync$8(cmd);
       const out = stdout.trim();
       const success = out.toLowerCase().includes("successfully") || out.toLowerCase().includes("activated");
+      if (success) sh$6("chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true");
       return { success, message: success ? "" : out || "Connection failed" };
     } catch (err) {
       const msg = (err.stdout ?? err.message ?? "Connection failed").trim();
@@ -4045,6 +4046,8 @@ function createWindow() {
 }
 electron.app.whenReady().then(() => {
   utils.electronApp.setAppUserModelId("com.cryogram.app");
+  child_process.exec("chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true", () => {
+  });
   electron.app.on("browser-window-created", (_, window) => {
     utils.optimizer.watchWindowShortcuts(window);
   });

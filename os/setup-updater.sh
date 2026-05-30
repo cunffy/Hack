@@ -191,11 +191,20 @@ if [ -f "$OB_CONF" ]; then
     echo "  [+] Patching openbox config with Alt+Tab keybindings..."
     sed -i 's|</keyboard>|  <keybind key="A-Tab"><action name="NextWindow"><dialog>icons</dialog><bar>no</bar><raise>yes</raise><allDesktops>no</allDesktops><panels>no</panels><desktop>no</desktop></action></keybind>\n    <keybind key="A-S-Tab"><action name="PreviousWindow"><dialog>icons</dialog><bar>no</bar><raise>yes</raise><allDesktops>no</allDesktops><panels>no</panels><desktop>no</desktop></action></keybind>\n  </keyboard>|' "$OB_CONF"
   fi
-  # Ensure single desktop (no accidental workspace 2)
-  if ! grep -q '<number>1</number>' "$OB_CONF"; then
-    sed -i 's|<desktops>.*</desktops>|<desktops><number>1</number></desktops>|' "$OB_CONF"
+  # Ensure 4 workspaces for Super+1–4 switching
+  sed -i 's|<desktops>[^<]*<number>[0-9]*</number>[^<]*</desktops>|<desktops><number>4</number></desktops>|' "$OB_CONF" 2>/dev/null || true
+  if ! grep -q '<number>4</number>' "$OB_CONF"; then
+    sed -i 's|<desktops>|<desktops><number>4</number>|' "$OB_CONF" 2>/dev/null || true
   fi
 fi
+
+# ── Ensure persistent data directory is owned by cryogram ────────────────────
+# Electron stores settings (theme, PIN, API keys) in /opt/cryogram-data.
+# If the dir is missing or root-owned the cryogram user can't write there and
+# settings reset on every reboot.
+mkdir -p /opt/cryogram-data
+chown cryogram:cryogram /opt/cryogram-data 2>/dev/null || true
+chmod 755 /opt/cryogram-data
 
 # ── Restart the app ───────────────────────────────────────────────────────────
 # The session loop in /usr/local/bin/cryogram-session restarts Electron

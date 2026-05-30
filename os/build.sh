@@ -571,6 +571,12 @@ chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true
 NMD
 chmod +x /etc/NetworkManager/dispatcher.d/10-cryogram-timesync
 
+# ── Persistent settings directory ─────────────────────────────────────────────
+# Electron saves theme, PIN, and API keys here. Must be writable by cryogram.
+mkdir -p /opt/cryogram-data
+chown cryogram:cryogram /opt/cryogram-data 2>/dev/null || true
+chmod 755 /opt/cryogram-data
+
 echo "[cryogram] Setup complete at $INSTALL_DIR ($(du -sh $INSTALL_DIR | cut -f1))"
 exit 0
 HOOKEOF
@@ -985,7 +991,7 @@ cat > /etc/xdg/openbox/cryogram-rc.xml << 'OBCONF'
 <?xml version="1.0" encoding="UTF-8"?>
 <openbox_config xmlns="http://openbox.org/3.4/rc">
   <desktops>
-    <number>1</number>
+    <number>4</number>
   </desktops>
   <resistance>
     <strength>0</strength>
