@@ -4025,8 +4025,7 @@ function createWindow() {
     mainWindow.on("restore", () => mainWindow?.maximize());
     electron.globalShortcut.register("Super+D", () => {
       if (screenLocked) return;
-      mainWindow?.moveTop();
-      mainWindow?.focus();
+      raiseShell();
     });
     electron.globalShortcut.register("Super+Tab", () => {
     });
@@ -4076,8 +4075,7 @@ function createWindow() {
     });
     electron.globalShortcut.register("CommandOrControl+Alt+T", () => {
       if (screenLocked) return;
-      mainWindow?.moveTop();
-      mainWindow?.focus();
+      raiseShell();
       mainWindow?.webContents.send("open:app", "terminal");
     });
     electron.globalShortcut.register("CommandOrControl+Space", () => {

@@ -142,12 +142,11 @@ function createWindow(): void {
     })
     mainWindow!.on('restore', () => mainWindow?.maximize())
 
-    // Super+D raises Electron to front so user can reach the dock,
-    // then re-pins it to the desktop layer after a moment
+    // Super+D: toggle — raise Cryogram above X11 apps so the user can interact
+    // with the dock/apps, or sink it back below so X11 apps are visible again.
     globalShortcut.register('Super+D', () => {
       if (screenLocked) return
-      mainWindow?.moveTop()
-      mainWindow?.focus()
+      raiseShell()
     })
     globalShortcut.register('Super+Tab', () => {})
     // Workspace switching
@@ -185,9 +184,7 @@ function createWindow(): void {
     globalShortcut.register('Super+Up',    () => { if (!screenLocked) { snapX11('max');   mainWindow?.webContents.send('window:snap', 'max')   } })
     globalShortcut.register('CommandOrControl+Alt+T', () => {
       if (screenLocked) return
-      // Raise Electron first so the terminal is visible even if desktop was behind Brave
-      mainWindow?.moveTop()
-      mainWindow?.focus()
+      raiseShell()
       mainWindow?.webContents.send('open:app', 'terminal')
     })
     globalShortcut.register('CommandOrControl+Space', () => {
