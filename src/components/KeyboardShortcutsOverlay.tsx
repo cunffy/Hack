@@ -18,6 +18,7 @@ const SECTIONS = [
     shortcuts: [
       { keys: ['Alt', 'Tab'], desc: 'Switch app (forward)' },
       { keys: ['Alt', 'Shift', 'Tab'], desc: 'Switch app (backward)' },
+      { keys: ['Ctrl', 'W'], desc: 'Close focused window' },
       { keys: ['Ctrl', 'Alt', 'T'], desc: 'Open Terminal' },
       { keys: ['Super', '1–4'], desc: 'Switch workspace' },
     ],
@@ -25,9 +26,12 @@ const SECTIONS = [
   {
     title: 'Window Snapping',
     shortcuts: [
-      { keys: ['Drag → left edge'], desc: 'Snap left half' },
-      { keys: ['Drag → right edge'], desc: 'Snap right half' },
-      { keys: ['Drag → top edge'], desc: 'Maximize' },
+      { keys: ['Super', '←'], desc: 'Snap to left half' },
+      { keys: ['Super', '→'], desc: 'Snap to right half' },
+      { keys: ['Super', '↑'], desc: 'Maximize / restore' },
+      { keys: ['Drag to left edge'], desc: 'Snap left half' },
+      { keys: ['Drag to right edge'], desc: 'Snap right half' },
+      { keys: ['Drag to top edge'], desc: 'Maximize' },
     ],
   },
   {

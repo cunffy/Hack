@@ -21,6 +21,7 @@ interface WindowStore {
   windows: AppWindow[]
   nextZ: number
   openApp(appId: AppId): void
+  openAppNewWindow(appId: AppId): void
   closeWindow(id: string): void
   focusWindow(id: string): void
   moveWindow(id: string, x: number, y: number): void
@@ -28,6 +29,7 @@ interface WindowStore {
   minimizeWindow(id: string): void
   restoreWindow(id: string): void
   toggleMaximize(id: string): void
+  snapWindow(id: string, side: 'left' | 'right' | 'max'): void
 }
 
 const APP_META: Record<AppId, { title: string; width: number; height: number }> = {
@@ -177,6 +179,49 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     set((s) => ({
       nextZ: s.nextZ + 1,
       windows: s.windows.map((w) => w.id === id ? { ...w, minimized: false, focused: true, zIndex: z } : w),
+    }))
+  },
+
+  openAppNewWindow(appId) {
+    if (appId === 'brave') {
+      try {
+        const api = (window as any).cryogram
+        api?.launcher?.launch({ exec: 'brave-browser --new-window --password-store=basic', name: 'Brave', icon: '', comment: '', categories: ['Network'], category: 'Other', desktopFile: '', terminal: false })
+      } catch {}
+      return
+    }
+    const meta = APP_META[appId]
+    const id = `${appId}-${++instanceCounter}`
+    const offset = (get().windows.length % 8) * 24
+    const z = get().nextZ
+    set(s => ({
+      nextZ: s.nextZ + 1,
+      windows: [
+        ...s.windows.map(w => ({ ...w, focused: false })),
+        { id, appId, title: meta.title, x: 80 + offset, y: 80 + offset, width: meta.width, height: meta.height, minimized: false, maximized: false, focused: true, zIndex: z },
+      ],
+    }))
+  },
+
+  snapWindow(id, side) {
+    const W = typeof window !== 'undefined' ? window.innerWidth : 1440
+    const H = typeof window !== 'undefined' ? window.innerHeight - 28 - 88 : 784
+    const z = get().nextZ
+    set(s => ({
+      nextZ: s.nextZ + 1,
+      windows: s.windows.map(w => {
+        if (w.id !== id) return w
+        if (side === 'max') {
+          if (w.maximized) return { ...w, maximized: false, zIndex: z, focused: true, ...(w.prevBounds ?? {}) }
+          return { ...w, maximized: true, zIndex: z, focused: true, prevBounds: { x: w.x, y: w.y, width: w.width, height: w.height }, x: 0, y: 0, width: W, height: H }
+        }
+        const snapW = Math.floor(W / 2)
+        return {
+          ...w, maximized: false, zIndex: z, focused: true,
+          prevBounds: w.prevBounds ?? { x: w.x, y: w.y, width: w.width, height: w.height },
+          x: side === 'left' ? 0 : snapW, y: 0, width: snapW, height: H,
+        }
+      }),
     }))
   },
 

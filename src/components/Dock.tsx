@@ -91,7 +91,7 @@ interface CtxState { x: number; y: number; appId: AppId }
 export function Dock() {
   const { order, setOrder, removeApp } = useDockStore()
   const addDesktopIcon = useDesktopStore(s => s.addIcon)
-  const { windows, openApp, focusWindow, restoreWindow, minimizeWindow } = useWindowStore()
+  const { windows, openApp, openAppNewWindow, focusWindow, restoreWindow, minimizeWindow, closeWindow } = useWindowStore()
 
   const [mouseX, setMouseX]     = useState<number | null>(null)
   const [hovered, setHovered]   = useState<string | null>(null)
@@ -140,19 +140,33 @@ export function Dock() {
           <ContextMenu
             x={ctx.x} y={ctx.y}
             onClose={() => setCtx(null)}
-            items={[
-              {
-                label: windows.find(w => w.appId === ctx.appId) ? 'Focus Window' : 'Open',
-                action: () => {
-                  const win = windows.find(w => w.appId === ctx.appId)
-                  if (!win) openApp(ctx.appId)
-                  else { restoreWindow(win.id); focusWindow(win.id) }
+            items={(() => {
+              const win = windows.find(w => w.appId === ctx.appId)
+              const items: MenuItem[] = [
+                {
+                  label: win ? 'Focus Window' : 'Open',
+                  action: () => {
+                    if (!win) openApp(ctx.appId)
+                    else { restoreWindow(win.id); focusWindow(win.id) }
+                  },
                 },
-              },
-              { label: 'Add to Desktop', action: () => addDesktopIcon(ctx.appId) },
-              { sep: true },
-              { label: 'Remove from Dock', danger: true, action: () => removeApp(ctx.appId) },
-            ] as MenuItem[]}
+                {
+                  label: 'New Window',
+                  action: () => openAppNewWindow(ctx.appId),
+                },
+                { label: 'Add to Desktop', action: () => addDesktopIcon(ctx.appId) },
+                { sep: true },
+              ]
+              if (win) {
+                items.push({
+                  label: 'Close',
+                  danger: true,
+                  action: () => closeWindow(win.id),
+                })
+              }
+              items.push({ label: 'Remove from Dock', danger: true, action: () => removeApp(ctx.appId) })
+              return items
+            })()}
           />
         )}
       </AnimatePresence>

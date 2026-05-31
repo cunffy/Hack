@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+export function showToast(title: string, body: string, type: 'info' | 'success' | 'error' | 'warning' = 'info') {
+  window.dispatchEvent(new CustomEvent('cryogram:notification', { detail: { title, body, type } }))
+}
+
 interface Toast {
   id: number
   title: string

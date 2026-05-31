@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, powerMonitor, globalShortcut } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, powerMonitor, globalShortcut, screen as electronScreen } from 'electron'
 import { join } from 'path'
 import { exec, execFileSync } from 'child_process'
 import { existsSync, mkdirSync } from 'fs'
@@ -150,6 +150,25 @@ function createWindow(): void {
       })
     })
     globalShortcut.register('Super+L', () => lockScreen())
+
+    // ── Window snapping ────────────────────────────────────────────────────
+    // Snaps the active X11 window via wmctrl and notifies renderer to snap
+    // any focused internal Electron window simultaneously.
+    const snapX11 = (side: 'left' | 'right' | 'max') => {
+      const { width, height } = electronScreen.getPrimaryDisplay().workAreaSize
+      const TB = 28 // titlebar height
+      if (side === 'max') {
+        exec('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz 2>/dev/null', () => {})
+      } else {
+        const x = side === 'left' ? 0 : Math.floor(width / 2)
+        const w = Math.floor(width / 2)
+        const h = height - TB
+        exec(`wmctrl -r :ACTIVE: -b remove,maximized_vert,maximized_horz 2>/dev/null; wmctrl -r :ACTIVE: -e 0,${x},${TB},${w},${h} 2>/dev/null`, () => {})
+      }
+    }
+    globalShortcut.register('Super+Left',  () => { if (!screenLocked) { snapX11('left');  mainWindow?.webContents.send('window:snap', 'left')  } })
+    globalShortcut.register('Super+Right', () => { if (!screenLocked) { snapX11('right'); mainWindow?.webContents.send('window:snap', 'right') } })
+    globalShortcut.register('Super+Up',    () => { if (!screenLocked) { snapX11('max');   mainWindow?.webContents.send('window:snap', 'max')   } })
     globalShortcut.register('CommandOrControl+Alt+T', () => {
       if (screenLocked) return
       // Raise Electron first so the terminal is visible even if desktop was behind Brave

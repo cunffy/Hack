@@ -1,7 +1,9 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { Terminal as XTerm } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
 import { WebLinksAddon } from 'xterm-addon-web-links'
+import { ContextMenu } from '../../components/ContextMenu'
 import 'xterm/css/xterm.css'
 
 const SESSION_ID = () => `term_${Math.random().toString(36).slice(2)}`
@@ -9,6 +11,7 @@ const SESSION_ID = () => `term_${Math.random().toString(36).slice(2)}`
 export default function Terminal() {
   const containerRef = useRef<HTMLDivElement>(null)
   const termRef = useRef<XTerm | null>(null)
+  const [ctx, setCtx] = useState<{ x: number; y: number } | null>(null)
   const fitAddonRef = useRef<FitAddon | null>(null)
   const sessionIdRef = useRef<string>(SESSION_ID())
   const cleanupRef = useRef<(() => void) | null>(null)
@@ -105,10 +108,50 @@ export default function Terminal() {
   }, [init])
 
   return (
-    <div
-      ref={containerRef}
-      className="flex-1 w-full h-full p-1"
-      style={{ background: '#0a0e14' }}
-    />
+    <div style={{ position: 'relative', flex: 1, width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div
+        ref={containerRef}
+        className="flex-1 w-full h-full p-1"
+        style={{ background: '#0a0e14' }}
+        onContextMenu={e => { e.preventDefault(); setCtx({ x: e.clientX, y: e.clientY }) }}
+      />
+      <AnimatePresence>
+        {ctx && (
+          <ContextMenu
+            x={ctx.x} y={ctx.y}
+            onClose={() => setCtx(null)}
+            items={[
+              {
+                label: 'Copy',
+                shortcut: 'Ctrl+Shift+C',
+                action: () => {
+                  const sel = termRef.current?.getSelection()
+                  if (sel) navigator.clipboard.writeText(sel).catch(() => {})
+                },
+                disabled: !termRef.current?.getSelection(),
+              },
+              {
+                label: 'Paste',
+                shortcut: 'Ctrl+Shift+V',
+                action: () => {
+                  navigator.clipboard.readText().then(text => {
+                    if (text && termRef.current) window.cryogram.terminal.write(sessionIdRef.current, text)
+                  }).catch(() => {})
+                },
+              },
+              { sep: true },
+              {
+                label: 'Clear',
+                action: () => termRef.current?.clear(),
+              },
+              {
+                label: 'Select All',
+                action: () => termRef.current?.selectAll(),
+              },
+            ]}
+          />
+        )}
+      </AnimatePresence>
+    </div>
   )
 }

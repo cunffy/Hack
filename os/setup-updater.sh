@@ -144,6 +144,8 @@ rsync -a --delete "\$STAGING/" "\$DEST/out/"
 
 echo "── Update complete — rebooting in 5 seconds..."
 sleep 5
+# Blank screen before reboot so there's no white framebuffer flash
+DISPLAY="${DISPLAY:-:0}" xsetroot -solid black 2>/dev/null || true
 reboot
 UPDATER
 chmod +x /usr/local/bin/cryogram-update
@@ -163,6 +165,11 @@ if [ "$SRC" != "/opt/cryogram-src" ] && [ ! -e /opt/cryogram-src ]; then
   ln -sf "$SRC" /opt/cryogram-src
 fi
 echo "        Done."
+
+# ── SSH service — disable on a desktop security OS (stops shutdown errors) ───
+# ssh.service failing on shutdown causes console errors and slows reboot.
+systemctl disable ssh 2>/dev/null || true
+systemctl mask    ssh 2>/dev/null || true
 
 # ── 4. Sudoers rule ───────────────────────────────────────────────────────────
 echo "  [4/4] Granting passwordless sudo for cryogram-update ..."
@@ -247,6 +254,9 @@ mkdir -p "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR" 2>/dev/null || true
 
 # Paint the screen dark immediately — eliminates white flash before Electron loads
 xsetroot -solid '#070b11' 2>/dev/null || true
+
+# Keep the screen black on exit (reboot/shutdown) so framebuffer never flashes white
+trap 'xsetroot -solid black 2>/dev/null || true' EXIT
 
 # Disable X11 screensaver and power management
 xset s off 2>/dev/null || true

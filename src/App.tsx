@@ -31,6 +31,8 @@ export default function App() {
   const wallpaper = useDesktopStore(s => s.wallpaper)
   const { isLocked, lock } = useLockStore()
   const openApp = useWindowStore(s => s.openApp)
+  const snapWindow = useWindowStore(s => s.snapWindow)
+  const focusedWinId = useWindowStore(s => s.windows.find(w => w.focused && !w.minimized)?.id)
 
   const [updateInfo, setUpdateInfo]       = useState<UpdateInfo | null>(null)
   const [showUpdateScreen, setShowScreen] = useState(false)
@@ -134,6 +136,51 @@ export default function App() {
     })
     return cleanup ?? undefined
   }, [])
+
+  // Super+arrows window snapping — snap focused internal window
+  useEffect(() => {
+    const cleanup = (window.cryogram as any).onSnap?.((side: 'left' | 'right' | 'max') => {
+      if (focusedWinId) snapWindow(focusedWinId, side)
+    })
+    return cleanup ?? undefined
+  }, [focusedWinId, snapWindow])
+
+  // Inactivity auto-lock
+  useEffect(() => {
+    if (!booted) return
+    let minutes = 0
+    window.cryogram.settings.get('autolock.minutes').then((v: any) => { minutes = typeof v === 'number' ? v : 0 }).catch(() => {})
+
+    let timer: ReturnType<typeof setTimeout>
+    const reset = () => {
+      clearTimeout(timer)
+      if (!minutes) return
+      timer = setTimeout(async () => {
+        if (isLocked) return
+        try {
+          const enabled = await window.cryogram.settings.get('pin.enabled')
+          const hash    = await window.cryogram.settings.get('pin.hash')
+          lock(!!(enabled && hash))
+        } catch { lock(false) }
+      }, minutes * 60 * 1000)
+    }
+
+    const reread = async () => {
+      const v = await window.cryogram.settings.get('autolock.minutes').catch(() => 0)
+      minutes = typeof v === 'number' ? v : 0
+    }
+
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart'] as const
+    events.forEach(e => window.addEventListener(e, reset, { passive: true }))
+    window.addEventListener('cryogram:autolock-changed', reread as any)
+    reset()
+
+    return () => {
+      clearTimeout(timer)
+      events.forEach(e => window.removeEventListener(e, reset))
+      window.removeEventListener('cryogram:autolock-changed', reread as any)
+    }
+  }, [booted, isLocked, lock])
 
   // Alt+Tab
   useEffect(() => {

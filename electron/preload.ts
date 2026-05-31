@@ -363,6 +363,13 @@ contextBridge.exposeInMainWorld('cryogram', {
     return () => ipcRenderer.removeListener('workspace:changed', listener)
   },
 
+  // Super+Left/Right/Up window snapping
+  onSnap: (cb: (side: 'left' | 'right' | 'max') => void) => {
+    const listener = (_: unknown, side: unknown) => cb(side as 'left' | 'right' | 'max')
+    ipcRenderer.on('window:snap', listener)
+    return () => ipcRenderer.removeListener('window:snap', listener)
+  },
+
   // Shodan
   shodan: {
     search:   (query: string, page?: number) => ipcRenderer.invoke('shodan:search', query, page),
