@@ -59,9 +59,9 @@ echo "  Cryogram OS — System Update & Setup"
 echo "  ──────────────────────────────────────"
 echo ""
 
-# ── Ensure required X11 tools are installed ───────────────────────────────────
-for pkg in xdotool wmctrl rsync; do
-  if ! command -v "$pkg" &>/dev/null; then
+# ── Ensure required X11 and audio tools are installed ────────────────────────
+for pkg in xdotool wmctrl rsync pulseaudio-utils brightnessctl; do
+  if ! command -v "${pkg%%-*}" &>/dev/null && ! dpkg -l "$pkg" 2>/dev/null | grep -q '^ii'; then
     echo "  [pre] Installing missing tool: $pkg ..."
     apt-get install -y -qq "$pkg" 2>/dev/null || true
   fi
