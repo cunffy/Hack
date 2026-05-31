@@ -82,11 +82,22 @@ let screenLocked = false  // tracked in main so shortcuts can check it
 function lockScreen(): void {
   if (!mainWindow) return
   screenLocked = true
-  // Put Electron above every X11 window (Brave, terminals, etc.) so apps
-  // cannot be seen or interacted with while the lock screen is active.
+  // Restore full-screen state before raising — if the window was snapped to
+  // a half-screen by the snap keybinding, lock screen would only cover half.
+  mainWindow.unmaximize()
+  mainWindow.maximize()
+  // Put Electron above every X11 window so no app is visible while locked.
   mainWindow.setAlwaysOnTop(true, 'screen-saver')
   mainWindow.focus()
   mainWindow.moveTop()
+  // Re-assert after 200ms in case a pending sinkShell() timer fires and
+  // removes the above state that we just set.
+  setTimeout(() => {
+    if (screenLocked) {
+      mainWindow?.setAlwaysOnTop(true, 'screen-saver')
+      mainWindow?.moveTop()
+    }
+  }, 200)
   mainWindow.webContents.send('screen:lock')
 }
 
@@ -151,19 +162,23 @@ function createWindow(): void {
     globalShortcut.register('Super+L', () => lockScreen())
 
     // ── Window snapping ────────────────────────────────────────────────────
-    // Snaps the active X11 window via wmctrl and notifies renderer to snap
-    // any focused internal Electron window simultaneously.
+    // Snaps the active X11 window via wmctrl. Skips if Cryogram itself is the
+    // active window — internal window snapping is handled by the renderer via
+    // the window:snap event sent below.
     const snapX11 = (side: 'left' | 'right' | 'max') => {
       const { width, height } = electronScreen.getPrimaryDisplay().workAreaSize
       const TB = 28 // titlebar height
-      if (side === 'max') {
-        exec('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz 2>/dev/null', () => {})
-      } else {
-        const x = side === 'left' ? 0 : Math.floor(width / 2)
-        const w = Math.floor(width / 2)
-        const h = height - TB
-        exec(`wmctrl -r :ACTIVE: -b remove,maximized_vert,maximized_horz 2>/dev/null; wmctrl -r :ACTIVE: -e 0,${x},${TB},${w},${h} 2>/dev/null`, () => {})
-      }
+      exec("xdotool getactivewindow getwindowclassname 2>/dev/null", (_err, cls) => {
+        if (!cls || cls.trim().toLowerCase().includes('cryogram')) return
+        if (side === 'max') {
+          exec('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz 2>/dev/null', () => {})
+        } else {
+          const x = side === 'left' ? 0 : Math.floor(width / 2)
+          const w = Math.floor(width / 2)
+          const h = height - TB
+          exec(`wmctrl -r :ACTIVE: -b remove,maximized_vert,maximized_horz 2>/dev/null; wmctrl -r :ACTIVE: -e 0,${x},${TB},${w},${h} 2>/dev/null`, () => {})
+        }
+      })
     }
     globalShortcut.register('Super+Left',  () => { if (!screenLocked) { snapX11('left');  mainWindow?.webContents.send('window:snap', 'left')  } })
     globalShortcut.register('Super+Right', () => { if (!screenLocked) { snapX11('right'); mainWindow?.webContents.send('window:snap', 'right') } })

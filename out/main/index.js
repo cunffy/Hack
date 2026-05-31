@@ -3978,9 +3978,17 @@ let screenLocked = false;
 function lockScreen() {
   if (!mainWindow) return;
   screenLocked = true;
+  mainWindow.unmaximize();
+  mainWindow.maximize();
   mainWindow.setAlwaysOnTop(true, "screen-saver");
   mainWindow.focus();
   mainWindow.moveTop();
+  setTimeout(() => {
+    if (screenLocked) {
+      mainWindow?.setAlwaysOnTop(true, "screen-saver");
+      mainWindow?.moveTop();
+    }
+  }, 200);
   mainWindow.webContents.send("screen:lock");
 }
 function createWindow() {
@@ -4034,16 +4042,19 @@ function createWindow() {
     const snapX11 = (side) => {
       const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
       const TB = 28;
-      if (side === "max") {
-        child_process.exec("wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz 2>/dev/null", () => {
-        });
-      } else {
-        const x = side === "left" ? 0 : Math.floor(width / 2);
-        const w = Math.floor(width / 2);
-        const h = height - TB;
-        child_process.exec(`wmctrl -r :ACTIVE: -b remove,maximized_vert,maximized_horz 2>/dev/null; wmctrl -r :ACTIVE: -e 0,${x},${TB},${w},${h} 2>/dev/null`, () => {
-        });
-      }
+      child_process.exec("xdotool getactivewindow getwindowclassname 2>/dev/null", (_err, cls) => {
+        if (!cls || cls.trim().toLowerCase().includes("cryogram")) return;
+        if (side === "max") {
+          child_process.exec("wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz 2>/dev/null", () => {
+          });
+        } else {
+          const x = side === "left" ? 0 : Math.floor(width / 2);
+          const w = Math.floor(width / 2);
+          const h = height - TB;
+          child_process.exec(`wmctrl -r :ACTIVE: -b remove,maximized_vert,maximized_horz 2>/dev/null; wmctrl -r :ACTIVE: -e 0,${x},${TB},${w},${h} 2>/dev/null`, () => {
+          });
+        }
+      });
     };
     electron.globalShortcut.register("Super+Left", () => {
       if (!screenLocked) {

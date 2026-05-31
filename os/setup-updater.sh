@@ -300,16 +300,29 @@ picom --backend xrender --vsync --no-fading-openclose --daemon 2>/dev/null || tr
 # Hide cursor when idle
 unclutter -root -idle 5 2>/dev/null &
 
+# ── Audio: start PipeWire/PulseAudio if not already running ──────────────────
+# cryogram-session may be the first process in the user session, so audio
+# daemons might not be started yet (no loginctl session, no systemd user units).
+if command -v pipewire &>/dev/null && ! pgrep -x pipewire > /dev/null 2>&1; then
+  pipewire &
+  sleep 0.5
+  pipewire-pulse &>/dev/null &
+  wireplumber &>/dev/null &
+elif command -v pulseaudio &>/dev/null && ! pgrep -x pulseaudio > /dev/null 2>&1; then
+  pulseaudio --start --exit-idle-time=-1 2>/dev/null || true
+fi
+
 # On live boot: launch installer after desktop loads
 if grep -q "boot=live" /proc/cmdline 2>/dev/null; then
   (sleep 5 && sudo /usr/bin/calamares) &
 fi
 
-# Launch Cryogram — auto-restart on crash, exit 0 = clean shutdown
+# Launch Cryogram — always restart on exit.
+# Electron exits 0 when killed via SIGTERM (app.quit()), so we CANNOT break on
+# exit code 0 — that would leave the screen black after every update.
+# cryogram-session is killed by systemd/init on shutdown, so the loop auto-stops.
 while true; do
-  /usr/local/bin/cryogram
-  STATUS=$?
-  [ $STATUS -eq 0 ] && break
+  /usr/local/bin/cryogram || true
   sleep 1
 done
 
@@ -318,18 +331,29 @@ SESSION
 chmod +x /usr/local/bin/cryogram-session
 
 # ── Ensure persistent data directory is owned by cryogram ────────────────────
-# Electron stores settings (theme, PIN, API keys) in /opt/cryogram-data.
-# If the dir is missing or root-owned the cryogram user can't write there and
-# settings reset on every reboot.
 mkdir -p /opt/cryogram-data
 chown cryogram:cryogram /opt/cryogram-data 2>/dev/null || true
 chmod 755 /opt/cryogram-data
 
+# ── Brightness: allow cryogram user to change backlight without sudo ──────────
+# brightnessctl writes to /sys/class/backlight/*/brightness which is group-writable
+# to 'video'. Without group membership brightnessctl silently does nothing.
+usermod -a -G video cryogram 2>/dev/null || true
+# Make brightness sysfs writable by the video group right now (persists via udev)
+find /sys/class/backlight -name brightness -exec chmod g+w {} \; 2>/dev/null || true
+
 # ── Restart the app ───────────────────────────────────────────────────────────
-# The session loop in /usr/local/bin/cryogram-session restarts Electron
-# automatically whenever it exits non-zero, so pkill is enough.
+# Use SIGKILL so Electron can't intercept it and exit cleanly with code 0.
+# The session loop (now fixed to always restart) will bring Cryogram back up.
 echo ""
 echo "  ✓ All done! Restarting Cryogram in 3 seconds..."
 echo ""
 sleep 3
-pkill -f "electron.*out/main" 2>/dev/null || true
+pkill -9 -f "electron.*out/main" 2>/dev/null || true
+
+# Safety net: if cryogram-session died (old loop broke on exit 0), restart it
+sleep 2
+if ! pgrep -f "cryogram-session" > /dev/null 2>&1 && id cryogram &>/dev/null; then
+  echo "  [restart] Session not running — starting cryogram-session as cryogram user..."
+  su -c "DISPLAY=:0 nohup /usr/local/bin/cryogram-session > /tmp/cryogram-session.log 2>&1 &" cryogram
+fi
