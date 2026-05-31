@@ -328,6 +328,12 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
     electron.ipcRenderer.on("workspace:changed", listener);
     return () => electron.ipcRenderer.removeListener("workspace:changed", listener);
   },
+  // Super+Left/Right/Up window snapping
+  onSnap: (cb) => {
+    const listener = (_, side) => cb(side);
+    electron.ipcRenderer.on("window:snap", listener);
+    return () => electron.ipcRenderer.removeListener("window:snap", listener);
+  },
   // Shodan
   shodan: {
     search: (query, page) => electron.ipcRenderer.invoke("shodan:search", query, page),

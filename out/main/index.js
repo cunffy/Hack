@@ -4011,6 +4011,38 @@ function createWindow() {
       });
     });
     electron.globalShortcut.register("Super+L", () => lockScreen());
+    const snapX11 = (side) => {
+      const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
+      const TB = 28;
+      if (side === "max") {
+        child_process.exec("wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz 2>/dev/null", () => {
+        });
+      } else {
+        const x = side === "left" ? 0 : Math.floor(width / 2);
+        const w = Math.floor(width / 2);
+        const h = height - TB;
+        child_process.exec(`wmctrl -r :ACTIVE: -b remove,maximized_vert,maximized_horz 2>/dev/null; wmctrl -r :ACTIVE: -e 0,${x},${TB},${w},${h} 2>/dev/null`, () => {
+        });
+      }
+    };
+    electron.globalShortcut.register("Super+Left", () => {
+      if (!screenLocked) {
+        snapX11("left");
+        mainWindow?.webContents.send("window:snap", "left");
+      }
+    });
+    electron.globalShortcut.register("Super+Right", () => {
+      if (!screenLocked) {
+        snapX11("right");
+        mainWindow?.webContents.send("window:snap", "right");
+      }
+    });
+    electron.globalShortcut.register("Super+Up", () => {
+      if (!screenLocked) {
+        snapX11("max");
+        mainWindow?.webContents.send("window:snap", "max");
+      }
+    });
     electron.globalShortcut.register("CommandOrControl+Alt+T", () => {
       if (screenLocked) return;
       mainWindow?.moveTop();
