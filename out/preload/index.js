@@ -214,6 +214,7 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
   updater: {
     check: () => electron.ipcRenderer.invoke("updater:check"),
     run: (password) => electron.ipcRenderer.invoke("updater:run", password),
+    isRoot: () => electron.ipcRenderer.invoke("updater:isRoot"),
     onProgress: (cb) => {
       const listener = (_, line) => cb(line);
       electron.ipcRenderer.on("updater:progress", listener);

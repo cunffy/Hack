@@ -1,7 +1,7 @@
 import { app, BrowserWindow, shell, ipcMain, powerMonitor, globalShortcut, screen as electronScreen } from 'electron'
 import { join } from 'path'
 import { exec, execFileSync } from 'child_process'
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs'
 
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
@@ -184,15 +184,15 @@ function createWindow(): void {
     })
 
     // ── Volume keys ────────────────────────────────────────────────────────
-    // Track last known level for optimistic HUD updates — never default to 50
-    // when pactl is slow or the sink isn't resolved yet.
     let _vol = -1
 
     // PipeWire/PulseAudio find their socket via XDG_RUNTIME_DIR.
-    // Pass it explicitly so pactl works even if the session env is incomplete.
+    // Prefer the env var (set by cryogram-session for the correct user).
+    // If Electron runs as root, fall back to uid 1000 (the desktop user).
+    const uid = process.getuid?.() ?? 1000
     const audioEnv = {
       ...process.env,
-      XDG_RUNTIME_DIR: process.env['XDG_RUNTIME_DIR'] ?? `/run/user/${process.getuid?.() ?? 1000}`,
+      XDG_RUNTIME_DIR: process.env['XDG_RUNTIME_DIR'] ?? `/run/user/${uid === 0 ? 1000 : uid}`,
     }
 
     const readVolAndSend = () => {
@@ -207,11 +207,14 @@ function createWindow(): void {
       })
     }
 
+    // Read current volume immediately so _vol is set before first keypress.
+    // Without this, the first VolumeUp/Down press skips the optimistic HUD.
+    readVolAndSend()
+
     const sendVolOptimistic = (delta: number) => {
-      if (_vol >= 0) {
-        _vol = Math.max(0, Math.min(100, _vol + delta))
-        mainWindow?.webContents.send('hud:volume', { level: _vol, muted: false })
-      }
+      // Always show HUD immediately — use 50 as baseline if volume unknown yet
+      _vol = Math.max(0, Math.min(100, (_vol < 0 ? 50 : _vol) + delta))
+      mainWindow?.webContents.send('hud:volume', { level: _vol, muted: false })
       setTimeout(readVolAndSend, 300)
     }
 
@@ -229,9 +232,30 @@ function createWindow(): void {
     })
 
     // ── Brightness keys ────────────────────────────────────────────────────
-    // XF86MonBrightnessUp/Down are not valid Electron accelerator names on Linux.
-    // Brightness is handled by openbox keybindings calling brightnessctl directly.
-    // The udev rule (90-backlight.rules) sets brightness sysfs nodes to 0666.
+    // Electron can't register XF86MonBrightnessUp/Down on Linux — Openbox
+    // handles them via keybindings calling brightnessctl. We poll the sysfs
+    // file every 200ms so any change (from any source) triggers the HUD.
+    let _brightness = -1
+    const backlightBase = (() => {
+      try {
+        const dirs = readdirSync('/sys/class/backlight')
+        return dirs.length ? `/sys/class/backlight/${dirs[0]}` : null
+      } catch { return null }
+    })()
+    if (backlightBase) {
+      setInterval(() => {
+        try {
+          const cur = parseInt(readFileSync(`${backlightBase}/brightness`, 'utf8').trim())
+          const max = parseInt(readFileSync(`${backlightBase}/max_brightness`, 'utf8').trim())
+          if (max <= 0) return
+          const level = Math.round(cur * 100 / max)
+          if (level !== _brightness) {
+            _brightness = level
+            mainWindow?.webContents.send('hud:brightness', { level })
+          }
+        } catch {}
+      }, 200)
+    }
 
     // ── Alt+Tab window switcher ────────────────────────────────────────────
     globalShortcut.register('Alt+Tab', () => {

@@ -107,6 +107,8 @@ export function registerUpdaterHandlers(): void {
     }
   })
 
+  ipcMain.handle('updater:isRoot', () => isRoot())
+
   ipcMain.handle('updater:run', (event, password?: string) => {
     return new Promise<{ success: boolean }>((resolve, reject) => {
       if (!existsSync(UPDATE_SCRIPT)) {

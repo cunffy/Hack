@@ -234,6 +234,7 @@ contextBridge.exposeInMainWorld('cryogram', {
   updater: {
     check:      () => ipcRenderer.invoke('updater:check'),
     run:        (password?: string) => ipcRenderer.invoke('updater:run', password),
+    isRoot:     () => ipcRenderer.invoke('updater:isRoot'),
     onProgress: (cb: (line: string) => void) => {
       const listener = (_: unknown, line: string) => cb(line)
       ipcRenderer.on('updater:progress', listener)

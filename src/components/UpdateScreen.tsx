@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-type Phase = 'auth' | 'starting' | 'updating' | 'countdown' | 'rebooting'
+type Phase = 'auth' | 'starting' | 'updating' | 'countdown' | 'restarting'
 
 interface Props {
   onCancel?: () => void
@@ -111,8 +111,10 @@ export function UpdateScreen({ onCancel }: Props) {
     const lines = stripAnsi(raw).split('\n').filter(l => l.trim())
     setLog(prev => [...prev, ...lines].slice(-120))
 
-    // Detect script entering reboot countdown
+    // Detect script nearing completion
     if (raw.includes('Rebooting in') || raw.includes('Rebooting')) {
+      setPhase('countdown')
+    } else if (raw.includes('Restarting Cryogram') || raw.includes('All done')) {
       setPhase('countdown')
     }
   }, [])
@@ -140,14 +142,19 @@ export function UpdateScreen({ onCancel }: Props) {
     return () => { if (countdownRef.current) clearInterval(countdownRef.current) }
   }, [phase])
 
-  // Check if we're running as root — if so skip auth phase
+  // Skip auth if running as root — live OS always runs Electron as root
+  const autoStarted = useRef(false)
   useEffect(() => {
+    if (autoStarted.current) return
     const api = (window as any).cryogram?.updater
-    if (!api) return
-    // Try running without password first (works if root)
-    // We detect root by attempting a no-password run; if it errors with
-    // wrong-password we know we need auth. Start in auth phase to be safe.
-  }, [])
+    if (!api?.isRoot) return
+    api.isRoot().then((root: boolean) => {
+      if (root && !autoStarted.current) {
+        autoStarted.current = true
+        runUpdate()
+      }
+    }).catch(() => {})
+  }, [runUpdate])
 
   const runUpdate = useCallback(async (pw?: string) => {
     setPhase('starting')
@@ -172,7 +179,7 @@ export function UpdateScreen({ onCancel }: Props) {
     } catch (err: any) {
       const msg = String(err?.message ?? err)
       if (msg.includes('code null') || msg.includes('killed')) {
-        setPhase('rebooting')
+        setPhase('restarting')
       } else if (msg === 'wrong-password' || msg.includes('wrong-password')) {
         setPhase('auth')
         setWrongPassword(true)
@@ -186,19 +193,19 @@ export function UpdateScreen({ onCancel }: Props) {
   }, [phase, appendLog])
 
   const phaseLabel: Record<Phase, string> = {
-    auth:      'Install Update',
-    starting:  'Preparing update…',
-    updating:  'Installing update…',
-    countdown: 'Update complete',
-    rebooting: 'Rebooting…',
+    auth:        'Install Update',
+    starting:    'Preparing update…',
+    updating:    'Installing update…',
+    countdown:   'Update complete',
+    restarting:  'Restarting…',
   }
 
   const phaseColor: Record<Phase, string> = {
-    auth:      'var(--cryo-accent)',
-    starting:  'var(--cryo-accent)',
-    updating:  'var(--cryo-accent)',
-    countdown: '#00ff88',
-    rebooting: '#a855f7',
+    auth:        'var(--cryo-accent)',
+    starting:    'var(--cryo-accent)',
+    updating:    'var(--cryo-accent)',
+    countdown:   '#00ff88',
+    restarting:  '#a855f7',
   }
 
   const color = error ? '#ef4444' : phaseColor[phase]
@@ -249,7 +256,7 @@ export function UpdateScreen({ onCancel }: Props) {
             }}
           >
             <AnimatePresence mode="wait">
-              {phase === 'countdown' || phase === 'rebooting' ? (
+              {phase === 'countdown' || phase === 'restarting' ? (
                 <motion.div key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 24 }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12"/>
@@ -283,8 +290,8 @@ export function UpdateScreen({ onCancel }: Props) {
               ? 'Run the command below once in a terminal, then try again'
               : error
               ? 'Check log below for details'
-              : phase === 'countdown' || phase === 'rebooting'
-              ? 'Your laptop will fully restart'
+              : phase === 'countdown' || phase === 'restarting'
+              ? 'Cryogram will restart automatically'
               : 'Downloading code changes only — not a new OS'}
           </div>
         </div>
@@ -368,7 +375,7 @@ export function UpdateScreen({ onCancel }: Props) {
 
         {/* Countdown */}
         <AnimatePresence>
-          {(phase === 'countdown' || phase === 'rebooting') && !error && (
+          {(phase === 'countdown' || phase === 'restarting') && !error && (
             <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -390,10 +397,10 @@ export function UpdateScreen({ onCancel }: Props) {
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
-                {phase === 'rebooting' ? '↺' : countdown}
+                {phase === 'restarting' ? '↺' : countdown}
               </motion.div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
-                {phase === 'rebooting' ? 'Restarting system…' : `Rebooting in ${countdown} second${countdown !== 1 ? 's' : ''}…`}
+                {phase === 'restarting' ? 'Restarting now…' : `Restarting in ${countdown} second${countdown !== 1 ? 's' : ''}…`}
               </div>
             </motion.div>
           )}

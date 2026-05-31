@@ -1186,6 +1186,7 @@ function registerUpdaterHandlers() {
       };
     }
   });
+  electron.ipcMain.handle("updater:isRoot", () => isRoot());
   electron.ipcMain.handle("updater:run", (event, password) => {
     return new Promise((resolve, reject) => {
       if (!fs$1.existsSync(UPDATE_SCRIPT)) {
@@ -4054,9 +4055,10 @@ function createWindow() {
       mainWindow?.webContents.send("open:spotlight");
     });
     let _vol = -1;
+    const uid = process.getuid?.() ?? 1e3;
     const audioEnv2 = {
       ...process.env,
-      XDG_RUNTIME_DIR: process.env["XDG_RUNTIME_DIR"] ?? `/run/user/${process.getuid?.() ?? 1e3}`
+      XDG_RUNTIME_DIR: process.env["XDG_RUNTIME_DIR"] ?? `/run/user/${uid === 0 ? 1e3 : uid}`
     };
     const readVolAndSend = () => {
       child_process.exec("pactl get-sink-volume @DEFAULT_SINK@", { env: audioEnv2 }, (err, volOut) => {
@@ -4069,11 +4071,10 @@ function createWindow() {
         });
       });
     };
+    readVolAndSend();
     const sendVolOptimistic = (delta) => {
-      if (_vol >= 0) {
-        _vol = Math.max(0, Math.min(100, _vol + delta));
-        mainWindow?.webContents.send("hud:volume", { level: _vol, muted: false });
-      }
+      _vol = Math.max(0, Math.min(100, (_vol < 0 ? 50 : _vol) + delta));
+      mainWindow?.webContents.send("hud:volume", { level: _vol, muted: false });
       setTimeout(readVolAndSend, 300);
     };
     electron.globalShortcut.register("VolumeUp", () => {
@@ -4088,6 +4089,30 @@ function createWindow() {
       child_process.exec("pactl set-sink-mute @DEFAULT_SINK@ toggle", { env: audioEnv2 });
       setTimeout(readVolAndSend, 300);
     });
+    let _brightness = -1;
+    const backlightBase = (() => {
+      try {
+        const dirs = fs$1.readdirSync("/sys/class/backlight");
+        return dirs.length ? `/sys/class/backlight/${dirs[0]}` : null;
+      } catch {
+        return null;
+      }
+    })();
+    if (backlightBase) {
+      setInterval(() => {
+        try {
+          const cur = parseInt(fs$1.readFileSync(`${backlightBase}/brightness`, "utf8").trim());
+          const max = parseInt(fs$1.readFileSync(`${backlightBase}/max_brightness`, "utf8").trim());
+          if (max <= 0) return;
+          const level = Math.round(cur * 100 / max);
+          if (level !== _brightness) {
+            _brightness = level;
+            mainWindow?.webContents.send("hud:brightness", { level });
+          }
+        } catch {
+        }
+      }, 200);
+    }
     electron.globalShortcut.register("Alt+Tab", () => {
       if (screenLocked) return;
       mainWindow?.webContents.send("app:switcher", "next");

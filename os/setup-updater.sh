@@ -329,6 +329,7 @@ chmod 755 /opt/cryogram-data
 # The session loop in /usr/local/bin/cryogram-session restarts Electron
 # automatically whenever it exits non-zero, so pkill is enough.
 echo ""
-echo "  ✓ All done! Restarting Cryogram..."
+echo "  ✓ All done! Restarting Cryogram in 3 seconds..."
 echo ""
+sleep 3
 pkill -f "electron.*out/main" 2>/dev/null || true
