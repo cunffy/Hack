@@ -103,21 +103,13 @@ cat > /usr/local/bin/cryogram-update << UPDATER
 set -euo pipefail
 BRANCH="$BRANCH"
 SRC="/opt/cryogram-src"
-DEST="/opt/cryogram"
-STAGING=\$(mktemp -d)
-trap 'rm -rf "\$STAGING"' EXIT
 
 echo "── Cryogram OS Updater ──────────────────────────"
 # Ensure SSL certs are present before any HTTPS git operation
 if [ ! -f /etc/ssl/certs/ca-certificates.crt ] || [ ! -s /etc/ssl/certs/ca-certificates.crt ]; then
   apt-get update -qq && apt-get install -y -qq ca-certificates
 fi
-# Always refresh the bundle so git finds it — on some Debian installs the
-# bundle exists but the symlinks need rebuilding for git to detect it.
 update-ca-certificates --fresh 2>/dev/null || true
-
-# Tell git explicitly where the CA bundle lives — avoids "CAfile: none" even
-# when ca-certificates is installed but git's default lookup path differs.
 export GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt
 git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
@@ -136,17 +128,11 @@ if [ ! -f "\$SRC/out/main/index.js" ] || [ ! -f "\$SRC/out/renderer/index.html" 
   exit 1
 fi
 
-echo "── Staging app files..."
-rsync -a "\$SRC/out/" "\$STAGING/"
-
-echo "── Applying update..."
-rsync -a --delete "\$STAGING/" "\$DEST/out/"
-
-echo "── Update complete — rebooting in 5 seconds..."
-sleep 5
-# Blank screen before reboot so there's no white framebuffer flash
-DISPLAY="${DISPLAY:-:0}" xsetroot -solid black 2>/dev/null || true
-reboot
+# Run the full setup script from the pulled source — this syncs out/, patches
+# Openbox keybindings, reloads Openbox config, and restarts Electron.
+# Doing it this way guarantees every update deploys ALL changes (not just JS).
+echo "── Applying full system update..."
+bash "\$SRC/os/setup-updater.sh"
 UPDATER
 chmod +x /usr/local/bin/cryogram-update
 echo "        Done."
@@ -220,11 +206,25 @@ if [ -f "$OB_CONF" ]; then
     echo "  [+] Patching openbox config with Alt+Tab keybindings..."
     sed -i 's|</keyboard>|  <keybind key="A-Tab"><action name="NextWindow"><dialog>icons</dialog><bar>no</bar><raise>yes</raise><allDesktops>no</allDesktops><panels>no</panels><desktop>no</desktop></action></keybind>\n    <keybind key="A-S-Tab"><action name="PreviousWindow"><dialog>icons</dialog><bar>no</bar><raise>yes</raise><allDesktops>no</allDesktops><panels>no</panels><desktop>no</desktop></action></keybind>\n  </keyboard>|' "$OB_CONF"
   fi
-  # Brightness keys — Electron cannot register these on Linux, so openbox must handle them
-  if ! grep -q 'XF86MonBrightness' "$OB_CONF"; then
-    echo "  [+] Patching openbox config with brightness keybindings..."
-    sed -i 's|</keyboard>|  <keybind key="XF86MonBrightnessUp"><action name="Execute"><execute>brightnessctl set +10%</execute></action></keybind>\n    <keybind key="XF86MonBrightnessDown"><action name="Execute"><execute>brightnessctl set 10%-</execute></action></keybind>\n  </keyboard>|' "$OB_CONF"
-  fi
+  # Brightness keys — force-replace every time so stale absolute-value bindings
+  # (set 0 / set 100%) can't survive; always use relative +10% / 10%-.
+  echo "  [+] Setting brightness keybindings (force-replace)..."
+  python3 - "$OB_CONF" << 'PYFIX'
+import sys, re
+path = sys.argv[1]
+with open(path) as f:
+    data = f.read()
+data = re.sub(r'\s*<keybind key="XF86MonBrightness[^"]*">.*?</keybind>', '', data, flags=re.DOTALL)
+new_bindings = (
+    '  <keybind key="XF86MonBrightnessUp"><action name="Execute"><execute>brightnessctl set +10%</execute></action></keybind>\n'
+    '    <keybind key="XF86MonBrightnessDown"><action name="Execute"><execute>brightnessctl set 10%-</execute></action></keybind>\n'
+    '  </keyboard>'
+)
+data = data.replace('</keyboard>', new_bindings, 1)
+with open(path, 'w') as f:
+    f.write(data)
+print("  Brightness keybindings replaced.")
+PYFIX
   # Volume keys — pactl needs XDG_RUNTIME_DIR to locate the PipeWire socket.
   # Install a tiny wrapper so every call site (openbox + shell) gets it automatically.
   cat > /usr/local/bin/cryogram-pactl << 'PACTL_WRAP'
@@ -262,6 +262,11 @@ PYFIX
     sed -i 's|<desktops>|<desktops><number>4</number>|' "$OB_CONF" 2>/dev/null || true
   fi
 fi
+
+# ── Reload Openbox config so new keybindings take effect immediately ──────────
+# openbox --reconfigure sends SIGUSR2 to the running Openbox WM.
+# No reboot or logout needed — keybindings and window rules apply instantly.
+DISPLAY="${DISPLAY:-:0}" openbox --reconfigure 2>/dev/null || true
 
 # ── Rewrite session script (openbox before picom, xrender compositor) ────────
 cat > /usr/local/bin/cryogram-session << 'SESSION'
