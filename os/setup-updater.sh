@@ -13,7 +13,8 @@ set -euo pipefail
 # Install chrony (NTP daemon) so time stays correct automatically from now on.
 if ! command -v chronyc &>/dev/null; then
   echo "  [pre] Installing chrony (NTP time sync)..."
-  apt-get update -qq && apt-get install -y -qq chrony
+  apt-get update -qq || true
+  apt-get install -y -qq chrony || true
 fi
 systemctl enable chrony 2>/dev/null || true
 systemctl start  chrony 2>/dev/null || true
@@ -33,7 +34,7 @@ chmod +x /etc/NetworkManager/dispatcher.d/10-cryogram-timesync
 # Ensure SSL certificates are present and the bundle is up to date
 if [ ! -f /etc/ssl/certs/ca-certificates.crt ] || [ ! -s /etc/ssl/certs/ca-certificates.crt ]; then
   echo "  [pre] Installing ca-certificates..."
-  apt-get install -y -qq ca-certificates
+  apt-get install -y -qq ca-certificates || true
 fi
 # Always rebuild the bundle — on some Debian systems the certs are installed
 # but git still reports CAfile:none until update-ca-certificates is run.
@@ -177,7 +178,7 @@ cat > /etc/xdg/openbox/cryogram-menu.xml << 'OBMENU'
     </item>
     <separator/>
     <item label="Restart Cryogram">
-      <action name="Execute"><execute>bash -c "pkill -f 'electron.*out/main'"</execute></action>
+      <action name="Execute"><execute>bash -c "pkill -x cryogram 2>/dev/null || pkill -9 -x cryogram"</execute></action>
     </item>
   </menu>
 </openbox_menu>
@@ -343,17 +344,10 @@ usermod -a -G video cryogram 2>/dev/null || true
 find /sys/class/backlight -name brightness -exec chmod g+w {} \; 2>/dev/null || true
 
 # ── Restart the app ───────────────────────────────────────────────────────────
-# Use SIGKILL so Electron can't intercept it and exit cleanly with code 0.
-# The session loop (now fixed to always restart) will bring Cryogram back up.
+# Electron restarts itself via app.relaunch() + app.exit(0) after the update
+# script exits cleanly (code 0). We do NOT kill Electron here — the old pkill
+# pattern "electron.*out/main" never matched the actual binary (/usr/local/bin/cryogram),
+# which is why updates always produced a black screen instead of restarting.
 echo ""
-echo "  ✓ All done! Restarting Cryogram in 3 seconds..."
+echo "  ✓ All done! Cryogram is restarting..."
 echo ""
-sleep 3
-pkill -9 -f "electron.*out/main" 2>/dev/null || true
-
-# Safety net: if cryogram-session died (old loop broke on exit 0), restart it
-sleep 2
-if ! pgrep -f "cryogram-session" > /dev/null 2>&1 && id cryogram &>/dev/null; then
-  echo "  [restart] Session not running — starting cryogram-session as cryogram user..."
-  su -c "DISPLAY=:0 nohup /usr/local/bin/cryogram-session > /tmp/cryogram-session.log 2>&1 &" cryogram
-fi

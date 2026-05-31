@@ -1213,12 +1213,11 @@ function registerUpdaterHandlers() {
         if (!s.match(/^\[sudo\]|password for |Sorry, try again/)) send(s);
       });
       proc2.on("close", (code) => {
-        if (code === null) {
+        if (code === null || code === 0) {
           resolve({ success: true });
-        } else if (code === 0) {
-          const { exec: execRaw } = require("child_process");
-          execRaw("shutdown -r now || reboot");
-          resolve({ success: true });
+          const { app } = require("electron");
+          app.relaunch();
+          setTimeout(() => app.exit(0), 2e3);
         } else if (!isRoot() && code === 1) {
           reject(new Error("wrong-password"));
         } else {

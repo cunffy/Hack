@@ -142,15 +142,15 @@ export function registerUpdaterHandlers(): void {
       })
 
       proc.on('close', (code) => {
-        if (code === null) {
-          // OS killed the process — reboot is already underway
+        if (code === null || code === 0) {
+          // Script finished — restart Electron itself cleanly.
+          // resolve() first so the renderer sees "All done" and shows the countdown UI.
+          // Then relaunch() + exit(0) after 2 s, which is more reliable than pkill
+          // because it uses the actual binary path regardless of how the process was named.
           resolve({ success: true })
-        } else if (code === 0) {
-          // Script exited cleanly but didn't reboot (shouldn't happen).
-          // Force reboot so the user's machine always restarts after an update.
-          const { exec: execRaw } = require('child_process')
-          execRaw('shutdown -r now || reboot')
-          resolve({ success: true })
+          const { app } = require('electron')
+          app.relaunch()
+          setTimeout(() => app.exit(0), 2000)
         } else if (!isRoot() && code === 1) {
           reject(new Error('wrong-password'))
         } else {
