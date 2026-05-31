@@ -182,13 +182,9 @@ export default function App() {
     }
   }, [booted, isLocked, lock])
 
-  // Alt+Tab
+  // Keyboard shortcuts (Alt+Tab is handled by globalShortcut in main process)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.altKey && e.key === 'Tab') {
-        e.preventDefault()
-        window.dispatchEvent(new CustomEvent('cryogram:switcher', { detail: e.shiftKey ? 'prev' : 'next' }))
-      }
       // Ctrl+Space → spotlight
       if (e.ctrlKey && e.code === 'Space') {
         e.preventDefault()

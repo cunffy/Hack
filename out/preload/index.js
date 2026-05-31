@@ -210,6 +210,11 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
     save: (dataUrl, name) => electron.ipcRenderer.invoke("screenshot:save", dataUrl, name),
     copyToClipboard: (dataUrl) => electron.ipcRenderer.invoke("screenshot:copyToClipboard", dataUrl)
   },
+  // Shell layer control — raise/sink Electron relative to X11 apps
+  shell: {
+    sink: () => electron.ipcRenderer.send("shell:sink"),
+    unpin: () => electron.ipcRenderer.send("shell:unpin")
+  },
   // Update checker + runner
   updater: {
     check: () => electron.ipcRenderer.invoke("updater:check"),

@@ -74,20 +74,10 @@ import { registerColorPickerHandlers } from './ipc/color-picker'
 import { registerImageViewerHandlers } from './ipc/image-viewer'
 import { registerRSSReaderHandlers } from './ipc/rss-reader'
 import { registerRemoteDesktopHandlers } from './ipc/remote-desktop'
+import { setShellWindow, raiseShell, sinkShell, unpinShell, pinToDesktopLayer } from './shellControl'
 
 let mainWindow: BrowserWindow | null = null
 let screenLocked = false  // tracked in main so shortcuts can check it
-
-// Pin Electron to the desktop layer so every X11 app always floats above it.
-// Called after show and after unlock (lock screen uses setAlwaysOnTop to override).
-function pinToDesktopLayer(): void {
-  // below = always under X11 apps; sticky = visible on every virtual desktop
-  // so workspaces 2/3/4 show the Cryogram background rather than white X11 root
-  exec(
-    "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} sh -c 'wmctrl -i -r {} -b add,below && wmctrl -i -r {} -b add,sticky'",
-    () => {}
-  )
-}
 
 function lockScreen(): void {
   if (!mainWindow) return
@@ -118,6 +108,13 @@ function createWindow(): void {
       webviewTag: true,
     },
     icon: join(__dirname, '../../resources/icon.png'),
+  })
+
+  // Register shell window for raise/sink control
+  setShellWindow(mainWindow)
+  // When Electron loses focus to any X11 app, return to the desktop layer
+  mainWindow.on('blur', () => {
+    if (!screenLocked) sinkShell()
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -258,12 +255,16 @@ function createWindow(): void {
     }
 
     // ── Alt+Tab window switcher ────────────────────────────────────────────
+    // Raise Electron above all X11 apps first so the overlay is visible even
+    // when Cryogram is pinned below Brave or another X11 window.
     globalShortcut.register('Alt+Tab', () => {
       if (screenLocked) return
+      raiseShell()
       mainWindow?.webContents.send('app:switcher', 'next')
     })
     globalShortcut.register('Alt+Shift+Tab', () => {
       if (screenLocked) return
+      raiseShell()
       mainWindow?.webContents.send('app:switcher', 'prev')
     })
   })
@@ -296,6 +297,10 @@ app.whenReady().then(() => {
     else mainWindow?.maximize()
   })
   ipcMain.on('window:close', () => mainWindow?.close())
+
+  // Renderer requests shell layer changes (called by AppSwitcherOverlay)
+  ipcMain.on('shell:sink',  () => sinkShell())
+  ipcMain.on('shell:unpin', () => unpinShell())
 
   // Hide shell so an external X11 app can be seen; Super+D restores it
   ipcMain.handle('wm:hideShell', () => {

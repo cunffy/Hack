@@ -230,6 +230,12 @@ contextBridge.exposeInMainWorld('cryogram', {
     copyToClipboard:  (dataUrl: string)          => ipcRenderer.invoke('screenshot:copyToClipboard', dataUrl),
   },
 
+  // Shell layer control — raise/sink Electron relative to X11 apps
+  shell: {
+    sink:  () => ipcRenderer.send('shell:sink'),
+    unpin: () => ipcRenderer.send('shell:unpin'),
+  },
+
   // Update checker + runner
   updater: {
     check:      () => ipcRenderer.invoke('updater:check'),

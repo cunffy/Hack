@@ -3929,6 +3929,28 @@ function registerRemoteDesktopHandlers() {
     });
   });
 }
+let _win = null;
+function setShellWindow(win) {
+  _win = win;
+}
+function pinToDesktopLayer() {
+  child_process.exec(
+    "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} sh -c 'wmctrl -i -r {} -b add,below && wmctrl -i -r {} -b add,sticky'",
+    () => {
+    }
+  );
+}
+function raiseShell() {
+  _win?.setAlwaysOnTop(true, "pop-up-menu");
+  _win?.focus();
+}
+function sinkShell() {
+  _win?.setAlwaysOnTop(false);
+  setTimeout(pinToDesktopLayer, 50);
+}
+function unpinShell() {
+  _win?.setAlwaysOnTop(false);
+}
 electron.app.commandLine.appendSwitch("disable-features", "SpareRendererForSitePerProcess,TranslateUI,AutofillServerCommunication,HardwareMediaKeyHandling,MediaSessionService");
 electron.app.commandLine.appendSwitch("enable-gpu-rasterization");
 electron.app.commandLine.appendSwitch("enable-zero-copy");
@@ -3953,13 +3975,6 @@ if (!utils.is.dev) {
 }
 let mainWindow = null;
 let screenLocked = false;
-function pinToDesktopLayer() {
-  child_process.exec(
-    "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} sh -c 'wmctrl -i -r {} -b add,below && wmctrl -i -r {} -b add,sticky'",
-    () => {
-    }
-  );
-}
 function lockScreen() {
   if (!mainWindow) return;
   screenLocked = true;
@@ -3986,6 +4001,10 @@ function createWindow() {
       webviewTag: true
     },
     icon: path.join(__dirname, "../../resources/icon.png")
+  });
+  setShellWindow(mainWindow);
+  mainWindow.on("blur", () => {
+    if (!screenLocked) sinkShell();
   });
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
@@ -4115,10 +4134,12 @@ function createWindow() {
     }
     electron.globalShortcut.register("Alt+Tab", () => {
       if (screenLocked) return;
+      raiseShell();
       mainWindow?.webContents.send("app:switcher", "next");
     });
     electron.globalShortcut.register("Alt+Shift+Tab", () => {
       if (screenLocked) return;
+      raiseShell();
       mainWindow?.webContents.send("app:switcher", "prev");
     });
   });
@@ -4145,6 +4166,8 @@ electron.app.whenReady().then(() => {
     else mainWindow?.maximize();
   });
   electron.ipcMain.on("window:close", () => mainWindow?.close());
+  electron.ipcMain.on("shell:sink", () => sinkShell());
+  electron.ipcMain.on("shell:unpin", () => unpinShell());
   electron.ipcMain.handle("wm:hideShell", () => {
     mainWindow?.minimize();
     return true;
