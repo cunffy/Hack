@@ -81,8 +81,10 @@ let screenLocked = false  // tracked in main so shortcuts can check it
 // Pin Electron to the desktop layer so every X11 app always floats above it.
 // Called after show and after unlock (lock screen uses setAlwaysOnTop to override).
 function pinToDesktopLayer(): void {
+  // below = always under X11 apps; sticky = visible on every virtual desktop
+  // so workspaces 2/3/4 show the Cryogram background rather than white X11 root
   exec(
-    "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} wmctrl -i -r {} -b add,below",
+    "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} sh -c 'wmctrl -i -r {} -b add,below && wmctrl -i -r {} -b add,sticky'",
     () => {}
   )
 }

@@ -202,7 +202,13 @@ OB_CONF="/etc/xdg/openbox/cryogram-rc.xml"
 if [ -f "$OB_CONF" ]; then
   # Pin Cryogram to the desktop layer in openbox (never above normal windows)
   if ! grep -q 'class="cryogram"' "$OB_CONF"; then
-    sed -i 's|<applications>|<applications>\n    <application class="cryogram"><layer>below</layer><decor>no</decor><border>no</border><skip_taskbar>yes</skip_taskbar><skip_pager>yes</skip_pager></application>|' "$OB_CONF"
+    # desktop=all makes Electron visible on every virtual workspace (no white screen)
+    sed -i 's|<applications>|<applications>\n    <application class="cryogram"><layer>below</layer><decor>no</decor><border>no</border><skip_taskbar>yes</skip_taskbar><skip_pager>yes</skip_pager><desktop>all</desktop></application>|' "$OB_CONF"
+  else
+    # Upgrade existing rule: add sticky desktop if missing
+    if ! grep -qE 'class="cryogram"[^>]*>.*<desktop>' "$OB_CONF" && ! grep -q '<desktop>all</desktop>' "$OB_CONF"; then
+      sed -i 's|<application class="cryogram">\(.*\)</application>|<application class="cryogram">\1<desktop>all</desktop></application>|' "$OB_CONF"
+    fi
   fi
   # Enable right-click menu if not already wired up
   if ! grep -q 'cryogram-menu' "$OB_CONF"; then
@@ -228,13 +234,28 @@ exec pactl "$@"
 PACTL_WRAP
   chmod +x /usr/local/bin/cryogram-pactl
 
-  if ! grep -q 'XF86AudioRaiseVolume' "$OB_CONF"; then
-    echo "  [+] Patching openbox config with volume keybindings..."
-    sed -i 's|</keyboard>|  <keybind key="XF86AudioRaiseVolume"><action name="Execute"><execute>cryogram-pactl set-sink-volume @DEFAULT_SINK@ +5%</execute></action></keybind>\n    <keybind key="XF86AudioLowerVolume"><action name="Execute"><execute>cryogram-pactl set-sink-volume @DEFAULT_SINK@ -5%</execute></action></keybind>\n    <keybind key="XF86AudioMute"><action name="Execute"><execute>cryogram-pactl set-sink-mute @DEFAULT_SINK@ toggle</execute></action></keybind>\n  </keyboard>|' "$OB_CONF"
-  else
-    # Keybindings already exist — upgrade any bare 'pactl' calls to use the wrapper
-    sed -i 's|<execute>pactl |<execute>cryogram-pactl |g' "$OB_CONF"
-  fi
+  # Always force-replace volume keybindings so +5% / -5% / toggle are correct.
+  # Remove any existing XF86Audio bindings first (prevents duplicate or stale entries).
+  echo "  [+] Setting volume keybindings (force-replace)..."
+  python3 - "$OB_CONF" << 'PYFIX'
+import sys, re
+path = sys.argv[1]
+with open(path) as f:
+    data = f.read()
+# Strip any existing XF86Audio* keybind blocks
+data = re.sub(r'\s*<keybind key="XF86Audio[^"]*">.*?</keybind>', '', data, flags=re.DOTALL)
+# Insert fresh correct bindings before </keyboard>
+new_bindings = (
+    '  <keybind key="XF86AudioRaiseVolume"><action name="Execute"><execute>cryogram-pactl set-sink-volume @DEFAULT_SINK@ +5%</execute></action></keybind>\n'
+    '    <keybind key="XF86AudioLowerVolume"><action name="Execute"><execute>cryogram-pactl set-sink-volume @DEFAULT_SINK@ -5%</execute></action></keybind>\n'
+    '    <keybind key="XF86AudioMute"><action name="Execute"><execute>cryogram-pactl set-sink-mute @DEFAULT_SINK@ toggle</execute></action></keybind>\n'
+    '  </keyboard>'
+)
+data = data.replace('</keyboard>', new_bindings, 1)
+with open(path, 'w') as f:
+    f.write(data)
+print("  Volume keybindings replaced.")
+PYFIX
   # Ensure 4 workspaces for Super+1–4 switching
   sed -i 's|<desktops>[^<]*<number>[0-9]*</number>[^<]*</desktops>|<desktops><number>4</number></desktops>|' "$OB_CONF" 2>/dev/null || true
   if ! grep -q '<number>4</number>' "$OB_CONF"; then

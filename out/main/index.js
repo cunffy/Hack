@@ -3954,7 +3954,7 @@ let mainWindow = null;
 let screenLocked = false;
 function pinToDesktopLayer() {
   child_process.exec(
-    "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} wmctrl -i -r {} -b add,below",
+    "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} sh -c 'wmctrl -i -r {} -b add,below && wmctrl -i -r {} -b add,sticky'",
     () => {
     }
   );
