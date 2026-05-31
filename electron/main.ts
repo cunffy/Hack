@@ -293,6 +293,13 @@ function createWindow(): void {
   }
 }
 
+// Prevent double-start: if another instance is already running (e.g., the
+// session loop races with app.relaunch() after an update), quit immediately.
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+  process.exit(0)
+}
+
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.cryogram.app')
 

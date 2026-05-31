@@ -142,11 +142,16 @@ export function registerUpdaterHandlers(): void {
       })
 
       proc.on('close', (code) => {
-        if (code === null || code === 0) {
-          // Script finished — restart Electron itself cleanly.
-          // resolve() first so the renderer sees "All done" and shows the countdown UI.
-          // Then relaunch() + exit(0) after 2 s, which is more reliable than pkill
-          // because it uses the actual binary path regardless of how the process was named.
+        if (code === null) {
+          // Electron was killed externally (pkill from setup-updater.sh).
+          // The session loop or a fresh cryogram-session handles the restart.
+          // This branch normally never executes (Electron is already dead), but
+          // resolve() is here as a safety net if the process tree is unusual.
+          resolve({ success: true })
+        } else if (code === 0) {
+          // Script exited cleanly without killing Electron (edge case — pkill failed).
+          // Use app.relaunch() as fallback; requestSingleInstanceLock() prevents
+          // a double-start if the session loop also kicks in.
           resolve({ success: true })
           const { app } = require('electron')
           app.relaunch()

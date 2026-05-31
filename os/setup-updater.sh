@@ -344,10 +344,18 @@ usermod -a -G video cryogram 2>/dev/null || true
 find /sys/class/backlight -name brightness -exec chmod g+w {} \; 2>/dev/null || true
 
 # ── Restart the app ───────────────────────────────────────────────────────────
-# Electron restarts itself via app.relaunch() + app.exit(0) after the update
-# script exits cleanly (code 0). We do NOT kill Electron here — the old pkill
-# pattern "electron.*out/main" never matched the actual binary (/usr/local/bin/cryogram),
-# which is why updates always produced a black screen instead of restarting.
+# Kill the running session loop and Cryogram, then start a fresh cryogram-session.
+# This guarantees we're running the NEW session script (with the || true restart
+# loop) even if the user had an old broken session loop still in memory.
+# We use pkill -x cryogram (exact binary name) — the old pattern
+# "electron.*out/main" never matched the actual binary and caused black screens.
 echo ""
 echo "  ✓ All done! Cryogram is restarting..."
 echo ""
+sleep 2
+pkill -9 -f "cryogram-session" 2>/dev/null || true
+pkill -9 -x cryogram 2>/dev/null || true
+sleep 1
+if id cryogram &>/dev/null; then
+  su -c "DISPLAY=:0 nohup /usr/local/bin/cryogram-session > /tmp/cryogram-session.log 2>&1 &" cryogram || true
+fi

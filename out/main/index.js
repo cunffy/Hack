@@ -1213,7 +1213,9 @@ function registerUpdaterHandlers() {
         if (!s.match(/^\[sudo\]|password for |Sorry, try again/)) send(s);
       });
       proc2.on("close", (code) => {
-        if (code === null || code === 0) {
+        if (code === null) {
+          resolve({ success: true });
+        } else if (code === 0) {
           resolve({ success: true });
           const { app } = require("electron");
           app.relaunch();
@@ -4160,6 +4162,10 @@ function createWindow() {
   } else {
     mainWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
   }
+}
+if (!electron.app.requestSingleInstanceLock()) {
+  electron.app.quit();
+  process.exit(0);
 }
 electron.app.whenReady().then(() => {
   utils.electronApp.setAppUserModelId("com.cryogram.app");
