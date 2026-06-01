@@ -4057,14 +4057,6 @@ function createWindow() {
     });
     electron.globalShortcut.register("Super+Tab", () => {
     });
-    [1, 2, 3, 4].forEach((n) => {
-      electron.globalShortcut.register(`Super+${n}`, () => {
-        if (screenLocked) return;
-        const { exec: exec2 } = require("child_process");
-        exec2(`wmctrl -s ${n - 1} 2>/dev/null`);
-        mainWindow?.webContents.send("workspace:changed", n - 1);
-      });
-    });
     electron.globalShortcut.register("Super+L", () => lockScreen());
     const snapX11 = (side) => {
       const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;

@@ -153,15 +153,6 @@ function createWindow(): void {
       raiseShell()
     })
     globalShortcut.register('Super+Tab', () => {})
-    // Workspace switching
-    ;[1, 2, 3, 4].forEach(n => {
-      globalShortcut.register(`Super+${n}`, () => {
-        if (screenLocked) return
-        const { exec } = require('child_process')
-        exec(`wmctrl -s ${n - 1} 2>/dev/null`)
-        mainWindow?.webContents.send('workspace:changed', n - 1)
-      })
-    })
     globalShortcut.register('Super+L', () => lockScreen())
 
     // ── Window snapping ────────────────────────────────────────────────────

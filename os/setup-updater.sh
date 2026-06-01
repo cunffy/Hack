@@ -293,10 +293,12 @@ with open(path, 'w') as f:
     f.write(data)
 print("  Volume keybindings replaced.")
 PYFIX
-  # Ensure 4 workspaces for Super+1–4 switching
-  sed -i 's|<desktops>[^<]*<number>[0-9]*</number>[^<]*</desktops>|<desktops><number>4</number></desktops>|' "$OB_CONF" 2>/dev/null || true
-  if ! grep -q '<number>4</number>' "$OB_CONF"; then
-    sed -i 's|<desktops>|<desktops><number>4</number>|' "$OB_CONF" 2>/dev/null || true
+  # 1 workspace — eliminates the grey-screen-on-other-workspaces bug.
+  # Cryogram is a single-workspace desktop OS; virtual desktop switching
+  # only caused confusion and grey screens when accidentally triggered.
+  sed -i 's|<desktops>[^<]*<number>[0-9]*</number>[^<]*</desktops>|<desktops><number>1</number></desktops>|' "$OB_CONF" 2>/dev/null || true
+  if ! grep -q '<number>1</number>' "$OB_CONF"; then
+    sed -i 's|<desktops>|<desktops><number>1</number>|' "$OB_CONF" 2>/dev/null || true
   fi
 fi
 
@@ -387,20 +389,8 @@ find /sys/class/backlight -name brightness -exec chmod g+w {} \; 2>/dev/null || 
 echo ""
 echo "  ✓ All done! Cryogram is restarting..."
 echo ""
-sleep 1
-
-# Kill Electron — try multiple name/path patterns to be safe.
-pkill -9 -x cryogram 2>/dev/null || \
-  pkill -9 -f "/opt/cryogram/cryogram" 2>/dev/null || \
-  pkill -9 -f "out/main/index.js" 2>/dev/null || true
-
-sleep 2
-
-# If the session loop is no longer running (e.g. it was killed by a previous
-# broken update), start a fresh one so Electron actually comes back.
-if ! pgrep -f "cryogram-session" > /dev/null 2>&1; then
-  echo "  [restart] Session loop not running — starting fresh cryogram-session..."
-  if id cryogram &>/dev/null; then
-    su -c "DISPLAY=:0 nohup /usr/local/bin/cryogram-session > /tmp/cryogram-session.log 2>&1 &" cryogram || true
-  fi
-fi
+# DO NOT kill Electron here. The updater IPC handler (updater.ts) calls
+# app.exit(0) after this script exits with code 0 — Electron exits cleanly,
+# the session loop catches the exit and restarts with the new code.
+# Killing Electron from here means proc.on('close') fires in a dead process
+# and app.exit(0) never runs, causing the black screen.
