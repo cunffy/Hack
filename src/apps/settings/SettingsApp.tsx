@@ -227,6 +227,7 @@ function ProfilePanel() {
   const save = async () => {
     await window.cryogram.settings.set('profile.name', name)
     await window.cryogram.settings.set('profile.email', email)
+    window.dispatchEvent(new CustomEvent('cryogram:profileUpdated'))
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }

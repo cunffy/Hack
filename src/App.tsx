@@ -258,7 +258,7 @@ export default function App() {
                 src={wallpaper.startsWith('file://') ? wallpaper : `file://${wallpaper}`}
                 alt=""
                 className="absolute inset-0 w-full h-full pointer-events-none"
-                style={{ objectFit: 'cover', objectPosition: 'center' }}
+                style={{ objectFit: 'cover', objectPosition: 'center', imageRendering: 'high-quality', willChange: 'transform' }}
                 draggable={false}
               />
             )}
