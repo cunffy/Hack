@@ -119,6 +119,9 @@ fi
 update-ca-certificates --fresh 2>/dev/null || true
 export GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt
 git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
+# Allow git to operate on a directory owned by a different user (root runs
+# git on a repo owned by the cryogram system user — without this git refuses).
+git config --global --add safe.directory "\$SRC"
 
 if [ ! -d "\$SRC/.git" ]; then
   echo "── First run: cloning source repository..."
