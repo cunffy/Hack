@@ -365,18 +365,13 @@ usermod -a -G video cryogram 2>/dev/null || true
 find /sys/class/backlight -name brightness -exec chmod g+w {} \; 2>/dev/null || true
 
 # ── Restart the app ───────────────────────────────────────────────────────────
-# Kill the running session loop and Cryogram, then start a fresh cryogram-session.
-# This guarantees we're running the NEW session script (with the || true restart
-# loop) even if the user had an old broken session loop still in memory.
-# We use pkill -x cryogram (exact binary name) — the old pattern
-# "electron.*out/main" never matched the actual binary and caused black screens.
+# Only kill the Electron binary — the existing cryogram-session loop (while true)
+# will restart it within 1 second automatically. Killing the whole session and
+# starting a fresh one is fragile (DISPLAY, su, nohup races) and caused the
+# permanent black screen. The loop is already running and reliable; use it.
 echo ""
 echo "  ✓ All done! Cryogram is restarting..."
 echo ""
-sleep 2
-pkill -9 -f "cryogram-session" 2>/dev/null || true
-pkill -9 -x cryogram 2>/dev/null || true
 sleep 1
-if id cryogram &>/dev/null; then
-  su -c "DISPLAY=:0 nohup /usr/local/bin/cryogram-session > /tmp/cryogram-session.log 2>&1 &" cryogram || true
-fi
+pkill -9 -x cryogram 2>/dev/null || pkill -9 -f "/opt/cryogram/cryogram" 2>/dev/null || true
+# Session loop restarts cryogram within 1 second — no further action needed.

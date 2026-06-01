@@ -1234,8 +1234,7 @@ function registerUpdaterHandlers() {
         } else if (code === 0) {
           resolve({ success: true });
           const { app } = require("electron");
-          app.relaunch();
-          setTimeout(() => app.exit(0), 2e3);
+          setTimeout(() => app.exit(0), 1500);
         } else if (!isRoot() && code === 1) {
           reject(new Error("wrong-password"));
         } else {

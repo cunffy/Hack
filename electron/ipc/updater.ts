@@ -149,13 +149,11 @@ export function registerUpdaterHandlers(): void {
           // resolve() is here as a safety net if the process tree is unusual.
           resolve({ success: true })
         } else if (code === 0) {
-          // Script exited cleanly without killing Electron (edge case — pkill failed).
-          // Use app.relaunch() as fallback; requestSingleInstanceLock() prevents
-          // a double-start if the session loop also kicks in.
+          // Script exited cleanly. pkill may or may not have killed Electron.
+          // Exit this instance — the session loop (while true) restarts it within 1s.
           resolve({ success: true })
           const { app } = require('electron')
-          app.relaunch()
-          setTimeout(() => app.exit(0), 2000)
+          setTimeout(() => app.exit(0), 1500)
         } else if (!isRoot() && code === 1) {
           reject(new Error('wrong-password'))
         } else {
