@@ -14,6 +14,7 @@ export interface AppWindow {
   maximized: boolean
   focused: boolean
   zIndex: number
+  native?: boolean
   prevBounds?: { x: number; y: number; width: number; height: number }
 }
 
@@ -96,51 +97,42 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   nextZ: 10,
 
   openApp(appId) {
-    // External apps — launch via OS rather than opening an internal window.
     if (appId === 'brave') {
       try {
         const api = (window as any).cryogram
-        // Empty desktopFile forces exec fallback (gio launch skips our custom flags).
-        // --password-store=basic: skip gnome-keyring prompt on every launch.
-        // --start-maximized: open fullscreen like a proper OS browser.
         api?.launcher?.launch({ exec: 'brave-browser --password-store=basic --start-maximized', name: 'Brave', icon: '', comment: '', categories: ['Network'], category: 'Other', desktopFile: '', terminal: false })
       } catch {}
       return
     }
 
-    // Restore/focus existing window — never open a second instance of the same app.
-    // This matches macOS/Windows behaviour: clicking the dock/taskbar icon brings
-    // the window back rather than spawning a duplicate.
+    // Focus existing native window if already open
     const existing = get().windows.find(w => w.appId === appId)
     if (existing) {
+      ;(window as any).cryogram?.shell?.openAppWindow?.(appId).catch?.(() => {})
       get().restoreWindow(existing.id)
       return
     }
 
     const meta = APP_META[appId]
     const id = `${appId}-${++instanceCounter}`
-    const offset = (get().windows.length % 8) * 24
-    const z = get().nextZ
 
-    set((s) => ({
-      nextZ: s.nextZ + 1,
-      windows: [
-        ...s.windows.map((w) => ({ ...w, focused: false })),
-        {
-          id,
-          appId,
-          title: meta.title,
-          x: 60 + offset,
-          y: 60 + offset,
-          width: meta.width,
-          height: meta.height,
-          minimized: false,
-          maximized: false,
-          focused: true,
-          zIndex: z,
-        },
-      ],
-    }))
+    // Open as native BrowserWindow; update store when it opens
+    ;(window as any).cryogram?.shell?.openAppWindow?.(appId)
+      .then?.(() => {
+        set(s => ({
+          nextZ: s.nextZ + 1,
+          windows: [
+            ...s.windows.map(w => ({ ...w, focused: false })),
+            {
+              id, appId, title: meta.title,
+              x: 0, y: 0, width: meta.width, height: meta.height,
+              minimized: false, maximized: false, focused: true,
+              zIndex: s.nextZ, native: true,
+            },
+          ],
+        }))
+      })
+      .catch?.(() => {})
   },
 
   closeWindow(id) {

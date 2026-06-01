@@ -166,16 +166,26 @@ function createWindow(): void {
     // the window:snap event sent below.
     const snapX11 = (side: 'left' | 'right' | 'max') => {
       const { width, height } = electronScreen.getPrimaryDisplay().workAreaSize
-      const TB = 28 // titlebar height
-      exec("xdotool getactivewindow getwindowclassname 2>/dev/null", (_err, cls) => {
-        if (!cls || cls.trim().toLowerCase().includes('cryogram')) return
+      const TB = 28
+      exec('xdotool getactivewindow', (_err, xidStr) => {
+        const xid = xidStr?.trim()
+        if (!xid) return
+        // Skip if active window IS the main desktop shell
+        try {
+          const mainNativeId = mainWindow?.getNativeWindowHandle().readUInt32LE(0)
+          if (mainNativeId) {
+            const mainXid = `0x${mainNativeId.toString(16)}`
+            const decXid = String(mainNativeId)
+            if (xid === mainXid || xid === decXid) return
+          }
+        } catch {}
         if (side === 'max') {
-          exec('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz 2>/dev/null', () => {})
+          exec(`wmctrl -i -r ${xid} -b add,maximized_vert,maximized_horz 2>/dev/null || true`, () => {})
         } else {
           const x = side === 'left' ? 0 : Math.floor(width / 2)
           const w = Math.floor(width / 2)
           const h = height - TB
-          exec(`wmctrl -r :ACTIVE: -b remove,maximized_vert,maximized_horz 2>/dev/null; wmctrl -r :ACTIVE: -e 0,${x},${TB},${w},${h} 2>/dev/null`, () => {})
+          exec(`wmctrl -i -r ${xid} -b remove,maximized_vert,maximized_horz 2>/dev/null; wmctrl -i -r ${xid} -e 0,${x},${TB},${w},${h} 2>/dev/null || true`, () => {})
         }
       })
     }
@@ -204,20 +214,25 @@ function createWindow(): void {
       XDG_RUNTIME_DIR: process.env['XDG_RUNTIME_DIR'] ?? `/run/user/${uid === 0 ? 1000 : uid}`,
     }
 
+    const execVol = (delta: string) => {
+      exec(`pactl set-sink-volume @DEFAULT_SINK@ ${delta} 2>/dev/null || pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r -I{} pactl set-sink-volume {} ${delta} 2>/dev/null || true`, { env: audioEnv })
+    }
+    const readVolCmd = `pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null || pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r pactl get-sink-volume 2>/dev/null`
+    const readMuteCmd = `pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null || pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r pactl get-sink-mute 2>/dev/null`
+
     const readVolAndSend = () => {
-      exec('pactl get-sink-volume @DEFAULT_SINK@', { env: audioEnv }, (err, volOut) => {
+      exec(readVolCmd, { env: audioEnv }, (err, volOut) => {
         if (err || !volOut) return
         const match = volOut.match(/(\d+)%/)
         if (!match) return
         _vol = Math.min(100, parseInt(match[1]))
-        exec('pactl get-sink-mute @DEFAULT_SINK@', { env: audioEnv }, (_, muteOut) => {
+        exec(readMuteCmd, { env: audioEnv }, (_, muteOut) => {
           mainWindow?.webContents.send('hud:volume', { level: _vol, muted: muteOut?.includes('yes') ?? false })
         })
       })
     }
 
-    // Read current volume immediately so _vol is set before first keypress.
-    // Without this, the first VolumeUp/Down press skips the optimistic HUD.
+    // Read current volume immediately
     readVolAndSend()
 
     const sendVolOptimistic = (delta: number) => {
@@ -228,15 +243,15 @@ function createWindow(): void {
     }
 
     globalShortcut.register('VolumeUp', () => {
-      exec('pactl set-sink-volume @DEFAULT_SINK@ +5%', { env: audioEnv })
+      execVol('+5%')
       sendVolOptimistic(5)
     })
     globalShortcut.register('VolumeDown', () => {
-      exec('pactl set-sink-volume @DEFAULT_SINK@ -5%', { env: audioEnv })
+      execVol('-5%')
       sendVolOptimistic(-5)
     })
     globalShortcut.register('VolumeMute', () => {
-      exec('pactl set-sink-mute @DEFAULT_SINK@ toggle', { env: audioEnv })
+      exec(`pactl set-sink-mute @DEFAULT_SINK@ toggle 2>/dev/null || pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r -I{} pactl set-sink-mute {} toggle 2>/dev/null || true`, { env: audioEnv })
       setTimeout(readVolAndSend, 300)
     })
 
@@ -300,6 +315,9 @@ if (!app.requestSingleInstanceLock()) {
   process.exit(0)
 }
 
+// Map of open app windows spawned as separate BrowserWindows
+const appWindowMap = new Map<number, { win: BrowserWindow; appId: string }>()
+
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.cryogram.app')
 
@@ -320,6 +338,93 @@ app.whenReady().then(() => {
   // Renderer requests shell layer changes (called by AppSwitcherOverlay)
   ipcMain.on('shell:sink',  () => sinkShell())
   ipcMain.on('shell:unpin', () => unpinShell())
+
+  // ── App windows: each Cryogram app as its own BrowserWindow ──────────────────
+  ipcMain.handle('shell:open-app-window', (_, appId: string) => {
+    // Focus existing window if already open
+    for (const [id, { win, appId: aid }] of appWindowMap) {
+      if (aid === appId && !win.isDestroyed()) {
+        win.show()
+        win.focus()
+        return id
+      }
+    }
+
+    const display = electronScreen.getPrimaryDisplay()
+    const { width, height } = display.workAreaSize
+    const defaultSizes: Record<string, [number, number]> = {
+      terminal: [900, 580], editor: [1100, 740], 'password-tester': [820, 620],
+      leaker: [860, 560], settings: [760, 560], system: [760, 560], files: [860, 580],
+      launcher: [760, 560], opticseo: [1280, 820], phone: [780, 600], scanner: [900, 620],
+      vpn: [720, 560], notes: [820, 580], mail: [1100, 780], passwords: [860, 600],
+      'ssh-keys': [820, 600], firewall: [780, 580], 'task-manager': [900, 600],
+      logs: [960, 640], netmon: [900, 600], screenshot: [900, 640], calculator: [560, 520],
+      'crypto-tools': [720, 580], 'api-tester': [1100, 720], 'cert-inspector': [780, 580],
+      docker: [960, 640], git: [980, 640], database: [960, 640], markdown: [1000, 680],
+      trash: [820, 560], shodan: [1100, 720], osint: [1060, 700], cve: [1060, 700],
+      'ai-assistant': [820, 640], wordlists: [900, 600], 'json-explorer': [1060, 680],
+      totp: [760, 540], regex: [900, 640], 'encoding-chain': [980, 640],
+      'packet-sniffer': [1100, 680], backup: [820, 580], 'password-health': [760, 580],
+      pomodoro: [560, 700], 'audit-log': [980, 640], 'code-scanner': [1060, 700],
+      wallpaper: [820, 580], 'clipboard-history': [720, 580], 'color-picker': [680, 560],
+      'unit-converter': [680, 520], 'world-clock': [780, 520], 'image-viewer': [960, 700],
+      'rss-reader': [1000, 680], 'remote-desktop': [860, 600],
+    }
+    const [w, h] = defaultSizes[appId] || [920, 640]
+    const x = Math.max(0, Math.floor((width - w) / 2))
+    const y = Math.max(0, Math.floor((height - h) / 2))
+
+    const win = new BrowserWindow({
+      width: w, height: h, x, y,
+      minWidth: 380, minHeight: 280,
+      frame: false,
+      backgroundColor: '#070b11',
+      webPreferences: {
+        preload: join(__dirname, '../preload/index.js'),
+        sandbox: false,
+        contextIsolation: true,
+        nodeIntegration: false,
+        webviewTag: true,
+      },
+      show: false,
+    })
+
+    if (is.dev) {
+      win.loadURL(`${process.env['ELECTRON_RENDERER_URL']}?standalone=${encodeURIComponent(appId)}`)
+    } else {
+      win.loadFile(join(__dirname, '../renderer/index.html'), {
+        query: { standalone: appId }
+      })
+    }
+
+    win.once('ready-to-show', () => {
+      win.show()
+      win.focus()
+      // Remove any Openbox below-layer rule that may have applied to cryogram-class windows
+      try {
+        const nativeId = win.getNativeWindowHandle().readUInt32LE(0)
+        exec(`wmctrl -i -r 0x${nativeId.toString(16)} -b remove,below 2>/dev/null || true`, () => {})
+      } catch {}
+    })
+
+    const winId = win.id
+    appWindowMap.set(winId, { win, appId })
+
+    win.on('closed', () => {
+      appWindowMap.delete(winId)
+      mainWindow?.webContents.send('app-window:closed', appId)
+    })
+
+    return winId
+  })
+
+  ipcMain.on('shell:winctrl-close',    (e) => BrowserWindow.fromWebContents(e.sender)?.close())
+  ipcMain.on('shell:winctrl-minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize())
+  ipcMain.on('shell:winctrl-maximize', (e) => {
+    const w = BrowserWindow.fromWebContents(e.sender)
+    if (!w) return
+    w.isMaximized() ? w.unmaximize() : w.maximize()
+  })
 
   // Hide shell so an external X11 app can be seen; Super+D restores it
   ipcMain.handle('wm:hideShell', () => {

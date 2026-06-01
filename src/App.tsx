@@ -23,6 +23,7 @@ import { KeyboardShortcutsOverlay } from './components/KeyboardShortcutsOverlay'
 import { useDesktopStore } from './store/desktopStore'
 import { useLockStore } from './store/lockStore'
 import { useWindowStore } from './store/windowStore'
+import { StandaloneApp } from './components/StandaloneApp'
 
 interface UpdateInfo { commitCount: number; changes: string[] }
 
@@ -218,6 +219,21 @@ export default function App() {
     ;(window as any).__cryogram_toggleNotifHistory = () => setNotifHistoryOpen(o => !o)
     return () => { delete (window as any).__cryogram_toggleNotifHistory }
   }, [])
+
+  // Standalone mode: this BrowserWindow shows only one app (e.g., Terminal)
+  const standaloneApp = new URLSearchParams(window.location.search).get('standalone')
+
+  // Sync native window close events back to the window store
+  useEffect(() => {
+    const cleanup = (window.cryogram as any).shell?.onAppWindowClosed?.((appId: string) => {
+      const wins = useWindowStore.getState().windows
+      const w = wins.find(w => w.appId === appId)
+      if (w) useWindowStore.getState().closeWindow(w.id)
+    })
+    return cleanup ?? undefined
+  }, [])
+
+  if (standaloneApp) return <StandaloneApp appId={standaloneApp} />
 
   return (
     <ThemeProvider>

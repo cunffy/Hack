@@ -68,6 +68,12 @@ for pkg in xdotool wmctrl rsync pulseaudio-utils brightnessctl; do
   fi
 done
 
+# Ensure PipeWire's PulseAudio compatibility layer is installed for pactl to work
+if command -v pipewire &>/dev/null && ! command -v pipewire-pulse &>/dev/null; then
+  echo "  [pre] Installing pipewire-pulse (required for pactl volume control)..."
+  apt-get install -y -qq pipewire-pulse 2>/dev/null || true
+fi
+
 # ── Sanity checks ─────────────────────────────────────────────────────────────
 if [ ! -d "$DEST/out" ]; then
   echo "  ERROR: $DEST/out not found — is Cryogram OS installed at $DEST?"
@@ -312,6 +318,10 @@ if command -v pipewire &>/dev/null && ! pgrep -x pipewire > /dev/null 2>&1; then
 elif command -v pulseaudio &>/dev/null && ! pgrep -x pulseaudio > /dev/null 2>&1; then
   pulseaudio --start --exit-idle-time=-1 2>/dev/null || true
 fi
+
+# Set default audio sink if PipeWire/PulseAudio started without one
+(sleep 3 && pactl set-default-sink @DEFAULT_SINK@ 2>/dev/null || \
+  pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r pactl set-default-sink 2>/dev/null || true) &
 
 # On live boot: launch installer after desktop loads
 if grep -q "boot=live" /proc/cmdline 2>/dev/null; then

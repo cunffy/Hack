@@ -3935,11 +3935,19 @@ function setShellWindow(win) {
   _win = win;
 }
 function pinToDesktopLayer() {
-  child_process.exec(
-    "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} sh -c 'wmctrl -i -r {} -b add,below && wmctrl -i -r {} -b add,sticky'",
-    () => {
-    }
-  );
+  if (!_win) return;
+  try {
+    const nativeId = _win.getNativeWindowHandle().readUInt32LE(0);
+    const xid = `0x${nativeId.toString(16)}`;
+    child_process.exec(`wmctrl -i -r ${xid} -b add,below,sticky 2>/dev/null || true`, () => {
+    });
+  } catch {
+    child_process.exec(
+      "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} sh -c 'wmctrl -i -r {} -b add,below && wmctrl -i -r {} -b add,sticky'",
+      () => {
+      }
+    );
+  }
 }
 function raiseShell() {
   _win?.setAlwaysOnTop(true, "pop-up-menu");
@@ -3947,7 +3955,7 @@ function raiseShell() {
 }
 function sinkShell() {
   _win?.setAlwaysOnTop(false);
-  setTimeout(pinToDesktopLayer, 50);
+  pinToDesktopLayer();
 }
 function unpinShell() {
   _win?.setAlwaysOnTop(false);
@@ -4042,16 +4050,26 @@ function createWindow() {
     const snapX11 = (side) => {
       const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize;
       const TB = 28;
-      child_process.exec("xdotool getactivewindow getwindowclassname 2>/dev/null", (_err, cls) => {
-        if (!cls || cls.trim().toLowerCase().includes("cryogram")) return;
+      child_process.exec("xdotool getactivewindow", (_err, xidStr) => {
+        const xid = xidStr?.trim();
+        if (!xid) return;
+        try {
+          const mainNativeId = mainWindow?.getNativeWindowHandle().readUInt32LE(0);
+          if (mainNativeId) {
+            const mainXid = `0x${mainNativeId.toString(16)}`;
+            const decXid = String(mainNativeId);
+            if (xid === mainXid || xid === decXid) return;
+          }
+        } catch {
+        }
         if (side === "max") {
-          child_process.exec("wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz 2>/dev/null", () => {
+          child_process.exec(`wmctrl -i -r ${xid} -b add,maximized_vert,maximized_horz 2>/dev/null || true`, () => {
           });
         } else {
           const x = side === "left" ? 0 : Math.floor(width / 2);
           const w = Math.floor(width / 2);
           const h = height - TB;
-          child_process.exec(`wmctrl -r :ACTIVE: -b remove,maximized_vert,maximized_horz 2>/dev/null; wmctrl -r :ACTIVE: -e 0,${x},${TB},${w},${h} 2>/dev/null`, () => {
+          child_process.exec(`wmctrl -i -r ${xid} -b remove,maximized_vert,maximized_horz 2>/dev/null; wmctrl -i -r ${xid} -e 0,${x},${TB},${w},${h} 2>/dev/null || true`, () => {
           });
         }
       });
@@ -4089,13 +4107,18 @@ function createWindow() {
       ...process.env,
       XDG_RUNTIME_DIR: process.env["XDG_RUNTIME_DIR"] ?? `/run/user/${uid === 0 ? 1e3 : uid}`
     };
+    const execVol = (delta) => {
+      child_process.exec(`pactl set-sink-volume @DEFAULT_SINK@ ${delta} 2>/dev/null || pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r -I{} pactl set-sink-volume {} ${delta} 2>/dev/null || true`, { env: audioEnv2 });
+    };
+    const readVolCmd = `pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null || pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r pactl get-sink-volume 2>/dev/null`;
+    const readMuteCmd = `pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null || pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r pactl get-sink-mute 2>/dev/null`;
     const readVolAndSend = () => {
-      child_process.exec("pactl get-sink-volume @DEFAULT_SINK@", { env: audioEnv2 }, (err, volOut) => {
+      child_process.exec(readVolCmd, { env: audioEnv2 }, (err, volOut) => {
         if (err || !volOut) return;
         const match = volOut.match(/(\d+)%/);
         if (!match) return;
         _vol = Math.min(100, parseInt(match[1]));
-        child_process.exec("pactl get-sink-mute @DEFAULT_SINK@", { env: audioEnv2 }, (_, muteOut) => {
+        child_process.exec(readMuteCmd, { env: audioEnv2 }, (_, muteOut) => {
           mainWindow?.webContents.send("hud:volume", { level: _vol, muted: muteOut?.includes("yes") ?? false });
         });
       });
@@ -4107,15 +4130,15 @@ function createWindow() {
       setTimeout(readVolAndSend, 300);
     };
     electron.globalShortcut.register("VolumeUp", () => {
-      child_process.exec("pactl set-sink-volume @DEFAULT_SINK@ +5%", { env: audioEnv2 });
+      execVol("+5%");
       sendVolOptimistic(5);
     });
     electron.globalShortcut.register("VolumeDown", () => {
-      child_process.exec("pactl set-sink-volume @DEFAULT_SINK@ -5%", { env: audioEnv2 });
+      execVol("-5%");
       sendVolOptimistic(-5);
     });
     electron.globalShortcut.register("VolumeMute", () => {
-      child_process.exec("pactl set-sink-mute @DEFAULT_SINK@ toggle", { env: audioEnv2 });
+      child_process.exec(`pactl set-sink-mute @DEFAULT_SINK@ toggle 2>/dev/null || pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r -I{} pactl set-sink-mute {} toggle 2>/dev/null || true`, { env: audioEnv2 });
       setTimeout(readVolAndSend, 300);
     });
     let _brightness = -1;
@@ -4167,6 +4190,7 @@ if (!electron.app.requestSingleInstanceLock()) {
   electron.app.quit();
   process.exit(0);
 }
+const appWindowMap = /* @__PURE__ */ new Map();
 electron.app.whenReady().then(() => {
   utils.electronApp.setAppUserModelId("com.cryogram.app");
   child_process.exec("chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true", () => {
@@ -4182,6 +4206,124 @@ electron.app.whenReady().then(() => {
   electron.ipcMain.on("window:close", () => mainWindow?.close());
   electron.ipcMain.on("shell:sink", () => sinkShell());
   electron.ipcMain.on("shell:unpin", () => unpinShell());
+  electron.ipcMain.handle("shell:open-app-window", (_, appId) => {
+    for (const [id, { win: win2, appId: aid }] of appWindowMap) {
+      if (aid === appId && !win2.isDestroyed()) {
+        win2.show();
+        win2.focus();
+        return id;
+      }
+    }
+    const display = electron.screen.getPrimaryDisplay();
+    const { width, height } = display.workAreaSize;
+    const defaultSizes = {
+      terminal: [900, 580],
+      editor: [1100, 740],
+      "password-tester": [820, 620],
+      leaker: [860, 560],
+      settings: [760, 560],
+      system: [760, 560],
+      files: [860, 580],
+      launcher: [760, 560],
+      opticseo: [1280, 820],
+      phone: [780, 600],
+      scanner: [900, 620],
+      vpn: [720, 560],
+      notes: [820, 580],
+      mail: [1100, 780],
+      passwords: [860, 600],
+      "ssh-keys": [820, 600],
+      firewall: [780, 580],
+      "task-manager": [900, 600],
+      logs: [960, 640],
+      netmon: [900, 600],
+      screenshot: [900, 640],
+      calculator: [560, 520],
+      "crypto-tools": [720, 580],
+      "api-tester": [1100, 720],
+      "cert-inspector": [780, 580],
+      docker: [960, 640],
+      git: [980, 640],
+      database: [960, 640],
+      markdown: [1e3, 680],
+      trash: [820, 560],
+      shodan: [1100, 720],
+      osint: [1060, 700],
+      cve: [1060, 700],
+      "ai-assistant": [820, 640],
+      wordlists: [900, 600],
+      "json-explorer": [1060, 680],
+      totp: [760, 540],
+      regex: [900, 640],
+      "encoding-chain": [980, 640],
+      "packet-sniffer": [1100, 680],
+      backup: [820, 580],
+      "password-health": [760, 580],
+      pomodoro: [560, 700],
+      "audit-log": [980, 640],
+      "code-scanner": [1060, 700],
+      wallpaper: [820, 580],
+      "clipboard-history": [720, 580],
+      "color-picker": [680, 560],
+      "unit-converter": [680, 520],
+      "world-clock": [780, 520],
+      "image-viewer": [960, 700],
+      "rss-reader": [1e3, 680],
+      "remote-desktop": [860, 600]
+    };
+    const [w, h] = defaultSizes[appId] || [920, 640];
+    const x = Math.max(0, Math.floor((width - w) / 2));
+    const y = Math.max(0, Math.floor((height - h) / 2));
+    const win = new electron.BrowserWindow({
+      width: w,
+      height: h,
+      x,
+      y,
+      minWidth: 380,
+      minHeight: 280,
+      frame: false,
+      backgroundColor: "#070b11",
+      webPreferences: {
+        preload: path.join(__dirname, "../preload/index.js"),
+        sandbox: false,
+        contextIsolation: true,
+        nodeIntegration: false,
+        webviewTag: true
+      },
+      show: false
+    });
+    if (utils.is.dev) {
+      win.loadURL(`${process.env["ELECTRON_RENDERER_URL"]}?standalone=${encodeURIComponent(appId)}`);
+    } else {
+      win.loadFile(path.join(__dirname, "../renderer/index.html"), {
+        query: { standalone: appId }
+      });
+    }
+    win.once("ready-to-show", () => {
+      win.show();
+      win.focus();
+      try {
+        const nativeId = win.getNativeWindowHandle().readUInt32LE(0);
+        child_process.exec(`wmctrl -i -r 0x${nativeId.toString(16)} -b remove,below 2>/dev/null || true`, () => {
+        });
+      } catch {
+      }
+    });
+    const winId = win.id;
+    appWindowMap.set(winId, { win, appId });
+    win.on("closed", () => {
+      appWindowMap.delete(winId);
+      mainWindow?.webContents.send("app-window:closed", appId);
+    });
+    return winId;
+  });
+  electron.ipcMain.on("shell:winctrl-close", (e) => electron.BrowserWindow.fromWebContents(e.sender)?.close());
+  electron.ipcMain.on("shell:winctrl-minimize", (e) => electron.BrowserWindow.fromWebContents(e.sender)?.minimize());
+  electron.ipcMain.on("shell:winctrl-maximize", (e) => {
+    const w = electron.BrowserWindow.fromWebContents(e.sender);
+    if (!w) return;
+    w.isMaximized() ? w.unmaximize() : w.maximize();
+  });
   electron.ipcMain.handle("wm:hideShell", () => {
     mainWindow?.minimize();
     return true;

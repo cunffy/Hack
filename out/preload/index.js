@@ -213,7 +213,14 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
   // Shell layer control — raise/sink Electron relative to X11 apps
   shell: {
     sink: () => electron.ipcRenderer.send("shell:sink"),
-    unpin: () => electron.ipcRenderer.send("shell:unpin")
+    unpin: () => electron.ipcRenderer.send("shell:unpin"),
+    openAppWindow: (appId) => electron.ipcRenderer.invoke("shell:open-app-window", appId),
+    winCtrl: (action) => electron.ipcRenderer.send(`shell:winctrl-${action}`),
+    onAppWindowClosed: (cb) => {
+      const handler = (_, appId) => cb(appId);
+      electron.ipcRenderer.on("app-window:closed", handler);
+      return () => electron.ipcRenderer.removeListener("app-window:closed", handler);
+    }
   },
   // Update checker + runner
   updater: {
