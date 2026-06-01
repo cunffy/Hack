@@ -6,7 +6,12 @@
 #     [ -d "$D/.git" ] && git $SSL -C "$D" pull \
 #     || git $SSL clone --depth=1 -b claude/custom-security-os-URNk5 https://github.com/cunffy/Hack.git "$D"; \
 #     bash "$D/os/setup-updater.sh"'
+#
+# Pass --no-restart to skip killing Electron (used when called from cryogram-update,
+# where updater.ts calls app.exit(0) after this script exits with code 0).
 set -euo pipefail
+NO_RESTART=false
+for arg in "$@"; do [[ "$arg" == "--no-restart" ]] && NO_RESTART=true; done
 
 # ── Pre-flight: time sync + SSL certs ────────────────────────────────────────
 # Fix clock first — SSL cert verification fails if the clock is wrong.
@@ -140,9 +145,10 @@ fi
 
 # Run the full setup script from the pulled source — this syncs out/, patches
 # Openbox keybindings, reloads Openbox config, and restarts Electron.
-# Doing it this way guarantees every update deploys ALL changes (not just JS).
+# --no-restart: updater.ts calls app.exit(0) after this script exits code 0,
+# so we must NOT also kill Electron from inside the script (causes black screen).
 echo "── Applying full system update..."
-bash "\$SRC/os/setup-updater.sh"
+bash "\$SRC/os/setup-updater.sh" --no-restart
 UPDATER
 chmod +x /usr/local/bin/cryogram-update
 echo "        Done."
@@ -389,8 +395,21 @@ find /sys/class/backlight -name brightness -exec chmod g+w {} \; 2>/dev/null || 
 echo ""
 echo "  ✓ All done! Cryogram is restarting..."
 echo ""
-# DO NOT kill Electron here. The updater IPC handler (updater.ts) calls
-# app.exit(0) after this script exits with code 0 — Electron exits cleanly,
-# the session loop catches the exit and restarts with the new code.
-# Killing Electron from here means proc.on('close') fires in a dead process
-# and app.exit(0) never runs, causing the black screen.
+if [ "$NO_RESTART" = true ]; then
+  # Called from cryogram-update (update button path).
+  # updater.ts calls app.exit(0) after this script exits — do NOT kill Electron
+  # here or proc.on('close') fires in a dead process and app.exit(0) never runs.
+  echo "  (Restart handled by Electron updater — Cryogram will reload automatically)"
+else
+  # Manual TTY run — kill Electron so the session loop restarts it with new code.
+  pkill -9 -x cryogram 2>/dev/null || pkill -9 -f "/opt/cryogram/cryogram" 2>/dev/null || true
+  sleep 1
+  # If the session loop isn't running (e.g. first-time setup), start it now
+  if ! pgrep -f "cryogram-session" > /dev/null 2>&1; then
+    echo "  Starting cryogram-session loop..."
+    su -c "DISPLAY=:0 nohup /usr/local/bin/cryogram-session > /tmp/cryogram-session.log 2>&1 &" cryogram 2>/dev/null || \
+      DISPLAY=:0 nohup /usr/local/bin/cryogram-session > /tmp/cryogram-session.log 2>&1 & disown
+  fi
+  echo "  Cryogram killed — session loop will restart it within 1 second."
+  echo "  Switch back to graphical session: Ctrl+Alt+F7"
+fi
