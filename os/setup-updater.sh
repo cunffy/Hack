@@ -296,12 +296,17 @@ with open(path, 'w') as f:
     f.write(data)
 print("  Volume keybindings replaced.")
 PYFIX
-  # 1 workspace — eliminates the grey-screen-on-other-workspaces bug.
-  # Cryogram is a single-workspace desktop OS; virtual desktop switching
-  # only caused confusion and grey screens when accidentally triggered.
-  sed -i 's|<desktops>[^<]*<number>[0-9]*</number>[^<]*</desktops>|<desktops><number>1</number></desktops>|' "$OB_CONF" 2>/dev/null || true
-  if ! grep -q '<number>1</number>' "$OB_CONF"; then
-    sed -i 's|<desktops>|<desktops><number>1</number>|' "$OB_CONF" 2>/dev/null || true
+  # 4 workspaces with Super+1-4 switching via Openbox keybindings.
+  # The shell is kept sticky on all workspaces via Electron setVisibleOnAllWorkspaces
+  # + wmctrl _NET_WM_STATE_STICKY + _NET_WM_DESKTOP=0xffffffff (shellControl.ts),
+  # so no grey screen occurs when switching.
+  sed -i 's|<desktops>[^<]*<number>[0-9]*</number>[^<]*</desktops>|<desktops><number>4</number></desktops>|' "$OB_CONF" 2>/dev/null || true
+  if ! grep -q '<number>4</number>' "$OB_CONF"; then
+    sed -i 's|<desktops>|<desktops><number>4</number>|' "$OB_CONF" 2>/dev/null || true
+  fi
+  # Super+1-4 workspace switching keybindings
+  if ! grep -q 'GoToDesktop' "$OB_CONF"; then
+    sed -i 's|</keyboard>|  <keybind key="W-1"><action name="GoToDesktop"><desktop>1</desktop></action></keybind>\n    <keybind key="W-2"><action name="GoToDesktop"><desktop>2</desktop></action></keybind>\n    <keybind key="W-3"><action name="GoToDesktop"><desktop>3</desktop></action></keybind>\n    <keybind key="W-4"><action name="GoToDesktop"><desktop>4</desktop></action></keybind>\n  </keyboard>|' "$OB_CONF"
   fi
 fi
 
