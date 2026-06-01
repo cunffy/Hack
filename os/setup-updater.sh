@@ -301,10 +301,9 @@ PYFIX
 fi
 
 # ── Reload Openbox config so new keybindings take effect immediately ──────────
-# openbox --reconfigure sends SIGUSR2 to the running Openbox WM.
-# Must run as the desktop user (cryogram) with DISPLAY set — root has no X auth.
-su -c "DISPLAY=:0 XAUTHORITY=/home/cryogram/.Xauthority openbox --reconfigure 2>/dev/null || DISPLAY=:0 openbox --reconfigure 2>/dev/null || true" cryogram 2>/dev/null || \
-  DISPLAY=:0 openbox --reconfigure 2>/dev/null || true
+# pkill -USR2 openbox sends SIGUSR2 directly — no DISPLAY or X auth needed.
+pkill -USR2 -x openbox 2>/dev/null || \
+  su -c "DISPLAY=:0 XAUTHORITY=/home/cryogram/.Xauthority openbox --reconfigure 2>/dev/null || DISPLAY=:0 openbox --reconfigure 2>/dev/null" cryogram 2>/dev/null || true
 
 # ── Rewrite session script (openbox before picom, xrender compositor) ────────
 cat > /usr/local/bin/cryogram-session << 'SESSION'
@@ -385,13 +384,23 @@ usermod -a -G video cryogram 2>/dev/null || true
 find /sys/class/backlight -name brightness -exec chmod g+w {} \; 2>/dev/null || true
 
 # ── Restart the app ───────────────────────────────────────────────────────────
-# Only kill the Electron binary — the existing cryogram-session loop (while true)
-# will restart it within 1 second automatically. Killing the whole session and
-# starting a fresh one is fragile (DISPLAY, su, nohup races) and caused the
-# permanent black screen. The loop is already running and reliable; use it.
 echo ""
 echo "  ✓ All done! Cryogram is restarting..."
 echo ""
 sleep 1
-pkill -9 -x cryogram 2>/dev/null || pkill -9 -f "/opt/cryogram/cryogram" 2>/dev/null || true
-# Session loop restarts cryogram within 1 second — no further action needed.
+
+# Kill Electron — try multiple name/path patterns to be safe.
+pkill -9 -x cryogram 2>/dev/null || \
+  pkill -9 -f "/opt/cryogram/cryogram" 2>/dev/null || \
+  pkill -9 -f "out/main/index.js" 2>/dev/null || true
+
+sleep 2
+
+# If the session loop is no longer running (e.g. it was killed by a previous
+# broken update), start a fresh one so Electron actually comes back.
+if ! pgrep -f "cryogram-session" > /dev/null 2>&1; then
+  echo "  [restart] Session loop not running — starting fresh cryogram-session..."
+  if id cryogram &>/dev/null; then
+    su -c "DISPLAY=:0 nohup /usr/local/bin/cryogram-session > /tmp/cryogram-session.log 2>&1 &" cryogram || true
+  fi
+fi
