@@ -1229,12 +1229,8 @@ function registerUpdaterHandlers() {
         if (!s.match(/^\[sudo\]|password for |Sorry, try again/)) send(s);
       });
       proc2.on("close", (code) => {
-        if (code === null) {
+        if (code === 0 || code === null) {
           resolve({ success: true });
-        } else if (code === 0) {
-          resolve({ success: true });
-          const { app } = require("electron");
-          setTimeout(() => app.exit(0), 1500);
         } else if (!isRoot() && code === 1) {
           reject(new Error("wrong-password"));
         } else {

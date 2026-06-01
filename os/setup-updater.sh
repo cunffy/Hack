@@ -7,11 +7,10 @@
 #     || git $SSL clone --depth=1 -b claude/custom-security-os-URNk5 https://github.com/cunffy/Hack.git "$D"; \
 #     bash "$D/os/setup-updater.sh"'
 #
-# Pass --no-restart to skip killing Electron (used when called from cryogram-update,
-# where updater.ts calls app.exit(0) after this script exits with code 0).
+# Pass --no-reboot to skip the automatic reboot at the end (dev/testing only).
 set -euo pipefail
-NO_RESTART=false
-for arg in "$@"; do [[ "$arg" == "--no-restart" ]] && NO_RESTART=true; done
+NO_REBOOT=false
+for arg in "$@"; do [[ "$arg" == "--no-reboot" || "$arg" == "--no-restart" ]] && NO_REBOOT=true; done
 
 # ── Pre-flight: time sync + SSL certs ────────────────────────────────────────
 # Fix clock first — SSL cert verification fails if the clock is wrong.
@@ -144,11 +143,9 @@ if [ ! -f "\$SRC/out/main/index.js" ] || [ ! -f "\$SRC/out/renderer/index.html" 
 fi
 
 # Run the full setup script from the pulled source — this syncs out/, patches
-# Openbox keybindings, reloads Openbox config, and restarts Electron.
-# --no-restart: updater.ts calls app.exit(0) after this script exits code 0,
-# so we must NOT also kill Electron from inside the script (causes black screen).
+# Openbox keybindings/config, then reboots the machine to load everything fresh.
 echo "── Applying full system update..."
-bash "\$SRC/os/setup-updater.sh" --no-restart
+bash "\$SRC/os/setup-updater.sh"
 UPDATER
 chmod +x /usr/local/bin/cryogram-update
 echo "        Done."
@@ -391,25 +388,23 @@ usermod -a -G video cryogram 2>/dev/null || true
 # Make brightness sysfs writable by the video group right now (persists via udev)
 find /sys/class/backlight -name brightness -exec chmod g+w {} \; 2>/dev/null || true
 
-# ── Restart the app ───────────────────────────────────────────────────────────
+# ── Restart: reboot the machine ───────────────────────────────────────────────
+# A full reboot is the ONLY reliable way to restart Cryogram after an update.
+# It loads the new Electron code, the new Openbox config AND the new session
+# script all fresh, and LightDM autologin brings the desktop straight back.
+#
+# Why not just restart Electron? The running desktop session was launched by the
+# session script that existed at BOOT time. That old loop breaks on a clean
+# (exit 0) quit — so any app.exit(0) / pkill trick ends the whole session and
+# leaves a black screen. Rebooting sidesteps that race entirely. This is the
+# original, proven design (the first cryogram-update ended with `reboot`).
 echo ""
-echo "  ✓ All done! Cryogram is restarting..."
-echo ""
-if [ "$NO_RESTART" = true ]; then
-  # Called from cryogram-update (update button path).
-  # updater.ts calls app.exit(0) after this script exits — do NOT kill Electron
-  # here or proc.on('close') fires in a dead process and app.exit(0) never runs.
-  echo "  (Restart handled by Electron updater — Cryogram will reload automatically)"
+echo "  ✓ Update applied successfully."
+if [ "$NO_REBOOT" = true ]; then
+  echo "  (--no-reboot set — not rebooting. Reboot manually to load the update.)"
 else
-  # Manual TTY run — kill Electron so the session loop restarts it with new code.
-  pkill -9 -x cryogram 2>/dev/null || pkill -9 -f "/opt/cryogram/cryogram" 2>/dev/null || true
-  sleep 1
-  # If the session loop isn't running (e.g. first-time setup), start it now
-  if ! pgrep -f "cryogram-session" > /dev/null 2>&1; then
-    echo "  Starting cryogram-session loop..."
-    su -c "DISPLAY=:0 nohup /usr/local/bin/cryogram-session > /tmp/cryogram-session.log 2>&1 &" cryogram 2>/dev/null || \
-      DISPLAY=:0 nohup /usr/local/bin/cryogram-session > /tmp/cryogram-session.log 2>&1 & disown
-  fi
-  echo "  Cryogram killed — session loop will restart it within 1 second."
-  echo "  Switch back to graphical session: Ctrl+Alt+F7"
+  echo "  Rebooting now to load the updated system..."
+  sync
+  sleep 3
+  systemctl reboot 2>/dev/null || reboot 2>/dev/null || reboot -f
 fi

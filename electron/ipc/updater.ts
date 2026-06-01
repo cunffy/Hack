@@ -142,18 +142,14 @@ export function registerUpdaterHandlers(): void {
       })
 
       proc.on('close', (code) => {
-        if (code === null) {
-          // Electron was killed externally (pkill from setup-updater.sh).
-          // The session loop or a fresh cryogram-session handles the restart.
-          // This branch normally never executes (Electron is already dead), but
-          // resolve() is here as a safety net if the process tree is unusual.
+        // The update script reboots the machine itself once files are synced, so
+        // in the normal success path this process is torn down by the reboot and
+        // 'close' fires with code null (killed by signal during shutdown) — or
+        // never fires at all. We do NOT call app.exit(0) here: a full reboot is
+        // the only reliable restart, and any manual quit would just race the
+        // boot-time session loop and leave a black screen.
+        if (code === 0 || code === null) {
           resolve({ success: true })
-        } else if (code === 0) {
-          // Script exited cleanly. pkill may or may not have killed Electron.
-          // Exit this instance — the session loop (while true) restarts it within 1s.
-          resolve({ success: true })
-          const { app } = require('electron')
-          setTimeout(() => app.exit(0), 1500)
         } else if (!isRoot() && code === 1) {
           reject(new Error('wrong-password'))
         } else {
