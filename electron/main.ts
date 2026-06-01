@@ -394,17 +394,6 @@ app.whenReady().then(() => {
     win.once('ready-to-show', () => {
       win.show()
       win.focus()
-      // Remove Openbox below-layer rule — retry to beat the race with Openbox
-      // applying the rule at window-map time (Openbox fires async on MapNotify).
-      const removeBelow = () => {
-        try {
-          const nativeId = win.getNativeWindowHandle().readUInt32LE(0)
-          exec(`wmctrl -i -r 0x${nativeId.toString(16)} -b remove,below 2>/dev/null || true`, () => {})
-        } catch {}
-      }
-      removeBelow()
-      setTimeout(removeBelow, 150)
-      setTimeout(removeBelow, 500)
     })
 
     const winId = win.id

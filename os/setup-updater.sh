@@ -196,26 +196,20 @@ OBMENU
 # ── Patch openbox config (Alt+Tab keybindings + single workspace) ─────────────
 OB_CONF="/etc/xdg/openbox/cryogram-rc.xml"
 if [ -f "$OB_CONF" ]; then
-  # Pin only the main shell window (title="CryogramShell") to the desktop layer.
-  # Standalone app windows share the same WM_CLASS but must NOT be in the below
-  # layer — they need to appear above normal windows. Remove any old broad rule
-  # that matched all cryogram-class windows, then add the title-scoped rule.
+  # Remove any cryogram Openbox application rule — the main shell manages its
+  # own below-layer state via wmctrl (pinToDesktopLayer in shellControl.ts).
+  # Having the rule here caused ALL cryogram BrowserWindows (including app
+  # windows like Terminal, Settings, etc.) to be placed in the below layer and
+  # become invisible behind the desktop shell.
   python3 - "$OB_CONF" << 'PYFIX'
 import sys, re
 path = sys.argv[1]
 with open(path) as f:
     data = f.read()
-# Remove any existing cryogram application rule (old or new format)
 data = re.sub(r'\s*<application[^>]*class="cryogram"[^>]*>.*?</application>', '', data, flags=re.DOTALL)
-# Insert the scoped rule — only matches windows with title="CryogramShell"
-new_rule = ('    <application class="cryogram" title="CryogramShell">'
-            '<layer>below</layer><decor>no</decor><border>no</border>'
-            '<skip_taskbar>yes</skip_taskbar><skip_pager>yes</skip_pager>'
-            '<desktop>all</desktop></application>')
-data = data.replace('<applications>', '<applications>\n' + new_rule, 1)
 with open(path, 'w') as f:
     f.write(data)
-print('  [+] Openbox cryogram rule updated (title-scoped to CryogramShell)')
+print('  [+] Removed Openbox cryogram window rule (shell manages its own layer)')
 PYFIX
   # Enable right-click menu if not already wired up
   if ! grep -q 'cryogram-menu' "$OB_CONF"; then
