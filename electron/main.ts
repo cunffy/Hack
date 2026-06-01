@@ -132,6 +132,9 @@ function createWindow(): void {
   mainWindow.on('ready-to-show', () => {
     mainWindow!.show()
     mainWindow!.maximize()
+    // Make shell visible on every virtual workspace — Electron native API
+    // (more reliable than wmctrl sticky on Openbox)
+    mainWindow!.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
 
     // Pin to desktop layer — X11 apps always float on top, Electron is the floor
     setTimeout(pinToDesktopLayer, 500)
@@ -394,6 +397,19 @@ app.whenReady().then(() => {
     win.once('ready-to-show', () => {
       win.show()
       win.focus()
+      // Raise above any window (including the shell if it wasn't sunk yet)
+      win.moveTop()
+      // Belt-and-suspenders: if Openbox still applies the old below rule,
+      // strip it. Retry to beat the async Openbox MapNotify race.
+      const removeBelow = () => {
+        try {
+          const nativeId = win.getNativeWindowHandle().readUInt32LE(0)
+          exec(`wmctrl -i -r 0x${nativeId.toString(16)} -b remove,below 2>/dev/null || true`, () => {})
+        } catch {}
+      }
+      removeBelow()
+      setTimeout(removeBelow, 300)
+      setTimeout(removeBelow, 800)
     })
 
     const winId = win.id

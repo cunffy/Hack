@@ -4044,6 +4044,7 @@ function createWindow() {
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
     mainWindow.maximize();
+    mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     setTimeout(pinToDesktopLayer, 500);
     mainWindow.on("minimize", () => {
       mainWindow?.restore();
@@ -4316,6 +4317,18 @@ electron.app.whenReady().then(() => {
     win.once("ready-to-show", () => {
       win.show();
       win.focus();
+      win.moveTop();
+      const removeBelow = () => {
+        try {
+          const nativeId = win.getNativeWindowHandle().readUInt32LE(0);
+          child_process.exec(`wmctrl -i -r 0x${nativeId.toString(16)} -b remove,below 2>/dev/null || true`, () => {
+          });
+        } catch {
+        }
+      };
+      removeBelow();
+      setTimeout(removeBelow, 300);
+      setTimeout(removeBelow, 800);
     });
     const winId = win.id;
     appWindowMap.set(winId, { win, appId });
