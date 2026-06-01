@@ -3956,9 +3956,11 @@ function pinToDesktopLayer() {
     const xid = `0x${nativeId.toString(16)}`;
     child_process.exec(`wmctrl -i -r ${xid} -b add,below,sticky 2>/dev/null || true`, () => {
     });
+    child_process.exec(`xprop -id ${xid} -f _NET_WM_DESKTOP 32c -set _NET_WM_DESKTOP 0xffffffff 2>/dev/null || true`, () => {
+    });
   } catch {
     child_process.exec(
-      "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} sh -c 'wmctrl -i -r {} -b add,below && wmctrl -i -r {} -b add,sticky'",
+      "xdotool search --class 'cryogram' 2>/dev/null | head -1 | xargs -r -I{} sh -c 'wmctrl -i -r {} -b add,below,sticky && xprop -id {} -f _NET_WM_DESKTOP 32c -set _NET_WM_DESKTOP 0xffffffff'",
       () => {
       }
     );

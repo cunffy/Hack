@@ -196,20 +196,30 @@ OBMENU
 # ── Patch openbox config (Alt+Tab keybindings + single workspace) ─────────────
 OB_CONF="/etc/xdg/openbox/cryogram-rc.xml"
 if [ -f "$OB_CONF" ]; then
-  # Remove any cryogram Openbox application rule — the main shell manages its
-  # own below-layer state via wmctrl (pinToDesktopLayer in shellControl.ts).
-  # Having the rule here caused ALL cryogram BrowserWindows (including app
-  # windows like Terminal, Settings, etc.) to be placed in the below layer and
-  # become invisible behind the desktop shell.
+  # Update the Openbox cryogram window rule.
+  # <desktop>all</desktop> keeps the shell visible on every virtual desktop.
+  # <layer>below</layer> is intentionally ABSENT — shellControl.ts handles that
+  # via wmctrl so it only applies to the main shell, not to app windows.
   python3 - "$OB_CONF" << 'PYFIX'
 import sys, re
 path = sys.argv[1]
 with open(path) as f:
     data = f.read()
+# Remove any existing cryogram rule (old or current format)
 data = re.sub(r'\s*<application[^>]*class="cryogram"[^>]*>.*?</application>', '', data, flags=re.DOTALL)
+# Add rule — sticky on all desktops, no decorations, no taskbar/pager entry.
+# NO <layer>below</layer> here: that is set per-window by shellControl.ts so
+# it only applies to the main shell window, not to app windows.
+new_rule = ('    <application class="cryogram">'
+            '<desktop>all</desktop>'
+            '<decor>no</decor><border>no</border>'
+            '<skip_taskbar>yes</skip_taskbar>'
+            '<skip_pager>yes</skip_pager>'
+            '</application>')
+data = data.replace('<applications>', '<applications>\n' + new_rule, 1)
 with open(path, 'w') as f:
     f.write(data)
-print('  [+] Removed Openbox cryogram window rule (shell manages its own layer)')
+print('  [+] Openbox cryogram rule updated (sticky on all desktops, no forced layer)')
 PYFIX
   # Enable right-click menu if not already wired up
   if ! grep -q 'cryogram-menu' "$OB_CONF"; then
