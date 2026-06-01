@@ -165,6 +165,18 @@ echo "        Done."
 # ── SSH service — disable on a desktop security OS (stops shutdown errors) ───
 # ssh.service failing on shutdown causes console errors and slows reboot.
 systemctl disable ssh 2>/dev/null || true
+
+# ── Silence ACPI/kernel noise on the boot console ────────────────────────────
+# ACPI errors (Region VRTC, EC0.RTEC, etc.) are harmless firmware quirks on
+# many laptops but flood the TTY on boot. loglevel=3 keeps errors silent;
+# quiet suppresses the verbose init messages.
+if [ -f /etc/default/grub ]; then
+  if ! grep -q 'loglevel=3' /etc/default/grub; then
+    sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 quiet loglevel=3 acpi_osi=Linux"/' /etc/default/grub
+    update-grub 2>/dev/null || grub-mkconfig -o /boot/grub/grub.cfg 2>/dev/null || true
+    echo "  [+] GRUB updated — ACPI boot noise suppressed."
+  fi
+fi
 systemctl mask    ssh 2>/dev/null || true
 
 # ── 4. Sudoers rule ───────────────────────────────────────────────────────────
@@ -290,8 +302,9 @@ fi
 
 # ── Reload Openbox config so new keybindings take effect immediately ──────────
 # openbox --reconfigure sends SIGUSR2 to the running Openbox WM.
-# No reboot or logout needed — keybindings and window rules apply instantly.
-DISPLAY="${DISPLAY:-:0}" openbox --reconfigure 2>/dev/null || true
+# Must run as the desktop user (cryogram) with DISPLAY set — root has no X auth.
+su -c "DISPLAY=:0 XAUTHORITY=/home/cryogram/.Xauthority openbox --reconfigure 2>/dev/null || DISPLAY=:0 openbox --reconfigure 2>/dev/null || true" cryogram 2>/dev/null || \
+  DISPLAY=:0 openbox --reconfigure 2>/dev/null || true
 
 # ── Rewrite session script (openbox before picom, xrender compositor) ────────
 cat > /usr/local/bin/cryogram-session << 'SESSION'
