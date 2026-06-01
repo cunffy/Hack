@@ -4308,26 +4308,27 @@ electron.app.whenReady().then(() => {
     }
     win.once("ready-to-show", () => {
       win.show();
+      win.setAlwaysOnTop(true, "floating");
       win.focus();
       win.moveTop();
-      const removeBelow = () => {
-        try {
-          const nativeId = win.getNativeWindowHandle().readUInt32LE(0);
-          child_process.exec(`wmctrl -i -r 0x${nativeId.toString(16)} -b remove,below 2>/dev/null || true`, () => {
-          });
-        } catch {
-        }
-      };
-      removeBelow();
-      setTimeout(removeBelow, 300);
-      setTimeout(removeBelow, 800);
-      if (!screenLocked) setTimeout(sinkShell, 100);
+      if (!screenLocked) sinkShell();
+    });
+    win.on("focus", () => {
+      if (win.isDestroyed() || screenLocked) return;
+      win.setAlwaysOnTop(true, "floating");
+      sinkShell();
+    });
+    win.on("blur", () => {
+      if (!win.isDestroyed()) win.setAlwaysOnTop(false);
     });
     const winId = win.id;
     appWindowMap.set(winId, { win, appId });
     win.on("closed", () => {
       appWindowMap.delete(winId);
       mainWindow?.webContents.send("app-window:closed", appId);
+      if (appWindowMap.size === 0 && !screenLocked) {
+        raiseShell();
+      }
     });
     return winId;
   });

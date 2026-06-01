@@ -329,9 +329,10 @@ app.whenReady().then(() => {
 
   // ── App windows: each Cryogram app as its own BrowserWindow ──────────────────
   ipcMain.handle('shell:open-app-window', (_, appId: string) => {
-    // Drop the shell off the always-on-top layer first. If the shell was raised
-    // (Super+D, spotlight, Alt+Tab) it sits above everything — a new app window
-    // would open BEHIND it and be invisible. Sink it so app windows are on top.
+    // Drop the shell off always-on-top before creating the app window.
+    // The app window will be set to _NET_WM_STATE_ABOVE (floating), and the shell
+    // goes to _NET_WM_STATE_BELOW via the blur handler, so visibility is guaranteed
+    // regardless of X11 stacking order races.
     if (mainWindow && !screenLocked) {
       mainWindow.setAlwaysOnTop(false)
     }
@@ -395,24 +396,27 @@ app.whenReady().then(() => {
 
     win.once('ready-to-show', () => {
       win.show()
+      // Float app windows above the shell. The shell lives in _NET_WM_STATE_BELOW
+      // (via sinkShell/pinToDesktopLayer). Setting app windows to floating
+      // (_NET_WM_STATE_ABOVE) guarantees they're always visible over the fullscreen
+      // shell regardless of X11 stacking races or wmctrl timing.
+      win.setAlwaysOnTop(true, 'floating')
       win.focus()
-      // Raise above any window (including the shell if it wasn't sunk yet)
       win.moveTop()
-      // Belt-and-suspenders: if Openbox still applies the old below rule,
-      // strip it. Retry to beat the async Openbox MapNotify race.
-      const removeBelow = () => {
-        try {
-          const nativeId = win.getNativeWindowHandle().readUInt32LE(0)
-          exec(`wmctrl -i -r 0x${nativeId.toString(16)} -b remove,below 2>/dev/null || true`, () => {})
-        } catch {}
-      }
-      removeBelow()
-      setTimeout(removeBelow, 300)
-      setTimeout(removeBelow, 800)
-      // Push the main shell to the desktop layer so it sits UNDER this app
-      // window, not over it. Belt-and-suspenders with the setAlwaysOnTop(false)
-      // above and the blur→sinkShell handler.
-      if (!screenLocked) setTimeout(sinkShell, 100)
+      // Ensure the shell is in the below layer so the app window is on top
+      if (!screenLocked) sinkShell()
+    })
+
+    // When an app window gains focus, re-assert above state and sink the shell
+    win.on('focus', () => {
+      if (win.isDestroyed() || screenLocked) return
+      win.setAlwaysOnTop(true, 'floating')
+      sinkShell()
+    })
+    // When an app window loses focus (user clicked a native X11 app), drop
+    // always-on-top so native apps can come to the front normally
+    win.on('blur', () => {
+      if (!win.isDestroyed()) win.setAlwaysOnTop(false)
     })
 
     const winId = win.id
@@ -421,6 +425,11 @@ app.whenReady().then(() => {
     win.on('closed', () => {
       appWindowMap.delete(winId)
       mainWindow?.webContents.send('app-window:closed', appId)
+      // When the last app window closes, bring the shell back to the foreground
+      // so the user sees the desktop (not a black area where the window was).
+      if (appWindowMap.size === 0 && !screenLocked) {
+        raiseShell()
+      }
     })
 
     return winId
