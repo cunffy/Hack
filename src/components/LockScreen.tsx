@@ -125,8 +125,10 @@ export function LockScreen() {
                 <motion.div
                   key={i}
                   className="rounded-full"
+                  initial={i >= MIN_DIGITS ? { scale: 0, opacity: 0 } : false}
                   animate={{
                     scale: filled ? 1.2 : 1,
+                    opacity: 1,
                     background: isErr
                       ? '#f87171'
                       : filled
@@ -134,7 +136,7 @@ export function LockScreen() {
                         : 'rgba(255,255,255,0.18)',
                     boxShadow: filled && !isErr ? `0 0 12px var(--cryo-a50)` : 'none',
                   }}
-                  transition={{ duration: 0.1 }}
+                  transition={{ duration: 0.15 }}
                   style={{ width: 12, height: 12 }}
                 />
               )

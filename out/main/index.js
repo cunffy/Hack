@@ -214,7 +214,23 @@ function registerSettingsHandlers() {
   electron.ipcMain.handle("settings:set", (_, key, value) => {
     getStore().set(key, value);
   });
-  electron.ipcMain.handle("settings:getAll", () => getStore().store);
+  electron.ipcMain.handle("settings:getAll", () => {
+    const raw = getStore().store;
+    const flat = {};
+    const flatten = (obj, prefix = "") => {
+      for (const key of Object.keys(obj)) {
+        const full = prefix ? `${prefix}.${key}` : key;
+        const val = obj[key];
+        if (val !== null && typeof val === "object" && !Array.isArray(val)) {
+          flatten(val, full);
+        } else {
+          flat[full] = val;
+        }
+      }
+    };
+    flatten(raw);
+    return flat;
+  });
 }
 function getSettingsStore() {
   return getStore();
@@ -4006,6 +4022,7 @@ function createWindow() {
     height: 900,
     minWidth: 1024,
     minHeight: 700,
+    title: "CryogramShell",
     frame: false,
     titleBarStyle: "hidden",
     backgroundColor: "#070b11",
@@ -4298,12 +4315,17 @@ electron.app.whenReady().then(() => {
     win.once("ready-to-show", () => {
       win.show();
       win.focus();
-      try {
-        const nativeId = win.getNativeWindowHandle().readUInt32LE(0);
-        child_process.exec(`wmctrl -i -r 0x${nativeId.toString(16)} -b remove,below 2>/dev/null || true`, () => {
-        });
-      } catch {
-      }
+      const removeBelow = () => {
+        try {
+          const nativeId = win.getNativeWindowHandle().readUInt32LE(0);
+          child_process.exec(`wmctrl -i -r 0x${nativeId.toString(16)} -b remove,below 2>/dev/null || true`, () => {
+          });
+        } catch {
+        }
+      };
+      removeBelow();
+      setTimeout(removeBelow, 150);
+      setTimeout(removeBelow, 500);
     });
     const winId = win.id;
     appWindowMap.set(winId, { win, appId });
