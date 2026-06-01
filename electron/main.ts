@@ -329,11 +329,19 @@ app.whenReady().then(() => {
 
   // ── App windows: each Cryogram app as its own BrowserWindow ──────────────────
   ipcMain.handle('shell:open-app-window', (_, appId: string) => {
+    // Drop the shell off the always-on-top layer first. If the shell was raised
+    // (Super+D, spotlight, Alt+Tab) it sits above everything — a new app window
+    // would open BEHIND it and be invisible. Sink it so app windows are on top.
+    if (mainWindow && !screenLocked) {
+      mainWindow.setAlwaysOnTop(false)
+    }
+
     // Focus existing window if already open
     for (const [id, { win, appId: aid }] of appWindowMap) {
       if (aid === appId && !win.isDestroyed()) {
         win.show()
         win.focus()
+        win.moveTop()
         return id
       }
     }
@@ -401,6 +409,10 @@ app.whenReady().then(() => {
       removeBelow()
       setTimeout(removeBelow, 300)
       setTimeout(removeBelow, 800)
+      // Push the main shell to the desktop layer so it sits UNDER this app
+      // window, not over it. Belt-and-suspenders with the setAlwaysOnTop(false)
+      // above and the blur→sinkShell handler.
+      if (!screenLocked) setTimeout(sinkShell, 100)
     })
 
     const winId = win.id

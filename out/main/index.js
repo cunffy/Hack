@@ -4210,10 +4210,14 @@ electron.app.whenReady().then(() => {
   electron.ipcMain.on("shell:sink", () => sinkShell());
   electron.ipcMain.on("shell:unpin", () => unpinShell());
   electron.ipcMain.handle("shell:open-app-window", (_, appId) => {
+    if (mainWindow && !screenLocked) {
+      mainWindow.setAlwaysOnTop(false);
+    }
     for (const [id, { win: win2, appId: aid }] of appWindowMap) {
       if (aid === appId && !win2.isDestroyed()) {
         win2.show();
         win2.focus();
+        win2.moveTop();
         return id;
       }
     }
@@ -4317,6 +4321,7 @@ electron.app.whenReady().then(() => {
       removeBelow();
       setTimeout(removeBelow, 300);
       setTimeout(removeBelow, 800);
+      if (!screenLocked) setTimeout(sinkShell, 100);
     });
     const winId = win.id;
     appWindowMap.set(winId, { win, appId });
