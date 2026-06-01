@@ -4186,10 +4186,6 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
   }
 }
-if (!electron.app.requestSingleInstanceLock()) {
-  electron.app.quit();
-  process.exit(0);
-}
 const appWindowMap = /* @__PURE__ */ new Map();
 electron.app.whenReady().then(() => {
   utils.electronApp.setAppUserModelId("com.cryogram.app");
