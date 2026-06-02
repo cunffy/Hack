@@ -411,5 +411,8 @@ else
   echo "  Rebooting now to load the updated system..."
   sync
   sleep 3
-  systemctl reboot 2>/dev/null || reboot 2>/dev/null || reboot -f
+  # Use plain `reboot` first — works directly with the kernel/init and is reliable
+  # even from a sudo subprocess where D-Bus may be unavailable.
+  # systemctl reboot can hang waiting for D-Bus when invoked this way.
+  reboot 2>/dev/null || systemctl reboot 2>/dev/null || reboot -f 2>/dev/null || true
 fi

@@ -217,7 +217,7 @@ export function registerSystemHandlers(): void {
   // Use sudo so polkit allows power commands from the cryogram non-root user.
   // The sudoers rule in /etc/sudoers.d/cryogram-power grants NOPASSWD for these.
   ipcMain.handle('system:shutdown', async () => { await sh('sudo systemctl poweroff') })
-  ipcMain.handle('system:reboot',   async () => { await sh('sudo systemctl reboot') })
+  ipcMain.handle('system:reboot',   async () => { await sh('reboot 2>/dev/null || sudo systemctl reboot 2>/dev/null || sudo reboot -f 2>/dev/null || true') })
   ipcMain.handle('system:sleep',    async () => { await sh('sudo systemctl suspend') })
   ipcMain.handle('system:lock', async () => {
     // Tell renderer to show in-app lock screen

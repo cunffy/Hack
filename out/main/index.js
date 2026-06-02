@@ -721,7 +721,7 @@ function registerSystemHandlers() {
     await sh$6("sudo systemctl poweroff");
   });
   electron.ipcMain.handle("system:reboot", async () => {
-    await sh$6("sudo systemctl reboot");
+    await sh$6("reboot 2>/dev/null || sudo systemctl reboot 2>/dev/null || sudo reboot -f 2>/dev/null || true");
   });
   electron.ipcMain.handle("system:sleep", async () => {
     await sh$6("sudo systemctl suspend");

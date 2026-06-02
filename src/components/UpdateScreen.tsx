@@ -125,7 +125,9 @@ export function UpdateScreen({ onCancel }: Props) {
     if (el) el.scrollTop = el.scrollHeight
   }, [log])
 
-  // Countdown timer - starts when phase = 'countdown'
+  // Countdown timer - starts when phase = 'countdown'.
+  // When it hits 0, also trigger a reboot from the Electron side as a fallback
+  // in case the script-side `reboot` command didn't fire (e.g. D-Bus race).
   useEffect(() => {
     if (phase !== 'countdown') return
     setCount(10)
@@ -133,7 +135,10 @@ export function UpdateScreen({ onCancel }: Props) {
       setCount(n => {
         if (n <= 1) {
           clearInterval(countdownRef.current!)
-          setPhase('rebooting')
+          setPhase('restarting')
+          // Belt-and-suspenders: trigger reboot from Electron if the script's
+          // reboot hasn't already brought the machine down.
+          try { (window as any).cryogram?.system?.reboot?.() } catch {}
           return 0
         }
         return n - 1
