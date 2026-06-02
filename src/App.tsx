@@ -75,6 +75,16 @@ export default function App() {
     return () => clearTimeout(t)
   }, [booted])
 
+  // Listen for IPC-triggered update screen open (from standalone app windows like Settings)
+  useEffect(() => {
+    const api = (window as any).cryogram?.updater
+    const unsub = api?.onOpenScreen?.(() => {
+      setUpdateInfo(null)
+      setShowScreen(true)
+    })
+    return () => unsub?.()
+  }, [])
+
   // Expose manual update trigger globally so Settings can call it
   useEffect(() => {
     ;(window as any).__cryogram_checkUpdate = async () => {

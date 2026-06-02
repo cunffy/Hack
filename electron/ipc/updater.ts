@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
 import { execFile, spawn, exec } from 'child_process'
 import { promisify } from 'util'
 import { existsSync, readFileSync } from 'fs'
@@ -108,6 +108,17 @@ export function registerUpdaterHandlers(): void {
   })
 
   ipcMain.handle('updater:isRoot', () => isRoot())
+
+  // Called from standalone app windows (e.g. Settings) to trigger the update
+  // screen in the main shell — the shell's window is the only one that has
+  // the UpdateScreen in its React tree.
+  ipcMain.handle('updater:showUpdateScreen', () => {
+    const wins = BrowserWindow.getAllWindows()
+    // Main shell is the one WITHOUT a standalone query param — it's the largest one
+    const main = wins.find(w => !w.isDestroyed() && w.webContents.getURL().includes('index.html') && !w.webContents.getURL().includes('standalone='))
+      ?? wins.find(w => !w.isDestroyed())
+    main?.webContents.send('updater:openScreen')
+  })
 
   ipcMain.handle('updater:run', (event, password?: string) => {
     return new Promise<{ success: boolean }>((resolve, reject) => {

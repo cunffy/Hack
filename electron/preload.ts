@@ -248,10 +248,16 @@ contextBridge.exposeInMainWorld('cryogram', {
     check:      () => ipcRenderer.invoke('updater:check'),
     run:        (password?: string) => ipcRenderer.invoke('updater:run', password),
     isRoot:     () => ipcRenderer.invoke('updater:isRoot'),
+    showUpdateScreen: () => ipcRenderer.invoke('updater:showUpdateScreen'),
     onProgress: (cb: (line: string) => void) => {
       const listener = (_: unknown, line: string) => cb(line)
       ipcRenderer.on('updater:progress', listener)
       return () => ipcRenderer.removeListener('updater:progress', listener)
+    },
+    onOpenScreen: (cb: () => void) => {
+      const listener = () => cb()
+      ipcRenderer.on('updater:openScreen', listener)
+      return () => ipcRenderer.removeListener('updater:openScreen', listener)
     },
   },
 

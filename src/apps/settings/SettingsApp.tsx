@@ -1046,7 +1046,14 @@ function UpdateSection() {
   }
 
   const startUpdate = () => {
-    ;(window as any).__cryogram_startUpdate?.()
+    // When running inside the main shell, __cryogram_startUpdate is available directly.
+    // When running as a standalone BrowserWindow (e.g. Settings app window), use IPC
+    // to tell the main shell to show its UpdateScreen.
+    if ((window as any).__cryogram_startUpdate) {
+      ;(window as any).__cryogram_startUpdate()
+    } else {
+      ;(window as any).cryogram?.updater?.showUpdateScreen?.()
+    }
   }
 
   const isSSLError = errorCode === 'ssl-error'

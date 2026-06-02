@@ -1203,6 +1203,11 @@ function registerUpdaterHandlers() {
     }
   });
   electron.ipcMain.handle("updater:isRoot", () => isRoot());
+  electron.ipcMain.handle("updater:showUpdateScreen", () => {
+    const wins = electron.BrowserWindow.getAllWindows();
+    const main = wins.find((w) => !w.isDestroyed() && w.webContents.getURL().includes("index.html") && !w.webContents.getURL().includes("standalone=")) ?? wins.find((w) => !w.isDestroyed());
+    main?.webContents.send("updater:openScreen");
+  });
   electron.ipcMain.handle("updater:run", (event, password) => {
     return new Promise((resolve, reject) => {
       if (!fs$1.existsSync(UPDATE_SCRIPT)) {

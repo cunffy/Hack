@@ -227,10 +227,16 @@ electron.contextBridge.exposeInMainWorld("cryogram", {
     check: () => electron.ipcRenderer.invoke("updater:check"),
     run: (password) => electron.ipcRenderer.invoke("updater:run", password),
     isRoot: () => electron.ipcRenderer.invoke("updater:isRoot"),
+    showUpdateScreen: () => electron.ipcRenderer.invoke("updater:showUpdateScreen"),
     onProgress: (cb) => {
       const listener = (_, line) => cb(line);
       electron.ipcRenderer.on("updater:progress", listener);
       return () => electron.ipcRenderer.removeListener("updater:progress", listener);
+    },
+    onOpenScreen: (cb) => {
+      const listener = () => cb();
+      electron.ipcRenderer.on("updater:openScreen", listener);
+      return () => electron.ipcRenderer.removeListener("updater:openScreen", listener);
     }
   },
   // TLS cert inspector
