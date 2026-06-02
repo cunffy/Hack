@@ -104,6 +104,7 @@ export function UpdateScreen({ onCancel }: Props) {
   const [needsSudoSetup, setNeedsSudoSetup] = useState(false)
   const [password, setPassword]   = useState('')
   const [wrongPassword, setWrongPassword] = useState(false)
+  const [isRoot, setIsRoot]       = useState<boolean | null>(null)
   const logRef = useRef<HTMLDivElement>(null)
   const countdownRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -147,19 +148,12 @@ export function UpdateScreen({ onCancel }: Props) {
     return () => { if (countdownRef.current) clearInterval(countdownRef.current) }
   }, [phase])
 
-  // Skip auth if running as root — live OS always runs Electron as root
-  const autoStarted = useRef(false)
+  // Check if running as root on mount — determines whether to show password prompt
   useEffect(() => {
-    if (autoStarted.current) return
     const api = (window as any).cryogram?.updater
-    if (!api?.isRoot) return
-    api.isRoot().then((root: boolean) => {
-      if (root && !autoStarted.current) {
-        autoStarted.current = true
-        runUpdate()
-      }
-    }).catch(() => {})
-  }, [runUpdate])
+    if (!api?.isRoot) { setIsRoot(false); return }
+    api.isRoot().then((root: boolean) => setIsRoot(root)).catch(() => setIsRoot(false))
+  }, [])
 
   const runUpdate = useCallback(async (pw?: string) => {
     setPhase('starting')
@@ -301,9 +295,9 @@ export function UpdateScreen({ onCancel }: Props) {
           </div>
         </div>
 
-        {/* Auth panel — password prompt */}
+        {/* Auth panel */}
         <AnimatePresence>
-          {phase === 'auth' && !needsSudoSetup && (
+          {phase === 'auth' && !needsSudoSetup && isRoot !== null && (
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -316,33 +310,43 @@ export function UpdateScreen({ onCancel }: Props) {
                 borderRadius: 16,
                 padding: '20px 22px',
               }}>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 12 }}>
-                  Enter your account password to install the update
-                </div>
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  autoFocus
-                  onChange={e => { setPassword(e.target.value); setWrongPassword(false) }}
-                  onKeyDown={e => { if (e.key === 'Enter' && password) runUpdate(password) }}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 10,
-                    background: 'rgba(0,0,0,0.4)',
-                    border: `1px solid ${wrongPassword ? '#ef4444' : 'rgba(255,255,255,0.12)'}`,
-                    color: '#fff',
-                    fontSize: 14,
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    fontFamily: 'inherit',
-                  }}
-                />
-                {wrongPassword && (
-                  <div style={{ fontSize: 11, color: '#f87171', marginTop: 6 }}>
-                    Incorrect password — try again
+                {isRoot ? (
+                  /* Running as root — no password needed, just confirm */
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 14 }}>
+                    The system will download the latest update and reboot.
                   </div>
+                ) : (
+                  /* Non-root — need sudo password */
+                  <>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 12 }}>
+                      Enter your account password to install the update
+                    </div>
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      value={password}
+                      autoFocus
+                      onChange={e => { setPassword(e.target.value); setWrongPassword(false) }}
+                      onKeyDown={e => { if (e.key === 'Enter' && password) runUpdate(password) }}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        borderRadius: 10,
+                        background: 'rgba(0,0,0,0.4)',
+                        border: `1px solid ${wrongPassword ? '#ef4444' : 'rgba(255,255,255,0.12)'}`,
+                        color: '#fff',
+                        fontSize: 14,
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                        fontFamily: 'inherit',
+                      }}
+                    />
+                    {wrongPassword && (
+                      <div style={{ fontSize: 11, color: '#f87171', marginTop: 6 }}>
+                        Incorrect password — try again
+                      </div>
+                    )}
+                  </>
                 )}
                 <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
                   {onCancel && (
@@ -358,15 +362,15 @@ export function UpdateScreen({ onCancel }: Props) {
                     </button>
                   )}
                   <button
-                    onClick={() => password && runUpdate(password)}
-                    disabled={!password}
+                    onClick={() => isRoot ? runUpdate() : (password && runUpdate(password))}
+                    disabled={!isRoot && !password}
                     style={{
                       flex: 2, padding: '9px 0', borderRadius: 10, fontSize: 13, fontWeight: 700,
-                      background: password ? 'linear-gradient(135deg, var(--cryo-accent), #7c3aed)' : 'rgba(255,255,255,0.05)',
+                      background: (isRoot || password) ? 'linear-gradient(135deg, var(--cryo-accent), #7c3aed)' : 'rgba(255,255,255,0.05)',
                       border: 'none',
-                      color: password ? '#fff' : 'rgba(255,255,255,0.25)',
-                      cursor: password ? 'pointer' : 'default',
-                      boxShadow: password ? '0 0 20px var(--cryo-a30)' : 'none',
+                      color: (isRoot || password) ? '#fff' : 'rgba(255,255,255,0.25)',
+                      cursor: (isRoot || password) ? 'pointer' : 'default',
+                      boxShadow: (isRoot || password) ? '0 0 20px var(--cryo-a30)' : 'none',
                       transition: 'all 0.2s',
                     }}
                   >
