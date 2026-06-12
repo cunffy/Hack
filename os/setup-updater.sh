@@ -143,9 +143,11 @@ if [ ! -f "\$SRC/out/main/index.js" ] || [ ! -f "\$SRC/out/renderer/index.html" 
 fi
 
 # Run the full setup script from the pulled source — this syncs out/, patches
-# Openbox keybindings/config, then reboots the machine to load everything fresh.
+# Openbox keybindings/config. --no-reboot lets the Electron countdown reach
+# zero and animate before Electron itself triggers the reboot.
 echo "── Applying full system update..."
-bash "\$SRC/os/setup-updater.sh"
+bash "\$SRC/os/setup-updater.sh" --no-reboot
+echo "  Rebooting in 10 seconds..."
 UPDATER
 chmod +x /usr/local/bin/cryogram-update
 echo "        Done."
