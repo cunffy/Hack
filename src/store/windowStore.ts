@@ -105,34 +105,36 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
       return
     }
 
-    // Focus existing native window if already open
+    // Focus / restore existing window if already open
     const existing = get().windows.find(w => w.appId === appId)
     if (existing) {
-      ;(window as any).cryogram?.shell?.openAppWindow?.(appId).catch?.(() => {})
       get().restoreWindow(existing.id)
       return
     }
 
+    // Open as an in-shell React window (rendered by WindowManager). This is
+    // immune to the X11 layering problems that native BrowserWindows hit on
+    // the Openbox shell — the window is a div inside the shell, always visible.
     const meta = APP_META[appId]
     const id = `${appId}-${++instanceCounter}`
-
-    // Open as native BrowserWindow; update store when it opens
-    ;(window as any).cryogram?.shell?.openAppWindow?.(appId)
-      .then?.(() => {
-        set(s => ({
-          nextZ: s.nextZ + 1,
-          windows: [
-            ...s.windows.map(w => ({ ...w, focused: false })),
-            {
-              id, appId, title: meta.title,
-              x: 0, y: 0, width: meta.width, height: meta.height,
-              minimized: false, maximized: false, focused: true,
-              zIndex: s.nextZ, native: true,
-            },
-          ],
-        }))
-      })
-      .catch?.(() => {})
+    const z = get().nextZ
+    const vw = typeof window !== 'undefined' ? window.innerWidth  : 1440
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 900
+    const offset = (get().windows.length % 6) * 28
+    const x = Math.max(0, Math.floor((vw - meta.width) / 2) + offset - 70)
+    const y = Math.max(36, Math.floor((vh - 88 - meta.height) / 2) + offset - 70)
+    set(s => ({
+      nextZ: s.nextZ + 1,
+      windows: [
+        ...s.windows.map(w => ({ ...w, focused: false })),
+        {
+          id, appId, title: meta.title,
+          x, y, width: meta.width, height: meta.height,
+          minimized: false, maximized: false, focused: true,
+          zIndex: z,
+        },
+      ],
+    }))
   },
 
   closeWindow(id) {
