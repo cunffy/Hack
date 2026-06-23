@@ -395,6 +395,33 @@ usermod -a -G video cryogram 2>/dev/null || true
 # Make brightness sysfs writable by the video group right now (persists via udev)
 find /sys/class/backlight -name brightness -exec chmod g+w {} \; 2>/dev/null || true
 
+# ── WiFi: save passwords to disk, not gnome-keyring ──────────────────────────
+# LightDM autologin never prompts for a login password, so gnome-keyring is
+# never unlocked. NetworkManager's default (psk-flags=1) stores WiFi passwords
+# in the user keyring — if the keyring is locked the password is lost on every
+# reboot and NM asks again. Setting psk-flags=0 stores passwords in
+# /etc/NetworkManager/system-connections/ (root-owned, mode 600) which persists
+# across reboots with no keyring involved.
+mkdir -p /etc/NetworkManager/conf.d
+cat > /etc/NetworkManager/conf.d/10-cryogram-wifi.conf << 'NMCONF'
+[connection]
+wifi-sec.psk-flags=0
+NMCONF
+
+# Fix any existing saved connections that already have psk-flags=1 (keyring).
+# Changing to 0 makes NM re-save the PSK to disk on next successful connect.
+for f in /etc/NetworkManager/system-connections/*.nmconnection \
+          /etc/NetworkManager/system-connections/*.conf; do
+  [ -f "$f" ] || continue
+  if grep -q 'psk-flags=1' "$f" 2>/dev/null; then
+    sed -i 's/psk-flags=1/psk-flags=0/g' "$f"
+    echo "  [+] WiFi: fixed password storage for $(basename "$f")"
+  fi
+done
+# Reload NM so the new conf takes effect immediately (no reboot needed)
+systemctl reload NetworkManager 2>/dev/null || nmcli general reload 2>/dev/null || true
+echo "  [+] WiFi passwords will now be saved to disk (no keyring required)."
+
 # ── Restart: reboot the machine ───────────────────────────────────────────────
 # A full reboot is the ONLY reliable way to restart Cryogram after an update.
 # It loads the new Electron code, the new Openbox config AND the new session
