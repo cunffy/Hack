@@ -314,8 +314,10 @@ export function Dock() {
                       <motion.button
                         onClick={async () => {
                           try {
-                            // Electron is pinned to the desktop layer (below all X11 windows),
-                            // so just raising the target window is sufficient.
+                            // Drop the shell out of always-on-top first so the
+                            // target X11 window (Brave, …) raises above it, then
+                            // activate it via wmctrl.
+                            ;(window.cryogram as any).shell?.sink?.()
                             await (window.cryogram as any).wm?.focusWindow(xwin.id)
                           } catch {}
                         }}

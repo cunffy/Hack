@@ -243,11 +243,24 @@ PYFIX
     sed -i 's|<mouse>|<menu><file>/etc/xdg/openbox/cryogram-menu.xml</file></menu>\n  <mouse>|' "$OB_CONF"
     sed -i 's|<context name="Root">.*</context>|<context name="Root"><mousebind button="Right" action="Press"><action name="ShowMenu"><menu>root-menu</menu></action></mousebind></context>|' "$OB_CONF"
   fi
-  # Only patch if Alt+Tab binding is missing
-  if ! grep -q 'A-Tab' "$OB_CONF"; then
-    echo "  [+] Patching openbox config with Alt+Tab keybindings..."
-    sed -i 's|</keyboard>|  <keybind key="A-Tab"><action name="NextWindow"><dialog>icons</dialog><bar>no</bar><raise>yes</raise><allDesktops>no</allDesktops><panels>no</panels><desktop>no</desktop></action></keybind>\n    <keybind key="A-S-Tab"><action name="PreviousWindow"><dialog>icons</dialog><bar>no</bar><raise>yes</raise><allDesktops>no</allDesktops><panels>no</panels><desktop>no</desktop></action></keybind>\n  </keyboard>|' "$OB_CONF"
-  fi
+  # Alt+Tab: STRIP any Openbox NextWindow/PreviousWindow bindings so they don't
+  # grab the Alt+Tab key. Electron registers a global Alt+Tab shortcut that drives
+  # the unified Cryogram switcher (which lists BOTH in-shell apps AND native X11
+  # windows like Brave in one overlay). Openbox and Electron cannot both hold the
+  # Alt+Tab X11 grab — if Openbox binds it, Electron's shortcut silently fails and
+  # Alt+Tab appears broken. Force-remove the bindings here (every run) to be safe.
+  echo "  [+] Removing Openbox Alt+Tab bindings (Electron owns Alt+Tab)..."
+  python3 - "$OB_CONF" << 'PYFIX'
+import sys, re
+path = sys.argv[1]
+with open(path) as f:
+    data = f.read()
+# Strip any A-Tab / A-S-Tab keybind blocks (NextWindow / PreviousWindow).
+data = re.sub(r'\s*<keybind key="A-S?-Tab">.*?</keybind>', '', data, flags=re.DOTALL)
+with open(path, 'w') as f:
+    f.write(data)
+print("  Openbox Alt+Tab bindings removed.")
+PYFIX
   # Brightness keys — force-replace every time so stale absolute-value bindings
   # (set 0 / set 100%) can't survive; always use relative +10% / 10%-.
   echo "  [+] Setting brightness keybindings (force-replace)..."
