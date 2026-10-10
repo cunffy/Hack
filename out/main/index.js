@@ -2259,7 +2259,7 @@ function certFromDetailedPeer(cert) {
     validTo: validTo.toISOString(),
     daysRemaining: Math.floor((validTo.getTime() - now) / 864e5),
     sans,
-    publicKey: { algorithm: "RSA", size: 0 },
+    publicKey: { algorithm: "RSA", bits: 0 },
     fingerprints: { sha256, sha1 },
     serialNumber: cert.serialNumber ?? "",
     signatureAlgorithm: "SHA256withRSA",
@@ -2279,7 +2279,7 @@ function certFromX509(cert) {
     sans: cert.subjectAltName ? cert.subjectAltName.split(", ").map((s) => s.replace(/^(DNS|IP Address):/i, "").trim()) : [],
     publicKey: {
       algorithm: cert.publicKey?.asymmetricKeyType?.toUpperCase() ?? "Unknown",
-      size: cert.publicKey?.asymmetricKeyDetails?.modulusLength ?? 0
+      bits: cert.publicKey?.asymmetricKeyDetails?.modulusLength ?? 0
     },
     fingerprints: { sha256: cert.fingerprint256, sha1: cert.fingerprint },
     serialNumber: cert.serialNumber,
@@ -2649,7 +2649,8 @@ function getKey() {
 async function shodanFetch(path2) {
   const key = getKey();
   if (!key) throw new Error("NO_API_KEY");
-  const res = await fetch(`https://api.shodan.io${path2}?key=${key}`);
+  const sep = path2.includes("?") ? "&" : "?";
+  const res = await fetch(`https://api.shodan.io${path2}${sep}key=${key}`);
   if (!res.ok) throw new Error(`Shodan API error: ${res.status}`);
   return res.json();
 }

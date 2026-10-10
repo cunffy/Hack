@@ -385,7 +385,7 @@ export function installMockCryogram(): void {
 
     vpn: {
       getStatus: async () => ({ connected: false }),
-      connect: async () => ({ success: false, error: '[mock] VPN not available' }),
+      connect: async () => ({ success: false, message: '[mock] VPN not available' }),
       disconnect: async () => ({ success: false }),
     },
 

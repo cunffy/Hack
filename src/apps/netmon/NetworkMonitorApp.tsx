@@ -321,10 +321,11 @@ function BandwidthTab() {
     // Start stream
     cryogram().netmon.startStream().catch(() => {})
 
-    // Subscribe to events
-    const { ipcRenderer } = (window as any).require?.('electron') ?? {}
-
-    const onStats = (_: unknown, data: { interfaces: { name: string; rxRate: number; txRate: number; rxTotal: number; txTotal: number }[] }) => {
+    // Subscribe to streamed stats via the exposed preload API. (The old code
+    // used window.require('electron'), which is undefined under contextIsolation,
+    // so the bandwidth graphs never received any data.)
+    const onStats = (data: { interfaces: { name: string; rxRate: number; txRate: number; rxTotal: number; txTotal: number }[] }) => {
+      if (!data?.interfaces) return
       setInterfaces(prev => {
         const next = new Map(prev)
         for (const iface of data.interfaces) {
@@ -340,17 +341,9 @@ function BandwidthTab() {
       })
     }
 
-    if (ipcRenderer) {
-      ipcRenderer.on('netmon:stats', onStats)
-      return () => {
-        ipcRenderer.removeListener('netmon:stats', onStats)
-        cryogram().netmon.stopStream().catch(() => {})
-        streamStarted.current = false
-      }
-    }
-
-    // Fallback: no ipcRenderer access
+    const unsub = cryogram().netmon.onStats(onStats as any)
     return () => {
+      unsub?.()
       cryogram().netmon.stopStream().catch(() => {})
       streamStarted.current = false
     }

@@ -9,7 +9,10 @@ function getKey(): string {
 async function shodanFetch(path: string): Promise<any> {
   const key = getKey()
   if (!key) throw new Error('NO_API_KEY')
-  const res = await fetch(`https://api.shodan.io${path}?key=${key}`)
+  // path may already contain a query string (e.g. ?query=…), so pick the right
+  // separator for the api key — otherwise the URL gets a second '?' and fails.
+  const sep = path.includes('?') ? '&' : '?'
+  const res = await fetch(`https://api.shodan.io${path}${sep}key=${key}`)
   if (!res.ok) throw new Error(`Shodan API error: ${res.status}`)
   return res.json()
 }

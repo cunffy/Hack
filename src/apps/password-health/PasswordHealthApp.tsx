@@ -152,7 +152,16 @@ export default function PasswordHealthApp() {
     (async () => {
       try {
         const data = await (window as any).cryogram?.passwords?.getAll();
-        const entries: VaultEntry[] = Array.isArray(data) ? data : [];
+        // The vault stores the service name as `title` (and optional `url`); map
+        // it to the `site` field this view reads so names aren't blank.
+        const entries: VaultEntry[] = Array.isArray(data)
+          ? data.map((e: any) => ({
+              id: e.id,
+              site: e.title || e.site || e.url || '(unnamed)',
+              username: e.username ?? '',
+              password: e.password ?? '',
+            }))
+          : [];
         setVault(entries);
         audit(entries);
       } catch { setVault([]); }

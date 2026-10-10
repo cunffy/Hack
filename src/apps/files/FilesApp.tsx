@@ -90,6 +90,18 @@ export default function FilesApp() {
     if (parent !== cwd) navigate(parent)
   }
 
+  // Navigate to a sidebar place (Home/Desktop/Documents/Downloads). The standard
+  // user folders don't exist on a fresh account, so create the folder first
+  // (mkdir is recursive/idempotent) — otherwise readDir would fail and the click
+  // would appear to do nothing.
+  const goToPlace = useCallback(async (key: string) => {
+    const path = sidebarPath(key)
+    if (key !== 'home') {
+      try { await window.cryogram.files.mkdir(path) } catch {}
+    }
+    navigate(path)
+  }, [home, navigate]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const openItem = async (item: FileItem) => {
     if (item.isDir) {
       navigate(item.path)
@@ -152,7 +164,7 @@ export default function FilesApp() {
         {SIDEBAR_LOCS.map(loc => (
           <button
             key={loc.key}
-            onClick={() => navigate(sidebarPath(loc.key))}
+            onClick={() => goToPlace(loc.key)}
             className="flex items-center gap-2 px-3 py-1.5 text-xs transition-colors hover:bg-white/5 text-left"
             style={{ color: cwd === sidebarPath(loc.key) ? '#00d4ff' : '#c9d1d9' }}
           >

@@ -645,4 +645,19 @@ systemctl disable apt-daily.timer         2>/dev/null || true
 systemctl disable apt-daily-upgrade.timer 2>/dev/null || true
 systemctl disable ModemManager            2>/dev/null || true
 
+# --- Wordlists: extract rockyou so dictionary attacks work out of the box ---
+# The `wordlists` package ships /usr/share/wordlists/rockyou.txt.gz; the security
+# tools (hash cracker, network tester) preselect the extracted .txt path.
+mkdir -p /usr/share/wordlists
+if [ -f /usr/share/wordlists/rockyou.txt.gz ] && [ ! -f /usr/share/wordlists/rockyou.txt ]; then
+  gunzip -kf /usr/share/wordlists/rockyou.txt.gz 2>/dev/null || true
+fi
+
+# --- Standard user folders so the file manager's Desktop/Documents/etc. work ---
+# Created in /etc/skel so every account gets them; the apply-skel hook copies
+# them into /home/cryogram after skel is fully populated.
+for d in Desktop Documents Downloads Pictures Music Videos; do
+  mkdir -p "/etc/skel/$d"
+done
+
 echo "System configuration complete."

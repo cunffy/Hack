@@ -35,7 +35,7 @@ function certFromDetailedPeer(cert: tls.DetailedPeerCertificate): any {
     validTo:            validTo.toISOString(),
     daysRemaining:      Math.floor((validTo.getTime() - now) / 86_400_000),
     sans,
-    publicKey:          { algorithm: 'RSA', size: 0 },
+    publicKey:          { algorithm: 'RSA', bits: 0 },
     fingerprints:       { sha256, sha1 },
     serialNumber:       (cert as any).serialNumber ?? '',
     signatureAlgorithm: 'SHA256withRSA',
@@ -58,7 +58,7 @@ function certFromX509(cert: crypto.X509Certificate): any {
       : [],
     publicKey:          {
       algorithm: cert.publicKey?.asymmetricKeyType?.toUpperCase() ?? 'Unknown',
-      size:      (cert.publicKey as any)?.asymmetricKeyDetails?.modulusLength ?? 0,
+      bits:      (cert.publicKey as any)?.asymmetricKeyDetails?.modulusLength ?? 0,
     },
     fingerprints:       { sha256: cert.fingerprint256, sha1: cert.fingerprint },
     serialNumber:       cert.serialNumber,

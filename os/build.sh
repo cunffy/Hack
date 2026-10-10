@@ -60,6 +60,9 @@ arpwatch
 hashcat
 john
 crunch
+hydra
+wordlists
+seclists
 nikto
 gobuster
 sqlmap
