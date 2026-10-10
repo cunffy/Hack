@@ -12,9 +12,15 @@ export function AnimatedBackground() {
     let raf: number
     let t = 0
 
+    // Render at the device pixel ratio (capped for perf) so dots and gradients
+    // stay crisp on HiDPI / 4K displays instead of looking grainy/upscaled.
     const resize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      canvas.width = Math.floor(window.innerWidth * dpr)
+      canvas.height = Math.floor(window.innerHeight * dpr)
+      canvas.style.width = window.innerWidth + 'px'
+      canvas.style.height = window.innerHeight + 'px'
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
     resize()
     window.addEventListener('resize', resize)
@@ -24,10 +30,11 @@ export function AnimatedBackground() {
 
     const draw = () => {
       t += 0.007
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      const W = canvas.width
-      const H = canvas.height
+      // Work in CSS pixels; the DPR transform set in resize() maps to device px.
+      const W = window.innerWidth
+      const H = window.innerHeight
+      ctx.clearRect(0, 0, W, H)
       const cols = Math.ceil(W / SPACING) + 1
       const rows = Math.ceil(H / SPACING) + 1
       const maxDist = Math.sqrt((W / 2) ** 2 + (H / 2) ** 2)

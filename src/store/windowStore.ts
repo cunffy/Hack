@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { TITLEBAR_H, DOCK_CLEARANCE } from '../lib/layout'
 
 export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot' | 'calculator' | 'crypto-tools' | 'api-tester' | 'cert-inspector' | 'docker' | 'git' | 'database' | 'markdown' | 'trash' | 'shodan' | 'osint' | 'cve' | 'ai-assistant' | 'wordlists' | 'json-explorer' | 'totp' | 'regex' | 'encoding-chain' | 'packet-sniffer' | 'backup' | 'password-health' | 'pomodoro' | 'audit-log' | 'code-scanner' | 'wallpaper' | 'clipboard-history' | 'color-picker' | 'unit-converter' | 'world-clock' | 'image-viewer' | 'rss-reader' | 'remote-desktop' | 'brave'
 
@@ -122,7 +123,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     const vh = typeof window !== 'undefined' ? window.innerHeight : 900
     const offset = (get().windows.length % 6) * 28
     const x = Math.max(0, Math.floor((vw - meta.width) / 2) + offset - 70)
-    const y = Math.max(36, Math.floor((vh - 88 - meta.height) / 2) + offset - 70)
+    const y = Math.max(16, Math.floor((vh - TITLEBAR_H - DOCK_CLEARANCE - meta.height) / 2) + offset - 50)
     set(s => ({
       nextZ: s.nextZ + 1,
       windows: [
@@ -199,7 +200,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
 
   snapWindow(id, side) {
     const W = typeof window !== 'undefined' ? window.innerWidth : 1440
-    const H = typeof window !== 'undefined' ? window.innerHeight - 28 - 88 : 784
+    const H = typeof window !== 'undefined' ? window.innerHeight - TITLEBAR_H - DOCK_CLEARANCE : 784
     const z = get().nextZ
     set(s => ({
       nextZ: s.nextZ + 1,
@@ -223,7 +224,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     const z = get().nextZ
     // Content area: full width, height minus TitleBar (28px) and Dock clearance (88px)
     const W = typeof window !== 'undefined' ? window.innerWidth : 1440
-    const H = typeof window !== 'undefined' ? window.innerHeight - 28 - 88 : 784
+    const H = typeof window !== 'undefined' ? window.innerHeight - TITLEBAR_H - DOCK_CLEARANCE : 784
     set((s) => ({
       nextZ: s.nextZ + 1,
       windows: s.windows.map((w) => {

@@ -13,22 +13,20 @@ const s = {
 
 interface WP { id:string; name:string; path:string; type:'builtin'|'custom'; thumb?:string }
 
-const BUILTIN_WALLPAPERS: WP[] = [
-  { id:'none', name:'Animated Background', path:'', type:'builtin' },
-  { id:'dark-city', name:'Dark City', path:'/wallpapers/dark-city.jpg', type:'builtin' },
-  { id:'cyber-grid', name:'Cyber Grid', path:'/wallpapers/cyber-grid.jpg', type:'builtin' },
-  { id:'terminal-green', name:'Terminal Green', path:'/wallpapers/terminal-green.jpg', type:'builtin' },
-  { id:'space', name:'Deep Space', path:'/wallpapers/space.jpg', type:'builtin' },
-  { id:'abstract-dark', name:'Abstract Dark', path:'/wallpapers/abstract-dark.jpg', type:'builtin' },
-  { id:'matrix', name:'Matrix Rain', path:'/wallpapers/matrix.jpg', type:'builtin' },
-]
+// Gradient wallpapers are stored as their full CSS `background` value, so the
+// desktop can render them directly (crisp vector gradients — never grainy) and
+// the same string round-trips through settings persistence.
+interface Gradient { id:string; name:string; css:string }
 
-const GRADIENT_WALLPAPERS = [
-  { id:'grad-1', name:'Cyber Dusk', colors:['#0a0e1a','#0d2640'], type:'gradient' },
-  { id:'grad-2', name:'Neon Night', colors:['#050a0f','#1a0a2e'], type:'gradient' },
-  { id:'grad-3', name:'Arctic Blue', colors:['#030d1a','#0a2a3d'], type:'gradient' },
-  { id:'grad-4', name:'Crimson Dark', colors:['#0a0808','#2a0808'], type:'gradient' },
-  { id:'grad-5', name:'Forest Dark', colors:['#040a06','#0a1e0c'], type:'gradient' },
+const GRADIENT_WALLPAPERS: Gradient[] = [
+  { id:'grad-cyber-dusk', name:'Cyber Dusk',  css:'radial-gradient(circle at 18% 22%, rgba(0,212,255,0.16), transparent 45%), radial-gradient(circle at 82% 78%, rgba(187,136,255,0.13), transparent 50%), linear-gradient(135deg, #070b14 0%, #0d1e33 100%)' },
+  { id:'grad-neon-night', name:'Neon Night',  css:'radial-gradient(circle at 75% 25%, rgba(187,136,255,0.20), transparent 50%), radial-gradient(circle at 20% 80%, rgba(99,102,241,0.12), transparent 50%), linear-gradient(160deg, #0a0612 0%, #1a0a2e 75%)' },
+  { id:'grad-arctic',     name:'Arctic Blue', css:'radial-gradient(circle at 30% 68%, rgba(0,180,255,0.18), transparent 50%), linear-gradient(135deg, #03101c 0%, #0a2a3d 100%)' },
+  { id:'grad-crimson',    name:'Crimson Dark',css:'radial-gradient(circle at 72% 30%, rgba(255,70,90,0.15), transparent 50%), linear-gradient(140deg, #0c0708 0%, #2a0810 100%)' },
+  { id:'grad-forest',     name:'Forest Dark', css:'radial-gradient(circle at 25% 28%, rgba(52,211,153,0.15), transparent 50%), linear-gradient(135deg, #040a06 0%, #0a2015 100%)' },
+  { id:'grad-space',      name:'Deep Space',  css:'radial-gradient(ellipse at 50% -10%, rgba(80,120,255,0.14), transparent 55%), radial-gradient(circle at 85% 75%, rgba(187,136,255,0.11), transparent 45%), linear-gradient(180deg, #05070f 0%, #0a0a1a 100%)' },
+  { id:'grad-ember',      name:'Ember',       css:'radial-gradient(circle at 70% 80%, rgba(251,146,60,0.16), transparent 50%), linear-gradient(140deg, #0a0806 0%, #2a160a 100%)' },
+  { id:'grad-slate',      name:'Mono Slate',  css:'radial-gradient(circle at 50% 20%, rgba(148,163,184,0.10), transparent 55%), linear-gradient(135deg, #0a0d12 0%, #1a2130 100%)' },
 ]
 
 export default function WallpaperApp() {
@@ -85,9 +83,10 @@ export default function WallpaperApp() {
                   {!wallpaper && <div style={{ position:'absolute', top:6, right:6, background:'var(--cryo-accent,#00d4ff)', borderRadius:'50%', width:16, height:16, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, color:'#000', fontWeight:700 }}>✓</div>}
                 </div>
                 {GRADIENT_WALLPAPERS.map(g => (
-                  <div key={g.id} style={s.thumb(wallpaper===g.id)} onClick={() => applyWallpaper(g.id)}>
-                    <div style={{ width:'100%', height:'100%', background:`linear-gradient(135deg,${g.colors[0]},${g.colors[1]})` }} />
+                  <div key={g.id} style={s.thumb(wallpaper===g.css)} onClick={() => applyWallpaper(g.css)}>
+                    <div style={{ width:'100%', height:'100%', background:g.css }} />
                     <div style={s.label}>{g.name}</div>
+                    {wallpaper===g.css && <div style={{ position:'absolute', top:6, right:6, background:'var(--cryo-accent,#00d4ff)', borderRadius:'50%', width:16, height:16, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, color:'#000', fontWeight:700 }}>✓</div>}
                   </div>
                 ))}
               </div>
