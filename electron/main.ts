@@ -1,9 +1,19 @@
-import { app, BrowserWindow, shell, ipcMain, powerMonitor, globalShortcut } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, powerMonitor, globalShortcut, screen as electronScreen } from 'electron'
 import { join } from 'path'
 import { exec, execFileSync } from 'child_process'
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs'
 
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+
+// ── Performance flags (set before app.ready) ──────────────────────────────────
+// Disable spare renderer pre-spawn — saves ~40 MB RAM on a single-window app.
+app.commandLine.appendSwitch('disable-features', 'SpareRendererForSitePerProcess,TranslateUI,AutofillServerCommunication,HardwareMediaKeyHandling,MediaSessionService')
+// Enable GPU raster and zero-copy for faster 2D rendering.
+app.commandLine.appendSwitch('enable-gpu-rasterization')
+app.commandLine.appendSwitch('enable-zero-copy')
+// Disable background throttling — Electron is the desktop shell, always needs full speed.
+app.commandLine.appendSwitch('disable-background-timer-throttling')
+app.commandLine.appendSwitch('disable-renderer-backgrounding')
 
 // On the live OS, store userData at a fixed path inside /opt/ which is
 // guaranteed persistent (the app itself lives there). The default path
@@ -64,6 +74,7 @@ import { registerColorPickerHandlers } from './ipc/color-picker'
 import { registerImageViewerHandlers } from './ipc/image-viewer'
 import { registerRSSReaderHandlers } from './ipc/rss-reader'
 import { registerRemoteDesktopHandlers } from './ipc/remote-desktop'
+import { setShellWindow, raiseShell, sinkShell, unpinShell, pinToDesktopLayer } from './shellControl'
 
 let mainWindow: BrowserWindow | null = null
 let screenLocked = false  // tracked in main so shortcuts can check it
@@ -71,11 +82,22 @@ let screenLocked = false  // tracked in main so shortcuts can check it
 function lockScreen(): void {
   if (!mainWindow) return
   screenLocked = true
-  // Put Electron above every X11 window (Brave, terminals, etc.) so apps
-  // cannot be seen or interacted with while the lock screen is active.
+  // Restore full-screen state before raising — if the window was snapped to
+  // a half-screen by the snap keybinding, lock screen would only cover half.
+  mainWindow.unmaximize()
+  mainWindow.maximize()
+  // Put Electron above every X11 window so no app is visible while locked.
   mainWindow.setAlwaysOnTop(true, 'screen-saver')
   mainWindow.focus()
   mainWindow.moveTop()
+  // Re-assert after 200ms in case a pending sinkShell() timer fires and
+  // removes the above state that we just set.
+  setTimeout(() => {
+    if (screenLocked) {
+      mainWindow?.setAlwaysOnTop(true, 'screen-saver')
+      mainWindow?.moveTop()
+    }
+  }, 200)
   mainWindow.webContents.send('screen:lock')
 }
 
@@ -85,6 +107,7 @@ function createWindow(): void {
     height: 900,
     minWidth: 1024,
     minHeight: 700,
+    title: 'CryogramShell',
     frame: false,
     titleBarStyle: 'hidden',
     backgroundColor: '#070b11',
@@ -99,34 +122,74 @@ function createWindow(): void {
     icon: join(__dirname, '../../resources/icon.png'),
   })
 
+  // Register shell window for raise/sink control
+  setShellWindow(mainWindow)
+  // When Electron loses focus to any X11 app, return to the desktop layer
+  mainWindow.on('blur', () => {
+    if (!screenLocked) sinkShell()
+  })
+
   mainWindow.on('ready-to-show', () => {
     mainWindow!.show()
     mainWindow!.maximize()
+    // Make shell visible on every virtual workspace — Electron native API
+    // (more reliable than wmctrl sticky on Openbox)
+    mainWindow!.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+
+    // Pin to desktop layer — X11 apps always float on top, Electron is the floor
+    setTimeout(pinToDesktopLayer, 500)
+
+    // Never minimize under any condition — restore immediately if the WM tries
+    mainWindow!.on('minimize', () => {
+      mainWindow?.restore()
+      setTimeout(pinToDesktopLayer, 200)
+    })
     mainWindow!.on('restore', () => mainWindow?.maximize())
 
+    // Super+D: toggle — raise Cryogram above X11 apps so the user can interact
+    // with the dock/apps, or sink it back below so X11 apps are visible again.
     globalShortcut.register('Super+D', () => {
       if (screenLocked) return
-      if (mainWindow?.isMinimized() || !mainWindow?.isVisible()) {
-        mainWindow?.show()
-        mainWindow?.maximize()
-        mainWindow?.focus()
-      } else {
-        mainWindow?.minimize()
-      }
+      raiseShell()
     })
     globalShortcut.register('Super+Tab', () => {})
-    // Workspace switching
-    ;[1, 2, 3, 4].forEach(n => {
-      globalShortcut.register(`Super+${n}`, () => {
-        if (screenLocked) return
-        const { exec } = require('child_process')
-        exec(`wmctrl -s ${n - 1} 2>/dev/null`)
-        mainWindow?.webContents.send('workspace:changed', n - 1)
-      })
-    })
     globalShortcut.register('Super+L', () => lockScreen())
+
+    // ── Window snapping ────────────────────────────────────────────────────
+    // Snaps the active X11 window via wmctrl. Skips if Cryogram itself is the
+    // active window — internal window snapping is handled by the renderer via
+    // the window:snap event sent below.
+    const snapX11 = (side: 'left' | 'right' | 'max') => {
+      const { width, height } = electronScreen.getPrimaryDisplay().workAreaSize
+      const TB = 28
+      exec('xdotool getactivewindow', (_err, xidStr) => {
+        const xid = xidStr?.trim()
+        if (!xid) return
+        // Skip if active window IS the main desktop shell
+        try {
+          const mainNativeId = mainWindow?.getNativeWindowHandle().readUInt32LE(0)
+          if (mainNativeId) {
+            const mainXid = `0x${mainNativeId.toString(16)}`
+            const decXid = String(mainNativeId)
+            if (xid === mainXid || xid === decXid) return
+          }
+        } catch {}
+        if (side === 'max') {
+          exec(`wmctrl -i -r ${xid} -b add,maximized_vert,maximized_horz 2>/dev/null || true`, () => {})
+        } else {
+          const x = side === 'left' ? 0 : Math.floor(width / 2)
+          const w = Math.floor(width / 2)
+          const h = height - TB
+          exec(`wmctrl -i -r ${xid} -b remove,maximized_vert,maximized_horz 2>/dev/null; wmctrl -i -r ${xid} -e 0,${x},${TB},${w},${h} 2>/dev/null || true`, () => {})
+        }
+      })
+    }
+    globalShortcut.register('Super+Left',  () => { if (!screenLocked) { snapX11('left');  mainWindow?.webContents.send('window:snap', 'left')  } })
+    globalShortcut.register('Super+Right', () => { if (!screenLocked) { snapX11('right'); mainWindow?.webContents.send('window:snap', 'right') } })
+    globalShortcut.register('Super+Up',    () => { if (!screenLocked) { snapX11('max');   mainWindow?.webContents.send('window:snap', 'max')   } })
     globalShortcut.register('CommandOrControl+Alt+T', () => {
       if (screenLocked) return
+      raiseShell()
       mainWindow?.webContents.send('open:app', 'terminal')
     })
     globalShortcut.register('CommandOrControl+Space', () => {
@@ -135,55 +198,95 @@ function createWindow(): void {
     })
 
     // ── Volume keys ────────────────────────────────────────────────────────
-    // Track last known level for optimistic HUD updates — never default to 50
-    // when pactl is slow or the sink isn't resolved yet.
     let _vol = -1
 
+    // PipeWire/PulseAudio find their socket via XDG_RUNTIME_DIR.
+    // Prefer the env var (set by cryogram-session for the correct user).
+    // If Electron runs as root, fall back to uid 1000 (the desktop user).
+    const uid = process.getuid?.() ?? 1000
+    const audioEnv = {
+      ...process.env,
+      XDG_RUNTIME_DIR: process.env['XDG_RUNTIME_DIR'] ?? `/run/user/${uid === 0 ? 1000 : uid}`,
+    }
+
+    const execVol = (delta: string) => {
+      exec(`pactl set-sink-volume @DEFAULT_SINK@ ${delta} 2>/dev/null || pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r -I{} pactl set-sink-volume {} ${delta} 2>/dev/null || true`, { env: audioEnv })
+    }
+    const readVolCmd = `pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null || pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r pactl get-sink-volume 2>/dev/null`
+    const readMuteCmd = `pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null || pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r pactl get-sink-mute 2>/dev/null`
+
     const readVolAndSend = () => {
-      exec('pactl get-sink-volume @DEFAULT_SINK@', (err, volOut) => {
+      exec(readVolCmd, { env: audioEnv }, (err, volOut) => {
         if (err || !volOut) return
         const match = volOut.match(/(\d+)%/)
         if (!match) return
         _vol = Math.min(100, parseInt(match[1]))
-        exec('pactl get-sink-mute @DEFAULT_SINK@', (_, muteOut) => {
+        exec(readMuteCmd, { env: audioEnv }, (_, muteOut) => {
           mainWindow?.webContents.send('hud:volume', { level: _vol, muted: muteOut?.includes('yes') ?? false })
         })
       })
     }
 
+    // Read current volume immediately
+    readVolAndSend()
+
     const sendVolOptimistic = (delta: number) => {
-      if (_vol >= 0) {
-        _vol = Math.max(0, Math.min(100, _vol + delta))
-        mainWindow?.webContents.send('hud:volume', { level: _vol, muted: false })
-      }
+      // Always show HUD immediately — use 50 as baseline if volume unknown yet
+      _vol = Math.max(0, Math.min(100, (_vol < 0 ? 50 : _vol) + delta))
+      mainWindow?.webContents.send('hud:volume', { level: _vol, muted: false })
       setTimeout(readVolAndSend, 300)
     }
 
     globalShortcut.register('VolumeUp', () => {
-      exec('pactl set-sink-volume @DEFAULT_SINK@ +5%')
+      execVol('+5%')
       sendVolOptimistic(5)
     })
     globalShortcut.register('VolumeDown', () => {
-      exec('pactl set-sink-volume @DEFAULT_SINK@ -5%')
+      execVol('-5%')
       sendVolOptimistic(-5)
     })
     globalShortcut.register('VolumeMute', () => {
-      exec('pactl set-sink-mute @DEFAULT_SINK@ toggle')
+      exec(`pactl set-sink-mute @DEFAULT_SINK@ toggle 2>/dev/null || pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r -I{} pactl set-sink-mute {} toggle 2>/dev/null || true`, { env: audioEnv })
       setTimeout(readVolAndSend, 300)
     })
 
     // ── Brightness keys ────────────────────────────────────────────────────
-    // BrightnessUp/Down are not valid Electron accelerator names on Linux.
-    // Brightness is handled by ACPI (configured by cryogram-update) at OS level.
-    // The brightness slider in System Settings works via setBrightness IPC.
+    // Electron can't register XF86MonBrightnessUp/Down on Linux — Openbox
+    // handles them via keybindings calling brightnessctl. We poll the sysfs
+    // file every 200ms so any change (from any source) triggers the HUD.
+    let _brightness = -1
+    const backlightBase = (() => {
+      try {
+        const dirs = readdirSync('/sys/class/backlight')
+        return dirs.length ? `/sys/class/backlight/${dirs[0]}` : null
+      } catch { return null }
+    })()
+    if (backlightBase) {
+      setInterval(() => {
+        try {
+          const cur = parseInt(readFileSync(`${backlightBase}/brightness`, 'utf8').trim())
+          const max = parseInt(readFileSync(`${backlightBase}/max_brightness`, 'utf8').trim())
+          if (max <= 0) return
+          const level = Math.round(cur * 100 / max)
+          if (level !== _brightness) {
+            _brightness = level
+            mainWindow?.webContents.send('hud:brightness', { level })
+          }
+        } catch {}
+      }, 200)
+    }
 
     // ── Alt+Tab window switcher ────────────────────────────────────────────
+    // Raise Electron above all X11 apps first so the overlay is visible even
+    // when Cryogram is pinned below Brave or another X11 window.
     globalShortcut.register('Alt+Tab', () => {
       if (screenLocked) return
+      raiseShell()
       mainWindow?.webContents.send('app:switcher', 'next')
     })
     globalShortcut.register('Alt+Shift+Tab', () => {
       if (screenLocked) return
+      raiseShell()
       mainWindow?.webContents.send('app:switcher', 'prev')
     })
   })
@@ -200,8 +303,14 @@ function createWindow(): void {
   }
 }
 
+// Map of open app windows spawned as separate BrowserWindows
+const appWindowMap = new Map<number, { win: BrowserWindow; appId: string }>()
+
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.cryogram.app')
+
+  // Sync system clock immediately — the hardware RTC can drift when offline.
+  exec('chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true', () => {})
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
@@ -214,6 +323,126 @@ app.whenReady().then(() => {
   })
   ipcMain.on('window:close', () => mainWindow?.close())
 
+  // Renderer requests shell layer changes (called by AppSwitcherOverlay)
+  ipcMain.on('shell:sink',  () => sinkShell())
+  ipcMain.on('shell:unpin', () => unpinShell())
+
+  // ── App windows: each Cryogram app as its own BrowserWindow ──────────────────
+  ipcMain.handle('shell:open-app-window', (_, appId: string) => {
+    // Drop the shell off always-on-top before creating the app window.
+    // The app window will be set to _NET_WM_STATE_ABOVE (floating), and the shell
+    // goes to _NET_WM_STATE_BELOW via the blur handler, so visibility is guaranteed
+    // regardless of X11 stacking order races.
+    if (mainWindow && !screenLocked) {
+      mainWindow.setAlwaysOnTop(false)
+    }
+
+    // Focus existing window if already open
+    for (const [id, { win, appId: aid }] of appWindowMap) {
+      if (aid === appId && !win.isDestroyed()) {
+        win.show()
+        win.focus()
+        win.moveTop()
+        return id
+      }
+    }
+
+    const display = electronScreen.getPrimaryDisplay()
+    const { width, height } = display.workAreaSize
+    const defaultSizes: Record<string, [number, number]> = {
+      terminal: [900, 580], editor: [1100, 740], 'password-tester': [820, 620],
+      leaker: [860, 560], settings: [760, 560], system: [760, 560], files: [860, 580],
+      launcher: [760, 560], opticseo: [1280, 820], phone: [780, 600], scanner: [900, 620],
+      vpn: [720, 560], notes: [820, 580], mail: [1100, 780], passwords: [860, 600],
+      'ssh-keys': [820, 600], firewall: [780, 580], 'task-manager': [900, 600],
+      logs: [960, 640], netmon: [900, 600], screenshot: [900, 640], calculator: [560, 520],
+      'crypto-tools': [720, 580], 'api-tester': [1100, 720], 'cert-inspector': [780, 580],
+      docker: [960, 640], git: [980, 640], database: [960, 640], markdown: [1000, 680],
+      trash: [820, 560], shodan: [1100, 720], osint: [1060, 700], cve: [1060, 700],
+      'ai-assistant': [820, 640], wordlists: [900, 600], 'json-explorer': [1060, 680],
+      totp: [760, 540], regex: [900, 640], 'encoding-chain': [980, 640],
+      'packet-sniffer': [1100, 680], backup: [820, 580], 'password-health': [760, 580],
+      pomodoro: [560, 700], 'audit-log': [980, 640], 'code-scanner': [1060, 700],
+      wallpaper: [820, 580], 'clipboard-history': [720, 580], 'color-picker': [680, 560],
+      'unit-converter': [680, 520], 'world-clock': [780, 520], 'image-viewer': [960, 700],
+      'rss-reader': [1000, 680], 'remote-desktop': [860, 600],
+    }
+    const [w, h] = defaultSizes[appId] || [920, 640]
+    const x = Math.max(0, Math.floor((width - w) / 2))
+    const y = Math.max(0, Math.floor((height - h) / 2))
+
+    const win = new BrowserWindow({
+      width: w, height: h, x, y,
+      minWidth: 380, minHeight: 280,
+      frame: false,
+      backgroundColor: '#070b11',
+      webPreferences: {
+        preload: join(__dirname, '../preload/index.js'),
+        sandbox: false,
+        contextIsolation: true,
+        nodeIntegration: false,
+        webviewTag: true,
+      },
+      show: false,
+    })
+
+    if (is.dev) {
+      win.loadURL(`${process.env['ELECTRON_RENDERER_URL']}?standalone=${encodeURIComponent(appId)}`)
+    } else {
+      win.loadFile(join(__dirname, '../renderer/index.html'), {
+        query: { standalone: appId }
+      })
+    }
+
+    win.once('ready-to-show', () => {
+      win.show()
+      // Float app windows above the shell. The shell lives in _NET_WM_STATE_BELOW
+      // (via sinkShell/pinToDesktopLayer). Setting app windows to floating
+      // (_NET_WM_STATE_ABOVE) guarantees they're always visible over the fullscreen
+      // shell regardless of X11 stacking races or wmctrl timing.
+      win.setAlwaysOnTop(true, 'floating')
+      win.focus()
+      win.moveTop()
+      // Ensure the shell is in the below layer so the app window is on top
+      if (!screenLocked) sinkShell()
+    })
+
+    // When an app window gains focus, re-assert above state and sink the shell
+    win.on('focus', () => {
+      if (win.isDestroyed() || screenLocked) return
+      win.setAlwaysOnTop(true, 'floating')
+      sinkShell()
+    })
+    // When an app window loses focus (user clicked a native X11 app), drop
+    // always-on-top so native apps can come to the front normally
+    win.on('blur', () => {
+      if (!win.isDestroyed()) win.setAlwaysOnTop(false)
+    })
+
+    const winId = win.id
+    appWindowMap.set(winId, { win, appId })
+
+    win.on('closed', () => {
+      appWindowMap.delete(winId)
+      mainWindow?.webContents.send('app-window:closed', appId)
+      // When the last app window closes, bring the shell back to the foreground
+      // so the user sees the desktop (not a black area where the window was).
+      if (appWindowMap.size === 0 && !screenLocked) {
+        raiseShell()
+      }
+    })
+
+    return winId
+  })
+
+  ipcMain.on('shell:winctrl-close',    (e) => BrowserWindow.fromWebContents(e.sender)?.close())
+  ipcMain.on('shell:winctrl-minimize', (e) => BrowserWindow.fromWebContents(e.sender)?.minimize())
+  ipcMain.on('shell:winctrl-maximize', (e) => {
+    const w = BrowserWindow.fromWebContents(e.sender)
+    if (!w) return
+    w.isMaximized() ? w.unmaximize() : w.maximize()
+  })
+
   // Hide shell so an external X11 app can be seen; Super+D restores it
   ipcMain.handle('wm:hideShell', () => {
     mainWindow?.minimize()
@@ -225,6 +454,7 @@ app.whenReady().then(() => {
   ipcMain.on('screen:unlock', () => {
     screenLocked = false
     mainWindow?.setAlwaysOnTop(false)
+    setTimeout(pinToDesktopLayer, 300)
   })
 
   registerTerminalHandlers()
@@ -271,7 +501,10 @@ app.whenReady().then(() => {
   createWindow()
   startNotificationBridge()
 
-  powerMonitor.on('resume',      () => lockScreen())
+  // Lock immediately when the lid closes (suspend) so the lock screen is
+  // already visible when the display turns back on — no desktop flash on wake.
+  powerMonitor.on('suspend',     () => lockScreen())
+  powerMonitor.on('resume',      () => lockScreen())  // belt-and-suspenders fallback
   powerMonitor.on('lock-screen', () => lockScreen())
 
   app.on('activate', () => {

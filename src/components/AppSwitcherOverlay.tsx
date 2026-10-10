@@ -107,6 +107,7 @@ interface SwitcherEntry {
   appId?: AppId
   // x11 window
   x11Title?: string
+  x11Id?: string
   // display
   icon: string
   color: string
@@ -127,6 +128,9 @@ export function AppSwitcherOverlay() {
 
   // Auto-hide timer ref
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Keep a ref to current selection so timer callbacks don't capture stale state
+  const selIdxRef = useRef(0)
+  useEffect(() => { selIdxRef.current = selIdx }, [selIdx])
 
   // ── Fetch X11 windows ────────────────────────────────────────────────────
 
@@ -174,6 +178,7 @@ export function AppSwitcherOverlay() {
       key:      `x11-${x.id}`,
       type:     'x11',
       x11Title: x.title,
+      x11Id:    x.id,
       icon:     meta.icon,
       color:    meta.color,
       label:    meta.name,
@@ -187,8 +192,16 @@ export function AppSwitcherOverlay() {
 
   const resetHideTimer = useCallback(() => {
     if (hideTimer.current) clearTimeout(hideTimer.current)
-    hideTimer.current = setTimeout(() => setVisible(false), 1000)
-  }, [])
+    hideTimer.current = setTimeout(() => {
+      const entry = shown[selIdxRef.current]
+      if (entry) {
+        activateEntry(entry)
+      } else {
+        shell?.sink?.()
+      }
+      setVisible(false)
+    }, 1200)
+  }, [shown])
 
   const showSwitcher = useCallback((direction: 'next' | 'prev') => {
     setVisible(true)
@@ -239,7 +252,7 @@ export function AppSwitcherOverlay() {
         activateEntry(shown[selIdx])
         setVisible(false)
       } else if (e.key === 'Escape') {
-        setVisible(false)
+        dismissWithSink()
       }
     }
     window.addEventListener('keydown', onKey)
@@ -248,14 +261,50 @@ export function AppSwitcherOverlay() {
 
   // ── Activate selected entry ──────────────────────────────────────────────
 
+  const shell = (window.cryogram as any)?.shell
+
   function activateEntry(entry: SwitcherEntry | undefined) {
     if (!entry) return
     if (entry.type === 'app' && entry.windowId) {
+      // Electron stays raised (ABOVE state) — just remove always-on-top flag so
+      // the WM puts it back in normal Z-order. blur handler will sink it later.
+      shell?.unpin?.()
       restoreWindow(entry.windowId)
       focusWindow(entry.windowId)
+    } else if (entry.type === 'x11' && entry.x11Id) {
+      // Sink Electron back to the desktop layer first, then raise the X11 window.
+      // Small delay gives wmctrl time to remove ABOVE before xdotool raises the target.
+      shell?.sink?.()
+      const id = entry.x11Id
+      setTimeout(() => {
+        ;(window.cryogram as any)?.wm?.focusWindow?.(id)
+      }, 60)
     }
-    // X11 windows: no JS focus possible from renderer; no-op
   }
+
+  function dismissWithSink() {
+    shell?.sink?.()
+    setVisible(false)
+  }
+
+  // ── Commit selection when Alt key is released ────────────────────────────
+
+  useEffect(() => {
+    if (!visible) return
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') {
+        const entry = shown[selIdxRef.current]
+        if (entry) {
+          activateEntry(entry)
+        } else {
+          shell?.sink?.()
+        }
+        setVisible(false)
+      }
+    }
+    window.addEventListener('keyup', onKeyUp)
+    return () => window.removeEventListener('keyup', onKeyUp)
+  }, [visible, shown])
 
   // ── Cleanup timer on unmount ─────────────────────────────────────────────
 
@@ -289,7 +338,7 @@ export function AppSwitcherOverlay() {
             justifyContent:      'center',
             fontFamily:          font,
           }}
-          onClick={() => setVisible(false)}
+          onClick={() => dismissWithSink()}
         >
           {/* Card row container */}
           <motion.div

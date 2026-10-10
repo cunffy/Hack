@@ -113,7 +113,7 @@ const APP_COLORS: Record<string, string> = {
   'remote-desktop':    '#10b981',
 }
 
-function AppContent({ appId }: { appId: string }) {
+export function AppContent({ appId }: { appId: string }) {
   return (
     <AppCrashBoundary appId={appId}>
     <Suspense

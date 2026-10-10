@@ -3,16 +3,7 @@ import { persist } from 'zustand/middleware'
 import { AppId } from './windowStore'
 
 export const DEFAULT_DOCK: AppId[] = [
-  'terminal', 'editor', 'mail', 'password-tester', 'leaker',
-  'files', 'passwords', 'scanner', 'firewall', 'vpn',
-  'task-manager', 'netmon', 'logs', 'launcher', 'settings',
-  'calculator', 'crypto-tools', 'api-tester', 'cert-inspector',
-  'docker', 'git', 'database', 'markdown', 'trash',
-  'shodan', 'osint', 'cve', 'ai-assistant', 'wordlists',
-  'json-explorer', 'totp', 'regex', 'encoding-chain', 'packet-sniffer',
-  'backup', 'password-health', 'pomodoro', 'audit-log', 'code-scanner', 'wallpaper',
-  'clipboard-history', 'color-picker', 'unit-converter', 'world-clock', 'image-viewer', 'rss-reader',
-  'remote-desktop',
+  'launcher', 'brave', 'settings', 'files', 'ai-assistant', 'terminal',
 ]
 
 interface DockStore {
@@ -32,9 +23,16 @@ export const useDockStore = create<DockStore>()(
     }),
     {
       name: 'cryogram-dock-order',
+      version: 4,
+      // v4: add Brave to dock; one-time merge of Brave into existing order.
+      migrate: (state: any, _fromVersion: number) => {
+        const order: AppId[] = state?.order ?? DEFAULT_DOCK
+        return { order: order.includes('brave') ? order : ['launcher', 'brave', ...order.filter((id: AppId) => id !== 'launcher')] }
+      },
       merge: (persisted: any, current) => {
         const stored: AppId[] = persisted?.order ?? current.order
         const merged = [...stored]
+        // Ensure core apps are always present, but never reset user customizations
         for (const id of DEFAULT_DOCK) {
           if (!merged.includes(id)) merged.push(id)
         }

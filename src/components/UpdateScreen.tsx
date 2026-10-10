@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-type Phase = 'auth' | 'starting' | 'updating' | 'countdown' | 'rebooting'
+type Phase = 'auth' | 'starting' | 'updating' | 'countdown' | 'restarting'
 
 interface Props {
   onCancel?: () => void
@@ -104,6 +104,7 @@ export function UpdateScreen({ onCancel }: Props) {
   const [needsSudoSetup, setNeedsSudoSetup] = useState(false)
   const [password, setPassword]   = useState('')
   const [wrongPassword, setWrongPassword] = useState(false)
+  const [isRoot, setIsRoot]       = useState<boolean | null>(null)
   const logRef = useRef<HTMLDivElement>(null)
   const countdownRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -111,8 +112,10 @@ export function UpdateScreen({ onCancel }: Props) {
     const lines = stripAnsi(raw).split('\n').filter(l => l.trim())
     setLog(prev => [...prev, ...lines].slice(-120))
 
-    // Detect script entering reboot countdown
+    // Detect script nearing completion
     if (raw.includes('Rebooting in') || raw.includes('Rebooting')) {
+      setPhase('countdown')
+    } else if (raw.includes('Restarting Cryogram') || raw.includes('All done')) {
       setPhase('countdown')
     }
   }, [])
@@ -123,7 +126,9 @@ export function UpdateScreen({ onCancel }: Props) {
     if (el) el.scrollTop = el.scrollHeight
   }, [log])
 
-  // Countdown timer - starts when phase = 'countdown'
+  // Countdown timer - starts when phase = 'countdown'.
+  // When it hits 0, also trigger a reboot from the Electron side as a fallback
+  // in case the script-side `reboot` command didn't fire (e.g. D-Bus race).
   useEffect(() => {
     if (phase !== 'countdown') return
     setCount(10)
@@ -131,7 +136,10 @@ export function UpdateScreen({ onCancel }: Props) {
       setCount(n => {
         if (n <= 1) {
           clearInterval(countdownRef.current!)
-          setPhase('rebooting')
+          setPhase('restarting')
+          // Belt-and-suspenders: trigger reboot from Electron if the script's
+          // reboot hasn't already brought the machine down.
+          try { (window as any).cryogram?.system?.reboot?.() } catch {}
           return 0
         }
         return n - 1
@@ -140,13 +148,11 @@ export function UpdateScreen({ onCancel }: Props) {
     return () => { if (countdownRef.current) clearInterval(countdownRef.current) }
   }, [phase])
 
-  // Check if we're running as root — if so skip auth phase
+  // Check if running as root on mount — determines whether to show password prompt
   useEffect(() => {
     const api = (window as any).cryogram?.updater
-    if (!api) return
-    // Try running without password first (works if root)
-    // We detect root by attempting a no-password run; if it errors with
-    // wrong-password we know we need auth. Start in auth phase to be safe.
+    if (!api?.isRoot) { setIsRoot(false); return }
+    api.isRoot().then((root: boolean) => setIsRoot(root)).catch(() => setIsRoot(false))
   }, [])
 
   const runUpdate = useCallback(async (pw?: string) => {
@@ -165,14 +171,14 @@ export function UpdateScreen({ onCancel }: Props) {
       const unsub = api.onProgress((line: string) => appendLog(line))
       try {
         await api.run(pw)
-        if (phase !== 'countdown' && phase !== 'rebooting') setPhase('countdown')
+        if (phase !== 'countdown' && phase !== 'restarting') setPhase('countdown')
       } finally {
         unsub()
       }
     } catch (err: any) {
       const msg = String(err?.message ?? err)
       if (msg.includes('code null') || msg.includes('killed')) {
-        setPhase('rebooting')
+        setPhase('restarting')
       } else if (msg === 'wrong-password' || msg.includes('wrong-password')) {
         setPhase('auth')
         setWrongPassword(true)
@@ -186,19 +192,19 @@ export function UpdateScreen({ onCancel }: Props) {
   }, [phase, appendLog])
 
   const phaseLabel: Record<Phase, string> = {
-    auth:      'Install Update',
-    starting:  'Preparing update…',
-    updating:  'Installing update…',
-    countdown: 'Update complete',
-    rebooting: 'Rebooting…',
+    auth:        'Install Update',
+    starting:    'Preparing update…',
+    updating:    'Installing update…',
+    countdown:   'Update complete',
+    restarting:  'Restarting…',
   }
 
   const phaseColor: Record<Phase, string> = {
-    auth:      'var(--cryo-accent)',
-    starting:  'var(--cryo-accent)',
-    updating:  'var(--cryo-accent)',
-    countdown: '#00ff88',
-    rebooting: '#a855f7',
+    auth:        'var(--cryo-accent)',
+    starting:    'var(--cryo-accent)',
+    updating:    'var(--cryo-accent)',
+    countdown:   '#00ff88',
+    restarting:  '#a855f7',
   }
 
   const color = error ? '#ef4444' : phaseColor[phase]
@@ -249,7 +255,7 @@ export function UpdateScreen({ onCancel }: Props) {
             }}
           >
             <AnimatePresence mode="wait">
-              {phase === 'countdown' || phase === 'rebooting' ? (
+              {phase === 'countdown' || phase === 'restarting' ? (
                 <motion.div key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 24 }}>
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12"/>
@@ -283,15 +289,15 @@ export function UpdateScreen({ onCancel }: Props) {
               ? 'Run the command below once in a terminal, then try again'
               : error
               ? 'Check log below for details'
-              : phase === 'countdown' || phase === 'rebooting'
-              ? 'Your laptop will fully restart'
+              : phase === 'countdown' || phase === 'restarting'
+              ? 'Cryogram will restart automatically'
               : 'Downloading code changes only — not a new OS'}
           </div>
         </div>
 
-        {/* Auth panel — password prompt */}
+        {/* Auth panel */}
         <AnimatePresence>
-          {phase === 'auth' && !needsSudoSetup && (
+          {phase === 'auth' && !needsSudoSetup && isRoot !== null && (
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -304,33 +310,43 @@ export function UpdateScreen({ onCancel }: Props) {
                 borderRadius: 16,
                 padding: '20px 22px',
               }}>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 12 }}>
-                  Enter your account password to install the update
-                </div>
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  autoFocus
-                  onChange={e => { setPassword(e.target.value); setWrongPassword(false) }}
-                  onKeyDown={e => { if (e.key === 'Enter' && password) runUpdate(password) }}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 10,
-                    background: 'rgba(0,0,0,0.4)',
-                    border: `1px solid ${wrongPassword ? '#ef4444' : 'rgba(255,255,255,0.12)'}`,
-                    color: '#fff',
-                    fontSize: 14,
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    fontFamily: 'inherit',
-                  }}
-                />
-                {wrongPassword && (
-                  <div style={{ fontSize: 11, color: '#f87171', marginTop: 6 }}>
-                    Incorrect password — try again
+                {isRoot ? (
+                  /* Running as root — no password needed, just confirm */
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 14 }}>
+                    The system will download the latest update and reboot.
                   </div>
+                ) : (
+                  /* Non-root — need sudo password */
+                  <>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 12 }}>
+                      Enter your account password to install the update
+                    </div>
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      value={password}
+                      autoFocus
+                      onChange={e => { setPassword(e.target.value); setWrongPassword(false) }}
+                      onKeyDown={e => { if (e.key === 'Enter' && password) runUpdate(password) }}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        borderRadius: 10,
+                        background: 'rgba(0,0,0,0.4)',
+                        border: `1px solid ${wrongPassword ? '#ef4444' : 'rgba(255,255,255,0.12)'}`,
+                        color: '#fff',
+                        fontSize: 14,
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                        fontFamily: 'inherit',
+                      }}
+                    />
+                    {wrongPassword && (
+                      <div style={{ fontSize: 11, color: '#f87171', marginTop: 6 }}>
+                        Incorrect password — try again
+                      </div>
+                    )}
+                  </>
                 )}
                 <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
                   {onCancel && (
@@ -346,15 +362,15 @@ export function UpdateScreen({ onCancel }: Props) {
                     </button>
                   )}
                   <button
-                    onClick={() => password && runUpdate(password)}
-                    disabled={!password}
+                    onClick={() => isRoot ? runUpdate() : (password && runUpdate(password))}
+                    disabled={!isRoot && !password}
                     style={{
                       flex: 2, padding: '9px 0', borderRadius: 10, fontSize: 13, fontWeight: 700,
-                      background: password ? 'linear-gradient(135deg, var(--cryo-accent), #7c3aed)' : 'rgba(255,255,255,0.05)',
+                      background: (isRoot || password) ? 'linear-gradient(135deg, var(--cryo-accent), #7c3aed)' : 'rgba(255,255,255,0.05)',
                       border: 'none',
-                      color: password ? '#fff' : 'rgba(255,255,255,0.25)',
-                      cursor: password ? 'pointer' : 'default',
-                      boxShadow: password ? '0 0 20px var(--cryo-a30)' : 'none',
+                      color: (isRoot || password) ? '#fff' : 'rgba(255,255,255,0.25)',
+                      cursor: (isRoot || password) ? 'pointer' : 'default',
+                      boxShadow: (isRoot || password) ? '0 0 20px var(--cryo-a30)' : 'none',
                       transition: 'all 0.2s',
                     }}
                   >
@@ -368,7 +384,7 @@ export function UpdateScreen({ onCancel }: Props) {
 
         {/* Countdown */}
         <AnimatePresence>
-          {(phase === 'countdown' || phase === 'rebooting') && !error && (
+          {(phase === 'countdown' || phase === 'restarting') && !error && (
             <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -390,10 +406,10 @@ export function UpdateScreen({ onCancel }: Props) {
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
-                {phase === 'rebooting' ? '↺' : countdown}
+                {phase === 'restarting' ? '↺' : countdown}
               </motion.div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
-                {phase === 'rebooting' ? 'Restarting system…' : `Rebooting in ${countdown} second${countdown !== 1 ? 's' : ''}…`}
+                {phase === 'restarting' ? 'Restarting now…' : `Restarting in ${countdown} second${countdown !== 1 ? 's' : ''}…`}
               </div>
             </motion.div>
           )}

@@ -17,7 +17,7 @@ cat > /usr/share/applications/install-cryogram.desktop << 'DESKTOP'
 [Desktop Entry]
 Name=Install Cryogram OS
 Comment=Install Cryogram OS to this computer
-Exec=pkexec calamares
+Exec=sudo /usr/bin/calamares
 Icon=system-software-install
 Terminal=false
 Type=Application

@@ -23,6 +23,7 @@ import { KeyboardShortcutsOverlay } from './components/KeyboardShortcutsOverlay'
 import { useDesktopStore } from './store/desktopStore'
 import { useLockStore } from './store/lockStore'
 import { useWindowStore } from './store/windowStore'
+import { StandaloneApp } from './components/StandaloneApp'
 
 interface UpdateInfo { commitCount: number; changes: string[] }
 
@@ -31,6 +32,8 @@ export default function App() {
   const wallpaper = useDesktopStore(s => s.wallpaper)
   const { isLocked, lock } = useLockStore()
   const openApp = useWindowStore(s => s.openApp)
+  const snapWindow = useWindowStore(s => s.snapWindow)
+  const focusedWinId = useWindowStore(s => s.windows.find(w => w.focused && !w.minimized)?.id)
 
   const [updateInfo, setUpdateInfo]       = useState<UpdateInfo | null>(null)
   const [showUpdateScreen, setShowScreen] = useState(false)
@@ -71,6 +74,16 @@ export default function App() {
     }, 8000)
     return () => clearTimeout(t)
   }, [booted])
+
+  // Listen for IPC-triggered update screen open (from standalone app windows like Settings)
+  useEffect(() => {
+    const api = (window as any).cryogram?.updater
+    const unsub = api?.onOpenScreen?.(() => {
+      setUpdateInfo(null)
+      setShowScreen(true)
+    })
+    return () => unsub?.()
+  }, [])
 
   // Expose manual update trigger globally so Settings can call it
   useEffect(() => {
@@ -135,22 +148,66 @@ export default function App() {
     return cleanup ?? undefined
   }, [])
 
-  // Alt+Tab
+  // Super+arrows window snapping — snap focused internal window
+  useEffect(() => {
+    const cleanup = (window.cryogram as any).onSnap?.((side: 'left' | 'right' | 'max') => {
+      if (focusedWinId) snapWindow(focusedWinId, side)
+    })
+    return cleanup ?? undefined
+  }, [focusedWinId, snapWindow])
+
+  // Inactivity auto-lock
+  useEffect(() => {
+    if (!booted) return
+    let minutes = 0
+    window.cryogram.settings.get('autolock.minutes').then((v: any) => { minutes = typeof v === 'number' ? v : 0 }).catch(() => {})
+
+    let timer: ReturnType<typeof setTimeout>
+    const reset = () => {
+      clearTimeout(timer)
+      if (!minutes) return
+      timer = setTimeout(async () => {
+        if (isLocked) return
+        try {
+          const enabled = await window.cryogram.settings.get('pin.enabled')
+          const hash    = await window.cryogram.settings.get('pin.hash')
+          lock(!!(enabled && hash))
+        } catch { lock(false) }
+      }, minutes * 60 * 1000)
+    }
+
+    const reread = async () => {
+      const v = await window.cryogram.settings.get('autolock.minutes').catch(() => 0)
+      minutes = typeof v === 'number' ? v : 0
+    }
+
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart'] as const
+    events.forEach(e => window.addEventListener(e, reset, { passive: true }))
+    window.addEventListener('cryogram:autolock-changed', reread as any)
+    reset()
+
+    return () => {
+      clearTimeout(timer)
+      events.forEach(e => window.removeEventListener(e, reset))
+      window.removeEventListener('cryogram:autolock-changed', reread as any)
+    }
+  }, [booted, isLocked, lock])
+
+  // Keyboard shortcuts (Alt+Tab is handled by globalShortcut in main process)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.altKey && e.key === 'Tab') {
-        e.preventDefault()
-        window.dispatchEvent(new CustomEvent('cryogram:switcher', { detail: e.shiftKey ? 'prev' : 'next' }))
-      }
       // Ctrl+Space → spotlight
       if (e.ctrlKey && e.code === 'Space') {
         e.preventDefault()
         setSpotlightOpen(o => !o)
       }
-      // Ctrl+Shift+V → clipboard history
+      // Ctrl+Shift+V → clipboard history (skip when xterm has focus)
       if (e.ctrlKey && e.shiftKey && e.code === 'KeyV') {
-        e.preventDefault()
-        setClipboardOpen(o => !o)
+        const inTerminal = !!(e.target as HTMLElement)?.closest('.xterm-helper-textarea, .xterm-screen, .xterm-viewport')
+        if (!inTerminal) {
+          e.preventDefault()
+          setClipboardOpen(o => !o)
+        }
       }
       // Super+M → Mission Control
       if (e.metaKey && e.code === 'KeyM') {
@@ -172,6 +229,21 @@ export default function App() {
     ;(window as any).__cryogram_toggleNotifHistory = () => setNotifHistoryOpen(o => !o)
     return () => { delete (window as any).__cryogram_toggleNotifHistory }
   }, [])
+
+  // Standalone mode: this BrowserWindow shows only one app (e.g., Terminal)
+  const standaloneApp = new URLSearchParams(window.location.search).get('standalone')
+
+  // Sync native window close events back to the window store
+  useEffect(() => {
+    const cleanup = (window.cryogram as any).shell?.onAppWindowClosed?.((appId: string) => {
+      const wins = useWindowStore.getState().windows
+      const w = wins.find(w => w.appId === appId)
+      if (w) useWindowStore.getState().closeWindow(w.id)
+    })
+    return cleanup ?? undefined
+  }, [])
+
+  if (standaloneApp) return <StandaloneApp appId={standaloneApp} />
 
   return (
     <ThemeProvider>
@@ -196,7 +268,7 @@ export default function App() {
                 src={wallpaper.startsWith('file://') ? wallpaper : `file://${wallpaper}`}
                 alt=""
                 className="absolute inset-0 w-full h-full pointer-events-none"
-                style={{ objectFit: 'cover', objectPosition: 'center' }}
+                style={{ objectFit: 'cover', objectPosition: 'center', imageRendering: 'high-quality' as React.CSSProperties['imageRendering'], willChange: 'transform' }}
                 draggable={false}
               />
             )}

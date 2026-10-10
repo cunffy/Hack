@@ -1,4 +1,4 @@
-import { r as reactExports, j as jsxRuntimeExports } from "./index-D1cCCGNU.js";
+import { r as reactExports, j as jsxRuntimeExports, A as AnimatePresence, C as ContextMenu } from "./index-BoM7DgQP.js";
 var xterm = { exports: {} };
 (function(module, exports) {
   !function(e, t) {
@@ -6093,6 +6093,7 @@ const SESSION_ID = () => `term_${Math.random().toString(36).slice(2)}`;
 function Terminal() {
   const containerRef = reactExports.useRef(null);
   const termRef = reactExports.useRef(null);
+  const [ctx, setCtx] = reactExports.useState(null);
   const fitAddonRef = reactExports.useRef(null);
   const sessionIdRef = reactExports.useRef(SESSION_ID());
   const cleanupRef = reactExports.useRef(null);
@@ -6132,18 +6133,53 @@ function Terminal() {
     const webLinksAddon = new xtermAddonWebLinksExports.WebLinksAddon();
     term.loadAddon(fitAddon);
     term.loadAddon(webLinksAddon);
+    try {
+      await document.fonts?.ready;
+    } catch {
+    }
+    for (let i = 0; i < 30 && containerRef.current && containerRef.current.clientHeight === 0; i++) {
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+    }
+    if (!containerRef.current || termRef.current) {
+      term.dispose();
+      return;
+    }
     term.open(containerRef.current);
-    fitAddon.fit();
+    const safeFit = () => {
+      try {
+        fitAddon.fit();
+      } catch {
+      }
+    };
+    safeFit();
     termRef.current = term;
     fitAddonRef.current = fitAddon;
     const id = sessionIdRef.current;
     const { cols, rows } = term;
     await window.cryogram.terminal.create(id, cols, rows);
     term.onData((data) => window.cryogram.terminal.write(id, data));
+    term.attachCustomKeyEventHandler((event) => {
+      if (event.type === "keydown" && event.ctrlKey && event.shiftKey) {
+        if (event.key === "C") {
+          const sel = term.getSelection();
+          if (sel) navigator.clipboard.writeText(sel).catch(() => {
+          });
+          return false;
+        }
+        if (event.key === "V") {
+          navigator.clipboard.readText().then((text) => {
+            if (text) window.cryogram.terminal.write(id, text);
+          }).catch(() => {
+          });
+          return false;
+        }
+      }
+      return true;
+    });
     const removeListener = window.cryogram.terminal.onData(id, (data) => term.write(data));
     cleanupRef.current = removeListener;
     const resizeObserver = new ResizeObserver(() => {
-      fitAddon.fit();
+      safeFit();
       const { cols: cols2, rows: rows2 } = term;
       window.cryogram.terminal.resize(id, cols2, rows2);
     });
@@ -6160,14 +6196,59 @@ function Terminal() {
       termRef.current?.dispose();
     };
   }, [init]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "div",
-    {
-      ref: containerRef,
-      className: "flex-1 w-full h-full p-1",
-      style: { background: "#0a0e14" }
-    }
-  );
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { position: "relative", flex: 1, width: "100%", height: "100%", display: "flex", flexDirection: "column" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        ref: containerRef,
+        className: "flex-1 w-full h-full p-1",
+        style: { background: "#0a0e14" },
+        onContextMenu: (e) => {
+          e.preventDefault();
+          setCtx({ x: e.clientX, y: e.clientY });
+        }
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: ctx && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ContextMenu,
+      {
+        x: ctx.x,
+        y: ctx.y,
+        onClose: () => setCtx(null),
+        items: [
+          {
+            label: "Copy",
+            shortcut: "Ctrl+Shift+C",
+            action: () => {
+              const sel = termRef.current?.getSelection();
+              if (sel) navigator.clipboard.writeText(sel).catch(() => {
+              });
+            },
+            disabled: !termRef.current?.getSelection()
+          },
+          {
+            label: "Paste",
+            shortcut: "Ctrl+Shift+V",
+            action: () => {
+              navigator.clipboard.readText().then((text) => {
+                if (text && termRef.current) window.cryogram.terminal.write(sessionIdRef.current, text);
+              }).catch(() => {
+              });
+            }
+          },
+          { sep: true },
+          {
+            label: "Clear",
+            action: () => termRef.current?.clear()
+          },
+          {
+            label: "Select All",
+            action: () => termRef.current?.selectAll()
+          }
+        ]
+      }
+    ) })
+  ] });
 }
 export {
   Terminal as default

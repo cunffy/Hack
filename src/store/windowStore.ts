@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot' | 'calculator' | 'crypto-tools' | 'api-tester' | 'cert-inspector' | 'docker' | 'git' | 'database' | 'markdown' | 'trash' | 'shodan' | 'osint' | 'cve' | 'ai-assistant' | 'wordlists' | 'json-explorer' | 'totp' | 'regex' | 'encoding-chain' | 'packet-sniffer' | 'backup' | 'password-health' | 'pomodoro' | 'audit-log' | 'code-scanner' | 'wallpaper' | 'clipboard-history' | 'color-picker' | 'unit-converter' | 'world-clock' | 'image-viewer' | 'rss-reader' | 'remote-desktop'
+export type AppId = 'terminal' | 'editor' | 'password-tester' | 'leaker' | 'settings' | 'files' | 'launcher' | 'system' | 'opticseo' | 'phone' | 'scanner' | 'vpn' | 'notes' | 'mail' | 'passwords' | 'ssh-keys' | 'firewall' | 'task-manager' | 'logs' | 'netmon' | 'screenshot' | 'calculator' | 'crypto-tools' | 'api-tester' | 'cert-inspector' | 'docker' | 'git' | 'database' | 'markdown' | 'trash' | 'shodan' | 'osint' | 'cve' | 'ai-assistant' | 'wordlists' | 'json-explorer' | 'totp' | 'regex' | 'encoding-chain' | 'packet-sniffer' | 'backup' | 'password-health' | 'pomodoro' | 'audit-log' | 'code-scanner' | 'wallpaper' | 'clipboard-history' | 'color-picker' | 'unit-converter' | 'world-clock' | 'image-viewer' | 'rss-reader' | 'remote-desktop' | 'brave'
 
 export interface AppWindow {
   id: string
@@ -14,6 +14,7 @@ export interface AppWindow {
   maximized: boolean
   focused: boolean
   zIndex: number
+  native?: boolean
   prevBounds?: { x: number; y: number; width: number; height: number }
 }
 
@@ -21,6 +22,7 @@ interface WindowStore {
   windows: AppWindow[]
   nextZ: number
   openApp(appId: AppId): void
+  openAppNewWindow(appId: AppId): void
   closeWindow(id: string): void
   focusWindow(id: string): void
   moveWindow(id: string, x: number, y: number): void
@@ -28,6 +30,7 @@ interface WindowStore {
   minimizeWindow(id: string): void
   restoreWindow(id: string): void
   toggleMaximize(id: string): void
+  snapWindow(id: string, side: 'left' | 'right' | 'max'): void
 }
 
 const APP_META: Record<AppId, { title: string; width: number; height: number }> = {
@@ -84,6 +87,7 @@ const APP_META: Record<AppId, { title: string; width: number; height: number }> 
   'image-viewer':      { title: 'Image Viewer',        width: 960,  height: 700 },
   'rss-reader':        { title: 'RSS Reader',          width: 1000, height: 680 },
   'remote-desktop':    { title: 'Remote Desktop',      width: 860,  height: 600 },
+  brave:               { title: 'Brave Browser',       width: 0,    height: 0 },
 }
 
 let instanceCounter = 0
@@ -93,35 +97,40 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   nextZ: 10,
 
   openApp(appId) {
-    // Restore/focus existing window — never open a second instance of the same app.
-    // This matches macOS/Windows behaviour: clicking the dock/taskbar icon brings
-    // the window back rather than spawning a duplicate.
+    if (appId === 'brave') {
+      try {
+        const api = (window as any).cryogram
+        api?.launcher?.launch({ exec: 'brave-browser --password-store=basic --start-maximized', name: 'Brave', icon: '', comment: '', categories: ['Network'], category: 'Other', desktopFile: '', terminal: false })
+      } catch {}
+      return
+    }
+
+    // Focus / restore existing window if already open
     const existing = get().windows.find(w => w.appId === appId)
     if (existing) {
       get().restoreWindow(existing.id)
       return
     }
 
+    // Open as an in-shell React window (rendered by WindowManager). This is
+    // immune to the X11 layering problems that native BrowserWindows hit on
+    // the Openbox shell — the window is a div inside the shell, always visible.
     const meta = APP_META[appId]
     const id = `${appId}-${++instanceCounter}`
-    const offset = (get().windows.length % 8) * 24
     const z = get().nextZ
-
-    set((s) => ({
+    const vw = typeof window !== 'undefined' ? window.innerWidth  : 1440
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 900
+    const offset = (get().windows.length % 6) * 28
+    const x = Math.max(0, Math.floor((vw - meta.width) / 2) + offset - 70)
+    const y = Math.max(36, Math.floor((vh - 88 - meta.height) / 2) + offset - 70)
+    set(s => ({
       nextZ: s.nextZ + 1,
       windows: [
-        ...s.windows.map((w) => ({ ...w, focused: false })),
+        ...s.windows.map(w => ({ ...w, focused: false })),
         {
-          id,
-          appId,
-          title: meta.title,
-          x: 60 + offset,
-          y: 60 + offset,
-          width: meta.width,
-          height: meta.height,
-          minimized: false,
-          maximized: false,
-          focused: true,
+          id, appId, title: meta.title,
+          x, y, width: meta.width, height: meta.height,
+          minimized: false, maximized: false, focused: true,
           zIndex: z,
         },
       ],
@@ -164,6 +173,49 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
     set((s) => ({
       nextZ: s.nextZ + 1,
       windows: s.windows.map((w) => w.id === id ? { ...w, minimized: false, focused: true, zIndex: z } : w),
+    }))
+  },
+
+  openAppNewWindow(appId) {
+    if (appId === 'brave') {
+      try {
+        const api = (window as any).cryogram
+        api?.launcher?.launch({ exec: 'brave-browser --new-window --password-store=basic', name: 'Brave', icon: '', comment: '', categories: ['Network'], category: 'Other', desktopFile: '', terminal: false })
+      } catch {}
+      return
+    }
+    const meta = APP_META[appId]
+    const id = `${appId}-${++instanceCounter}`
+    const offset = (get().windows.length % 8) * 24
+    const z = get().nextZ
+    set(s => ({
+      nextZ: s.nextZ + 1,
+      windows: [
+        ...s.windows.map(w => ({ ...w, focused: false })),
+        { id, appId, title: meta.title, x: 80 + offset, y: 80 + offset, width: meta.width, height: meta.height, minimized: false, maximized: false, focused: true, zIndex: z },
+      ],
+    }))
+  },
+
+  snapWindow(id, side) {
+    const W = typeof window !== 'undefined' ? window.innerWidth : 1440
+    const H = typeof window !== 'undefined' ? window.innerHeight - 28 - 88 : 784
+    const z = get().nextZ
+    set(s => ({
+      nextZ: s.nextZ + 1,
+      windows: s.windows.map(w => {
+        if (w.id !== id) return w
+        if (side === 'max') {
+          if (w.maximized) return { ...w, maximized: false, zIndex: z, focused: true, ...(w.prevBounds ?? {}) }
+          return { ...w, maximized: true, zIndex: z, focused: true, prevBounds: { x: w.x, y: w.y, width: w.width, height: w.height }, x: 0, y: 0, width: W, height: H }
+        }
+        const snapW = Math.floor(W / 2)
+        return {
+          ...w, maximized: false, zIndex: z, focused: true,
+          prevBounds: w.prevBounds ?? { x: w.x, y: w.y, width: w.width, height: w.height },
+          x: side === 'left' ? 0 : snapW, y: 0, width: snapW, height: H,
+        }
+      }),
     }))
   },
 

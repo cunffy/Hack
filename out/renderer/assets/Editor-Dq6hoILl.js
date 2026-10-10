@@ -1,4 +1,4 @@
-import { r as reactExports, W as We, j as jsxRuntimeExports } from "./index-D1cCCGNU.js";
+import { r as reactExports, W as We, j as jsxRuntimeExports, A as AnimatePresence, C as ContextMenu } from "./index-BoM7DgQP.js";
 function _arrayLikeToArray(r, a) {
   (null == a || a > r.length) && (a = r.length);
   for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
@@ -624,7 +624,8 @@ const FILE_ICONS = {
 function TreeNode({
   entry,
   depth,
-  onOpenFile
+  onOpenFile,
+  onContextMenu
 }) {
   const [open, setOpen] = reactExports.useState(false);
   const [children, setChildren] = reactExports.useState([]);
@@ -648,23 +649,68 @@ function TreeNode({
         className: "flex items-center gap-1.5 px-2 py-0.5 cursor-pointer hover:bg-cryo-border/40 text-cryo-text text-xs rounded transition-colors",
         style: { paddingLeft: `${8 + depth * 12}px` },
         onClick: toggle,
+        onContextMenu: (e) => {
+          e.preventDefault();
+          onContextMenu(e, entry);
+        },
         children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "shrink-0 w-4 text-center", children: iconEl }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", children: entry.name })
         ]
       }
     ),
-    open && children.map((child) => /* @__PURE__ */ jsxRuntimeExports.jsx(TreeNode, { entry: child, depth: depth + 1, onOpenFile }, child.path))
+    open && children.map((child) => /* @__PURE__ */ jsxRuntimeExports.jsx(TreeNode, { entry: child, depth: depth + 1, onOpenFile, onContextMenu }, child.path))
   ] });
 }
 function FileTree({ workspace, onOpenFile }) {
   const [entries, setEntries] = reactExports.useState([]);
-  reactExports.useEffect(() => {
+  const [ctx, setCtx] = reactExports.useState(null);
+  const reload = () => {
     window.cryogram.fs.readDir("__workspace__").then(setEntries).catch(() => setEntries([]));
+  };
+  reactExports.useEffect(() => {
+    reload();
   }, [workspace]);
+  const ctxItems = () => {
+    if (!ctx) return [];
+    const { entry } = ctx;
+    const items = [];
+    if (!entry.isDir) {
+      items.push({ label: "Open File", action: () => onOpenFile(entry.path, entry.name) });
+    }
+    items.push({
+      label: "Copy Path",
+      action: () => navigator.clipboard.writeText(entry.path).catch(() => {
+      })
+    });
+    if (entry.isDir) {
+      items.push({ sep: true });
+      items.push({
+        label: "New File Here",
+        action: async () => {
+          const name = prompt("File name:");
+          if (!name) return;
+          const sep = entry.path.endsWith("/") ? "" : "/";
+          await window.cryogram.fs.writeFile(`${entry.path}${sep}${name}`, "").catch(() => {
+          });
+          reload();
+        }
+      });
+    }
+    return items;
+  };
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "py-2", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-2 pb-1 text-xs text-cryo-muted font-bold uppercase tracking-wider", children: "Explorer" }),
-    entries.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-3 py-2 text-xs text-cryo-muted", children: "Empty workspace" }) : entries.map((e) => /* @__PURE__ */ jsxRuntimeExports.jsx(TreeNode, { entry: e, depth: 0, onOpenFile }, e.path))
+    entries.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-3 py-2 text-xs text-cryo-muted", children: "Empty workspace" }) : entries.map((e) => /* @__PURE__ */ jsxRuntimeExports.jsx(TreeNode, { entry: e, depth: 0, onOpenFile, onContextMenu: (ev, entry) => setCtx({ x: ev.clientX, y: ev.clientY, entry }) }, e.path)),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AnimatePresence, { children: ctx && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ContextMenu,
+      {
+        x: ctx.x,
+        y: ctx.y,
+        onClose: () => setCtx(null),
+        items: ctxItems()
+      }
+    ) })
   ] });
 }
 const LANG_MAP = {

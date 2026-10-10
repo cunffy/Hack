@@ -25,6 +25,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     r.setProperty('--cryo-a20', hexAlpha(accent, 0.20))
     r.setProperty('--cryo-a25', hexAlpha(accent, 0.25))
     r.setProperty('--cryo-a30', hexAlpha(accent, 0.30))
+    r.setProperty('--cryo-a35', hexAlpha(accent, 0.35))
+    r.setProperty('--cryo-a40', hexAlpha(accent, 0.40))
     r.setProperty('--cryo-a45', hexAlpha(accent, 0.45))
     r.setProperty('--cryo-a50', hexAlpha(accent, 0.50))
   }, [accent, accent2, bg])

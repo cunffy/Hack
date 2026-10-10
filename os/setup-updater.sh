@@ -1,0 +1,460 @@
+#!/bin/bash
+# Cryogram OS — apply updates and install built-in updater infrastructure.
+# Invoked automatically by the one-liner:
+#   sudo bash -c 'D=/opt/cryogram-src; SSL="-c http.sslCAInfo=/etc/ssl/certs/ca-certificates.crt"; \
+#     update-ca-certificates --fresh 2>/dev/null || true; \
+#     [ -d "$D/.git" ] && git $SSL -C "$D" pull \
+#     || git $SSL clone --depth=1 -b claude/custom-security-os-URNk5 https://github.com/cunffy/Hack.git "$D"; \
+#     bash "$D/os/setup-updater.sh"'
+#
+# Pass --no-reboot to skip the automatic reboot at the end (dev/testing only).
+set -euo pipefail
+NO_REBOOT=false
+for arg in "$@"; do [[ "$arg" == "--no-reboot" || "$arg" == "--no-restart" ]] && NO_REBOOT=true; done
+
+# ── Pre-flight: time sync + SSL certs ────────────────────────────────────────
+# Fix clock first — SSL cert verification fails if the clock is wrong.
+# Install chrony (NTP daemon) so time stays correct automatically from now on.
+if ! command -v chronyc &>/dev/null; then
+  echo "  [pre] Installing chrony (NTP time sync)..."
+  apt-get update -qq || true
+  apt-get install -y -qq chrony || true
+fi
+systemctl enable chrony 2>/dev/null || true
+systemctl start  chrony 2>/dev/null || true
+# Force immediate step sync (don't wait for gradual slew)
+chronyc makestep 2>/dev/null || true
+
+# NetworkManager dispatcher: sync time the moment any network comes up
+mkdir -p /etc/NetworkManager/dispatcher.d
+cat > /etc/NetworkManager/dispatcher.d/10-cryogram-timesync << 'NMD'
+#!/bin/bash
+# Sync system clock whenever a network interface comes up
+[ "$2" = "up" ] || exit 0
+chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true
+NMD
+chmod +x /etc/NetworkManager/dispatcher.d/10-cryogram-timesync
+
+# Ensure SSL certificates are present and the bundle is up to date
+if [ ! -f /etc/ssl/certs/ca-certificates.crt ] || [ ! -s /etc/ssl/certs/ca-certificates.crt ]; then
+  echo "  [pre] Installing ca-certificates..."
+  apt-get install -y -qq ca-certificates || true
+fi
+# Always rebuild the bundle — on some Debian systems the certs are installed
+# but git still reports CAfile:none until update-ca-certificates is run.
+update-ca-certificates --fresh 2>/dev/null || true
+# Point git at the bundle explicitly for all subsequent operations
+export GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt
+git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
+
+SRC="$(cd "$(dirname "$0")/.." && pwd)"
+DEST="/opt/cryogram"
+BRANCH="claude/custom-security-os-URNk5"
+REPO_URL="https://github.com/cunffy/Hack.git"
+
+echo ""
+echo "  ██████╗██████╗ ██╗   ██╗ ██████╗  ██████╗ ██████╗  █████╗ ███╗   ███╗"
+echo "  ██╔════╝██╔══██╗╚██╗ ██╔╝██╔═══██╗██╔════╝ ██╔══██╗████╗ ████║"
+echo "  ██║     ██████╔╝ ╚████╔╝ ██║   ██║██║  ███╗ ███████║██╔████╔██║"
+echo "  ██║     ██╔══██╗  ╚██╔╝  ██║   ██║██║   ██║ ██╔══██║██║╚██╔╝██║"
+echo "  ╚██████╗██║  ██║   ██║   ╚██████╔╝╚██████╔╝ ██║  ██║██║ ╚═╝ ██║"
+echo "   ╚═════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚═════╝  ╚═╝  ╚═╝╚═╝     ╚═╝"
+echo ""
+echo "  Cryogram OS — System Update & Setup"
+echo "  ──────────────────────────────────────"
+echo ""
+
+# ── Ensure required X11 and audio tools are installed ────────────────────────
+for pkg in xdotool wmctrl rsync pulseaudio-utils brightnessctl; do
+  if ! command -v "${pkg%%-*}" &>/dev/null && ! dpkg -l "$pkg" 2>/dev/null | grep -q '^ii'; then
+    echo "  [pre] Installing missing tool: $pkg ..."
+    apt-get install -y -qq "$pkg" 2>/dev/null || true
+  fi
+done
+
+# Ensure PipeWire's PulseAudio compatibility layer is installed for pactl to work
+if command -v pipewire &>/dev/null && ! command -v pipewire-pulse &>/dev/null; then
+  echo "  [pre] Installing pipewire-pulse (required for pactl volume control)..."
+  apt-get install -y -qq pipewire-pulse 2>/dev/null || true
+fi
+
+# ── Sanity checks ─────────────────────────────────────────────────────────────
+if [ ! -d "$DEST/out" ]; then
+  echo "  ERROR: $DEST/out not found — is Cryogram OS installed at $DEST?"
+  exit 1
+fi
+if [ ! -f "$SRC/out/main/index.js" ]; then
+  echo "  ERROR: $SRC/out/main/index.js not found — source clone looks incomplete."
+  exit 1
+fi
+
+# ── 1. Sync the built app files ───────────────────────────────────────────────
+echo "  [1/4] Syncing app files  $SRC/out/  →  $DEST/out/ ..."
+# Sync to a staging dir first so the live app files are only replaced once
+# the full transfer has succeeded — prevents a partial update from breaking the OS.
+STAGING=$(mktemp -d)
+trap 'rm -rf "$STAGING"' EXIT
+
+rsync -a "$SRC/out/" "$STAGING/"
+
+# Verify the two critical entry points survived the staging copy
+if [ ! -f "$STAGING/main/index.js" ] || [ ! -f "$STAGING/renderer/index.html" ]; then
+  echo "  ERROR: staging copy is missing critical files — aborting."
+  exit 1
+fi
+
+# Atomic swap: replace live out/ only after staging is verified complete
+rsync -a --delete "$STAGING/" "$DEST/out/"
+echo "        Done."
+
+# ── 2. Install the update script ──────────────────────────────────────────────
+echo "  [2/4] Installing /usr/local/bin/cryogram-update ..."
+cat > /usr/local/bin/cryogram-update << UPDATER
+#!/bin/bash
+set -euo pipefail
+BRANCH="$BRANCH"
+SRC="/opt/cryogram-src"
+
+echo "── Cryogram OS Updater ──────────────────────────"
+# Ensure SSL certs are present before any HTTPS git operation
+if [ ! -f /etc/ssl/certs/ca-certificates.crt ] || [ ! -s /etc/ssl/certs/ca-certificates.crt ]; then
+  apt-get update -qq && apt-get install -y -qq ca-certificates
+fi
+update-ca-certificates --fresh 2>/dev/null || true
+export GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt
+git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
+# Allow git to operate on a directory owned by a different user (root runs
+# git on a repo owned by the cryogram system user — without this git refuses).
+git config --global --add safe.directory "\$SRC"
+
+if [ ! -d "\$SRC/.git" ]; then
+  echo "── First run: cloning source repository..."
+  git -c http.sslCAInfo=/etc/ssl/certs/ca-certificates.crt clone --depth=1 --branch "\$BRANCH" "$REPO_URL" "\$SRC"
+else
+  echo "── Pulling latest changes from \$BRANCH..."
+  git -C "\$SRC" -c http.sslCAInfo=/etc/ssl/certs/ca-certificates.crt fetch --depth=1 origin "\$BRANCH"
+  git -C "\$SRC" reset --hard "origin/\$BRANCH"
+fi
+
+echo "── Verifying downloaded files..."
+if [ ! -f "\$SRC/out/main/index.js" ] || [ ! -f "\$SRC/out/renderer/index.html" ]; then
+  echo "ERROR: critical files missing after pull — aborting update."
+  exit 1
+fi
+
+# Run the full setup script from the pulled source — this syncs out/, patches
+# Openbox keybindings/config. --no-reboot lets the Electron countdown reach
+# zero and animate before Electron itself triggers the reboot.
+echo "── Applying full system update..."
+bash "\$SRC/os/setup-updater.sh" --no-reboot
+echo "  Rebooting in 10 seconds..."
+UPDATER
+chmod +x /usr/local/bin/cryogram-update
+echo "        Done."
+
+# ── 3. Write update config ────────────────────────────────────────────────────
+echo "  [3/4] Writing /etc/cryogram/update.conf ..."
+mkdir -p /etc/cryogram
+cat > /etc/cryogram/update.conf << CONF
+REPO_URL="$REPO_URL"
+BRANCH="$BRANCH"
+CONF
+
+# Create /opt/cryogram-src symlink if the script ran from a different path,
+# so the in-app updater:check handler can find the .git directory.
+if [ "$SRC" != "/opt/cryogram-src" ] && [ ! -e /opt/cryogram-src ]; then
+  ln -sf "$SRC" /opt/cryogram-src
+fi
+echo "        Done."
+
+# ── SSH service — disable on a desktop security OS (stops shutdown errors) ───
+# ssh.service failing on shutdown causes console errors and slows reboot.
+systemctl disable ssh 2>/dev/null || true
+
+# ── Silence ACPI/kernel noise on the boot console ────────────────────────────
+# ACPI errors (Region VRTC, EC0.RTEC, etc.) are harmless firmware quirks on
+# many laptops but flood the TTY on boot. loglevel=3 keeps errors silent;
+# quiet suppresses the verbose init messages.
+if [ -f /etc/default/grub ]; then
+  if ! grep -q 'loglevel=3' /etc/default/grub; then
+    sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT="\([^"]*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 quiet loglevel=3 acpi_osi=Linux"/' /etc/default/grub
+    update-grub 2>/dev/null || grub-mkconfig -o /boot/grub/grub.cfg 2>/dev/null || true
+    echo "  [+] GRUB updated — ACPI boot noise suppressed."
+  fi
+fi
+systemctl mask    ssh 2>/dev/null || true
+
+# ── 4. Sudoers rule ───────────────────────────────────────────────────────────
+echo "  [4/4] Granting passwordless sudo for cryogram-update ..."
+echo "cryogram ALL=(ALL) NOPASSWD: /usr/local/bin/cryogram-update" \
+  > /etc/sudoers.d/cryogram-update
+chmod 440 /etc/sudoers.d/cryogram-update
+echo "        Done."
+
+# ── Emergency right-click desktop menu ───────────────────────────────────────
+cat > /etc/xdg/openbox/cryogram-menu.xml << 'OBMENU'
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu>
+  <menu id="root-menu" label="Cryogram OS">
+    <item label="Open Terminal">
+      <action name="Execute"><execute>xterm -bg '#0a0e14' -fg '#c9d1d9' -fa 'JetBrains Mono' -fs 11</execute></action>
+    </item>
+    <item label="Raise Desktop">
+      <action name="Execute"><execute>bash -c "xdotool search --class 'cryogram' | head -1 | xargs -r xdotool windowraise"</execute></action>
+    </item>
+    <separator/>
+    <item label="Restart Cryogram">
+      <action name="Execute"><execute>bash -c "pkill -x cryogram 2>/dev/null || pkill -9 -x cryogram"</execute></action>
+    </item>
+  </menu>
+</openbox_menu>
+OBMENU
+
+# ── Patch openbox config (Alt+Tab keybindings + single workspace) ─────────────
+OB_CONF="/etc/xdg/openbox/cryogram-rc.xml"
+if [ -f "$OB_CONF" ]; then
+  # Update the Openbox cryogram window rule.
+  # <desktop>all</desktop> keeps the shell visible on every virtual desktop.
+  # <layer>below</layer> is intentionally ABSENT — shellControl.ts handles that
+  # via wmctrl so it only applies to the main shell, not to app windows.
+  python3 - "$OB_CONF" << 'PYFIX'
+import sys, re
+path = sys.argv[1]
+with open(path) as f:
+    data = f.read()
+# Remove any existing cryogram rule (old or current format)
+data = re.sub(r'\s*<application[^>]*class="cryogram"[^>]*>.*?</application>', '', data, flags=re.DOTALL)
+# Add rule — sticky on all desktops, no decorations, no taskbar/pager entry.
+# NO <layer>below</layer> here: that is set per-window by shellControl.ts so
+# it only applies to the main shell window, not to app windows.
+new_rule = ('    <application class="cryogram">'
+            '<desktop>all</desktop>'
+            '<decor>no</decor><border>no</border>'
+            '<skip_taskbar>yes</skip_taskbar>'
+            '<skip_pager>yes</skip_pager>'
+            '</application>')
+data = data.replace('<applications>', '<applications>\n' + new_rule, 1)
+with open(path, 'w') as f:
+    f.write(data)
+print('  [+] Openbox cryogram rule updated (sticky on all desktops, no forced layer)')
+PYFIX
+  # Enable right-click menu if not already wired up
+  if ! grep -q 'cryogram-menu' "$OB_CONF"; then
+    sed -i 's|<mouse>|<menu><file>/etc/xdg/openbox/cryogram-menu.xml</file></menu>\n  <mouse>|' "$OB_CONF"
+    sed -i 's|<context name="Root">.*</context>|<context name="Root"><mousebind button="Right" action="Press"><action name="ShowMenu"><menu>root-menu</menu></action></mousebind></context>|' "$OB_CONF"
+  fi
+  # Alt+Tab: STRIP any Openbox NextWindow/PreviousWindow bindings so they don't
+  # grab the Alt+Tab key. Electron registers a global Alt+Tab shortcut that drives
+  # the unified Cryogram switcher (which lists BOTH in-shell apps AND native X11
+  # windows like Brave in one overlay). Openbox and Electron cannot both hold the
+  # Alt+Tab X11 grab — if Openbox binds it, Electron's shortcut silently fails and
+  # Alt+Tab appears broken. Force-remove the bindings here (every run) to be safe.
+  echo "  [+] Removing Openbox Alt+Tab bindings (Electron owns Alt+Tab)..."
+  python3 - "$OB_CONF" << 'PYFIX'
+import sys, re
+path = sys.argv[1]
+with open(path) as f:
+    data = f.read()
+# Strip any A-Tab / A-S-Tab keybind blocks (NextWindow / PreviousWindow).
+data = re.sub(r'\s*<keybind key="A-S?-Tab">.*?</keybind>', '', data, flags=re.DOTALL)
+with open(path, 'w') as f:
+    f.write(data)
+print("  Openbox Alt+Tab bindings removed.")
+PYFIX
+  # Brightness keys — force-replace every time so stale absolute-value bindings
+  # (set 0 / set 100%) can't survive; always use relative +10% / 10%-.
+  echo "  [+] Setting brightness keybindings (force-replace)..."
+  python3 - "$OB_CONF" << 'PYFIX'
+import sys, re
+path = sys.argv[1]
+with open(path) as f:
+    data = f.read()
+data = re.sub(r'\s*<keybind key="XF86MonBrightness[^"]*">.*?</keybind>', '', data, flags=re.DOTALL)
+new_bindings = (
+    '  <keybind key="XF86MonBrightnessUp"><action name="Execute"><execute>brightnessctl set +10%</execute></action></keybind>\n'
+    '    <keybind key="XF86MonBrightnessDown"><action name="Execute"><execute>brightnessctl set 10%-</execute></action></keybind>\n'
+    '  </keyboard>'
+)
+data = data.replace('</keyboard>', new_bindings, 1)
+with open(path, 'w') as f:
+    f.write(data)
+print("  Brightness keybindings replaced.")
+PYFIX
+  # Volume keys — pactl needs XDG_RUNTIME_DIR to locate the PipeWire socket.
+  # Install a tiny wrapper so every call site (openbox + shell) gets it automatically.
+  cat > /usr/local/bin/cryogram-pactl << 'PACTL_WRAP'
+#!/bin/bash
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+exec pactl "$@"
+PACTL_WRAP
+  chmod +x /usr/local/bin/cryogram-pactl
+
+  # Always force-replace volume keybindings so +5% / -5% / toggle are correct.
+  # Remove any existing XF86Audio bindings first (prevents duplicate or stale entries).
+  echo "  [+] Setting volume keybindings (force-replace)..."
+  python3 - "$OB_CONF" << 'PYFIX'
+import sys, re
+path = sys.argv[1]
+with open(path) as f:
+    data = f.read()
+# Strip any existing XF86Audio* keybind blocks
+data = re.sub(r'\s*<keybind key="XF86Audio[^"]*">.*?</keybind>', '', data, flags=re.DOTALL)
+# Insert fresh correct bindings before </keyboard>
+new_bindings = (
+    '  <keybind key="XF86AudioRaiseVolume"><action name="Execute"><execute>cryogram-pactl set-sink-volume @DEFAULT_SINK@ +5%</execute></action></keybind>\n'
+    '    <keybind key="XF86AudioLowerVolume"><action name="Execute"><execute>cryogram-pactl set-sink-volume @DEFAULT_SINK@ -5%</execute></action></keybind>\n'
+    '    <keybind key="XF86AudioMute"><action name="Execute"><execute>cryogram-pactl set-sink-mute @DEFAULT_SINK@ toggle</execute></action></keybind>\n'
+    '  </keyboard>'
+)
+data = data.replace('</keyboard>', new_bindings, 1)
+with open(path, 'w') as f:
+    f.write(data)
+print("  Volume keybindings replaced.")
+PYFIX
+  # 4 workspaces with Super+1-4 switching via Openbox keybindings.
+  # The shell is kept sticky on all workspaces via Electron setVisibleOnAllWorkspaces
+  # + wmctrl _NET_WM_STATE_STICKY + _NET_WM_DESKTOP=0xffffffff (shellControl.ts),
+  # so no grey screen occurs when switching.
+  sed -i 's|<desktops>[^<]*<number>[0-9]*</number>[^<]*</desktops>|<desktops><number>4</number></desktops>|' "$OB_CONF" 2>/dev/null || true
+  if ! grep -q '<number>4</number>' "$OB_CONF"; then
+    sed -i 's|<desktops>|<desktops><number>4</number>|' "$OB_CONF" 2>/dev/null || true
+  fi
+  # Super+1-4 workspace switching keybindings
+  if ! grep -q 'GoToDesktop' "$OB_CONF"; then
+    sed -i 's|</keyboard>|  <keybind key="W-1"><action name="GoToDesktop"><desktop>1</desktop></action></keybind>\n    <keybind key="W-2"><action name="GoToDesktop"><desktop>2</desktop></action></keybind>\n    <keybind key="W-3"><action name="GoToDesktop"><desktop>3</desktop></action></keybind>\n    <keybind key="W-4"><action name="GoToDesktop"><desktop>4</desktop></action></keybind>\n  </keyboard>|' "$OB_CONF"
+  fi
+fi
+
+# ── Reload Openbox config so new keybindings take effect immediately ──────────
+# pkill -USR2 openbox sends SIGUSR2 directly — no DISPLAY or X auth needed.
+pkill -USR2 -x openbox 2>/dev/null || \
+  su -c "DISPLAY=:0 XAUTHORITY=/home/cryogram/.Xauthority openbox --reconfigure 2>/dev/null || DISPLAY=:0 openbox --reconfigure 2>/dev/null" cryogram 2>/dev/null || true
+
+# ── Rewrite session script (openbox before picom, xrender compositor) ────────
+cat > /usr/local/bin/cryogram-session << 'SESSION'
+#!/bin/bash
+export DISPLAY="${DISPLAY:-:0}"
+export HOME="${HOME:-/home/cryogram}"
+export XDG_SESSION_TYPE=x11
+export XDG_CURRENT_DESKTOP=Cryogram
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+mkdir -p "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR" 2>/dev/null || true
+
+# Paint the screen dark immediately — eliminates white flash before Electron loads
+xsetroot -solid '#070b11' 2>/dev/null || true
+
+# Keep the screen black on exit (reboot/shutdown) so framebuffer never flashes white
+trap 'xsetroot -solid black 2>/dev/null || true' EXIT
+
+# Disable X11 screensaver and power management
+xset s off 2>/dev/null || true
+xset s noblank 2>/dev/null || true
+xset -dpms 2>/dev/null || true
+
+# Openbox WM first — must be running before picom attaches
+openbox --config-file /etc/xdg/openbox/cryogram-rc.xml &
+WM_PID=$!
+sleep 0.3
+
+# Compositor for Electron transparency — xrender is faster to start than glx
+picom --backend xrender --vsync --no-fading-openclose --daemon 2>/dev/null || true
+
+# Hide cursor when idle
+unclutter -root -idle 5 2>/dev/null &
+
+# ── Audio: start PipeWire/PulseAudio if not already running ──────────────────
+# cryogram-session may be the first process in the user session, so audio
+# daemons might not be started yet (no loginctl session, no systemd user units).
+if command -v pipewire &>/dev/null && ! pgrep -x pipewire > /dev/null 2>&1; then
+  pipewire &
+  sleep 0.5
+  pipewire-pulse &>/dev/null &
+  wireplumber &>/dev/null &
+elif command -v pulseaudio &>/dev/null && ! pgrep -x pulseaudio > /dev/null 2>&1; then
+  pulseaudio --start --exit-idle-time=-1 2>/dev/null || true
+fi
+
+# Set default audio sink if PipeWire/PulseAudio started without one
+(sleep 3 && pactl set-default-sink @DEFAULT_SINK@ 2>/dev/null || \
+  pactl list sinks short 2>/dev/null | awk 'NR==1{print $1}' | xargs -r pactl set-default-sink 2>/dev/null || true) &
+
+# On live boot: launch installer after desktop loads
+if grep -q "boot=live" /proc/cmdline 2>/dev/null; then
+  (sleep 5 && sudo /usr/bin/calamares) &
+fi
+
+# Launch Cryogram — always restart on exit.
+# Electron exits 0 when killed via SIGTERM (app.quit()), so we CANNOT break on
+# exit code 0 — that would leave the screen black after every update.
+# cryogram-session is killed by systemd/init on shutdown, so the loop auto-stops.
+while true; do
+  /usr/local/bin/cryogram || true
+  sleep 1
+done
+
+kill $WM_PID 2>/dev/null || true
+SESSION
+chmod +x /usr/local/bin/cryogram-session
+
+# ── Ensure persistent data directory is owned by cryogram ────────────────────
+mkdir -p /opt/cryogram-data
+chown cryogram:cryogram /opt/cryogram-data 2>/dev/null || true
+chmod 755 /opt/cryogram-data
+
+# ── Brightness: allow cryogram user to change backlight without sudo ──────────
+# brightnessctl writes to /sys/class/backlight/*/brightness which is group-writable
+# to 'video'. Without group membership brightnessctl silently does nothing.
+usermod -a -G video cryogram 2>/dev/null || true
+# Make brightness sysfs writable by the video group right now (persists via udev)
+find /sys/class/backlight -name brightness -exec chmod g+w {} \; 2>/dev/null || true
+
+# ── WiFi: save passwords to disk, not gnome-keyring ──────────────────────────
+# LightDM autologin never prompts for a login password, so gnome-keyring is
+# never unlocked. NetworkManager's default (psk-flags=1) stores WiFi passwords
+# in the user keyring — if the keyring is locked the password is lost on every
+# reboot and NM asks again. Setting psk-flags=0 stores passwords in
+# /etc/NetworkManager/system-connections/ (root-owned, mode 600) which persists
+# across reboots with no keyring involved.
+mkdir -p /etc/NetworkManager/conf.d
+cat > /etc/NetworkManager/conf.d/10-cryogram-wifi.conf << 'NMCONF'
+[connection]
+wifi-sec.psk-flags=0
+NMCONF
+
+# Fix any existing saved connections that already have psk-flags=1 (keyring).
+# Changing to 0 makes NM re-save the PSK to disk on next successful connect.
+for f in /etc/NetworkManager/system-connections/*.nmconnection \
+          /etc/NetworkManager/system-connections/*.conf; do
+  [ -f "$f" ] || continue
+  if grep -q 'psk-flags=1' "$f" 2>/dev/null; then
+    sed -i 's/psk-flags=1/psk-flags=0/g' "$f"
+    echo "  [+] WiFi: fixed password storage for $(basename "$f")"
+  fi
+done
+# Reload NM so the new conf takes effect immediately (no reboot needed)
+systemctl reload NetworkManager 2>/dev/null || nmcli general reload 2>/dev/null || true
+echo "  [+] WiFi passwords will now be saved to disk (no keyring required)."
+
+# ── Restart: reboot the machine ───────────────────────────────────────────────
+# A full reboot is the ONLY reliable way to restart Cryogram after an update.
+# It loads the new Electron code, the new Openbox config AND the new session
+# script all fresh, and LightDM autologin brings the desktop straight back.
+#
+# Why not just restart Electron? The running desktop session was launched by the
+# session script that existed at BOOT time. That old loop breaks on a clean
+# (exit 0) quit — so any app.exit(0) / pkill trick ends the whole session and
+# leaves a black screen. Rebooting sidesteps that race entirely. This is the
+# original, proven design (the first cryogram-update ended with `reboot`).
+echo ""
+echo "  ✓ Update applied successfully."
+if [ "$NO_REBOOT" = true ]; then
+  echo "  (--no-reboot set — not rebooting. Reboot manually to load the update.)"
+else
+  echo "  Rebooting now to load the updated system..."
+  sync
+  sleep 3
+  # Use plain `reboot` first — works directly with the kernel/init and is reliable
+  # even from a sudo subprocess where D-Bus may be unavailable.
+  # systemctl reboot can hang waiting for D-Bus when invoked this way.
+  reboot 2>/dev/null || systemctl reboot 2>/dev/null || reboot -f 2>/dev/null || true
+fi

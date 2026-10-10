@@ -425,19 +425,19 @@ export function installMockCryogram(): void {
     },
     docker: {
       listContainers: async () => [
-        { ID: 'abc123', Names: '/mock-nginx', Image: 'nginx:latest', Status: 'Up 2 hours', State: 'running', Ports: '0.0.0.0:80->80/tcp', Created: '' },
-        { ID: 'def456', Names: '/mock-postgres', Image: 'postgres:15', Status: 'Exited (0) 1 hour ago', State: 'exited', Ports: '', Created: '' },
+        { id: 'abc123', name: '/mock-nginx', image: 'nginx:latest', status: 'Up 2 hours', state: 'running', ports: ['0.0.0.0:80->80/tcp'], created: Math.floor(Date.now() / 1000) - 7200 },
+        { id: 'def456', name: '/mock-postgres', image: 'postgres:15', status: 'Exited (0) 1 hour ago', state: 'exited', ports: [], created: Math.floor(Date.now() / 1000) - 3600 },
       ],
       listImages: async () => [
-        { ID: 'img1', Repository: 'nginx', Tag: 'latest', Size: '142MB', CreatedAt: '2024-01-01' },
-        { ID: 'img2', Repository: 'postgres', Tag: '15', Size: '379MB', CreatedAt: '2024-01-01' },
+        { id: 'sha256:img1aaaa', repository: 'nginx', tag: 'latest', size: 142 * 1024 * 1024, created: Math.floor(Date.now() / 1000) - 86400 },
+        { id: 'sha256:img2bbbb', repository: 'postgres', tag: '15', size: 379 * 1024 * 1024, created: Math.floor(Date.now() / 1000) - 172800 },
       ],
       startContainer: async () => true,
       stopContainer: async () => true,
       restartContainer: async () => true,
       removeContainer: async () => true,
       getStats: async () => [
-        { ID: 'abc123', Name: 'mock-nginx', CPUPerc: '0.5%', MemUsage: '12MiB / 8GiB', MemPerc: '0.14%', NetIO: '1kB / 2kB', BlockIO: '0B / 0B' },
+        { id: 'abc123', name: 'mock-nginx', cpuPercent: 0.5, memUsage: 12 * 1024 * 1024, memLimit: 8 * 1024 * 1024 * 1024 },
       ],
       pullImage: async () => true,
       removeImage: async () => true,

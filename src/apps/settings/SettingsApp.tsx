@@ -227,6 +227,7 @@ function ProfilePanel() {
   const save = async () => {
     await window.cryogram.settings.set('profile.name', name)
     await window.cryogram.settings.set('profile.email', email)
+    window.dispatchEvent(new CustomEvent('cryogram:profileUpdated'))
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -622,13 +623,22 @@ function SecurityPanel() {
   const [confirmPin, setConfirmPin]   = useState('')
   const [currentPin, setCurrentPin]   = useState('')
   const [pinMsg, setPinMsg]           = useState<{ text: string; ok: boolean } | null>(null)
+  const [autoLockMinutes, setAutoLockMinutes] = useState(0)
 
   useEffect(() => {
     window.cryogram.settings.getAll().then(all => {
       setPinEnabled(!!(all['pin.enabled'] as boolean))
       setPinSet(!!(all['pin.hash'] as string))
+      const al = all['autolock.minutes']
+      setAutoLockMinutes(typeof al === 'number' ? al : 0)
     })
   }, [])
+
+  const handleAutoLockChange = async (minutes: number) => {
+    setAutoLockMinutes(minutes)
+    await window.cryogram.settings.set('autolock.minutes', minutes)
+    window.dispatchEvent(new CustomEvent('cryogram:autolock-changed'))
+  }
 
   const flash = (text: string, ok: boolean) => {
     setPinMsg({ text, ok })
@@ -687,11 +697,39 @@ function SecurityPanel() {
     <div className="p-5 flex flex-col gap-5">
       <div>
         <h2 className="text-sm font-bold text-cryo-text mb-1">Security &amp; Lock Screen</h2>
-        <p className="text-xs text-cryo-muted">Configure PIN lock for boot and resume.</p>
+        <p className="text-xs text-cryo-muted">Configure PIN lock, auto-lock, and screen security.</p>
       </div>
 
+      {/* Auto-lock */}
+      <section className="panel p-4 space-y-3">
+        <div className="text-xs text-cryo-muted uppercase tracking-wider font-bold">Auto-Lock</div>
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-sm text-cryo-text">Lock after inactivity</div>
+            <div className="text-xs text-cryo-muted">Automatically locks the screen when idle</div>
+          </div>
+          <select
+            value={autoLockMinutes}
+            onChange={e => handleAutoLockChange(Number(e.target.value))}
+            className="text-xs rounded-lg px-3 py-1.5"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', outline: 'none', cursor: 'pointer' }}
+          >
+            <option value="0">Never</option>
+            <option value="1">1 minute</option>
+            <option value="5">5 minutes</option>
+            <option value="10">10 minutes</option>
+            <option value="30">30 minutes</option>
+          </select>
+        </div>
+        {autoLockMinutes > 0 && (
+          <div className="text-xs" style={{ color: 'rgba(0,212,255,0.7)' }}>
+            Screen will lock after {autoLockMinutes} {autoLockMinutes === 1 ? 'minute' : 'minutes'} of inactivity
+          </div>
+        )}
+      </section>
+
       <section className="panel p-4 space-y-4">
-        <div className="text-xs text-cryo-muted uppercase tracking-wider font-bold">Security &amp; Lock Screen</div>
+        <div className="text-xs text-cryo-muted uppercase tracking-wider font-bold">PIN Lock</div>
 
         {/* Toggle */}
         <div className="flex items-center justify-between">
@@ -977,6 +1015,7 @@ function UpdatePanel() {
 function UpdateSection() {
   const [checking, setChecking]   = useState(false)
   const [status, setStatus]       = useState<'idle' | 'uptodate' | 'available' | 'error'>('idle')
+  const [errorCode, setErrorCode] = useState('')
   const [commitCount, setCount]   = useState(0)
   const [changes, setChanges]     = useState<string[]>([])
   const [errorMsg, setErrorMsg]   = useState('')
@@ -985,6 +1024,7 @@ function UpdateSection() {
     setChecking(true)
     setStatus('idle')
     setErrorMsg('')
+    setErrorCode('')
     try {
       const result = await (window as any).__cryogram_checkUpdate?.()
       if (result?.hasUpdate) {
@@ -993,6 +1033,7 @@ function UpdateSection() {
         setChanges(result.changes ?? [])
       } else if (result?.error) {
         setStatus('error')
+        setErrorCode(result.error)
         setErrorMsg(result.message ?? result.error)
       } else {
         setStatus('uptodate')
@@ -1005,8 +1046,17 @@ function UpdateSection() {
   }
 
   const startUpdate = () => {
-    ;(window as any).__cryogram_startUpdate?.()
+    // When running inside the main shell, __cryogram_startUpdate is available directly.
+    // When running as a standalone BrowserWindow (e.g. Settings app window), use IPC
+    // to tell the main shell to show its UpdateScreen.
+    if ((window as any).__cryogram_startUpdate) {
+      ;(window as any).__cryogram_startUpdate()
+    } else {
+      ;(window as any).cryogram?.updater?.showUpdateScreen?.()
+    }
   }
+
+  const isSSLError = errorCode === 'ssl-error'
 
   return (
     <section className="panel p-4 space-y-3">
@@ -1024,12 +1074,41 @@ function UpdateSection() {
         {status === 'uptodate' && (
           <span style={{ fontSize: 12, color: '#4ade80' }}>✓ Cryogram OS is up to date</span>
         )}
-        {status === 'error' && (
+        {status === 'error' && !isSSLError && (
           <div style={{ fontSize: 11, color: '#f87171', maxWidth: 360, lineHeight: 1.5 }}>
             {errorMsg || 'Could not reach update server'}
           </div>
         )}
       </div>
+
+      {/* SSL error — update script installs certs, so offer to run it directly */}
+      {status === 'error' && isSSLError && (
+        <div style={{
+          background: 'rgba(251,146,60,0.08)',
+          border: '1px solid rgba(251,146,60,0.25)',
+          borderRadius: 10,
+          padding: '12px 14px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+        }}>
+          <div style={{ fontSize: 12, color: '#fb923c', fontWeight: 600 }}>
+            ⚠ SSL certificates not installed
+          </div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6 }}>
+            The update check requires SSL certificates which are missing on this system.
+            Click <strong style={{ color: '#fb923c' }}>Update Now</strong> — the update script
+            installs them automatically before downloading updates.
+          </div>
+          <button
+            className="btn"
+            onClick={startUpdate}
+            style={{ alignSelf: 'flex-start', background: 'rgba(251,146,60,0.15)', borderColor: 'rgba(251,146,60,0.4)', color: '#fb923c' }}
+          >
+            Update Now (auto-fixes SSL)
+          </button>
+        </div>
+      )}
 
       {status === 'available' && (
         <div style={{

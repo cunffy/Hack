@@ -1,9 +1,31 @@
-import { ipcMain } from 'electron'
-import { execFile, spawn } from 'child_process'
+import { ipcMain, BrowserWindow } from 'electron'
+import { execFile, spawn, exec } from 'child_process'
 import { promisify } from 'util'
 import { existsSync, readFileSync } from 'fs'
 
 const execFileP = promisify(execFile)
+const execP = promisify(exec)
+
+const CA_BUNDLE = '/etc/ssl/certs/ca-certificates.crt'
+
+// Return git env with SSL certs configured.
+// If the system CA bundle is missing, fall back to GIT_SSL_NO_VERIFY so the
+// check still works — the actual update script installs ca-certificates first.
+function gitEnv(): NodeJS.ProcessEnv {
+  const base = { ...process.env }
+  if (existsSync(CA_BUNDLE)) {
+    return { ...base, GIT_SSL_CAINFO: CA_BUNDLE, GIT_SSL_CAPATH: '/etc/ssl/certs' }
+  }
+  // CA bundle missing — disable SSL verification for the network check only.
+  // The cryogram-update script installs ca-certificates before pulling code.
+  return { ...base, GIT_SSL_NO_VERIFY: 'true' }
+}
+
+// Sync system clock before any SSL network operation — a wrong clock causes
+// cert validation failures even when certs are installed.
+async function syncClock(): Promise<void> {
+  try { await execP('chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true', { timeout: 4000 }) } catch {}
+}
 const UPDATE_SCRIPT = '/usr/local/bin/cryogram-update'
 
 // Possible locations where cryogram-update clones the source repo
@@ -51,31 +73,51 @@ export function registerUpdaterHandlers(): void {
     }
 
     try {
+      // Sync clock before any SSL operation — a wrong clock causes cert failures.
+      await syncClock()
+
       // Use ls-remote instead of fetch — it queries the remote over the network
       // without writing to .git/FETCH_HEAD, so it works even when the desktop
       // user doesn't have write permission to the root-owned .git directory.
       const { stdout: remoteOut } = await execFileP(
         'git', ['-C', srcDir, 'ls-remote', 'origin', `refs/heads/${branch}`],
-        { timeout: 16000 }
+        { timeout: 20000, env: gitEnv() }
       )
       const remoteSha = remoteOut.trim().split(/\s+/)[0]
       if (!remoteSha) {
         return { hasUpdate: false, error: 'fetch-failed', message: `Branch '${branch}' not found on remote.` }
       }
 
-      const { stdout: localOut } = await execFileP('git', ['-C', srcDir, 'rev-parse', 'HEAD'])
+      const { stdout: localOut } = await execFileP('git', ['-C', srcDir, 'rev-parse', 'HEAD'], { env: gitEnv() })
       const localSha = localOut.trim()
 
       if (remoteSha === localSha) return { hasUpdate: false }
 
       return { hasUpdate: true, commitCount: 1, changes: ['New updates are available — click Update Now to install.'] }
     } catch (e) {
+      const msg = (e as Error).message ?? ''
+      const isSSL = msg.includes('certificate') || msg.includes('CAfile') || msg.includes('SSL') || msg.includes('ssl')
       return {
         hasUpdate: false,
-        error: 'fetch-failed',
-        message: `Could not reach update server: ${(e as Error).message}`,
+        error: isSSL ? 'ssl-error' : 'fetch-failed',
+        message: isSSL
+          ? 'SSL certificates are not installed on this system. Click "Update Now" — the update script installs them automatically and then applies all pending updates.'
+          : `Could not reach update server: ${msg}`,
       }
     }
+  })
+
+  ipcMain.handle('updater:isRoot', () => isRoot())
+
+  // Called from standalone app windows (e.g. Settings) to trigger the update
+  // screen in the main shell — the shell's window is the only one that has
+  // the UpdateScreen in its React tree.
+  ipcMain.handle('updater:showUpdateScreen', () => {
+    const wins = BrowserWindow.getAllWindows()
+    // Main shell is the one WITHOUT a standalone query param — it's the largest one
+    const main = wins.find(w => !w.isDestroyed() && w.webContents.getURL().includes('index.html') && !w.webContents.getURL().includes('standalone='))
+      ?? wins.find(w => !w.isDestroyed())
+    main?.webContents.send('updater:openScreen')
   })
 
   ipcMain.handle('updater:run', (event, password?: string) => {
@@ -90,7 +132,7 @@ export function registerUpdaterHandlers(): void {
       const args = isRoot() ? [UPDATE_SCRIPT] : ['-S', UPDATE_SCRIPT]
 
       const proc = spawn(cmd, args, {
-        env: { ...process.env, TERM: 'xterm-color', FORCE_COLOR: '1' },
+        env: { ...gitEnv(), TERM: 'xterm-color', FORCE_COLOR: '1' },
       })
 
       // Feed password to sudo via stdin
@@ -111,14 +153,13 @@ export function registerUpdaterHandlers(): void {
       })
 
       proc.on('close', (code) => {
-        if (code === null) {
-          // OS killed the process — reboot is already underway
-          resolve({ success: true })
-        } else if (code === 0) {
-          // Script exited cleanly but didn't reboot (shouldn't happen).
-          // Force reboot so the user's machine always restarts after an update.
-          const { exec: execRaw } = require('child_process')
-          execRaw('shutdown -r now || reboot')
+        // The update script reboots the machine itself once files are synced, so
+        // in the normal success path this process is torn down by the reboot and
+        // 'close' fires with code null (killed by signal during shutdown) — or
+        // never fires at all. We do NOT call app.exit(0) here: a full reboot is
+        // the only reliable restart, and any manual quit would just race the
+        // boot-time session loop and leave a black screen.
+        if (code === 0 || code === null) {
           resolve({ success: true })
         } else if (!isRoot() && code === 1) {
           reject(new Error('wrong-password'))

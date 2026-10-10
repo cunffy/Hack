@@ -1,7 +1,9 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { Terminal as XTerm } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
 import { WebLinksAddon } from 'xterm-addon-web-links'
+import { ContextMenu } from '../../components/ContextMenu'
 import 'xterm/css/xterm.css'
 
 const SESSION_ID = () => `term_${Math.random().toString(36).slice(2)}`
@@ -9,6 +11,7 @@ const SESSION_ID = () => `term_${Math.random().toString(36).slice(2)}`
 export default function Terminal() {
   const containerRef = useRef<HTMLDivElement>(null)
   const termRef = useRef<XTerm | null>(null)
+  const [ctx, setCtx] = useState<{ x: number; y: number } | null>(null)
   const fitAddonRef = useRef<FitAddon | null>(null)
   const sessionIdRef = useRef<string>(SESSION_ID())
   const cleanupRef = useRef<(() => void) | null>(null)
@@ -51,8 +54,24 @@ export default function Terminal() {
     const webLinksAddon = new WebLinksAddon()
     term.loadAddon(fitAddon)
     term.loadAddon(webLinksAddon)
+
+    // xterm measures character dimensions when opened; if the container has no
+    // layout size yet (or the terminal font hasn't loaded), its renderer leaves
+    // `dimensions` undefined and a scheduled viewport refresh throws
+    // "Cannot read properties of undefined (reading 'dimensions')". Wait for the
+    // font and a non-zero container size before opening.
+    try { await (document as any).fonts?.ready } catch {}
+    for (let i = 0; i < 30 && containerRef.current && containerRef.current.clientHeight === 0; i++) {
+      await new Promise(r => requestAnimationFrame(() => r(null)))
+    }
+    if (!containerRef.current || termRef.current) { term.dispose(); return }
+
     term.open(containerRef.current)
-    fitAddon.fit()
+    // fit() reads the render service dimensions, which aren't ready until the
+    // terminal has laid out at least once. Guard against the zero-size / pre-render
+    // case so it never throws before the container has real dimensions.
+    const safeFit = () => { try { fitAddon.fit() } catch {} }
+    safeFit()
 
     termRef.current = term
     fitAddonRef.current = fitAddon
@@ -63,11 +82,29 @@ export default function Terminal() {
 
     term.onData((data) => window.cryogram.terminal.write(id, data))
 
+    // Ctrl+Shift+C → copy selection; Ctrl+Shift+V → paste from clipboard
+    term.attachCustomKeyEventHandler((event) => {
+      if (event.type === 'keydown' && event.ctrlKey && event.shiftKey) {
+        if (event.key === 'C') {
+          const sel = term.getSelection()
+          if (sel) navigator.clipboard.writeText(sel).catch(() => {})
+          return false
+        }
+        if (event.key === 'V') {
+          navigator.clipboard.readText().then(text => {
+            if (text) window.cryogram.terminal.write(id, text)
+          }).catch(() => {})
+          return false
+        }
+      }
+      return true
+    })
+
     const removeListener = window.cryogram.terminal.onData(id, (data) => term.write(data))
     cleanupRef.current = removeListener
 
     const resizeObserver = new ResizeObserver(() => {
-      fitAddon.fit()
+      safeFit()
       const { cols, rows } = term
       window.cryogram.terminal.resize(id, cols, rows)
     })
@@ -87,10 +124,50 @@ export default function Terminal() {
   }, [init])
 
   return (
-    <div
-      ref={containerRef}
-      className="flex-1 w-full h-full p-1"
-      style={{ background: '#0a0e14' }}
-    />
+    <div style={{ position: 'relative', flex: 1, width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div
+        ref={containerRef}
+        className="flex-1 w-full h-full p-1"
+        style={{ background: '#0a0e14' }}
+        onContextMenu={e => { e.preventDefault(); setCtx({ x: e.clientX, y: e.clientY }) }}
+      />
+      <AnimatePresence>
+        {ctx && (
+          <ContextMenu
+            x={ctx.x} y={ctx.y}
+            onClose={() => setCtx(null)}
+            items={[
+              {
+                label: 'Copy',
+                shortcut: 'Ctrl+Shift+C',
+                action: () => {
+                  const sel = termRef.current?.getSelection()
+                  if (sel) navigator.clipboard.writeText(sel).catch(() => {})
+                },
+                disabled: !termRef.current?.getSelection(),
+              },
+              {
+                label: 'Paste',
+                shortcut: 'Ctrl+Shift+V',
+                action: () => {
+                  navigator.clipboard.readText().then(text => {
+                    if (text && termRef.current) window.cryogram.terminal.write(sessionIdRef.current, text)
+                  }).catch(() => {})
+                },
+              },
+              { sep: true },
+              {
+                label: 'Clear',
+                action: () => termRef.current?.clear(),
+              },
+              {
+                label: 'Select All',
+                action: () => termRef.current?.selectAll(),
+              },
+            ]}
+          />
+        )}
+      </AnimatePresence>
+    </div>
   )
 }

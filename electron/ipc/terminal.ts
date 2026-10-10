@@ -18,13 +18,25 @@ export function registerTerminalHandlers(): void {
     sessions.set(id, proc)
 
     const win = BrowserWindow.fromWebContents(event.sender)
-    proc.onData((data) => {
-      win?.webContents.send(`terminal:data:${id}`, data)
-    })
+
+    const safeSend = (channel: string, ...args: any[]) => {
+      try {
+        if (win && !win.isDestroyed() && !win.webContents.isDestroyed())
+          win.webContents.send(channel, ...args)
+      } catch {}
+    }
+
+    proc.onData((data) => safeSend(`terminal:data:${id}`, data))
 
     proc.onExit(() => {
       sessions.delete(id)
-      win?.webContents.send(`terminal:data:${id}`, '\r\n[Process exited]\r\n')
+      safeSend(`terminal:data:${id}`, '\r\n[Process exited]\r\n')
+    })
+
+    // Kill the PTY when the window closes so it doesn't emit into the void
+    win?.once('closed', () => {
+      try { proc.kill() } catch {}
+      sessions.delete(id)
     })
 
     return { pid: proc.pid }

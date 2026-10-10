@@ -230,14 +230,34 @@ contextBridge.exposeInMainWorld('cryogram', {
     copyToClipboard:  (dataUrl: string)          => ipcRenderer.invoke('screenshot:copyToClipboard', dataUrl),
   },
 
+  // Shell layer control — raise/sink Electron relative to X11 apps
+  shell: {
+    sink:           () => ipcRenderer.send('shell:sink'),
+    unpin:          () => ipcRenderer.send('shell:unpin'),
+    openAppWindow:  (appId: string) => ipcRenderer.invoke('shell:open-app-window', appId),
+    winCtrl:        (action: 'close' | 'minimize' | 'maximize') => ipcRenderer.send(`shell:winctrl-${action}`),
+    onAppWindowClosed: (cb: (appId: string) => void) => {
+      const handler = (_: unknown, appId: string) => cb(appId)
+      ipcRenderer.on('app-window:closed', handler)
+      return () => ipcRenderer.removeListener('app-window:closed', handler)
+    },
+  },
+
   // Update checker + runner
   updater: {
     check:      () => ipcRenderer.invoke('updater:check'),
     run:        (password?: string) => ipcRenderer.invoke('updater:run', password),
+    isRoot:     () => ipcRenderer.invoke('updater:isRoot'),
+    showUpdateScreen: () => ipcRenderer.invoke('updater:showUpdateScreen'),
     onProgress: (cb: (line: string) => void) => {
       const listener = (_: unknown, line: string) => cb(line)
       ipcRenderer.on('updater:progress', listener)
       return () => ipcRenderer.removeListener('updater:progress', listener)
+    },
+    onOpenScreen: (cb: () => void) => {
+      const listener = () => cb()
+      ipcRenderer.on('updater:openScreen', listener)
+      return () => ipcRenderer.removeListener('updater:openScreen', listener)
     },
   },
 
@@ -361,6 +381,13 @@ contextBridge.exposeInMainWorld('cryogram', {
     const listener = (_: unknown, n: unknown) => cb(n as number)
     ipcRenderer.on('workspace:changed', listener)
     return () => ipcRenderer.removeListener('workspace:changed', listener)
+  },
+
+  // Super+Left/Right/Up window snapping
+  onSnap: (cb: (side: 'left' | 'right' | 'max') => void) => {
+    const listener = (_: unknown, side: unknown) => cb(side as 'left' | 'right' | 'max')
+    ipcRenderer.on('window:snap', listener)
+    return () => ipcRenderer.removeListener('window:snap', listener)
   },
 
   // Shodan

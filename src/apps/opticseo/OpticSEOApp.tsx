@@ -310,7 +310,7 @@ export default function OpticSEOApp() {
           src={url}
           partition="persist:opticseo"
           useragent={USER_AGENT}
-          allowpopups
+          allowpopups="true"
           style={{ width: '100%', height: '100%', display: 'flex' }}
         />
       </div>

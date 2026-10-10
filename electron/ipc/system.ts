@@ -7,8 +7,15 @@ import { getSettingsStore } from './settings'
 
 const execAsync = promisify(exec)
 
+// PipeWire/PulseAudio find their socket via XDG_RUNTIME_DIR.
+// Pass explicitly so pactl works even when the session env is incomplete.
+const audioEnv = {
+  ...process.env,
+  XDG_RUNTIME_DIR: process.env['XDG_RUNTIME_DIR'] ?? `/run/user/${process.getuid?.() ?? 1000}`,
+}
+
 function sh(cmd: string): Promise<string> {
-  return execAsync(cmd).then(r => r.stdout.trim()).catch(() => '')
+  return execAsync(cmd, { env: audioEnv }).then(r => r.stdout.trim()).catch(() => '')
 }
 
 export function registerSystemHandlers(): void {
@@ -56,6 +63,7 @@ export function registerSystemHandlers(): void {
       const { stdout } = await execAsync(cmd)
       const out = stdout.trim()
       const success = out.toLowerCase().includes('successfully') || out.toLowerCase().includes('activated')
+      if (success) sh('chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true')
       return { success, message: success ? '' : (out || 'Connection failed') }
     } catch (err: any) {
       const msg: string = (err.stdout ?? err.message ?? 'Connection failed').trim()
@@ -209,7 +217,7 @@ export function registerSystemHandlers(): void {
   // Use sudo so polkit allows power commands from the cryogram non-root user.
   // The sudoers rule in /etc/sudoers.d/cryogram-power grants NOPASSWD for these.
   ipcMain.handle('system:shutdown', async () => { await sh('sudo systemctl poweroff') })
-  ipcMain.handle('system:reboot',   async () => { await sh('sudo systemctl reboot') })
+  ipcMain.handle('system:reboot',   async () => { await sh('reboot 2>/dev/null || sudo systemctl reboot 2>/dev/null || sudo reboot -f 2>/dev/null || true') })
   ipcMain.handle('system:sleep',    async () => { await sh('sudo systemctl suspend') })
   ipcMain.handle('system:lock', async () => {
     // Tell renderer to show in-app lock screen
@@ -287,6 +295,7 @@ export function registerSystemHandlers(): void {
   })
 
   ipcMain.handle('wm:focusWindow', async (_, id: string) => {
+    // Raise the target X11 window — Electron is pinned to desktop layer below
     await sh(`wmctrl -ia ${id} 2>/dev/null`)
     return true
   })

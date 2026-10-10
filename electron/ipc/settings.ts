@@ -36,7 +36,23 @@ function getStore(): InstanceType<typeof Store> {
 export function registerSettingsHandlers(): void {
   ipcMain.handle('settings:get',    (_, key: string)                => getStore().get(key))
   ipcMain.handle('settings:set',    (_, key: string, value: unknown) => { getStore().set(key, value) })
-  ipcMain.handle('settings:getAll', ()                              => getStore().store)
+  ipcMain.handle('settings:getAll', () => {
+    const raw = getStore().store as Record<string, unknown>
+    const flat: Record<string, unknown> = {}
+    const flatten = (obj: Record<string, unknown>, prefix = '') => {
+      for (const key of Object.keys(obj)) {
+        const full = prefix ? `${prefix}.${key}` : key
+        const val = obj[key]
+        if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
+          flatten(val as Record<string, unknown>, full)
+        } else {
+          flat[full] = val
+        }
+      }
+    }
+    flatten(raw)
+    return flat
+  })
 }
 
 export function getSettingsStore() { return getStore() }

@@ -73,8 +73,8 @@ export function LockScreen() {
   const m  = time.getMinutes().toString().padStart(2, '0')
   const ds = time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 
-  // Show at least MIN_DIGITS dots; expand as user types beyond that
-  const dotCount = Math.max(MIN_DIGITS, pin.length)
+  // Start with 1 dot; grow by 1 for each digit typed
+  const dotCount = Math.max(1, pin.length)
 
   return (
     <motion.div
@@ -125,8 +125,10 @@ export function LockScreen() {
                 <motion.div
                   key={i}
                   className="rounded-full"
+                  initial={i > 0 ? { scale: 0, opacity: 0 } : false}
                   animate={{
                     scale: filled ? 1.2 : 1,
+                    opacity: 1,
                     background: isErr
                       ? '#f87171'
                       : filled
@@ -134,7 +136,7 @@ export function LockScreen() {
                         : 'rgba(255,255,255,0.18)',
                     boxShadow: filled && !isErr ? `0 0 12px var(--cryo-a50)` : 'none',
                   }}
-                  transition={{ duration: 0.1 }}
+                  transition={{ duration: 0.15 }}
                   style={{ width: 12, height: 12 }}
                 />
               )

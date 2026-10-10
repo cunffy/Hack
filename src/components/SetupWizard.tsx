@@ -329,6 +329,89 @@ function StepWelcome({
   )
 }
 
+// ── Step 1: Profile Name ──────────────────────────────────────────────────────
+
+function StepProfile({
+  onNext,
+  onSkip,
+  accentColor,
+}: {
+  onNext: () => void
+  onSkip: () => void
+  accentColor: string
+}) {
+  const [name, setName]     = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const submit = async () => {
+    const trimmed = name.trim()
+    setSaving(true)
+    try {
+      if (trimmed) {
+        await window.cryogram.settings.set('profile.name', trimmed)
+        window.dispatchEvent(new CustomEvent('cryogram:profileUpdated'))
+      }
+    } catch {}
+    setSaving(false)
+    onNext()
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 22, alignItems: 'center' }}>
+      {/* Person icon */}
+      <div style={{
+        width: 56, height: 56, borderRadius: 16,
+        background: `${accentColor}14`,
+        border: `1.5px solid ${accentColor}35`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+          stroke={accentColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+
+      <div style={{ textAlign: 'center' }}>
+        <div style={{
+          fontSize: 20, fontWeight: 700, color: 'rgba(255,255,255,0.92)',
+          marginBottom: 5, letterSpacing: '-0.01em',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+        }}>
+          What should we call you?
+        </div>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.38)', fontFamily: '-apple-system, sans-serif' }}>
+          Sets your display name across Cryogram OS
+        </div>
+      </div>
+
+      <div style={{ width: '100%' }}>
+        <input
+          autoFocus
+          type="text"
+          placeholder="Operator"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') submit() }}
+          style={{ ...inputStyle, textAlign: 'center', fontSize: 15 }}
+          onFocus={e => { e.currentTarget.style.borderColor = `${accentColor}60` }}
+          onBlur={e  => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)' }}
+        />
+      </div>
+
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
+        <PrimaryBtn
+          label={saving ? 'Saving…' : 'Next →'}
+          onClick={submit}
+          disabled={saving}
+          accentColor={accentColor}
+        />
+        <GhostBtn label="Skip for now" onClick={onSkip} />
+      </div>
+    </div>
+  )
+}
+
 // ── Step 2: Security PIN ──────────────────────────────────────────────────────
 
 function StepPin({
@@ -640,7 +723,7 @@ export function SetupWizard({ onComplete }: { onComplete: () => void }) {
   const [prevStep,     setPrevStep]     = useState(0)
   const [selectedTheme, setTheme]       = useState<ThemeId>('cyber')
 
-  const TOTAL_STEPS = 4
+  const TOTAL_STEPS = 5
   const direction   = step >= prevStep ? 1 : -1
 
   const goTo = (next: number) => {
@@ -764,19 +847,26 @@ export function SetupWizard({ onComplete }: { onComplete: () => void }) {
                   />
                 )}
                 {step === 1 && (
-                  <StepPin
+                  <StepProfile
                     accentColor={accentColor}
                     onNext={() => goTo(2)}
                     onSkip={() => goTo(2)}
                   />
                 )}
                 {step === 2 && (
-                  <StepApiKeys
+                  <StepPin
                     accentColor={accentColor}
-                    onComplete={() => goTo(3)}
+                    onNext={() => goTo(3)}
+                    onSkip={() => goTo(3)}
                   />
                 )}
                 {step === 3 && (
+                  <StepApiKeys
+                    accentColor={accentColor}
+                    onComplete={() => goTo(4)}
+                  />
+                )}
+                {step === 4 && (
                   <div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16, textAlign: 'center' }}>
                       Quick Tour
@@ -793,7 +883,7 @@ export function SetupWizard({ onComplete }: { onComplete: () => void }) {
         </motion.div>
 
         {/* Global skip link */}
-        {step < 3 && (
+        {step < 4 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

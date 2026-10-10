@@ -350,7 +350,7 @@ export function AppSwitcher() {
       } catch {}
     }
     poll()
-    const id = setInterval(poll, 2000)
+    const id = setInterval(poll, 3000)
     return () => clearInterval(id)
   }, [])
 

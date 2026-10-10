@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWindowStore } from '../store/windowStore'
 
@@ -76,7 +76,7 @@ function ActionBtn({
 
 function PowerBtn({
   icon, label, color, onClick,
-}: { icon: string; label: string; color: string; onClick: () => void }) {
+}: { icon: ReactNode; label: string; color: string; onClick: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -97,7 +97,7 @@ function PowerBtn({
         el.style.borderColor = `${color}28`
       }}
     >
-      <span style={{ fontSize: 16, color }}>{icon}</span>
+      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color, fontSize: 16, width: 18, height: 18 }}>{icon}</span>
       <span style={{ fontSize: 10, color: `${color}cc`, fontWeight: 500 }}>{label}</span>
     </button>
   )
@@ -225,6 +225,13 @@ export function UserPanel({ open, onClose }: UserPanelProps) {
   }
 
   const font = '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif'
+
+  const RestartIcon = (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74"/>
+      <polyline points="3 3 3 9 9 9"/>
+    </svg>
+  )
 
   const openSettings = (tab?: string) => {
     if (tab) window.dispatchEvent(new CustomEvent('cryogram:openSettingsTab', { detail: tab }))
@@ -397,7 +404,7 @@ export function UserPanel({ open, onClose }: UserPanelProps) {
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <PowerBtn icon="💤" label="Sleep"     color="#818cf8" onClick={() => setPowerConfirm('sleep')} />
-                <PowerBtn icon="🔄" label="Restart"   color="var(--cryo-accent)" onClick={() => setPowerConfirm('restart')} />
+                <PowerBtn icon={RestartIcon} label="Restart" color="var(--cryo-accent)" onClick={() => setPowerConfirm('restart')} />
                 <PowerBtn icon="⏻"  label="Shut Down" color="#ef4444" onClick={() => setPowerConfirm('shutdown')} />
               </div>
             </div>
@@ -434,8 +441,13 @@ export function UserPanel({ open, onClose }: UserPanelProps) {
               }}
               onClick={e => e.stopPropagation()}
             >
-              <div style={{ fontSize: 38, marginBottom: 12, lineHeight: 1 }}>
-                {powerConfirm === 'sleep' ? '💤' : powerConfirm === 'restart' ? '🔄' : '⏻'}
+              <div style={{ fontSize: 38, marginBottom: 12, lineHeight: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                {powerConfirm === 'sleep' ? '💤' : powerConfirm === 'restart' ? (
+                  <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="var(--cryo-accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74"/>
+                    <polyline points="3 3 3 9 9 9"/>
+                  </svg>
+                ) : '⏻'}
               </div>
               <div style={{ fontSize: 15, fontWeight: 600, color: '#f0f4f8', marginBottom: 8 }}>
                 {powerConfirm === 'sleep'    ? 'Put System to Sleep?'

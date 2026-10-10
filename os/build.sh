@@ -8,7 +8,10 @@ set -euo pipefail
 VERSION="${CRYOGRAM_VERSION:-1.0}"
 CODENAME="${CRYOGRAM_CODENAME:-obsidian}"
 OUTPUT_DIR="/build/output"
-LB_DIR="/build/live-build"
+# Config source — read-only Windows volume mount
+CONF_DIR="/build/live-build"
+# Working dir — inside the container (ephemeral, always fresh, no NTFS locking)
+LB_DIR="/tmp/lb-work"
 ASSETS_DIR="/build/assets"
 
 # Print which command failed, for diagnosis
@@ -24,16 +27,18 @@ echo ""
 
 mkdir -p "$OUTPUT_DIR"
 
-# Ensure hook scripts are executable (volume mounts may drop exec bit)
+# Set up a fresh working directory inside the container.
+# Running lb from a container-internal path avoids NTFS locking issues
+# that prevent rm -rf from cleaning stale chroot/binary on Windows mounts.
+echo "[build] Setting up fresh live-build work directory at $LB_DIR..."
+rm -rf "$LB_DIR"
+mkdir -p "$LB_DIR"
+cp -r "$CONF_DIR/config" "$LB_DIR/"
+cp -r "$CONF_DIR/auto"   "$LB_DIR/"
+
+# Ensure hook and auto scripts are executable
 find "$LB_DIR/config/hooks" -name "*.chroot" -exec chmod +x {} \; 2>/dev/null || true
 find "$LB_DIR/auto" -type f -exec chmod +x {} \; 2>/dev/null || true
-
-# Clear any stale chroot/binary state left over from a previous failed build.
-# The live-build directory is volume-mounted so state persists between runs.
-echo "[build] Cleaning stale live-build state..."
-cd "$LB_DIR"
-lb clean --chroot --binary 2>/dev/null || true
-cd - >/dev/null
 
 # Write authoritative package lists directly — overrides whatever is on disk.
 # This guarantees the build works even if local files were never git-pulled.
@@ -195,7 +200,6 @@ gnome-font-viewer
 font-manager
 xfce4-terminal
 xterm
-alacritty
 nitrogen
 lxrandr
 arandr
@@ -220,7 +224,6 @@ fonts-liberation
 fonts-freefont-ttf
 fonts-dejavu
 ttf-bitstream-vera
-fonts-inter
 fonts-noto-color-emoji
 tlp
 tlp-rdw
@@ -243,6 +246,7 @@ squashfs-tools
 grub-efi-amd64
 grub-pc-bin
 grub-common
+xdg-utils
 PKGEOF
 
 cat > "$PKG_LISTS/gaming.list.chroot" << 'PKGEOF'
@@ -263,8 +267,6 @@ i965-va-driver
 xserver-xorg-video-nouveau
 wine
 wine64
-winetricks
-lutris
 gamemode
 libgamemode0
 libgamemodeauto0
@@ -276,13 +278,13 @@ pavucontrol
 joystick
 jstest-gtk
 ffmpeg
-mesa-utils-extra
 PKGEOF
 
 cat > "$PKG_LISTS/base.list.chroot" << 'PKGEOF'
 # Base system — core utilities
 apt-transport-https
 ca-certificates
+chrony
 curl
 wget
 gnupg
@@ -338,6 +340,28 @@ echo "[build] Package lists written."
 HOOKS_DIR="$LB_DIR/config/hooks/normal"
 mkdir -p "$HOOKS_DIR"
 
+# First hook: ensure full apt sources (non-free-firmware etc.) are active
+# before any package installation hooks run.
+cat > "$HOOKS_DIR/0100-apt-sources.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set +e
+echo "[apt-sources] Configuring full Debian Bookworm sources..."
+cat > /etc/apt/sources.list << 'SOURCES'
+deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
+deb http://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian bookworm-backports main contrib non-free non-free-firmware
+SOURCES
+apt-get update \
+  -o Acquire::Check-Valid-Until=false \
+  -o Acquire::Check-Date=false \
+  -qq 2>/dev/null || true
+echo "[apt-sources] Done."
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0100-apt-sources.hook.chroot"
+echo "[build] Apt sources hook written."
+
 cat > "$HOOKS_DIR/0400-calamares.hook.chroot" << 'HOOKEOF'
 #!/bin/bash
 # Install Calamares graphical installer — non-fatal
@@ -361,7 +385,7 @@ cat > /usr/share/applications/install-cryogram.desktop << 'DESKTOP'
 [Desktop Entry]
 Name=Install Cryogram OS
 Comment=Install Cryogram OS to this computer
-Exec=pkexec calamares
+Exec=sudo /usr/bin/calamares
 Icon=system-software-install
 Terminal=false
 Type=Application
@@ -386,7 +410,7 @@ cat > /usr/local/bin/cryogram-installer-launch << 'LAUNCHER'
 # Only launch installer when running from live USB
 if grep -q "boot=live" /proc/cmdline 2>/dev/null; then
   sleep 4  # wait for desktop to fully load
-  pkexec calamares
+  sudo /usr/bin/calamares
 fi
 LAUNCHER
 chmod +x /usr/local/bin/cryogram-installer-launch
@@ -496,6 +520,63 @@ GRUB_GFXMODE="1920x1080,1280x720,auto"
 GRUB_GFXPAYLOAD_LINUX=keep
 GRUBDEFAULT
 
+# ── Update infrastructure ─────────────────────────────────────────────────
+mkdir -p /etc/cryogram
+cat > /etc/cryogram/update.conf << 'UPDATECONF'
+REPO_URL="https://github.com/cunffy/Hack.git"
+BRANCH="claude/custom-security-os-URNk5"
+UPDATECONF
+
+cat > /usr/local/bin/cryogram-update << 'UPDATER'
+#!/bin/bash
+set -euo pipefail
+REPO_URL="https://github.com/cunffy/Hack.git"
+BRANCH="claude/custom-security-os-URNk5"
+SRC="/opt/cryogram-src"
+DEST="/opt/cryogram"
+
+echo "── Cryogram OS Updater ──────────────────────────"
+if [ ! -d "$SRC/.git" ]; then
+  echo "── First run: cloning source repository..."
+  git clone --depth=1 --branch "$BRANCH" "$REPO_URL" "$SRC"
+else
+  echo "── Pulling latest changes from $BRANCH..."
+  git -C "$SRC" fetch --depth=1 origin "$BRANCH"
+  git -C "$SRC" reset --hard "origin/$BRANCH"
+fi
+
+echo "── Syncing app files..."
+rsync -a --delete "$SRC/out/" "$DEST/out/"
+
+echo "── Update complete — rebooting in 5 seconds..."
+sleep 5
+reboot
+UPDATER
+chmod +x /usr/local/bin/cryogram-update
+
+# Allow the cryogram user to run the update without a password prompt
+echo "cryogram ALL=(ALL) NOPASSWD: /usr/local/bin/cryogram-update" \
+  > /etc/sudoers.d/cryogram-update
+chmod 440 /etc/sudoers.d/cryogram-update
+
+# ── NTP time sync via chrony ──────────────────────────────────────────────────
+systemctl enable chrony 2>/dev/null || true
+
+# NetworkManager dispatcher: sync clock the moment any interface comes up
+mkdir -p /etc/NetworkManager/dispatcher.d
+cat > /etc/NetworkManager/dispatcher.d/10-cryogram-timesync << 'NMD'
+#!/bin/bash
+[ "$2" = "up" ] || exit 0
+chronyc makestep 2>/dev/null || timedatectl set-ntp true 2>/dev/null || true
+NMD
+chmod +x /etc/NetworkManager/dispatcher.d/10-cryogram-timesync
+
+# ── Persistent settings directory ─────────────────────────────────────────────
+# Electron saves theme, PIN, and API keys here. Must be writable by cryogram.
+mkdir -p /opt/cryogram-data
+chown cryogram:cryogram /opt/cryogram-data 2>/dev/null || true
+chmod 755 /opt/cryogram-data
+
 echo "[cryogram] Setup complete at $INSTALL_DIR ($(du -sh $INSTALL_DIR | cut -f1))"
 exit 0
 HOOKEOF
@@ -594,6 +675,22 @@ exit 0
 HOOKEOF
 chmod +x "$HOOKS_DIR/0402-calamares-unpackfs.hook.chroot"
 echo "[build] unpackfs config hook written."
+
+cat > "$HOOKS_DIR/0403-grub-wrapper.hook.chroot" << 'HOOKEOF'
+#!/bin/bash
+set +e
+echo "[grub-wrapper] Creating grub-install wrapper with --no-nvram..."
+mkdir -p /usr/local/sbin
+cat > /usr/local/sbin/cryogram-grub-install << 'WRAPPER'
+#!/bin/bash
+exec /usr/sbin/grub-install --no-nvram "$@"
+WRAPPER
+chmod +x /usr/local/sbin/cryogram-grub-install
+echo "[grub-wrapper] Done."
+exit 0
+HOOKEOF
+chmod +x "$HOOKS_DIR/0403-grub-wrapper.hook.chroot"
+echo "[build] GRUB wrapper hook written."
 
 # Fix skel timing: write a hook that copies /etc/skel to /home/cryogram
 # AFTER all other hooks have populated skel. The configure-system hook
@@ -802,6 +899,25 @@ cat > "$HOOKS_DIR/0545-cryogram-os-session.hook.chroot" << 'HOOKEOF'
 set -e
 echo "[session] Configuring Cryogram OS dedicated session..."
 
+# Emergency right-click menu — gives a terminal even if the Electron desktop is hidden
+cat > /etc/xdg/openbox/cryogram-menu.xml << 'OBMENU'
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_menu>
+  <menu id="root-menu" label="Cryogram OS">
+    <item label="Open Terminal">
+      <action name="Execute"><execute>xterm -bg '#0a0e14' -fg '#c9d1d9' -fa 'JetBrains Mono' -fs 11</execute></action>
+    </item>
+    <item label="Raise Desktop">
+      <action name="Execute"><execute>bash -c "xdotool search --class 'cryogram' | head -1 | xargs -r xdotool windowraise"</execute></action>
+    </item>
+    <separator/>
+    <item label="Restart Cryogram">
+      <action name="Execute"><execute>bash -c "pkill -f 'electron.*out/main'"</execute></action>
+    </item>
+  </menu>
+</openbox_menu>
+OBMENU
+
 # ── 1. Session launcher script ────────────────────────────────────────────
 # This script IS the desktop session. LightDM runs it after autologin.
 # Cryogram is the only application; openbox is an invisible WM backend.
@@ -811,6 +927,10 @@ export DISPLAY="${DISPLAY:-:0}"
 export HOME="${HOME:-/home/cryogram}"
 export XDG_SESSION_TYPE=x11
 export XDG_CURRENT_DESKTOP=Cryogram
+# XDG_RUNTIME_DIR is where PipeWire/PulseAudio create their sockets.
+# LightDM PAM may set it; fall back to the standard path if not.
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+mkdir -p "$XDG_RUNTIME_DIR" && chmod 700 "$XDG_RUNTIME_DIR" 2>/dev/null || true
 
 # Paint the screen dark immediately — eliminates white flash before Electron loads
 xsetroot -solid '#070b11' 2>/dev/null || true
@@ -821,18 +941,23 @@ xset s off 2>/dev/null || true
 xset s noblank 2>/dev/null || true
 xset -dpms 2>/dev/null || true
 
-# Lightweight GPU compositor — Electron uses GPU compositing and needs a compositor
-# for proper transparency/shadows. Fall back to software renderer if GPU fails.
-picom --backend glx --vsync --no-fading-openclose --daemon 2>/dev/null || \
-  picom --backend xrender --daemon 2>/dev/null || true
-
-# Openbox as invisible WM backend — provides the EWMH/ICCCM window management
-# that Electron expects. All user-facing features are disabled via config.
+# Openbox WM first — it must be running before picom attaches.
 openbox --config-file /etc/xdg/openbox/cryogram-rc.xml &
 WM_PID=$!
+sleep 0.3
+
+# Compositor — needed for Electron glassmorphism transparency.
+# Start with xrender (instant) instead of probing glx first (saves ~1s).
+picom --backend xrender --vsync --no-fading-openclose --daemon 2>/dev/null || true
 
 # Hide cursor when idle — security OS aesthetic
 unclutter -root -idle 5 2>/dev/null &
+
+# On live boot: pop up the graphical installer after the desktop loads.
+# boot=live is only in cmdline when running from the USB — never on installed system.
+if grep -q "boot=live" /proc/cmdline 2>/dev/null; then
+  (sleep 5 && sudo /usr/bin/calamares) &
+fi
 
 # ── Launch Cryogram OS shell ──────────────────────────────────────────────
 # Auto-restart on crash (exit non-zero). Exit 0 = clean shutdown/update,
@@ -868,6 +993,9 @@ mkdir -p /etc/xdg/openbox
 cat > /etc/xdg/openbox/cryogram-rc.xml << 'OBCONF'
 <?xml version="1.0" encoding="UTF-8"?>
 <openbox_config xmlns="http://openbox.org/3.4/rc">
+  <desktops>
+    <number>4</number>
+  </desktops>
   <resistance>
     <strength>0</strength>
     <screen_edge_strength>0</screen_edge_strength>
@@ -885,16 +1013,67 @@ cat > /etc/xdg/openbox/cryogram-rc.xml << 'OBCONF'
     <titleLayout></titleLayout>
   </theme>
   <keyboard>
-    <!-- No keybindings — Cryogram registers global shortcuts via Electron -->
+    <!-- Alt+Tab: cycle through windows on current workspace -->
+    <keybind key="A-Tab">
+      <action name="NextWindow">
+        <finalactions>
+          <action name="Focus"/>
+          <action name="Raise"/>
+          <action name="Unshade"/>
+        </finalactions>
+      </action>
+    </keybind>
+    <keybind key="A-S-Tab">
+      <action name="PreviousWindow">
+        <finalactions>
+          <action name="Focus"/>
+          <action name="Raise"/>
+          <action name="Unshade"/>
+        </finalactions>
+      </action>
+    </keybind>
+    <!-- Volume keys — handled by openbox so they work even if Electron misses them -->
+    <keybind key="XF86AudioRaiseVolume">
+      <action name="Execute"><execute>pactl set-sink-volume @DEFAULT_SINK@ +5%</execute></action>
+    </keybind>
+    <keybind key="XF86AudioLowerVolume">
+      <action name="Execute"><execute>pactl set-sink-volume @DEFAULT_SINK@ -5%</execute></action>
+    </keybind>
+    <keybind key="XF86AudioMute">
+      <action name="Execute"><execute>pactl set-sink-mute @DEFAULT_SINK@ toggle</execute></action>
+    </keybind>
+    <!-- Brightness keys — Electron cannot register XF86MonBrightness* on Linux -->
+    <keybind key="XF86MonBrightnessUp">
+      <action name="Execute"><execute>brightnessctl set +10%</execute></action>
+    </keybind>
+    <keybind key="XF86MonBrightnessDown">
+      <action name="Execute"><execute>brightnessctl set 10%-</execute></action>
+    </keybind>
   </keyboard>
+  <menu>
+    <file>/etc/xdg/openbox/cryogram-menu.xml</file>
+  </menu>
   <mouse>
     <context name="Root">
-      <!-- No right-click menu on root window — Cryogram is fullscreen anyway -->
+      <mousebind button="Right" action="Press">
+        <action name="ShowMenu"><menu>root-menu</menu></action>
+      </mousebind>
     </context>
     <context name="Desktop">
+      <mousebind button="Right" action="Press">
+        <action name="ShowMenu"><menu>root-menu</menu></action>
+      </mousebind>
     </context>
   </mouse>
   <applications>
+    <!-- Cryogram is the desktop shell — keep it pinned to the bottom layer -->
+    <application class="cryogram">
+      <layer>below</layer>
+      <decor>no</decor>
+      <border>no</border>
+      <skip_taskbar>yes</skip_taskbar>
+      <skip_pager>yes</skip_pager>
+    </application>
     <application class="*">
       <decor>no</decor>
       <border>no</border>
@@ -926,6 +1105,10 @@ cat > /etc/sudoers.d/cryogram-power << 'SUDOERS'
 cryogram ALL=(ALL) NOPASSWD: /bin/systemctl poweroff, /bin/systemctl reboot, /bin/systemctl hibernate, /bin/systemctl suspend, /bin/systemctl restart lightdm, /bin/systemctl restart display-manager
 SUDOERS
 chmod 440 /etc/sudoers.d/cryogram-power
+
+# Calamares installer — allow cryogram to run without password on live boot
+echo "cryogram ALL=(ALL) NOPASSWD: /usr/bin/calamares" > /etc/sudoers.d/calamares
+chmod 440 /etc/sudoers.d/calamares
 
 echo "[session] Cryogram OS session configured."
 exit 0

@@ -82,6 +82,7 @@ export const APP_META: Record<AppId, { label: string; color: string; icon: React
   'image-viewer':      { label: 'Image Viewer',     color: '#34d399', icon: <ImageViewerIcon /> },
   'rss-reader':        { label: 'RSS Reader',       color: '#fb923c', icon: <RSSIcon /> },
   'remote-desktop':    { label: 'Remote Desktop',   color: '#10b981', icon: <RemoteDesktopIcon /> },
+  brave:               { label: 'Brave Browser',    color: '#fb923c', icon: <BraveIcon /> },
 }
 
 interface X11Win { id: string; desktop: number; title: string }
@@ -90,7 +91,7 @@ interface CtxState { x: number; y: number; appId: AppId }
 export function Dock() {
   const { order, setOrder, removeApp } = useDockStore()
   const addDesktopIcon = useDesktopStore(s => s.addIcon)
-  const { windows, openApp, focusWindow, restoreWindow, minimizeWindow } = useWindowStore()
+  const { windows, openApp, openAppNewWindow, focusWindow, restoreWindow, minimizeWindow, closeWindow } = useWindowStore()
 
   const [mouseX, setMouseX]     = useState<number | null>(null)
   const [hovered, setHovered]   = useState<string | null>(null)
@@ -110,7 +111,7 @@ export function Dock() {
         ))
       } catch {}
     }
-    poll(); const id = setInterval(poll, 2000); return () => clearInterval(id)
+    poll(); const id = setInterval(poll, 3000); return () => clearInterval(id)
   }, [])
 
   const onMouseMove = useCallback((e: React.MouseEvent) => {
@@ -139,19 +140,33 @@ export function Dock() {
           <ContextMenu
             x={ctx.x} y={ctx.y}
             onClose={() => setCtx(null)}
-            items={[
-              {
-                label: windows.find(w => w.appId === ctx.appId) ? 'Focus Window' : 'Open',
-                action: () => {
-                  const win = windows.find(w => w.appId === ctx.appId)
-                  if (!win) openApp(ctx.appId)
-                  else { restoreWindow(win.id); focusWindow(win.id) }
+            items={(() => {
+              const win = windows.find(w => w.appId === ctx.appId)
+              const items: MenuItem[] = [
+                {
+                  label: win ? 'Focus Window' : 'Open',
+                  action: () => {
+                    if (!win) openApp(ctx.appId)
+                    else { restoreWindow(win.id); focusWindow(win.id) }
+                  },
                 },
-              },
-              { label: 'Add to Desktop', action: () => addDesktopIcon(ctx.appId) },
-              { sep: true },
-              { label: 'Remove from Dock', danger: true, action: () => removeApp(ctx.appId) },
-            ] as MenuItem[]}
+                {
+                  label: 'New Window',
+                  action: () => openAppNewWindow(ctx.appId),
+                },
+                { label: 'Add to Desktop', action: () => addDesktopIcon(ctx.appId) },
+                { sep: true },
+              ]
+              if (win) {
+                items.push({
+                  label: 'Close',
+                  danger: true,
+                  action: () => closeWindow(win.id),
+                })
+              }
+              items.push({ label: 'Remove from Dock', danger: true, action: () => removeApp(ctx.appId) })
+              return items
+            })()}
           />
         )}
       </AnimatePresence>
@@ -299,10 +314,10 @@ export function Dock() {
                       <motion.button
                         onClick={async () => {
                           try {
-                            // Hide the shell so the external window becomes visible
-                            await (window.cryogram as any).wm?.hideShell()
-                            // Small delay lets the shell minimize before wmctrl raises the target
-                            await new Promise(r => setTimeout(r, 120))
+                            // Drop the shell out of always-on-top first so the
+                            // target X11 window (Brave, …) raises above it, then
+                            // activate it via wmctrl.
+                            ;(window.cryogram as any).shell?.sink?.()
                             await (window.cryogram as any).wm?.focusWindow(xwin.id)
                           } catch {}
                         }}
@@ -842,6 +857,15 @@ function RemoteDesktopIcon() {
       <line x1="12" y1="17" x2="12" y2="21"/>
       <path d="M7 9l3 3-3 3"/>
       <line x1="13" y1="15" x2="17" y2="15"/>
+    </svg>
+  )
+}
+function BraveIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+      <path d="M9.5 9.5l2.5 5 2.5-5" strokeWidth="1.5"/>
+      <line x1="12" y1="14.5" x2="12" y2="16.5" strokeWidth="1.5"/>
     </svg>
   )
 }
