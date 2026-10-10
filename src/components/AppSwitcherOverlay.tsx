@@ -171,7 +171,9 @@ export function AppSwitcherOverlay() {
   useEffect(() => {
     if (!visible) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' || e.key === 'Tab') {
+      // Note: Alt+Tab advancement is driven from App.tsx (the single source), so
+      // we don't handle Tab here — otherwise it would advance twice per press.
+      if (e.key === 'ArrowRight') {
         e.preventDefault()
         setSelIdx(i => (i + 1) % Math.max(shown.length, 1))
         resetHideTimer()
@@ -187,8 +189,19 @@ export function AppSwitcherOverlay() {
         dismissWithSink()
       }
     }
+    // Releasing Alt commits the selection, like a normal Alt+Tab switcher.
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') {
+        activateEntry(shown[selIdx])
+        setVisible(false)
+      }
+    }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('keyup', onKeyUp)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('keyup', onKeyUp)
+    }
   }, [visible, shown, selIdx, resetHideTimer])
 
   // ── Activate selected entry ──────────────────────────────────────────────

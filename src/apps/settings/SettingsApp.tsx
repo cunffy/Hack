@@ -895,6 +895,7 @@ interface ApiKeyValues {
   hibpApiKey: string
   dehashedEmail: string
   dehashedApiKey: string
+  'shodan.apiKey': string
   workspace: string
 }
 
@@ -903,6 +904,7 @@ function ApiKeysPanel() {
     hibpApiKey: '',
     dehashedEmail: '',
     dehashedApiKey: '',
+    'shodan.apiKey': '',
     workspace: '',
   })
   const [saved, setSaved] = useState(false)
@@ -913,6 +915,7 @@ function ApiKeysPanel() {
         hibpApiKey:     (all.hibpApiKey     as string) || '',
         dehashedEmail:  (all.dehashedEmail  as string) || '',
         dehashedApiKey: (all.dehashedApiKey as string) || '',
+        'shodan.apiKey': (all['shodan.apiKey'] as string) || '',
         workspace:      (all.workspace      as string) || '',
       })
     })
@@ -937,6 +940,22 @@ function ApiKeysPanel() {
         <h2 className="text-sm font-bold text-cryo-text mb-1">API Keys</h2>
         <p className="text-xs text-cryo-muted">API keys are stored encrypted on your local machine.</p>
       </div>
+
+      {/* Shodan */}
+      <section className="panel p-4 space-y-3">
+        <div className="text-xs text-cryo-muted uppercase tracking-wider font-bold">Shodan (Shodan Explorer)</div>
+        <div>
+          <label className="block text-xs text-cryo-muted mb-1">API Key</label>
+          <input
+            type="password"
+            className="w-full"
+            placeholder="shodan-api-key"
+            value={vals['shodan.apiKey']}
+            onChange={e => setVals(v => ({ ...v, 'shodan.apiKey': e.target.value }))}
+          />
+          <p className="text-xs text-cryo-muted mt-1">Get a free key at account.shodan.io — required to search Shodan</p>
+        </div>
+      </section>
 
       {/* Have I Been Pwned */}
       <section className="panel p-4 space-y-3">
