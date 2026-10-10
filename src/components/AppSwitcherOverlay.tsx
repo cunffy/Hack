@@ -1,80 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWindowStore, AppId } from '../store/windowStore'
+import { APP_META } from './Dock'
 
-// ── App color / icon maps (no Dock import to avoid circular deps) ─────────────
-
-const APP_COLORS: Record<string, string> = {
-  terminal:           '#00ff88',
-  editor:             '#00d4ff',
-  'password-tester':  '#ffcc00',
-  leaker:             '#ff4466',
-  settings:           '#bb88ff',
-  files:              '#f59e0b',
-  launcher:           '#34d399',
-  system:             '#818cf8',
-  opticseo:           '#10b981',
-  phone:              '#a855f7',
-  scanner:            '#00ff88',
-  vpn:                '#a78bfa',
-  notes:              '#fbbf24',
-  mail:               '#ea4335',
-  'password-manager': '#ffcc00',
-  'ssh-keys':         '#00d4ff',
-  firewall:           '#ff4466',
-  'task-manager':     '#818cf8',
-  logs:               '#a855f7',
-  netmon:             '#00d4ff',
-  screenshot:         '#34d399',
-}
-
-const APP_ICONS: Record<string, string> = {
-  terminal:           '>_',
-  editor:             '{}',
-  mail:               '✉',
-  files:              '📁',
-  launcher:           '⊞',
-  settings:           '⚙',
-  system:             '♡',
-  phone:              '📱',
-  scanner:            '◎',
-  vpn:                '🔒',
-  notes:              '📝',
-  screenshot:         '📸',
-  'password-tester':  '🔑',
-  leaker:             '💧',
-  opticseo:           '🔍',
-  'password-manager': '🗝',
-  'ssh-keys':         '🔐',
-  firewall:           '🛡',
-  'task-manager':     '📊',
-  logs:               '📋',
-  netmon:             '📡',
-}
-
-const APP_LABELS: Record<string, string> = {
-  terminal:           'Terminal',
-  editor:             'Editor',
-  'password-tester':  'Pwd Tester',
-  leaker:             'Leaker',
-  settings:           'Settings',
-  files:              'Files',
-  launcher:           'Launcher',
-  system:             'System',
-  opticseo:           'OpticSEO',
-  phone:              'Phone',
-  scanner:            'Scanner',
-  vpn:                'VPN',
-  notes:              'Notes',
-  mail:               'Gmail',
-  'password-manager': 'Pwd Mgr',
-  'ssh-keys':         'SSH Keys',
-  firewall:           'Firewall',
-  'task-manager':     'Tasks',
-  logs:               'Logs',
-  netmon:             'NetMon',
-  screenshot:         'Screenshot',
-}
+// App icon / color / label for all built-in apps come from the single shared
+// registry (APP_META in Dock) so every surface — dock, switcher, spotlight,
+// mission control — shows the same crisp SVG icons with no gaps.
 
 // ── X11 title detection (mirrors Dock.tsx logic) ──────────────────────────────
 
@@ -109,7 +40,7 @@ interface SwitcherEntry {
   x11Title?: string
   x11Id?: string
   // display
-  icon: string
+  icon: ReactNode
   color: string
   label: string
 }
@@ -157,9 +88,10 @@ export function AppSwitcherOverlay() {
   for (const win of windows) {
     if (seenApps.has(win.appId)) continue
     seenApps.add(win.appId)
-    const color = APP_COLORS[win.appId] ?? '#64748b'
-    const icon  = APP_ICONS[win.appId]  ?? '⬡'
-    const label = APP_LABELS[win.appId] ?? win.title
+    const meta  = APP_META[win.appId as AppId]
+    const color = meta?.color ?? '#64748b'
+    const icon  = meta?.icon  ?? '⬡'
+    const label = meta?.label ?? win.title
     entries.push({
       key:      `app-${win.id}`,
       type:     'app',

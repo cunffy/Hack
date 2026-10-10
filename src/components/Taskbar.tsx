@@ -1,29 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useWindowStore } from '../store/windowStore'
+import { useWindowStore, AppId } from '../store/windowStore'
 import { usePinnedStore } from '../store/pinnedStore'
+import { APP_META } from './Dock'
 
-const APP_ICONS: Record<string, string> = {
-  terminal:          '⌨',
-  editor:            '📝',
-  'password-tester': '🔐',
-  leaker:            '🔍',
-  settings:          '⚙',
-  files:             '📁',
-  launcher:          '🚀',
-  system:            '🖥',
-}
-
-const APP_COLORS: Record<string, string> = {
-  terminal:          '#00ff88',
-  editor:            '#00d4ff',
-  'password-tester': '#ffcc00',
-  leaker:            '#ff4466',
-  settings:          '#bb88ff',
-  files:             '#f59e0b',
-  launcher:          '#34d399',
-  system:            '#818cf8',
-}
+// Built-in app icons/colors come from the shared registry (APP_META in Dock) so
+// the taskbar matches the dock, switcher and spotlight — all 55 apps, no gaps.
 
 // ── X11 app metadata (icon + color + display name from window title) ────────
 function getX11Meta(title: string): { icon: string; color: string; name: string } {
@@ -434,8 +416,9 @@ export function AppSwitcher() {
               <>
                 {windows.map((win, i) => {
                   const sel = i === idx
-                  const accent = APP_COLORS[win.appId] ?? '#00d4ff'
-                  const icon = APP_ICONS[win.appId] ?? '🪟'
+                  const _meta = APP_META[win.appId as AppId]
+                  const accent = _meta?.color ?? '#00d4ff'
+                  const icon = _meta?.icon ?? '🪟'
                   return (
                     <button
                       key={win.id}
@@ -617,8 +600,9 @@ export function Taskbar() {
         <div className="flex items-center gap-1 flex-1 min-w-0 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           <AnimatePresence initial={false}>
             {windows.map(win => {
-              const accent = APP_COLORS[win.appId] ?? '#00d4ff'
-              const icon = APP_ICONS[win.appId] ?? '🪟'
+              const _meta = APP_META[win.appId as AppId]
+              const accent = _meta?.color ?? '#00d4ff'
+              const icon = _meta?.icon ?? '🪟'
               const isActive = win.focused && !win.minimized
               return (
                 <motion.button
