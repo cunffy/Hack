@@ -1,11 +1,11 @@
 "use strict";
 const electron = require("electron");
 const path = require("path");
+const os = require("os");
 const child_process = require("child_process");
 const fs$1 = require("fs");
 const utils = require("@electron-toolkit/utils");
 const pty = require("node-pty");
-const os = require("os");
 const axios = require("axios");
 const Database$1 = require("better-sqlite3");
 const Store = require("electron-store");
@@ -31,8 +31,8 @@ function _interopNamespaceDefault(e) {
   return Object.freeze(n);
 }
 const path__namespace = /* @__PURE__ */ _interopNamespaceDefault(path);
-const pty__namespace = /* @__PURE__ */ _interopNamespaceDefault(pty);
 const os__namespace = /* @__PURE__ */ _interopNamespaceDefault(os);
+const pty__namespace = /* @__PURE__ */ _interopNamespaceDefault(pty);
 const crypto__namespace = /* @__PURE__ */ _interopNamespaceDefault(crypto);
 const fs__namespace = /* @__PURE__ */ _interopNamespaceDefault(fs);
 const tls__namespace = /* @__PURE__ */ _interopNamespaceDefault(tls);
@@ -4026,6 +4026,24 @@ if (!utils.is.dev) {
 }
 let mainWindow = null;
 let screenLocked = false;
+function ensureOpenboxConfig() {
+  try {
+    const rc = path.join(os.homedir(), ".config", "openbox", "rc.xml");
+    if (!fs$1.existsSync(rc)) return false;
+    const orig = fs$1.readFileSync(rc, "utf-8");
+    let s = orig;
+    s = s.replace(/[ \t]*<keybind key="A-Tab">[\s\S]*?<\/keybind>\n?/g, "");
+    s = s.replace(/[ \t]*<keybind key="A-S-Tab">[\s\S]*?<\/keybind>\n?/g, "");
+    s = s.replace(/<screenEdgeWarpTime>\s*\d+\s*<\/screenEdgeWarpTime>/g, "<screenEdgeWarpTime>0</screenEdgeWarpTime>");
+    if (s === orig) return false;
+    fs$1.writeFileSync(rc, s, "utf-8");
+    child_process.exec("openbox --reconfigure", { env: process.env }, () => {
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
 function lockScreen() {
   if (!mainWindow) return;
   screenLocked = true;
@@ -4201,16 +4219,28 @@ function createWindow() {
         }
       }, 200);
     }
-    electron.globalShortcut.register("Alt+Tab", () => {
-      if (screenLocked) return;
-      raiseShell();
-      mainWindow?.webContents.send("app:switcher", "next");
-    });
-    electron.globalShortcut.register("Alt+Shift+Tab", () => {
-      if (screenLocked) return;
-      raiseShell();
-      mainWindow?.webContents.send("app:switcher", "prev");
-    });
+    const registerAltTab = () => {
+      const ok = electron.globalShortcut.register("Alt+Tab", () => {
+        if (screenLocked) return;
+        raiseShell();
+        mainWindow?.webContents.send("app:switcher", "next");
+      });
+      electron.globalShortcut.register("Alt+Shift+Tab", () => {
+        if (screenLocked) return;
+        raiseShell();
+        mainWindow?.webContents.send("app:switcher", "prev");
+      });
+      return ok;
+    };
+    const reconfigured = ensureOpenboxConfig();
+    const grabbed = registerAltTab();
+    if (reconfigured || !grabbed) {
+      setTimeout(() => {
+        electron.globalShortcut.unregister("Alt+Tab");
+        electron.globalShortcut.unregister("Alt+Shift+Tab");
+        registerAltTab();
+      }, 1500);
+    }
   });
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     electron.shell.openExternal(url);
