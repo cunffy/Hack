@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { TITLEBAR_H } from '../lib/layout'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -273,7 +274,7 @@ export function QuickSettings({ open, onClose }: QuickSettingsProps) {
             onClick={e => e.stopPropagation()}
             style={{
               position:             'fixed',
-              top:                  36,
+              top:                  TITLEBAR_H,
               right:                8,
               width:                320,
               maxHeight:            '80vh',

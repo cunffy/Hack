@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { TITLEBAR_H } from '../lib/layout'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -348,7 +349,7 @@ export function ClipboardManager({ open, onClose }: { open: boolean; onClose: ()
             onClick={e => e.stopPropagation()}
             style={{
               position:             'fixed',
-              top:                  36,
+              top:                  TITLEBAR_H,
               right:                0,
               bottom:               0,
               width:                300,

@@ -261,9 +261,15 @@ export default function App() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            {/* Full-screen background layer */}
+            {/* Full-screen background layer: animated canvas, CSS gradient, or image */}
             {!wallpaper && <AnimatedBackground />}
-            {wallpaper && (
+            {wallpaper && wallpaper.includes('gradient(') && (
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: wallpaper, backgroundSize: 'cover' }}
+              />
+            )}
+            {wallpaper && !wallpaper.includes('gradient(') && (
               <img
                 src={wallpaper.startsWith('file://') ? wallpaper : `file://${wallpaper}`}
                 alt=""

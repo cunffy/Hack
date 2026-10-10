@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { TITLEBAR_H } from '../lib/layout'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -194,7 +195,7 @@ export function NotificationHistory({ open, onClose }: { open: boolean; onClose:
             transition={{ type: 'spring', stiffness: 340, damping: 32, mass: 0.9 }}
             style={{
               position:             'fixed',
-              top:                  36,   // below titlebar (36px)
+              top:                  TITLEBAR_H,   // below titlebar
               right:                0,
               bottom:               0,
               width:                320,

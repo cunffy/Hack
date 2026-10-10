@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AppWindow as AppWindowType, useWindowStore } from '../store/windowStore'
 import { AppCrashBoundary } from './AppCrashBoundary'
+import { TITLEBAR_H, DOCK_CLEARANCE } from '../lib/layout'
 
 const TerminalApp        = lazy(() => import('../apps/terminal/Terminal'))
 const EditorApp          = lazy(() => import('../apps/editor/Editor'))
@@ -199,9 +200,9 @@ function SnapPreview({ zone }: { zone: SnapZone }) {
     opacity: 0.08,
     border: '1px solid var(--cryo-accent, #00d4ff)',
     borderRadius: 8,
-    top: zone === 'top' ? 0 : 36,
-    ...(zone === 'left'  && { left: 0,                        width: '50vw', bottom: 72 }),
-    ...(zone === 'right' && { left: '50vw',                   width: '50vw', bottom: 72 }),
+    top: zone === 'top' ? 0 : TITLEBAR_H,
+    ...(zone === 'left'  && { left: 0,                        width: '50vw', bottom: DOCK_CLEARANCE }),
+    ...(zone === 'right' && { left: '50vw',                   width: '50vw', bottom: DOCK_CLEARANCE }),
     ...(zone === 'top'   && { left: 0, right: 0, top: 0, bottom: 0, borderRadius: 0 }),
   }
 
@@ -257,11 +258,11 @@ export function AppWindow({ window: win }: { window: AppWindowType }) {
       const onUp = () => {
         const zone = snapZoneRef.current
         if (zone === 'left') {
-          moveWindow(win.id, 0, 36)
-          resizeWindow(win.id, window.innerWidth / 2, window.innerHeight - 36 - 72)
+          moveWindow(win.id, 0, 0)
+          resizeWindow(win.id, window.innerWidth / 2, window.innerHeight - TITLEBAR_H - DOCK_CLEARANCE)
         } else if (zone === 'right') {
-          moveWindow(win.id, window.innerWidth / 2, 36)
-          resizeWindow(win.id, window.innerWidth / 2, window.innerHeight - 36 - 72)
+          moveWindow(win.id, window.innerWidth / 2, 0)
+          resizeWindow(win.id, window.innerWidth / 2, window.innerHeight - TITLEBAR_H - DOCK_CLEARANCE)
         } else if (zone === 'top') {
           toggleMaximize(win.id)
         }

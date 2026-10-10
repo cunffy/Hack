@@ -5,8 +5,8 @@ import { useDockStore } from '../store/dockStore'
 import { useDesktopStore } from '../store/desktopStore'
 import { ContextMenu, MenuItem } from './ContextMenu'
 
-const BASE = 48
-const MAX_SCALE = 1.52
+const BASE = 58
+const MAX_SCALE = 1.5
 const MAG_RADIUS = 88
 
 function getX11Meta(title: string): { icon: string; color: string; name: string } {
@@ -200,14 +200,14 @@ export function Dock() {
             ref={dockRef}
             className="flex items-end pointer-events-auto"
             style={{
-              paddingLeft: 14, paddingRight: 14, paddingTop: 8, paddingBottom: 8,
+              paddingLeft: 16, paddingRight: 16, paddingTop: 10, paddingBottom: 10,
               background: 'rgba(12,16,26,0.80)',
               backdropFilter: 'blur(40px) saturate(1.8)',
               WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
               border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 22,
+              borderRadius: 26,
               boxShadow: '0 8px 40px rgba(0,0,0,0.65), 0 1px 0 rgba(255,255,255,0.06) inset',
-              gap: 10,
+              gap: 12,
             }}
             onMouseMove={onMouseMove}
             onMouseLeave={onMouseLeave}
@@ -217,7 +217,7 @@ export function Dock() {
               values={order}
               onReorder={setOrder}
               className="flex items-end"
-              style={{ gap: 10, listStyle: 'none', padding: 0, margin: 0 }}
+              style={{ gap: 12, listStyle: 'none', padding: 0, margin: 0 }}
             >
               {order.map((appId, idx) => {
                 const meta = APP_META[appId]
@@ -264,14 +264,14 @@ export function Dock() {
                       >
                         <div className="absolute inset-0 pointer-events-none"
                           style={{ background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, transparent 55%)' }} />
-                        <div style={{ color: meta.color }}>{meta.icon}</div>
+                        <div style={{ color: meta.color, transform: 'scale(1.2)' }}>{meta.icon}</div>
                       </motion.button>
 
                       <div
                         className="mt-1 text-center leading-none select-none truncate pointer-events-none"
                         style={{
-                          fontSize: 9, maxWidth: BASE,
-                          color: isFocused ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.35)',
+                          fontSize: 10, maxWidth: BASE,
+                          color: isFocused ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.4)',
                           fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif',
                           transition: 'color 0.2s',
                         }}
@@ -331,11 +331,11 @@ export function Dock() {
                       >
                         <div className="absolute inset-0 pointer-events-none"
                           style={{ background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, transparent 55%)' }} />
-                        <span style={{ fontSize: 22 }}>{meta.icon}</span>
+                        <span style={{ fontSize: 27 }}>{meta.icon}</span>
                       </motion.button>
                       <div
                         className="mt-1 text-center leading-none select-none pointer-events-none truncate"
-                        style={{ fontSize: 9, maxWidth: BASE, color: `${meta.color}bb`, fontFamily: '-apple-system, sans-serif' }}
+                        style={{ fontSize: 10, maxWidth: BASE, color: `${meta.color}bb`, fontFamily: '-apple-system, sans-serif' }}
                       >
                         {meta.name}
                       </div>
