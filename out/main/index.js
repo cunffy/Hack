@@ -2331,6 +2331,24 @@ function parseJsonLines(out) {
     }
   }).filter(Boolean);
 }
+function parseSize(s) {
+  if (!s) return 0;
+  const m = String(s).trim().match(/^([\d.]+)\s*([KMGTP]?)i?B?$/i);
+  if (!m) return 0;
+  const n = parseFloat(m[1]);
+  if (isNaN(n)) return 0;
+  const mult = { "": 1, K: 1024, M: 1024 ** 2, G: 1024 ** 3, T: 1024 ** 4, P: 1024 ** 5 };
+  return Math.round(n * (mult[m[2].toUpperCase()] ?? 1));
+}
+function parseCreated(s) {
+  if (!s) return Math.floor(Date.now() / 1e3);
+  const t = Date.parse(String(s).replace(/\s+UTC$/, ""));
+  return isNaN(t) ? Math.floor(Date.now() / 1e3) : Math.floor(t / 1e3);
+}
+function parsePorts(s) {
+  if (!s) return [];
+  return String(s).split(",").map((p) => p.trim()).filter(Boolean);
+}
 function registerDockerHandlers() {
   electron.ipcMain.handle("docker:listContainers", async () => {
     const out = await sh$1('docker ps -a --format "{{json .}}" 2>/dev/null');
@@ -2340,8 +2358,8 @@ function registerDockerHandlers() {
       image: c.Image,
       status: c.Status,
       state: c.State,
-      ports: c.Ports,
-      created: c.CreatedAt
+      ports: parsePorts(c.Ports),
+      created: parseCreated(c.CreatedAt)
     }));
   });
   electron.ipcMain.handle("docker:startContainer", async (_, id) => {
@@ -2370,8 +2388,8 @@ function registerDockerHandlers() {
       id: img.ID,
       repository: img.Repository,
       tag: img.Tag,
-      size: img.Size,
-      created: img.CreatedAt
+      size: parseSize(img.Size),
+      created: parseCreated(img.CreatedAt)
     }));
   });
   electron.ipcMain.handle("docker:removeImage", async (_, id) => {
@@ -2389,15 +2407,16 @@ function registerDockerHandlers() {
   });
   electron.ipcMain.handle("docker:getStats", async () => {
     const out = await sh$1('docker stats --no-stream --format "{{json .}}" 2>/dev/null');
-    return parseJsonLines(out).map((s) => ({
-      id: s.ID,
-      name: s.Name,
-      cpuPct: s.CPUPerc,
-      memUsage: s.MemUsage,
-      memPct: s.MemPerc,
-      netIO: s.NetIO,
-      blockIO: s.BlockIO
-    }));
+    return parseJsonLines(out).map((s) => {
+      const [usedRaw, limitRaw] = String(s.MemUsage ?? "").split("/").map((x) => x.trim());
+      return {
+        id: s.ID,
+        name: s.Name,
+        cpuPercent: parseFloat(String(s.CPUPerc ?? "").replace("%", "")) || 0,
+        memUsage: parseSize(usedRaw),
+        memLimit: parseSize(limitRaw)
+      };
+    });
   });
 }
 const execAsync = util.promisify(child_process.exec);

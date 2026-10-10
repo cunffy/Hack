@@ -98,7 +98,7 @@ function ContainersTab() {
     const next = new Set(openLogs)
     if (next.has(id)) { next.delete(id); setOpenLogs(next); return }
     next.add(id); setOpenLogs(next)
-    try { const l = await ipc?.docker?.containerLogs?.(id, 150); setLogs(prev => ({ ...prev, [id]: l || '' })) } catch {}
+    try { const l = await ipc?.docker?.getLogs?.(id, 150); setLogs(prev => ({ ...prev, [id]: l || '' })) } catch {}
   }
 
   if (containers.length === 0) return <EmptyState msg="Docker not installed or not running" />

@@ -54,8 +54,24 @@ export default function Terminal() {
     const webLinksAddon = new WebLinksAddon()
     term.loadAddon(fitAddon)
     term.loadAddon(webLinksAddon)
+
+    // xterm measures character dimensions when opened; if the container has no
+    // layout size yet (or the terminal font hasn't loaded), its renderer leaves
+    // `dimensions` undefined and a scheduled viewport refresh throws
+    // "Cannot read properties of undefined (reading 'dimensions')". Wait for the
+    // font and a non-zero container size before opening.
+    try { await (document as any).fonts?.ready } catch {}
+    for (let i = 0; i < 30 && containerRef.current && containerRef.current.clientHeight === 0; i++) {
+      await new Promise(r => requestAnimationFrame(() => r(null)))
+    }
+    if (!containerRef.current || termRef.current) { term.dispose(); return }
+
     term.open(containerRef.current)
-    fitAddon.fit()
+    // fit() reads the render service dimensions, which aren't ready until the
+    // terminal has laid out at least once. Guard against the zero-size / pre-render
+    // case so it never throws before the container has real dimensions.
+    const safeFit = () => { try { fitAddon.fit() } catch {} }
+    safeFit()
 
     termRef.current = term
     fitAddonRef.current = fitAddon
@@ -88,7 +104,7 @@ export default function Terminal() {
     cleanupRef.current = removeListener
 
     const resizeObserver = new ResizeObserver(() => {
-      fitAddon.fit()
+      safeFit()
       const { cols, rows } = term
       window.cryogram.terminal.resize(id, cols, rows)
     })

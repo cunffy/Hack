@@ -746,31 +746,29 @@ declare global {
   // ── Docker types ──────────────────────────────────────────────────────────
 
   interface DockerContainer {
-    ID: string
-    Names: string
-    Image: string
-    Status: string
-    State: string
-    Ports: string
-    Created: string
+    id: string
+    name: string
+    image: string
+    status: string
+    state: string
+    ports: string[]
+    created: number
   }
 
   interface DockerImage {
-    ID: string
-    Repository: string
-    Tag: string
-    Size: string
-    CreatedAt: string
+    id: string
+    repository: string
+    tag: string
+    size: number
+    created: number
   }
 
   interface DockerStat {
-    ID: string
-    Name: string
-    CPUPerc: string
-    MemUsage: string
-    MemPerc: string
-    NetIO: string
-    BlockIO: string
+    id: string
+    name: string
+    cpuPercent: number
+    memUsage: number
+    memLimit: number
   }
 
   // ── Git types ─────────────────────────────────────────────────────────────

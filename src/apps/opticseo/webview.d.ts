@@ -7,7 +7,7 @@ declare module 'react' {
         src?: string
         partition?: string
         useragent?: string
-        allowpopups?: boolean
+        allowpopups?: boolean | string
         preload?: string
         nodeintegration?: boolean
         webpreferences?: string

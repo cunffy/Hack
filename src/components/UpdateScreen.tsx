@@ -171,7 +171,7 @@ export function UpdateScreen({ onCancel }: Props) {
       const unsub = api.onProgress((line: string) => appendLog(line))
       try {
         await api.run(pw)
-        if (phase !== 'countdown' && phase !== 'rebooting') setPhase('countdown')
+        if (phase !== 'countdown' && phase !== 'restarting') setPhase('countdown')
       } finally {
         unsub()
       }
