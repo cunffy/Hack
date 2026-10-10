@@ -190,7 +190,8 @@ function Spinner() {
 
 // ── No-API-Key screen ─────────────────────────────────────────────────────────
 
-function NoApiKey() {
+function NoApiKey({ onSave }: { onSave: (key: string) => void }) {
+  const [key, setKey] = useState('')
   const open = () => {
     window.dispatchEvent(new CustomEvent('cryogram:openSettingsTab', { detail: 'apikeys' }))
   }
@@ -200,19 +201,39 @@ function NoApiKey() {
         background: 'rgba(255,255,255,0.04)',
         border: '1px solid rgba(255,255,255,0.09)',
         borderRadius: 12,
-        padding: '36px 44px',
+        padding: '32px 36px',
         textAlign: 'center',
-        maxWidth: 380,
+        maxWidth: 420,
       }}>
         <div style={{ fontSize: 32, marginBottom: 14 }}>🔑</div>
         <div style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 8 }}>
           Shodan API Key Required
         </div>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 22 }}>
-          To search the Shodan database, you need a valid API key.
-          Register at <span style={{ color: ACCENT }}>shodan.io</span> to get one.
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 18 }}>
+          To search Shodan you need a free API key. Get one at{' '}
+          <span style={{ color: ACCENT }}>account.shodan.io</span>, then paste it below.
         </div>
-        <button style={S.btn} onClick={open}>Configure in Settings</button>
+        <input
+          type="password"
+          value={key}
+          onChange={e => setKey(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && key.trim()) onSave(key.trim()) }}
+          placeholder="Paste your Shodan API key…"
+          style={{ ...S.input, width: '100%', marginBottom: 10, textAlign: 'center' }}
+        />
+        <button
+          style={{ ...S.btn, width: '100%', marginBottom: 10, opacity: key.trim() ? 1 : 0.5 }}
+          disabled={!key.trim()}
+          onClick={() => onSave(key.trim())}
+        >
+          Save & Search
+        </button>
+        <button
+          style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: 11, cursor: 'pointer', textDecoration: 'underline' }}
+          onClick={open}
+        >
+          Or configure in Settings → API Keys
+        </button>
       </div>
     </div>
   )
@@ -530,7 +551,9 @@ export default function ShodanApp() {
   )
 
   if (!apiKey) return (
-    <div style={S.root}><NoApiKey /></div>
+    <div style={S.root}>
+      <NoApiKey onSave={async (k) => { try { await ipc?.settings?.set('shodan.apiKey', k) } catch {}; setApiKey(k) }} />
+    </div>
   )
 
   return (

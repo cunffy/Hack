@@ -193,9 +193,18 @@ export default function App() {
     }
   }, [booted, isLocked, lock])
 
-  // Keyboard shortcuts (Alt+Tab is handled by globalShortcut in main process)
+  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // Alt+Tab / Alt+Shift+Tab → app switcher. The main process also registers
+      // this as a global shortcut, but Electron's globalShortcut for Alt+Tab is
+      // unreliable on X11 — so we handle it here too. When globalShortcut DOES
+      // grab the key, the renderer never sees it, so this never double-fires.
+      if (e.altKey && (e.code === 'Tab' || e.key === 'Tab')) {
+        e.preventDefault()
+        window.dispatchEvent(new CustomEvent('cryogram:switcher', { detail: e.shiftKey ? 'prev' : 'next' }))
+        return
+      }
       // Ctrl+Space → spotlight
       if (e.ctrlKey && e.code === 'Space') {
         e.preventDefault()
