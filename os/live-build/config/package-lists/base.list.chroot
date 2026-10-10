@@ -42,3 +42,9 @@ firmware-linux-free
 firmware-linux-nonfree
 amd64-microcode
 intel-microcode
+# Secure Boot — Microsoft-signed shim + signed GRUB so UEFI Secure Boot can be
+# left ENABLED. Without these, grub-install deploys an unsigned bootloader and
+# the firmware rejects it, forcing the user to disable Secure Boot every boot.
+shim-signed
+grub-efi-amd64-signed
+mokutil

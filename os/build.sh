@@ -246,6 +246,9 @@ squashfs-tools
 grub-efi-amd64
 grub-pc-bin
 grub-common
+grub-efi-amd64-signed
+shim-signed
+mokutil
 xdg-utils
 PKGEOF
 

@@ -1,7 +1,8 @@
 import { app, BrowserWindow, shell, ipcMain, powerMonitor, globalShortcut, screen as electronScreen } from 'electron'
 import { join } from 'path'
+import { homedir } from 'os'
 import { exec, execFileSync } from 'child_process'
-import { existsSync, mkdirSync, readdirSync, readFileSync } from 'fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs'
 
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
@@ -78,6 +79,32 @@ import { setShellWindow, raiseShell, sinkShell, unpinShell, pinToDesktopLayer } 
 
 let mainWindow: BrowserWindow | null = null
 let screenLocked = false  // tracked in main so shortcuts can check it
+
+// Idempotently repair the Openbox window-manager config on startup. Installs
+// imaged before these fixes shipped carry an rc.xml that (1) grabs Alt+Tab for
+// Openbox's own switcher — which steals the key from Cryogram's app switcher —
+// and (2) switches desktops when a window is dragged to the screen edge, so
+// drag-to-snap flings native windows onto the next workspace. We rewrite the
+// user's rc.xml (runs as the session user via the Openbox autostart, so
+// homedir() is correct) and reload Openbox. Returns true if Openbox was
+// reconfigured, so the caller can re-grab Alt+Tab after the grab is released.
+function ensureOpenboxConfig(): boolean {
+  try {
+    const rc = join(homedir(), '.config', 'openbox', 'rc.xml')
+    if (!existsSync(rc)) return false
+    const orig = readFileSync(rc, 'utf-8')
+    let s = orig
+    s = s.replace(/[ \t]*<keybind key="A-Tab">[\s\S]*?<\/keybind>\n?/g, '')
+    s = s.replace(/[ \t]*<keybind key="A-S-Tab">[\s\S]*?<\/keybind>\n?/g, '')
+    s = s.replace(/<screenEdgeWarpTime>\s*\d+\s*<\/screenEdgeWarpTime>/g, '<screenEdgeWarpTime>0</screenEdgeWarpTime>')
+    if (s === orig) return false
+    writeFileSync(rc, s, 'utf-8')
+    exec('openbox --reconfigure', { env: process.env }, () => {})
+    return true
+  } catch {
+    return false
+  }
+}
 
 function lockScreen(): void {
   if (!mainWindow) return
@@ -279,16 +306,32 @@ function createWindow(): void {
     // ── Alt+Tab window switcher ────────────────────────────────────────────
     // Raise Electron above all X11 apps first so the overlay is visible even
     // when Cryogram is pinned below Brave or another X11 window.
-    globalShortcut.register('Alt+Tab', () => {
-      if (screenLocked) return
-      raiseShell()
-      mainWindow?.webContents.send('app:switcher', 'next')
-    })
-    globalShortcut.register('Alt+Shift+Tab', () => {
-      if (screenLocked) return
-      raiseShell()
-      mainWindow?.webContents.send('app:switcher', 'prev')
-    })
+    const registerAltTab = (): boolean => {
+      const ok = globalShortcut.register('Alt+Tab', () => {
+        if (screenLocked) return
+        raiseShell()
+        mainWindow?.webContents.send('app:switcher', 'next')
+      })
+      globalShortcut.register('Alt+Shift+Tab', () => {
+        if (screenLocked) return
+        raiseShell()
+        mainWindow?.webContents.send('app:switcher', 'prev')
+      })
+      return ok
+    }
+
+    // Self-heal the Openbox config (fixes Alt+Tab + drag-snap on installs that
+    // were imaged before these fixes shipped). If we had to reconfigure Openbox
+    // to release its Alt+Tab grab, re-register the shortcut once that settles.
+    const reconfigured = ensureOpenboxConfig()
+    const grabbed = registerAltTab()
+    if (reconfigured || !grabbed) {
+      setTimeout(() => {
+        globalShortcut.unregister('Alt+Tab')
+        globalShortcut.unregister('Alt+Shift+Tab')
+        registerAltTab()
+      }, 1500)
+    }
   })
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {

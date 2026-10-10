@@ -179,12 +179,12 @@ cat > /etc/skel/.config/openbox/rc.xml << 'RCEOF'
     <keybind key="A-F4">
       <action name="Close"/>
     </keybind>
-    <keybind key="A-Tab">
-      <action name="NextWindow"><dialog>icons</dialog><bar>yes</bar><raise>yes</raise></action>
-    </keybind>
-    <keybind key="A-S-Tab">
-      <action name="PreviousWindow"><dialog>icons</dialog><bar>yes</bar><raise>yes</raise></action>
-    </keybind>
+    <!-- NOTE: Alt+Tab / Alt+Shift+Tab are intentionally NOT bound here.
+         Cryogram's shell registers them as Electron global shortcuts and shows
+         its own app switcher (which lists both in-shell apps AND native X11
+         windows like Brave). If Openbox grabs A-Tab, it wins the X11 key grab
+         and Electron never sees it, so the Cryogram switcher never appears. -->
+
     <keybind key="Super-d">
       <action name="ToggleShowDesktop"/>
     </keybind>
@@ -229,7 +229,10 @@ cat > /etc/skel/.config/openbox/rc.xml << 'RCEOF'
   <mouse>
     <dragThreshold>1</dragThreshold>
     <doubleClickTime>500</doubleClickTime>
-    <screenEdgeWarpTime>400</screenEdgeWarpTime>
+    <!-- 0 disables desktop-switching when a window is dragged to the screen
+         edge. With a non-zero value, dragging a native X11 window (Brave, …)
+         to the edge to snap it would instead carry it to the next workspace. -->
+    <screenEdgeWarpTime>0</screenEdgeWarpTime>
     <screenEdgeWarpMouse>false</screenEdgeWarpMouse>
     <context name="Frame">
       <mousebind button="A-Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
