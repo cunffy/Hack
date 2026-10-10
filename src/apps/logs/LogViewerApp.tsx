@@ -206,20 +206,12 @@ export default function LogViewerApp() {
 
       cryogram().logs.stream({ unit }).catch(() => {})
 
-      const listener = (_: unknown, line: LogLine) => {
-        setLines(prev => [...prev.slice(-2000), line])
-      }
-      const { ipcRenderer } = (window as any).require?.('electron') ?? {}
-      if (ipcRenderer) {
-        ipcRenderer.on('logs:line', listener)
-        liveCleanupRef.current = () => ipcRenderer.removeListener('logs:line', listener)
-      } else {
-        // Use the cryogram bridge pattern for receiving events
-        const cleanup = (window as any).cryogram?.logs?.onLine?.((line: LogLine) => {
-          setLines(prev => [...prev.slice(-2000), line])
-        })
-        liveCleanupRef.current = cleanup ?? null
-      }
+      // Receive streamed lines via the exposed preload bridge (window.require is
+      // undefined under contextIsolation, so onLine is the only working path).
+      const cleanup = cryogram().logs.onLine((line: unknown) => {
+        setLines(prev => [...prev.slice(-2000), line as LogLine])
+      })
+      liveCleanupRef.current = cleanup ?? null
     } else {
       cryogram().logs.stopStream().catch(() => {})
       liveCleanupRef.current?.()

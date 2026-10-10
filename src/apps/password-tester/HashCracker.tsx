@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { FilePathInput, HelpBox, FieldHelp, DEFAULT_WORDLIST } from '../../components/SecurityHelpers'
 
 type Mode = 'bruteforce' | 'dictionary' | 'hybrid' | 'rainbow'
 type Algorithm = 'md5' | 'sha1' | 'sha256' | 'sha512' | 'ntlm' | 'bcrypt'
@@ -15,7 +16,7 @@ export function HashCracker() {
   const [mode, setMode] = useState<Mode>('dictionary')
   const [algorithm, setAlgorithm] = useState<Algorithm>('md5')
   const [hash, setHash] = useState('')
-  const [wordlistPath, setWordlistPath] = useState('')
+  const [wordlistPath, setWordlistPath] = useState(DEFAULT_WORDLIST)
   const [maxLength, setMaxLength] = useState(6)
   const [charsets, setCharsets] = useState<string[]>(['lowercase', 'digits'])
   const [rainbowPath, setRainbowPath] = useState('')
@@ -73,6 +74,22 @@ export function HashCracker() {
 
   return (
     <div className="flex flex-col gap-4 p-4 overflow-auto flex-1">
+      <HelpBox storageKey="hashcracker" title="How to crack a hash">
+        Recover the plaintext password behind a hash. Paste the hash, pick the
+        algorithm it was made with, choose an attack mode, then press
+        <b> Start Crack</b>.
+        <FieldHelp name="Mode">
+          <b>Dictionary</b> tries every word in a wordlist (fast, best first choice —
+          rockyou is preselected). <b>Hybrid</b> adds numbers/symbols to each word.
+          <b>Brute Force</b> tries every character combination (only feasible for short
+          passwords). <b>Rainbow</b> looks the hash up in a precomputed table.
+        </FieldHelp>
+        <FieldHelp name="Algorithm">The hash function used to create the hash (MD5, SHA‑1/256/512, NTLM, bcrypt). Pick the wrong one and nothing will match.</FieldHelp>
+        <FieldHelp name="Hash">The hash string you want to reverse, e.g. <code>5f4dcc3b5aa765d61d8327deb882cf99</code>.</FieldHelp>
+        <FieldHelp name="Wordlist">A text file with one candidate password per line. Click <b>Browse…</b> to pick one; <code>{DEFAULT_WORDLIST}</code> ships with the OS.</FieldHelp>
+        <div style={{ marginTop: 8, color: '#fbbf24' }}>Only crack hashes from systems you own or are authorized to test.</div>
+      </HelpBox>
+
       <div className="grid grid-cols-2 gap-4">
         {/* Mode */}
         <div>
@@ -127,11 +144,11 @@ export function HashCracker() {
       {(mode === 'dictionary' || mode === 'hybrid') && (
         <div>
           <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Wordlist Path</label>
-          <input
-            className="w-full"
-            placeholder="/path/to/rockyou.txt"
+          <FilePathInput
+            inputClassName="w-full"
+            placeholder="/usr/share/wordlists/rockyou.txt"
             value={wordlistPath}
-            onChange={(e) => setWordlistPath(e.target.value)}
+            onChange={setWordlistPath}
           />
         </div>
       )}
@@ -171,11 +188,11 @@ export function HashCracker() {
       {mode === 'rainbow' && (
         <div>
           <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Rainbow Table Path</label>
-          <input
-            className="w-full"
+          <FilePathInput
+            inputClassName="w-full"
             placeholder="/path/to/table.rt"
             value={rainbowPath}
-            onChange={(e) => setRainbowPath(e.target.value)}
+            onChange={setRainbowPath}
           />
         </div>
       )}

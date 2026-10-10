@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { FilePathInput, HelpBox, FieldHelp, DEFAULT_WORDLIST } from '../../components/SecurityHelpers'
 
 type Protocol = 'ssh' | 'http' | 'ftp' | 'smtp'
 type Mode = 'bruteforce' | 'dictionary' | 'spraying'
@@ -11,7 +12,7 @@ export function NetworkTester() {
   const [username, setUsername] = useState('')
   const [usernames, setUsernames] = useState('')
   const [password, setPassword] = useState('')
-  const [wordlistPath, setWordlistPath] = useState('')
+  const [wordlistPath, setWordlistPath] = useState(DEFAULT_WORDLIST)
   const [rateLimit, setRateLimit] = useState(5)
   const [running, setRunning] = useState(false)
   const [result, setResult] = useState<NetworkTestResult | null>(null)
@@ -67,6 +68,23 @@ export function NetworkTester() {
         <span>⚠</span>
         <span>Only test systems you own or have explicit written authorization to test. Unauthorized access testing is illegal.</span>
       </div>
+
+      <HelpBox storageKey="networktester" title="How to test a login service">
+        Checks whether an account on a remote service accepts weak credentials, by
+        trying many username/password combinations against it. Fill in the target,
+        pick how to attack, then press <b>Start Test</b>.
+        <FieldHelp name="Mode">
+          <b>Dictionary</b> tries each password in a wordlist against one username.
+          <b>Brute Force</b> generates password guesses. <b>Password Spray</b> tries ONE
+          password across MANY usernames (avoids account lockouts).
+        </FieldHelp>
+        <FieldHelp name="Protocol">The service type to log into — SSH, HTTP Basic auth, FTP, or SMTP.</FieldHelp>
+        <FieldHelp name="Rate Limit">Requests per second. Keep it low to avoid lockouts and heavy load.</FieldHelp>
+        <FieldHelp name="Target Host / Port">The IP or hostname of the machine, and the port (leave <code>auto</code> for the protocol default — SSH 22, HTTP 80, FTP 21, SMTP 25).</FieldHelp>
+        <FieldHelp name="Username">The account to test (dictionary / brute‑force modes).</FieldHelp>
+        <FieldHelp name="Password Wordlist">A file of candidate passwords, one per line. Click <b>Browse…</b>; rockyou is preselected.</FieldHelp>
+        <FieldHelp name="Password Spray (spray mode)">The single password to try, plus the list of usernames to try it against.</FieldHelp>
+      </HelpBox>
 
       <div className="grid grid-cols-3 gap-3">
         <div>
@@ -135,11 +153,11 @@ export function NetworkTester() {
       {mode !== 'spraying' && (
         <div>
           <label className="block text-xs text-cryo-muted mb-1.5 uppercase tracking-wider">Password Wordlist</label>
-          <input
-            className="w-full"
-            placeholder="/path/to/wordlist.txt"
+          <FilePathInput
+            inputClassName="w-full"
+            placeholder="/usr/share/wordlists/rockyou.txt"
             value={wordlistPath}
-            onChange={(e) => setWordlistPath(e.target.value)}
+            onChange={setWordlistPath}
           />
         </div>
       )}

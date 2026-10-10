@@ -17,6 +17,9 @@ arpwatch
 hashcat
 john
 crunch
+hydra
+wordlists
+seclists
 
 # Web application testing
 nikto

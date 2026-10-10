@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { HelpBox, FieldHelp } from '../../components/SecurityHelpers'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -301,6 +302,15 @@ export default function NetworkScannerApp() {
         className="shrink-0 p-4 flex flex-col gap-3"
         style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(8,12,20,0.6)' }}
       >
+        <HelpBox storageKey="netscanner" title="How to scan a network">
+          Discovers live hosts and open ports on a network (powered by nmap).
+          Enter a target, pick a scan type, then press <b>Scan</b>.
+          <FieldHelp name="Target">A single IP (<code>192.168.1.1</code>), a whole subnet in CIDR (<code>192.168.1.0/24</code> scans .1–.254), or a hostname.</FieldHelp>
+          <FieldHelp name="Scan Type"><b>Quick Ping</b> just finds which hosts are up. <b>Port Scan</b> lists open ports + service versions. <b>Service Detection</b> adds nmap scripts. <b>Full Scan</b> adds OS detection + traceroute (slowest).</FieldHelp>
+          <FieldHelp name="Port Range">Which ports to probe, e.g. <code>1-1000</code> or <code>22,80,443</code>. Leave blank for nmap's defaults.</FieldHelp>
+          <div style={{ marginTop: 6, color: '#fbbf24' }}>Only scan networks you own or are authorized to test.</div>
+        </HelpBox>
+
         {/* Row 1: Target + scan type */}
         <div className="flex gap-3 items-end">
           <div className="flex-1">

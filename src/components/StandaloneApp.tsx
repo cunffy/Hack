@@ -72,7 +72,9 @@ export function StandaloneApp({ appId }: { appId: string }) {
         style={{ background: 'var(--cryo-bg, #070b11)' }}
       >
         <Titlebar appId={appId} />
-        <div className="flex-1 overflow-hidden">
+        {/* flex-col so apps whose root uses flex-1 (leaker, password-tester, …)
+            fill the height instead of collapsing to their content size. */}
+        <div className="flex-1 overflow-hidden flex flex-col">
           <AppContent appId={appId} />
         </div>
       </div>
