@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { HelpBox, FieldHelp } from '../../components/SecurityHelpers'
 
 const s = {
   root: { display:'flex', height:'100%', background:'rgba(8,12,20,0.8)', color:'rgba(255,255,255,0.85)', fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif', fontSize:14 },
@@ -63,6 +64,15 @@ export default function CodeScannerApp() {
     <div style={s.root}>
       <div style={s.sidebar}>
         <div style={{ fontWeight:700, fontSize:14, marginBottom:14 }}>Code Scanner</div>
+        <div style={{ marginBottom: 12 }}>
+          <HelpBox storageKey="codescanner" title="How to scan code" defaultOpen={false}>
+            Scans a project folder for security issues — hard‑coded secrets, risky
+            patterns and known‑bad calls.
+            <FieldHelp name="Target Path">The folder to scan. Click <b>…</b> to pick it.</FieldHelp>
+            <FieldHelp name="Scanner">The ruleset/engine to run.</FieldHelp>
+            <FieldHelp name="Findings">Each result shows the file, line and why it was flagged, by severity.</FieldHelp>
+          </HelpBox>
+        </div>
         <div style={{ fontSize:11, color:'rgba(255,255,255,0.4)', marginBottom:4 }}>TARGET PATH</div>
         <div style={{ display:'flex', gap:6, marginBottom:12 }}>
           <input style={s.input} placeholder="/path/to/project" value={path} onChange={e => setPath(e.target.value)} />

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { HelpBox, FieldHelp } from '../../components/SecurityHelpers'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -501,6 +502,15 @@ export default function CVEApp() {
 
   return (
     <div style={S.root}>
+      <div style={{ padding: '10px 14px 0' }}>
+        <HelpBox storageKey="cve" title="How to search CVEs" defaultOpen={false}>
+          Looks up known software vulnerabilities in the NIST National
+          Vulnerability Database.
+          <FieldHelp name="Keyword">Search by product or technology, e.g. <code>log4j</code>, <code>apache</code>, <code>openssl</code>.</FieldHelp>
+          <FieldHelp name="CVE ID">Jump straight to a specific advisory, e.g. <code>CVE-2024-1234</code>.</FieldHelp>
+          <FieldHelp name="Result">Each entry shows the severity (CVSS), affected versions, and a description. Use it to check whether software you run is affected.</FieldHelp>
+        </HelpBox>
+      </div>
       {/* Search bar */}
       <div style={{
         display: 'flex',

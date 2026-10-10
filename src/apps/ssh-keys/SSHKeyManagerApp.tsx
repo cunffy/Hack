@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { HelpBox, FieldHelp } from '../../components/SecurityHelpers'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -400,6 +401,14 @@ export default function SSHKeyManagerApp() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif' }}>
+
+      <div style={{ padding: '10px 14px 0' }}>
+        <HelpBox storageKey="sshkeys" title="How to use SSH keys">
+          Manage the key pairs that log you into remote servers without a password.
+          <FieldHelp name="Keys tab">Lists your key pairs. <b>Generate</b> creates a new one (ed25519 recommended); copy the <b>public</b> key to a server's <code>~/.ssh/authorized_keys</code> to grant access. Never share the private key.</FieldHelp>
+          <FieldHelp name="Config tab">Edits <code>~/.ssh/config</code> — define host shortcuts (<code>Host myserver</code> → hostname, user, port, key) so you can just run <code>ssh myserver</code>.</FieldHelp>
+        </HelpBox>
+      </div>
 
       {/* Tab bar */}
       <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(8,12,20,0.5)', flexShrink: 0 }}>

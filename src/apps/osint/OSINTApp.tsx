@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { HelpBox, FieldHelp } from '../../components/SecurityHelpers'
 
 // ── Shared styles ─────────────────────────────────────────────────────────────
 
@@ -777,6 +778,17 @@ export default function OSINTApp() {
 
   return (
     <div style={S.root}>
+      <div style={{ padding: '10px 14px 0' }}>
+        <HelpBox storageKey="osint" title="How to use OSINT lookup" defaultOpen={false}>
+          Gathers public (open‑source) intelligence about a domain or IP. Pick a
+          tab, enter the target, and look it up.
+          <FieldHelp name="WHOIS">Domain registration details (registrar, dates, owner where public).</FieldHelp>
+          <FieldHelp name="DNS">A/MX/TXT/NS records for a domain.</FieldHelp>
+          <FieldHelp name="IP / Geo">Location, network/ASN and host info for an IP address.</FieldHelp>
+          <FieldHelp name="Certificates">Known TLS certificates / subdomains seen for a domain.</FieldHelp>
+          <div style={{ marginTop: 6, opacity: 0.7 }}>Uses only public records — no active scanning of the target.</div>
+        </HelpBox>
+      </div>
       {/* Tab bar */}
       <div style={{
         display: 'flex',

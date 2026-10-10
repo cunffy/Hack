@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { HelpBox, FieldHelp } from '../../components/SecurityHelpers'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -192,6 +193,15 @@ export default function VPNApp() {
       className="flex flex-col flex-1 overflow-hidden"
       style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif' }}
     >
+      <div style={{ padding: '10px 14px 0' }}>
+        <HelpBox storageKey="vpn" title="How to use the VPN" defaultOpen={false}>
+          Connects through a VPN so your traffic is encrypted and appears to come
+          from the VPN server (OpenVPN / WireGuard).
+          <FieldHelp name="Add Profile">Import a config file from your VPN provider (<code>.ovpn</code> or WireGuard <code>.conf</code>) and give it a name.</FieldHelp>
+          <FieldHelp name="Connect">Pick a profile and connect; the status header shows your tunnel state and IP.</FieldHelp>
+          <div style={{ marginTop: 6, opacity: 0.7 }}>You need a config from a VPN provider — this app doesn't provide servers.</div>
+        </HelpBox>
+      </div>
       {/* Status header */}
       <div
         style={{

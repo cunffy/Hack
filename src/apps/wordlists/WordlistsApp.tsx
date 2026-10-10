@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { HelpBox, FieldHelp } from '../../components/SecurityHelpers'
 
 const s = {
   root: { display:'flex', height:'100%', background:'rgba(8,12,20,0.8)', color:'rgba(255,255,255,0.85)', fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif', fontSize:14 },
@@ -77,6 +78,16 @@ export default function WordlistsApp() {
         </div>
       </div>
       <div style={s.main}>
+        <div style={{ padding: '10px 12px 0' }}>
+          <HelpBox storageKey="wordlists" title="How to use wordlists" defaultOpen={!selected && !genOpen}>
+            Wordlists are text files with one word per line, used by the password/
+            network testers for dictionary attacks.
+            <FieldHelp name="Select">Click a list on the left to preview it.</FieldHelp>
+            <FieldHelp name="Import File">Add your own <code>.txt</code> wordlist from disk.</FieldHelp>
+            <FieldHelp name="Generate">Build a custom list by length, character sets, prefix/suffix — useful for targeted guessing.</FieldHelp>
+            <div style={{ marginTop: 6, opacity: 0.7 }}>rockyou (<code>/usr/share/wordlists/rockyou.txt</code>) ships with the OS.</div>
+          </HelpBox>
+        </div>
         {!selected && !genOpen && (
           <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', color:'rgba(255,255,255,0.3)' }}>
             <div style={{ fontSize:40, marginBottom:12 }}>📋</div>

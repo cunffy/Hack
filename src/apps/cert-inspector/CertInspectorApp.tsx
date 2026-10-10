@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { HelpBox, FieldHelp } from '../../components/SecurityHelpers'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -189,6 +190,15 @@ export default function CertInspectorApp() {
 
   return (
     <div style={S.root}>
+      <div style={{ padding: '10px 14px 0' }}>
+        <HelpBox storageKey="certinspector" title="How to inspect a certificate" defaultOpen={false}>
+          Shows the details of a TLS/SSL certificate — who issued it, who it's for,
+          when it expires, and its key strength.
+          <FieldHelp name="Domain tab">Enter a hostname (e.g. <code>example.com</code>) to fetch and inspect its live certificate.</FieldHelp>
+          <FieldHelp name="PEM tab">Paste a certificate in PEM format (<code>-----BEGIN CERTIFICATE-----</code>) to decode it offline.</FieldHelp>
+          <FieldHelp name="What to check">Expiry date, issuer you trust, the hostname matches, and a modern key size (RSA ≥ 2048).</FieldHelp>
+        </HelpBox>
+      </div>
       {/* Tabs */}
       <div style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 14px', display: 'flex', gap: 2 }}>
         {(['domain', 'pem'] as const).map(t => (

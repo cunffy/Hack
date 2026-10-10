@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { HelpBox, FieldHelp } from '../../components/SecurityHelpers'
 
 // ── Compact MD5 implementation ───────────────────────────────────────────────
 function md5(input: string): string {
@@ -336,6 +337,15 @@ export default function CryptoToolsApp() {
   const [tab, setTab] = useState<Tab>('hash')
   return (
     <div className="flex flex-col h-full">
+      <div style={{ padding: '10px 12px 0' }}>
+        <HelpBox storageKey="cryptotools" title="How to use crypto tools" defaultOpen={false}>
+          Everyday cryptography helpers — all run locally in the app.
+          <FieldHelp name="Hash">Compute a fingerprint (MD5/SHA‑…) of text to compare or verify integrity.</FieldHelp>
+          <FieldHelp name="Encode / Decode">Convert between Base64, hex, URL‑encoding, etc. (encoding is not encryption).</FieldHelp>
+          <FieldHelp name="Encrypt / Decrypt">Protect text with a password (AES). Keep the password — without it the data can't be recovered.</FieldHelp>
+          <FieldHelp name="Generate">Create random keys, passwords or UUIDs.</FieldHelp>
+        </HelpBox>
+      </div>
       <div className="flex border-b" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(8,12,20,0.5)' }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
