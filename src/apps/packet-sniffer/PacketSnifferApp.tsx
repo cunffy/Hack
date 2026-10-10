@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { HelpBox, FieldHelp } from '../../components/SecurityHelpers'
 
 const s = {
   root: { display:'flex', flexDirection:'column' as const, height:'100%', background:'rgba(8,12,20,0.8)', color:'rgba(255,255,255,0.85)', fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif', fontSize:14 },
@@ -54,6 +55,16 @@ export default function PacketSnifferApp() {
 
   return (
     <div style={s.root}>
+      <div style={{ padding: '10px 12px 0' }}>
+        <HelpBox storageKey="sniffer" title="How to capture packets">
+          Captures live network traffic on an interface (powered by tcpdump) and
+          lists each packet. Pick an interface, optionally narrow with a filter,
+          then press <b>Start</b>.
+          <FieldHelp name="Interface">The network adapter to listen on — e.g. <code>eth0</code> (wired), <code>wlan0</code> (Wi‑Fi), or <code>any</code>.</FieldHelp>
+          <FieldHelp name="BPF filter">A Berkeley Packet Filter to show only matching traffic, e.g. <code>tcp port 80</code>, <code>host 1.1.1.1</code>, <code>udp</code>. Leave blank to capture everything.</FieldHelp>
+          <div style={{ marginTop: 6, color: '#fbbf24' }}>Capturing usually needs root and only works on networks you're allowed to monitor.</div>
+        </HelpBox>
+      </div>
       <div style={s.topBar}>
         <span style={{ fontWeight:700, fontSize:14 }}>Packet Sniffer</span>
         <select style={{ ...s.input, width:100 }} value={iface} onChange={e => setIface(e.target.value)} disabled={running}>

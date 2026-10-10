@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { HelpBox, FieldHelp } from '../../components/SecurityHelpers'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -317,6 +318,17 @@ export default function FirewallApp() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif' }}>
+
+      <div style={{ padding: '10px 14px 0' }}>
+        <HelpBox storageKey="firewall" title="How the firewall works">
+          Controls which network connections your machine allows, using the
+          system firewall (ufw).
+          <FieldHelp name="Enable / Disable">The master switch. When enabled, the default policy blocks incoming connections unless a rule allows them.</FieldHelp>
+          <FieldHelp name="Add Rule">Allow or deny a specific port/protocol — e.g. allow <code>22/tcp</code> for SSH, or <code>80,443</code> for a web server.</FieldHelp>
+          <FieldHelp name="Delete / Reset">Remove a single rule, or reset to defaults (clears all rules — you'll re‑allow what you need).</FieldHelp>
+          <div style={{ marginTop: 6, color: '#fbbf24' }}>Blocking the wrong port can cut off your own remote access — keep SSH allowed if you rely on it.</div>
+        </HelpBox>
+      </div>
 
       {/* ── Status header ── */}
       <div style={{

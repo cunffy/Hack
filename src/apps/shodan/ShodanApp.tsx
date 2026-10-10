@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { HelpBox, FieldHelp } from '../../components/SecurityHelpers'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -536,6 +537,14 @@ export default function ShodanApp() {
     <div style={S.root}>
       {/* Sidebar */}
       <div style={S.sidebar}>
+        <div style={{ padding: '10px 10px 0' }}>
+          <HelpBox storageKey="shodan" title="How to search Shodan" defaultOpen={false}>
+            Searches Shodan's index of internet‑exposed devices and services.
+            <FieldHelp name="Query">Keywords plus filters, e.g. <code>apache</code>, <code>port:22</code>, <code>city:"Berlin"</code>, <code>org:"Example"</code>, <code>product:nginx</code>. Combine them: <code>apache country:US port:443</code>.</FieldHelp>
+            <FieldHelp name="Result">Click a host to see its open ports, banners and location.</FieldHelp>
+            <div style={{ marginTop: 6, opacity: 0.7 }}>Needs a Shodan API key (set it in the key prompt). Only research systems you're authorized to.</div>
+          </HelpBox>
+        </div>
         {/* Search input */}
         <div style={{ padding: '12px 12px 8px' }}>
           <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
