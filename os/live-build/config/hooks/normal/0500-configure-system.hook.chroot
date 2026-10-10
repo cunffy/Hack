@@ -98,7 +98,7 @@ cat > /etc/skel/.config/openbox/rc.xml << 'RCEOF'
   <placement><policy>Smart</policy><center>yes</center><monitor>Primary</monitor></placement>
   <theme><name>Clearlooks</name><titleLayout>NLIMC</titleLayout><keepBorder>yes</keepBorder><animateIconify>yes</animateIconify><font place="ActiveWindow"><name>JetBrains Mono</name><size>9</size><weight>Bold</weight><slant>Normal</slant></font><font place="InactiveWindow"><name>JetBrains Mono</name><size>9</size><weight>Normal</weight><slant>Normal</slant></font><font place="MenuHeader"><name>JetBrains Mono</name><size>9</size><weight>Normal</weight><slant>Normal</slant></font><font place="MenuItem"><name>JetBrains Mono</name><size>9</size><weight>Normal</weight><slant>Normal</slant></font><font place="OSD"><name>JetBrains Mono</name><size>10</size><weight>Bold</weight><slant>Normal</slant></font></theme>
 
-  <desktops><number>4</number><firstdesk>1</firstdesk><names><name>Main</name><name>Work</name><name>Gaming</name><name>Monitor</name></names><popupTime>875</popupTime></desktops>
+  <desktops><number>1</number><firstdesk>1</firstdesk><names><name>Main</name></names><popupTime>875</popupTime></desktops>
 
   <resize><drawContents>yes</drawContents><popupShow>Nonpixel</popupShow><popupPosition>Center</popupPosition><popupFixedPosition><x>30</x><y>30</y></popupFixedPosition></resize>
 
@@ -211,11 +211,8 @@ cat > /etc/skel/.config/openbox/rc.xml << 'RCEOF'
       <action name="UnmaximizeFull"/>
     </keybind>
 
-    <!-- Desktop switching -->
-    <keybind key="Super-1"><action name="GoToDesktop"><to>1</to></action></keybind>
-    <keybind key="Super-2"><action name="GoToDesktop"><to>2</to></action></keybind>
-    <keybind key="Super-3"><action name="GoToDesktop"><to>3</to></action></keybind>
-    <keybind key="Super-4"><action name="GoToDesktop"><to>4</to></action></keybind>
+    <!-- Single workspace only — virtual desktop switching is intentionally
+         disabled (Super+1..4 removed, desktops=1 above). -->
 
     <!-- Session -->
     <keybind key="C-A-Delete">

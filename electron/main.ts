@@ -97,6 +97,10 @@ function ensureOpenboxConfig(): boolean {
     s = s.replace(/[ \t]*<keybind key="A-Tab">[\s\S]*?<\/keybind>\n?/g, '')
     s = s.replace(/[ \t]*<keybind key="A-S-Tab">[\s\S]*?<\/keybind>\n?/g, '')
     s = s.replace(/<screenEdgeWarpTime>\s*\d+\s*<\/screenEdgeWarpTime>/g, '<screenEdgeWarpTime>0</screenEdgeWarpTime>')
+    // Collapse to a single workspace: force desktops=1 and drop Super+1..4
+    // desktop-switching keybinds (virtual desktops are disabled).
+    s = s.replace(/(<desktops>[\s\S]*?<number>)\s*\d+\s*(<\/number>)/, '$11$2')
+    s = s.replace(/[ \t]*<keybind key="Super-[1-4]">[\s\S]*?<\/keybind>\n?/g, '')
     if (s === orig) return false
     writeFileSync(rc, s, 'utf-8')
     exec('openbox --reconfigure', { env: process.env }, () => {})

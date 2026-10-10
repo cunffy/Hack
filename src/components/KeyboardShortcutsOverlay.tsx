@@ -20,7 +20,6 @@ const SECTIONS = [
       { keys: ['Alt', 'Shift', 'Tab'], desc: 'Switch app (backward)' },
       { keys: ['Ctrl', 'W'], desc: 'Close focused window' },
       { keys: ['Ctrl', 'Alt', 'T'], desc: 'Open Terminal' },
-      { keys: ['Super', '1–4'], desc: 'Switch workspace' },
     ],
   },
   {

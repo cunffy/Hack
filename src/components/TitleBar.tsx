@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWindowStore } from '../store/windowStore'
-import { WorkspaceSwitcher } from './WorkspaceSwitcher'
 import { QuickSettings } from './QuickSettings'
 import { UserPanel } from './UserPanel'
 import { TITLEBAR_H } from '../lib/layout'
@@ -269,10 +268,8 @@ export function TitleBar() {
         )}
       </AnimatePresence>
 
-      {/* Center: workspace switcher + time + date */}
+      {/* Center: time + date */}
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-        <WorkspaceSwitcher />
-        <div className="w-px h-4" style={{ background: 'rgba(255,255,255,0.1)' }} />
         <div className="flex items-baseline gap-1.5">
           <span style={{ fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.9)', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em' }}>{time}</span>
           <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{date}</span>
