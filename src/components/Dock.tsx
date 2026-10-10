@@ -331,7 +331,11 @@ export function Dock() {
                       >
                         <div className="absolute inset-0 pointer-events-none"
                           style={{ background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, transparent 55%)' }} />
-                        <span style={{ fontSize: 27 }}>{meta.icon}</span>
+                        {/^brave/i.test(meta.name) ? (
+                          <div style={{ color: meta.color, transform: 'scale(1.15)' }}><BraveIcon /></div>
+                        ) : (
+                          <span style={{ fontSize: 27 }}>{meta.icon}</span>
+                        )}
                       </motion.button>
                       <div
                         className="mt-1 text-center leading-none select-none pointer-events-none truncate"

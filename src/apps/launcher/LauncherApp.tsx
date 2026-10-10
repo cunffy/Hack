@@ -74,29 +74,33 @@ export default function LauncherApp() {
   // Build the unified item list: built-in Cryogram apps first, then native apps.
   const allItems = useMemo<LItem[]>(() => {
     const builtins: LItem[] = (Object.keys(APP_META) as AppId[])
-      // 'system' is an alias of 'settings'; 'brave' is a native .desktop app
-      // (listed below via getApps with its real icon), so skip both here.
-      .filter(id => id !== 'system' && id !== 'brave')
+      // 'system' is an alias of 'settings' — skip it. 'brave' is kept: it has a
+      // guaranteed icon and launches the native browser via openApp('brave').
+      .filter(id => id !== 'system')
       .map(id => ({
         kind: 'builtin' as const,
         key: `builtin-${id}`,
         appId: id,
         name: APP_META[id].label,
-        category: BUILTIN_CAT[id] ?? 'Cryogram',
+        category: id === 'brave' ? 'Internet' : (BUILTIN_CAT[id] ?? 'Cryogram'),
         color: APP_META[id].color,
         icon: APP_META[id].icon,
       }))
       .sort((a, b) => a.name.localeCompare(b.name))
 
-    const natives: LItem[] = native.map(app => ({
-      kind: 'native' as const,
-      key: `native-${app.desktopFile}`,
-      name: app.name,
-      category: app.category,
-      comment: app.comment,
-      icon: app.icon,
-      app,
-    }))
+    // Drop native .desktop entries for Brave so it isn't listed twice (the
+    // built-in entry above already launches it, with a guaranteed icon).
+    const natives: LItem[] = native
+      .filter(app => !/brave/i.test(app.name) && !/brave/i.test(app.exec))
+      .map(app => ({
+        kind: 'native' as const,
+        key: `native-${app.desktopFile}`,
+        name: app.name,
+        category: app.category,
+        comment: app.comment,
+        icon: app.icon,
+        app,
+      }))
 
     return [...builtins, ...natives]
   }, [native])

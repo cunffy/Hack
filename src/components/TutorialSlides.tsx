@@ -93,13 +93,13 @@ const SLIDES: Slide[] = [
   {
     id: 'navigation',
     title: 'Getting Around',
-    subtitle: 'Titlebar, Dock, workspaces, and Mission Control',
+    subtitle: 'Titlebar, Dock, and Mission Control',
     accent: '#bb88ff',
     content: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {[
-            { icon: '📌', color: '#bb88ff', title: 'Titlebar', desc: 'Left: CryoGram menu. Centre: workspace switcher + clock. Right: notifications, quick settings gear, and your user avatar for weather, news & power controls.' },
+            { icon: '📌', color: '#bb88ff', title: 'Titlebar', desc: 'Left: CryoGram menu. Centre: clock. Right: notifications, quick settings gear, and your user avatar for weather, news & power controls.' },
             { icon: '⬡', color: '#00d4ff', title: 'Dock', desc: 'Hover to magnify icons. Click to open or focus an app. Right-click for context menu. Drag to reorder. All 40+ apps appear automatically.' },
             { icon: '🪟', color: '#4ade80', title: 'Windows', desc: 'Drag to any edge to snap (left/right half, or full-screen). Double-click titlebar to maximise. Middle-click or ✕ to close.' },
             { icon: '🔭', color: '#facc15', title: 'Mission Control', desc: 'Press Super+M (or ⊞+M) to see all open windows as tiles. Click any tile to jump to it.' },
@@ -284,7 +284,6 @@ const SLIDES: Slide[] = [
               { keys: ['Alt', 'Tab'], desc: 'Switch app' },
               { keys: ['Ctrl', 'Alt', 'T'], desc: 'Open Terminal' },
               { keys: ['Super', 'D'], desc: 'Show desktop' },
-              { keys: ['Super', '1–4'], desc: 'Switch workspace' },
             ]} />
           </div>
           <div>
